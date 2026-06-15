@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand-purple: #673de6;
+  --color-brand-purple-dark: #5025d1;
+  --color-brand-purple-deep: #2f1c6a;
+  --color-brand-purple-light: #ebe4ff;
+  --color-brand-meteorite: #8c85ff;
+  --color-brand-terracotta: #CC6223;
+  --color-brand-terracotta-dark: #a84e1b;
+  --color-brand-beige: #F3E5D6;
+  --color-brand-beige-light: #FAF6F0;
+  --color-brand-mint: #7EC8A0;
+  --color-brand-mint-dark: #5da87d;
+  --color-brand-charcoal: #282D30;
+  --color-brand-offwhite: #FAF8F5;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: #FAF8F5;
+  color: #1d1e20;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.cinematic-gradient {
+  background: linear-gradient(
+    135deg,
+    #2f1c6a 0%,
+    #5025d1 25%,
+    #673de6 50%,
+    #2f1c6a 100%
+  );
+}
+
+.cinematic-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(31, 19, 70, 0.85) 0%,
+    rgba(40, 45, 48, 0.7) 50%,
+    rgba(29, 30, 32, 0.9) 100%
+  );
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #ebe4ff 0%, #8c85ff 50%, #673de6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-warm {
+  background: linear-gradient(135deg, #CC6223 0%, #F3E5D6 50%, #CC6223 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
