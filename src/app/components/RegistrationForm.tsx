@@ -1,13 +1,85 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, AlertCircle, ArrowRight } from "lucide-react";
+
+// Validação com Zod
+const schema = z.object({
+  nome: z.string().min(3, { message: "O nome precisa ter pelo menos 3 caracteres." }),
+  email: z.string().email({ message: "E-mail inválido." }),
+  telefone: z
+    .string()
+    .min(10, { message: "O telefone deve ter DDD + número." })
+    .refine((val) => /^\(?[1-9]{2}\)?\s?9?[0-9]{4}-?[0-9]{4}$/.test(val.replace(/\s+/g, "")), {
+      message: "Formato de telefone inválido. Ex: (11) 99999-9999",
+    }),
+  motivacao: z.string().min(10, { message: "Por favor, escreva um pouco mais (mínimo 10 caracteres)." }),
+});
+
+type FormData = z.infer<typeof schema>;
 
 export default function RegistrationForm() {
   const [enviado, setEnviado] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      nome: "",
+      email: "",
+      telefone: "",
+      motivacao: "",
+    },
+  });
+
+  const watchTelefone = watch("telefone");
+
+  const formatTelefone = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    const limited = numbers.slice(0, 11);
+    
+    if (limited.length <= 2) {
+      return limited;
+    } else if (limited.length <= 6) {
+      return `(${limited.slice(0, 2)}) ${limited.slice(2)}`;
+    } else if (limited.length <= 10) {
+      return `(${limited.slice(0, 2)}) ${limited.slice(2, 6)}-${limited.slice(6)}`;
+    } else {
+      return `(${limited.slice(0, 2)}) ${limited.slice(2, 7)}-${limited.slice(7, 11)}`;
+    }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatTelefone(e.target.value);
+    setValue("telefone", formatted, { shouldValidate: true });
+  };
+
+  const onSubmit = async (data: FormData) => {
+    // Simulando envio para API
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    
+    // Salva no sessionStorage para compartilhar com a tela de pagamento
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("dados_inscricao", JSON.stringify(data));
+    }
+    
     setEnviado(true);
+    
+    // Redireciona para a nova tela de pagamento
+    setTimeout(() => {
+      router.push("/checkout");
+    }, 800);
   };
 
   return (
@@ -26,127 +98,173 @@ export default function RegistrationForm() {
             <span className="text-gradient">dizer sim</span> para você
           </h2>
           <p className="mt-4 text-brand-charcoal/60 text-lg max-w-xl mx-auto leading-relaxed">
-            Preencha o formulário abaixo e nossa equipe entrará em contato
-            para confirmar sua vaga na próxima sessão em grupo.
+            Preencha o formulário abaixo e nossa equipe entrará em contato para confirmar sua vaga na próxima sessão em grupo.
           </p>
         </div>
 
-        {/* Formulário */}
-        {enviado ? (
-          <div className="text-center py-16 glass-card-light rounded-2xl">
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-brand-mint/20 flex items-center justify-center">
-              <svg className="w-8 h-8 text-brand-mint-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-brand-charcoal mb-3">
-              Recebemos sua inscrição!
-            </h3>
-            <p className="text-brand-charcoal/60 max-w-md mx-auto leading-relaxed">
-              Em breve nossa equipe entrará em contato pelo WhatsApp para
-              confirmar os detalhes da sua participação. Fique atento.
-            </p>
-          </div>
-        ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="glass-card-light rounded-2xl p-8 md:p-12 space-y-6"
-          >
-            {/* Nome */}
-            <div>
-              <label
-                htmlFor="nome"
-                className="block text-sm font-semibold text-brand-charcoal mb-2"
+        <div className="min-h-[400px] flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            {enviado ? (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.5 }}
+                className="text-center py-16 px-8 glass-card-light rounded-2xl w-full"
               >
-                Nome completo
-              </label>
-              <input
-                type="text"
-                id="nome"
-                name="nome"
-                required
-                placeholder="Seu nome"
-                className="w-full px-4 py-3.5 rounded-xl border border-brand-charcoal/10 bg-white/80 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/10 transition-all duration-200"
-              />
-            </div>
-
-            {/* E-mail */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-semibold text-brand-charcoal mb-2"
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-brand-mint/20 flex items-center justify-center shadow-inner">
+                  <Check className="w-10 h-10 text-brand-mint-dark" />
+                </div>
+                <h3 className="text-2xl md:text-3xl font-bold text-brand-charcoal mb-4">
+                  Inscrição Concluída!
+                </h3>
+                <p className="text-brand-charcoal/60 max-w-md mx-auto leading-relaxed mb-8">
+                  Identificamos sua inscrição. Abrindo a tela de pagamento para que você possa concluir sua participação...
+                </p>
+                <button
+                  onClick={() => router.push("/checkout")}
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 hover:-translate-y-0.5"
+                >
+                  Abrir Tela de Pagamento
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                onSubmit={handleSubmit(onSubmit)}
+                className="glass-card-light rounded-2xl p-8 md:p-12 space-y-6 w-full shadow-xl"
               >
-                E-mail
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                placeholder="seu@email.com"
-                className="w-full px-4 py-3.5 rounded-xl border border-brand-charcoal/10 bg-white/80 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/10 transition-all duration-200"
-              />
-            </div>
+                {/* Nome */}
+                <div>
+                  <label
+                    htmlFor="nome"
+                    className="block text-sm font-semibold text-brand-charcoal mb-2"
+                  >
+                    Nome completo
+                  </label>
+                  <input
+                    type="text"
+                    id="nome"
+                    placeholder="Seu nome"
+                    {...register("nome")}
+                    className={`w-full px-4 py-3.5 rounded-xl border bg-white/85 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:ring-2 transition-all duration-200 ${
+                      errors.nome
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                        : "border-brand-charcoal/10 focus:border-brand-purple focus:ring-brand-purple/10"
+                    }`}
+                  />
+                  {errors.nome && (
+                    <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      {errors.nome.message}
+                    </p>
+                  )}
+                </div>
 
-            {/* Telefone (WhatsApp) */}
-            <div>
-              <label
-                htmlFor="telefone"
-                className="flex items-center gap-2 text-sm font-semibold text-brand-charcoal mb-2"
-              >
-                WhatsApp
-                <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                </svg>
-              </label>
-              <input
-                type="tel"
-                id="telefone"
-                name="telefone"
-                required
-                placeholder="(00) 00000-0000"
-                className="w-full px-4 py-3.5 rounded-xl border border-brand-charcoal/10 bg-white/80 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/10 transition-all duration-200"
-              />
-            </div>
+                {/* E-mail */}
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-semibold text-brand-charcoal mb-2"
+                  >
+                    E-mail
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    placeholder="seu@email.com"
+                    {...register("email")}
+                    className={`w-full px-4 py-3.5 rounded-xl border bg-white/85 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:ring-2 transition-all duration-200 ${
+                      errors.email
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                        : "border-brand-charcoal/10 focus:border-brand-purple focus:ring-brand-purple/10"
+                    }`}
+                  />
+                  {errors.email && (
+                    <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
 
-            {/* Motivação */}
-            <div>
-              <label
-                htmlFor="motivacao"
-                className="block text-sm font-semibold text-brand-charcoal mb-2"
-              >
-                O que você busca com esta sessão?
-              </label>
-              <textarea
-                id="motivacao"
-                name="motivacao"
-                rows={4}
-                required
-                placeholder="Compartilhe brevemente o que te trouxe até aqui..."
-                className="w-full px-4 py-3.5 rounded-xl border border-brand-charcoal/10 bg-white/80 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/10 transition-all duration-200 resize-none"
-              />
-            </div>
+                {/* Telefone (WhatsApp) */}
+                <div>
+                  <label
+                    htmlFor="telefone"
+                    className="block text-sm font-semibold text-brand-charcoal mb-2"
+                  >
+                    WhatsApp
+                  </label>
+                  <input
+                    type="tel"
+                    id="telefone"
+                    placeholder="(00) 90000-0000"
+                    {...register("telefone")}
+                    onChange={handlePhoneChange}
+                    className={`w-full px-4 py-3.5 rounded-xl border bg-white/85 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:ring-2 transition-all duration-200 ${
+                      errors.telefone
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                        : "border-brand-charcoal/10 focus:border-brand-purple focus:ring-brand-purple/10"
+                    }`}
+                  />
+                  {errors.telefone && (
+                    <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      {errors.telefone.message}
+                    </p>
+                  )}
+                </div>
 
-            {/* Botão */}
-            <button
-              type="submit"
-              className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 text-lg"
-            >
-              Enviar inscrição
-            </button>
+                {/* Motivação */}
+                <div>
+                  <label
+                    htmlFor="motivacao"
+                    className="block text-sm font-semibold text-brand-charcoal mb-2"
+                  >
+                    O que você busca com esta sessão?
+                  </label>
+                  <textarea
+                    id="motivacao"
+                    rows={4}
+                    placeholder="Compartilhe brevemente o que te trouxe até aqui..."
+                    {...register("motivacao")}
+                    className={`w-full px-4 py-3.5 rounded-xl border bg-white/85 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:ring-2 transition-all duration-200 resize-none ${
+                      errors.motivacao
+                        ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                        : "border-brand-charcoal/10 focus:border-brand-purple focus:ring-brand-purple/10"
+                    }`}
+                  />
+                  {errors.motivacao && (
+                    <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      {errors.motivacao.message}
+                    </p>
+                  )}
+                </div>
 
-            {/* Nota */}
-            <p className="text-center text-brand-charcoal/30 text-xs">
-              Seus dados estão seguros e serão usados exclusivamente para contato
-              sobre as sessões do Instituto Kalapa.
-            </p>
-          </form>
-        )}
+                {/* Botão */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 hover:-translate-y-0.5 text-lg disabled:opacity-50 disabled:hover:translate-y-0 cursor-pointer flex items-center justify-center"
+                >
+                  {isSubmitting ? "Enviando..." : "Enviar inscrição"}
+                </button>
+
+                {/* Nota */}
+                <p className="text-center text-brand-charcoal/30 text-xs">
+                  Seus dados estão seguros e serão usados exclusivamente para contato sobre as sessões do Instituto Kalapa.
+                </p>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </section>
   );

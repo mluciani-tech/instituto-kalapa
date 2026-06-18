@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     "bem-estar",
     "saúde mental",
     "sessão terapêutica",
+    "InfinitePay",
   ],
   openGraph: {
     title: "Instituto Kalapa — Sessões Terapêuticas em Grupo",
@@ -20,6 +21,17 @@ export const metadata: Metadata = {
       "Acolhimento e transformação em grupo. Participe das sessões quinzenais do Instituto Kalapa.",
     type: "website",
     locale: "pt_BR",
+    siteName: "Instituto Kalapa",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Instituto Kalapa — Sessões Terapêuticas em Grupo",
+    description:
+      "Acolhimento e transformação em grupo. Participe das sessões quinzenais do Instituto Kalapa.",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
