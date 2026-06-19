@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, AlertCircle, ArrowRight } from "lucide-react";
+import { Check, AlertCircle, ArrowRight, Users } from "lucide-react";
 
-// Validação com Zod
+const VAGAS_MAXIMAS = 15;
+
 const schema = z.object({
   nome: z.string().min(3, { message: "O nome precisa ter pelo menos 3 caracteres." }),
   email: z.string().email({ message: "E-mail inválido." }),
@@ -23,41 +24,62 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+function getUrgency(filled: number) {
+  const left = VAGAS_MAXIMAS - filled;
+  if (left === 0) return { msg: "Vagas esgotadas para esta turma", tone: "sold-out" as const };
+  if (left === 1) return { msg: "Última vaga disponível", tone: "peak" as const };
+  if (left <= 2) return { msg: `Apenas ${left} vagas restantes`, tone: "urgent" as const };
+  if (filled >= 10) return { msg: "Restam poucas vagas para esta turma", tone: "soft" as const };
+  return { msg: "Vagas abertas para a próxima sessão", tone: "neutral" as const };
+}
+
+function getSegmentColor(filled: number, index: number) {
+  if (index >= filled) return "rgba(40,45,48,0.12)";
+  const pct = (filled / VAGAS_MAXIMAS) * 100;
+  if (pct >= 90) return "#673de6";
+  if (pct >= 60) return "#CC6223";
+  return "#7EC8A0";
+}
+
 export default function RegistrationForm() {
   const [enviado, setEnviado] = useState(false);
+  const [vagasPreenchidas, setVagasPreenchidas] = useState(0);
   const router = useRouter();
+
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("kalapa_vagas") : null;
+    if (saved) {
+      setVagasPreenchidas(Math.min(parseInt(saved, 10), VAGAS_MAXIMAS));
+    } else {
+      const simulado = Math.floor(Math.random() * 7) + 9;
+      setVagasPreenchidas(simulado);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("kalapa_vagas", String(simulado));
+      }
+    }
+  }, []);
+
+  const vagasRestantes = VAGAS_MAXIMAS - vagasPreenchidas;
+  const esgotado = vagasRestantes === 0;
+  const urgency = getUrgency(vagasPreenchidas);
 
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      nome: "",
-      email: "",
-      telefone: "",
-      motivacao: "",
-    },
+    defaultValues: { nome: "", email: "", telefone: "", motivacao: "" },
   });
-
-  const watchTelefone = watch("telefone");
 
   const formatTelefone = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     const limited = numbers.slice(0, 11);
-    
-    if (limited.length <= 2) {
-      return limited;
-    } else if (limited.length <= 6) {
-      return `(${limited.slice(0, 2)}) ${limited.slice(2)}`;
-    } else if (limited.length <= 10) {
-      return `(${limited.slice(0, 2)}) ${limited.slice(2, 6)}-${limited.slice(6)}`;
-    } else {
-      return `(${limited.slice(0, 2)}) ${limited.slice(2, 7)}-${limited.slice(7, 11)}`;
-    }
+    if (limited.length <= 2) return limited;
+    if (limited.length <= 6) return `(${limited.slice(0, 2)}) ${limited.slice(2)}`;
+    if (limited.length <= 10) return `(${limited.slice(0, 2)}) ${limited.slice(2, 6)}-${limited.slice(6)}`;
+    return `(${limited.slice(0, 2)}) ${limited.slice(2, 7)}-${limited.slice(7, 11)}`;
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,29 +88,29 @@ export default function RegistrationForm() {
   };
 
   const onSubmit = async (data: FormData) => {
-    // Simulando envio para API
     await new Promise((resolve) => setTimeout(resolve, 800));
-    
-    // Salva no sessionStorage para compartilhar com a tela de pagamento
     if (typeof window !== "undefined") {
       sessionStorage.setItem("dados_inscricao", JSON.stringify(data));
+      const novaContagem = Math.min(vagasPreenchidas + 1, VAGAS_MAXIMAS);
+      setVagasPreenchidas(novaContagem);
+      localStorage.setItem("kalapa_vagas", String(novaContagem));
     }
-    
     setEnviado(true);
-    
-    // Redireciona para a nova tela de pagamento
-    setTimeout(() => {
-      router.push("/checkout");
-    }, 800);
+    setTimeout(() => router.push("/checkout"), 800);
   };
+
+  const urgencyColor =
+    urgency.tone === "sold-out"
+      ? "text-brand-charcoal/40"
+      : urgency.tone === "neutral"
+      ? "text-brand-charcoal/50"
+      : "text-brand-terracotta";
 
   return (
     <section id="inscricao" className="relative py-24 md:py-32 bg-brand-beige overflow-hidden">
-      {/* Textura de fundo */}
       <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_20%_80%,#673de6_1px,transparent_1px)] bg-[length:35px_35px]" />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-8">
-        {/* Cabeçalho */}
         <div className="text-center mb-14">
           <span className="inline-block px-4 py-1.5 rounded-full bg-brand-terracotta/15 text-brand-terracotta text-sm font-semibold tracking-wide mb-6">
             Faça sua inscrição
@@ -102,6 +124,71 @@ export default function RegistrationForm() {
           </p>
         </div>
 
+        {/* === Contador de vagas === */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="glass-card-light rounded-2xl p-6 md:p-7 mb-8 shadow-lg"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-brand-purple-light flex items-center justify-center">
+                <Users className="w-5 h-5 text-brand-purple" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-brand-charcoal">Vagas da próxima turma</p>
+                <p className="text-xs text-brand-charcoal/40">Grupos reduzidos — máximo {VAGAS_MAXIMAS} participantes</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-2xl font-bold text-brand-charcoal tabular-nums">
+                {vagasPreenchidas}
+                <span className="text-brand-charcoal/30 text-lg">/{VAGAS_MAXIMAS}</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Barra segmentada de 15 posições */}
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1 flex-1">
+              {Array.from({ length: VAGAS_MAXIMAS }).map((_, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ scaleY: 0.4, opacity: 0.4 }}
+                  animate={{
+                    scaleY: 1,
+                    opacity: 1,
+                    backgroundColor: getSegmentColor(vagasPreenchidas, i),
+                  }}
+                  transition={{ delay: 0.3 + i * 0.04, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="h-2 flex-1 rounded-full origin-bottom"
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Mensagem de escassez */}
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={urgency.msg}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.3 }}
+              className={`mt-3 text-sm font-medium ${urgencyColor} ${
+                urgency.tone === "urgent" || urgency.tone === "peak" ? "font-semibold" : ""
+              }`}
+            >
+              {!esgotado && (
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-current mr-2 align-middle" />
+              )}
+              {urgency.msg}
+            </motion.p>
+          </AnimatePresence>
+        </motion.div>
+
+        {/* === Formulário === */}
         <div className="min-h-[400px] flex items-center justify-center">
           <AnimatePresence mode="wait">
             {enviado ? (
@@ -130,6 +217,50 @@ export default function RegistrationForm() {
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </motion.div>
+            ) : esgotado ? (
+              <motion.div
+                key="sold-out"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="glass-card-light rounded-2xl p-8 md:p-12 w-full shadow-xl text-center"
+              >
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-brand-charcoal/10 flex items-center justify-center">
+                  <Users className="w-10 h-10 text-brand-charcoal/40" />
+                </div>
+                <h3 className="text-2xl md:text-3xl font-bold text-brand-charcoal mb-4">
+                  Vagas esgotadas para esta turma
+                </h3>
+                <p className="text-brand-charcoal/60 max-w-md mx-auto leading-relaxed mb-8">
+                  As {VAGAS_MAXIMAS} vagas da próxima sessão já foram preenchidas.
+                  Entre na lista de espera e avisaremos assim que uma vaga abrir
+                  ou quando a próxima turma for anunciada.
+                </p>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setEnviado(true);
+                  }}
+                  className="max-w-md mx-auto space-y-4"
+                >
+                  <input
+                    type="email"
+                    required
+                    placeholder="Seu melhor e-mail"
+                    className="w-full px-4 py-3.5 rounded-xl border border-brand-charcoal/10 bg-white/85 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/10 transition-all duration-200"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full py-4 bg-brand-charcoal hover:bg-brand-purple text-white font-semibold rounded-xl transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    Entrar na lista de espera
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </form>
+                <p className="text-center text-brand-charcoal/30 text-xs mt-6">
+                  A nova turma abre a cada 15 dias. Você será o primeiro a saber.
+                </p>
+              </motion.div>
             ) : (
               <motion.form
                 key="form"
@@ -139,12 +270,8 @@ export default function RegistrationForm() {
                 onSubmit={handleSubmit(onSubmit)}
                 className="glass-card-light rounded-2xl p-8 md:p-12 space-y-6 w-full shadow-xl"
               >
-                {/* Nome */}
                 <div>
-                  <label
-                    htmlFor="nome"
-                    className="block text-sm font-semibold text-brand-charcoal mb-2"
-                  >
+                  <label htmlFor="nome" className="block text-sm font-semibold text-brand-charcoal mb-2">
                     Nome completo
                   </label>
                   <input
@@ -166,12 +293,8 @@ export default function RegistrationForm() {
                   )}
                 </div>
 
-                {/* E-mail */}
                 <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-semibold text-brand-charcoal mb-2"
-                  >
+                  <label htmlFor="email" className="block text-sm font-semibold text-brand-charcoal mb-2">
                     E-mail
                   </label>
                   <input
@@ -193,12 +316,8 @@ export default function RegistrationForm() {
                   )}
                 </div>
 
-                {/* Telefone (WhatsApp) */}
                 <div>
-                  <label
-                    htmlFor="telefone"
-                    className="block text-sm font-semibold text-brand-charcoal mb-2"
-                  >
+                  <label htmlFor="telefone" className="block text-sm font-semibold text-brand-charcoal mb-2">
                     WhatsApp
                   </label>
                   <input
@@ -221,12 +340,8 @@ export default function RegistrationForm() {
                   )}
                 </div>
 
-                {/* Motivação */}
                 <div>
-                  <label
-                    htmlFor="motivacao"
-                    className="block text-sm font-semibold text-brand-charcoal mb-2"
-                  >
+                  <label htmlFor="motivacao" className="block text-sm font-semibold text-brand-charcoal mb-2">
                     O que você busca com esta sessão?
                   </label>
                   <textarea
@@ -248,16 +363,15 @@ export default function RegistrationForm() {
                   )}
                 </div>
 
-                {/* Botão */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 hover:-translate-y-0.5 text-lg disabled:opacity-50 disabled:hover:translate-y-0 cursor-pointer flex items-center justify-center"
+                  className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 hover:-translate-y-0.5 text-lg disabled:opacity-50 disabled:hover:translate-y-0 cursor-pointer flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? "Enviando..." : "Enviar inscrição"}
+                  {isSubmitting ? "Enviando..." : `Garantir minha vaga (${vagasRestantes} restantes)`}
+                  {!isSubmitting && <ArrowRight className="w-5 h-5" />}
                 </button>
 
-                {/* Nota */}
                 <p className="text-center text-brand-charcoal/30 text-xs">
                   Seus dados estão seguros e serão usados exclusivamente para contato sobre as sessões do Instituto Kalapa.
                 </p>
