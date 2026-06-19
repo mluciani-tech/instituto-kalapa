@@ -64,7 +64,7 @@ export default function Hero() {
           >
             <div className="w-2.5 h-2.5 rounded-full bg-brand-mint animate-pulse" />
             <span className="text-sm font-medium text-white/90 tracking-wide">
-              Grupos quinzenais — Presencial &amp; Online
+              Grupos quinzenais — Presencial
             </span>
           </motion.div>
 

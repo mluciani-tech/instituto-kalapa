@@ -47,15 +47,9 @@ export default function RegistrationForm() {
   const router = useRouter();
 
   useEffect(() => {
-    const saved = typeof window !== "undefined" ? localStorage.getItem("kalapa_vagas") : null;
-    if (saved) {
-      setVagasPreenchidas(Math.min(parseInt(saved, 10), VAGAS_MAXIMAS));
-    } else {
-      const simulado = Math.floor(Math.random() * 7) + 9;
-      setVagasPreenchidas(simulado);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("kalapa_vagas", String(simulado));
-      }
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("kalapa_vagas");
+      setVagasPreenchidas(saved ? Math.min(parseInt(saved, 10), VAGAS_MAXIMAS) : 0);
     }
   }, []);
 
