@@ -50,7 +50,7 @@ export default function Hero() {
       <div className="absolute inset-0 shadow-[inset_0_0_200px_rgba(0,0,0,0.7)] pointer-events-none" />
 
       {/* Conteúdo */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 py-32 md:px-8">
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 py-20 md:py-32 md:px-8">
         <motion.div
           variants={containerVariants}
           initial="hidden"

@@ -259,16 +259,22 @@ export default function Checkout() {
                   {/* Parcelamento (apenas cartão) */}
                   {metodoSelecionado === "cartao" && (
                     <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
-                      <label className="text-white/60 text-sm block mb-2">
+                      <label
+                        htmlFor="parcelamento"
+                        className="text-white/60 text-sm block mb-2"
+                      >
                         Parcelamento
                       </label>
-                      <select className="w-full bg-transparent text-white border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-mint transition-colors appearance-none cursor-pointer">
-                        <option value="1" className="bg-brand-charcoal">1x de R$ 97,00</option>
-                        <option value="2" className="bg-brand-charcoal">2x de R$ 48,50</option>
-                        <option value="3" className="bg-brand-charcoal">3x de R$ 32,33</option>
-                        <option value="4" className="bg-brand-charcoal">4x de R$ 24,25</option>
-                        <option value="6" className="bg-brand-charcoal">6x de R$ 16,17</option>
-                        <option value="12" className="bg-brand-charcoal">12x de R$ 8,08</option>
+                      <select
+                        id="parcelamento"
+                        className="w-full bg-brand-charcoal text-white border border-white/10 rounded-lg px-4 py-3.5 text-sm focus:outline-none focus:border-brand-mint transition-colors appearance-none cursor-pointer"
+                      >
+                        <option value="1">1x de R$ 97,00</option>
+                        <option value="2">2x de R$ 48,50</option>
+                        <option value="3">3x de R$ 32,33</option>
+                        <option value="4">4x de R$ 24,25</option>
+                        <option value="6">6x de R$ 16,17</option>
+                        <option value="12">12x de R$ 8,08</option>
                       </select>
                     </div>
                   )}

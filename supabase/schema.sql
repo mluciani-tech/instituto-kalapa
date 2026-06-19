@@ -23,17 +23,9 @@ CREATE INDEX IF NOT EXISTS idx_inscricoes_status ON inscricoes(status);
 -- Row Level Security
 ALTER TABLE inscricoes ENABLE ROW LEVEL SECURITY;
 
--- Política:任何人 pode ler (para o contador de vagas funcionar)
+-- Política: leitura pública (para o contador de vagas funcionar)
 CREATE POLICY "leitura_publica_inscricoes" ON inscricoes
   FOR SELECT USING (true);
 
--- Política: anyone pode inserir (via anon key com o formulário)
-CREATE POLICY "insercao_publica_inscricoes" ON inscricoes
-  FOR INSERT WITH CHECK (true);
-
--- Política: apenas admin pode atualizar/deletar (via service role no server)
-CREATE POLICY "atualizacao_admin_inscricoes" ON inscricoes
-  FOR UPDATE USING (auth.role() = 'service_role');
-
-CREATE POLICY "delecao_admin_inscricoes" ON inscricoes
-  FOR DELETE USING (auth.role() = 'service_role');
+-- INSERT/UPDATE/DELETE: apenas via service_role no servidor (sem política pública)
+-- O servidor usa a service_role key para inserir/atualizar registros

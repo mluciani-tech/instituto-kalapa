@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 
 const EMAIL_FROM = process.env.KALAPA_EMAIL_FROM || "contato@institutokalapa.com.br";
 const EMAIL_TO = process.env.KALAPA_EMAIL_TO || "contato@institutokalapa.com.br";
 const TURMA_ATUAL = "2025-01";
+
+const apiKey = process.env.RESEND_API_KEY;
+const isResendConfigured =
+  apiKey && apiKey !== "re_sua_key_aqui" && apiKey.startsWith("re_");
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { nome, email, telefone, motivacao, metodoPagamento, valor } = body;
 
-    if (isSupabaseConfigured()) {
-      const { error: insertError } = await supabase!.from("inscricoes").insert({
+    if (isAdminConfigured()) {
+      const { error: insertError } = await supabaseAdmin!.from("inscricoes").insert({
         turma_id: TURMA_ATUAL,
         nome,
         email,
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
       </div>
     `;
 
-    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "re_sua_key_aqui") {
+    if (!isResendConfigured) {
       console.warn("[send-email] RESEND_API_KEY não configurada — logando no console ao invés de enviar.");
       console.log("=========================================");
       console.log("MOCK: ENVIANDO E-MAIL DE CONFIRMAÇÃO");
@@ -77,6 +78,9 @@ export async function POST(req: Request) {
         mock: true,
       });
     }
+
+    const { Resend } = await import("resend");
+    const resend = new Resend(apiKey);
 
     const { data, error } = await resend.emails.send({
       from: `Instituto Kalapa <${EMAIL_FROM}>`,

@@ -105,8 +105,8 @@ export default function VisualGallery() {
                 <div className="absolute inset-0 shadow-[inset_0_0_80px_rgba(0,0,0,0.15)] pointer-events-none" />
 
                 {/* Linhas cinematográficas (letterbox) */}
-                <div className="absolute inset-x-0 top-0 h-[8%] bg-brand-charcoal/80 pointer-events-none" />
-                <div className="absolute inset-x-0 bottom-0 h-[8%] bg-brand-charcoal/80 pointer-events-none" />
+                <div className="absolute inset-x-0 top-0 h-[6%] md:h-[8%] bg-brand-charcoal/80 pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 h-[6%] md:h-[8%] bg-brand-charcoal/80 pointer-events-none" />
 
                 {/* Reflexo sutil de lente */}
                 <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-bl from-white/5 to-transparent rounded-bl-3xl pointer-events-none" />

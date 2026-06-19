@@ -191,6 +191,8 @@ export default function RegistrationForm() {
             {enviado ? (
               <motion.div
                 key="success"
+                role="status"
+                aria-live="polite"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
@@ -274,6 +276,7 @@ export default function RegistrationForm() {
                   <input
                     type="text"
                     id="nome"
+                    autoComplete="name"
                     placeholder="Seu nome"
                     {...register("nome")}
                     className={`w-full px-4 py-3.5 rounded-xl border bg-white/85 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:ring-2 transition-all duration-200 ${
@@ -297,6 +300,8 @@ export default function RegistrationForm() {
                   <input
                     type="email"
                     id="email"
+                    autoComplete="email"
+                    spellCheck={false}
                     placeholder="seu@email.com"
                     {...register("email")}
                     className={`w-full px-4 py-3.5 rounded-xl border bg-white/85 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:ring-2 transition-all duration-200 ${
@@ -320,6 +325,8 @@ export default function RegistrationForm() {
                   <input
                     type="tel"
                     id="telefone"
+                    autoComplete="tel"
+                    inputMode="numeric"
                     placeholder="(00) 90000-0000"
                     {...register("telefone")}
                     onChange={handlePhoneChange}
@@ -344,6 +351,7 @@ export default function RegistrationForm() {
                   <textarea
                     id="motivacao"
                     rows={4}
+                    autoComplete="off"
                     placeholder="Compartilhe brevemente o que te trouxe até aqui..."
                     {...register("motivacao")}
                     className={`w-full px-4 py-3.5 rounded-xl border bg-white/85 placeholder:text-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:ring-2 transition-all duration-200 resize-none ${
