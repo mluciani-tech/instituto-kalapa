@@ -1,15 +1,34 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const EMAIL_FROM = process.env.KALAPA_EMAIL_FROM || "contato@institutokalapa.com.br";
 const EMAIL_TO = process.env.KALAPA_EMAIL_TO || "contato@institutokalapa.com.br";
+const TURMA_ATUAL = "2025-01";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { nome, email, telefone, motivacao, metodoPagamento, valor } = body;
+
+    if (isSupabaseConfigured()) {
+      const { error: insertError } = await supabase!.from("inscricoes").insert({
+        turma_id: TURMA_ATUAL,
+        nome,
+        email,
+        telefone,
+        motivacao,
+        metodo_pagamento: metodoPagamento,
+        valor,
+        status: "confirmada",
+      });
+
+      if (insertError) {
+        console.error("[send-email] Erro ao inserir no Supabase:", insertError);
+      }
+    }
 
     const html = `
       <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #FAF8F5; padding: 32px; border-radius: 16px;">

@@ -47,10 +47,16 @@ export default function RegistrationForm() {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("kalapa_vagas");
-      setVagasPreenchidas(saved ? Math.min(parseInt(saved, 10), VAGAS_MAXIMAS) : 0);
-    }
+    const fetchVagas = async () => {
+      try {
+        const res = await fetch("/api/vagas");
+        const data = await res.json();
+        setVagasPreenchidas(data.preenchidas || 0);
+      } catch {
+        setVagasPreenchidas(0);
+      }
+    };
+    fetchVagas();
   }, []);
 
   const vagasRestantes = VAGAS_MAXIMAS - vagasPreenchidas;
@@ -85,9 +91,6 @@ export default function RegistrationForm() {
     await new Promise((resolve) => setTimeout(resolve, 800));
     if (typeof window !== "undefined") {
       sessionStorage.setItem("dados_inscricao", JSON.stringify(data));
-      const novaContagem = Math.min(vagasPreenchidas + 1, VAGAS_MAXIMAS);
-      setVagasPreenchidas(novaContagem);
-      localStorage.setItem("kalapa_vagas", String(novaContagem));
     }
     setEnviado(true);
     setTimeout(() => router.push("/checkout"), 800);
