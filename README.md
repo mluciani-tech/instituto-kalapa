@@ -1,70 +1,140 @@
-# Projeto: Prompt para Landing Page — Instituto Kalapa
+# Instituto Kalapa — Landing Page
 
-## Objetivo da solicitação
+Landing page de conversão para o Instituto Kalapa com venda de ingressos para sessões terapêuticas em grupo quinzenais (presenciais), contagem real de vagas via Supabase, pagamento via InfinitePay (simulado) e painel administrativo.
 
-Desenvolver um prompt de alta performance para estruturar uma landing page de conversão para o Instituto Kalapa, com foco na venda de ingressos para sessões terapêuticas em grupo quinzenais, utilizando pagamento via InfinitePay e estética cinematográfica.
+## Tech Stack
 
-## Estratégia utilizada
+- **Framework:** Next.js 16 (App Router) + Turbopack
+- **Linguagem:** TypeScript
+- **Estilos:** Tailwind CSS v4
+- **Animações:** Framer Motion
+- **Formulários:** react-hook-form + Zod
+- **Banco:** Supabase (PostgreSQL + RLS)
+- **E-mail:** Resend (com fallback mock)
+- **Ícones:** Lucide React
+- **Ímplantação:** Vercel
 
-Foi aplicada a Arquitetura Modular, separando Persona, Contexto, Instruções de Sistema e Restrições. Utilize técnica de Chain of Thought (CoT) para forçar o modelo a raciocinar sobre a jornada do paciente antes de gerar o copy, e descrições fotorrealistas detalhadas para garantir a estética cinematográfica solicitada.
+## Funcionalidades
 
-## Parâmetros escolhidos
+- **Hero cinematográfico** com gradiente, overlay e imagem de fundo
+- **Seção "A Experiência do Grupo"** com benefícios da terapia em grupo
+- **Galeria visual** com 3 imagens cinematográficas do Unsplash
+- **Formulário de inscrição** com validação, máscara de telefone e contador de vagas em tempo real (15 vagas máx.)
+- **Checkout** simulado com Pix/Cartão, parcelamento e confirmação
+- **Painel Admin** (`/admin`) com login protegido, listagem de participantes e opção de limpar banco de dados
+- **Notificação por e-mail** via Resend (funciona em modo mock sem API key)
+- **Responsivo** — adaptado para smartphones, tablets e desktop
+- **Acessibilidade** — `autocomplete`, `aria-live`, `role`, `prefers-reduced-motion`
 
-- **Persona (System Instructions):** Arquiteto de UX/UI e Copywriter especialista em Psicologia e Conversão.
-- **Contexto (Background):** Instituto Kalapa (terapias) + InfinitePay (fintech).
-- **Gatilho Lógico:** "Pense passo a passo" (Zero-shot CoT) para aumentar a precisão na estrutura de vendas.
-- **Formato de Saída:** Markdown estruturado para facilitar a visualização técnica.
+## Pré-requisitos
 
-## Justificativa técnica
+- Node.js 20+
+- npm
 
-A utilização de System Instructions calibra o tom de voz para o nicho terapêutico, evitando uma abordagem comercial agressiva que poderia afastar o público de psicologia. A inclusão de Restrições claras sobre o meio de pagamento (InfinitePay) e a periodicidade (15 dias) garante que a IA não alucine informações genéricas. A descrição visual segue as diretrizes de "Imagens fotorrealistas" documentadas, focando em iluminação e cenário.
+## Setup
 
-## Boas práticas aplicadas
+```bash
+# Instalar dependências
+npm install
 
-- **Precisão Quantitativa:** Definição exata de seções e campos de formulário.
-- **Linguagem Unívoca:** Comandos diretos como "Estruture", "Descreva" e "Sintetize".
-- **Modularização:** Separação entre a experiência do usuário (UX) e a interface visual (UI).
+# Copiar variáveis de ambiente
+cp .env.example .env.local
 
-## Limitações documentadas
+# Iniciar servidor de desenvolvimento
+npx next dev -p 3000
+```
 
-Como o link fornecido é externo e modelos de linguagem podem ter janelas de conhecimento datadas, o prompt instrui o modelo a focar na estrutura lógica e visual, cabendo ao usuário final inserir dados dinâmicos específicos (como valores exatos). Há risco de Ambiguidade Contextual se os temas específicos das sessões em grupo não forem detalhados no preenchimento final.
+## Variáveis de Ambiente
 
----
+| Variável | Obrigatória | Descrição |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Sim | URL do projeto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Sim | Chave pública (anon) do Supabase |
+| `NEXT_SUPABASE_SERVICE_ROLE_KEY` | Sim | Chave secreta do servidor (service_role) |
+| `ADMIN_PASSWORD` | Sim | Senha do painel administrativo `/admin` |
+| `SESSION_SECRET` | Não | Para assinar cookie de sessão (fallback = ADMIN_PASSWORD) |
+| `RESEND_API_KEY` | Não | Chave da API Resend (mock se ausente) |
+| `KALAPA_EMAIL_FROM` | Não | Remetente do e-mail de notificação |
+| `KALAPA_EMAIL_TO` | Não | Destinatário do e-mail de notificação |
 
-## Prompt final otimizado
+## Supabase
 
-======== INICIO DO PROMPT ========
-Persona (System Instructions): Atue como um Especialista em Design de Conversão (CRO) e Arquiteto de Experiência do Usuário (UX) com foco no setor de saúde mental e terapias holísticas. Seu objetivo é projetar a estrutura completa de uma Landing Page para o "Instituto Kalapa".
-Contexto e Objetivo:
-Cliente: Instituto Kalapa (foco em psicologia e trabalhos terapêuticos).
-Produto: Ingressos para sessões terapêuticas em grupo (Frequência: 1 vez a cada 15 dias).
-Parceiro Financeiro: InfinitePay (meio exclusivo para processamento de pagamentos).
-Estética Visual: Cinematográfica, moderna, acolhedora, utilizando pessoas reais e cenários que remetam à tranquilidade e ao autoconhecimento.
-Estrutura da Landing Page (Modular):
-Seção Hero (Abertura):
-Headline que conecte a dor emocional à solução de grupo do Instituto Kalapa.
-Subheadline explicando a dinâmica quinzenal.
-Diretriz de Imagem: Descreva uma foto cinematográfica com profundidade de campo, mostrando uma pessoa em um momento de introspecção em um ambiente moderno e iluminado naturalmente (tons terrosos, verde menta e iluminação suave).
-A Experiência do Grupo:
-Copy explicativo sobre os benefícios da terapia em grupo quinzenal.
-Use argumentos baseados em psicologia (acolhimento, pertencimento, cura coletiva).
-Checkout e Meios de Pagamento (Powered by InfinitePay):
-Seção dedicada à compra do ingresso.
-Destaque a facilidade e segurança do pagamento via InfinitePay.
-Liste opções de parcelamento e métodos (Pix/Cartão) processados pela InfinitePay.
-Galeria Visual Cinematográfica:
-Descreva 3 sugestões de imagens (prompts fotorrealistas) para compor a página:
-Imagem 1: Close nas mãos de duas pessoas em um gesto de apoio mútuo.
-Imagem 2: Um cenário de sala de estar moderna e minimalista onde ocorrem as sessões.
-Imagem 3: Um grupo de pessoas diversas sorrindo de forma leve em um ambiente aberto.
-Formulário de Inscrição:
-Campos: Nome, E-mail, Telefone (WhatsApp) e "O que você busca com esta sessão?".
-Instruções de Raciocínio (Chain of Thought): Pense passo a passo:
-Como o design visual moderno pode reduzir o estigma da psicologia?
-Como a integração da InfinitePay transmite profissionalismo e segurança para o cliente que está vulnerável emocionalmente? Reflita esses pontos no copy final da página.
-Restrições:
-Formato: Markdown estruturado.
-Tom de voz: Empático, profissional e inspirador.
-Proibido: Usar termos excessivamente "clínicos" ou frios. Foque no bem-estar.
-Quantidade: Mínimo de 5 seções detalhadas.
-======== FINAL DO PROMPT ========
+### Schema
+
+Execute o conteúdo de `supabase/schema.sql` no SQL Editor do Supabase.
+
+### RLS
+
+- `SELECT`: público (para o contador de vagas funcionar)
+- `INSERT/UPDATE/DELETE`: apenas via `service_role` (server-side)
+- A chave anon (pública) só pode **ler** dados
+
+### Estrutura da tabela
+
+```sql
+CREATE TABLE inscricoes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  turma_id TEXT NOT NULL DEFAULT '2025-01',
+  nome TEXT NOT NULL,
+  email TEXT NOT NULL,
+  telefone TEXT NOT NULL,
+  motivacao TEXT,
+  metodo_pagamento TEXT,
+  valor INTEGER DEFAULT 97,
+  status TEXT NOT NULL DEFAULT 'confirmada',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+## Deploy
+
+O projeto está configurado para deploy no Vercel:
+
+```bash
+npm install -g vercel
+vercel --prod
+```
+
+Ou conecte o repositório GitHub diretamente no [Vercel Dashboard](https://vercel.com).
+
+### Variáveis no Vercel
+
+Todas as variáveis do `.env.local` (exceto as que começam com `NEXT_PUBLIC_`) devem ser configuradas como **Environment Variables** no Vercel. As `NEXT_PUBLIC_*` podem ser passadas como build env.
+
+## Links
+
+- **Produção:** https://instituto-kalapa.vercel.app
+- **Painel Admin:** https://instituto-kalapa.vercel.app/admin
+- **GitHub:** https://github.com/mluciani-tech/instituto-kalapa
+
+## Estrutura do Projeto
+
+```
+src/
+├── app/
+│   ├── admin/page.tsx              # Painel administrativo
+│   ├── api/
+│   │   ├── admin/
+│   │   │   ├── limpar/route.ts     # DELETE — limpa todos os registros
+│   │   │   ├── login/route.ts      # POST — login do admin
+│   │   │   ├── logout/route.ts     # POST — logout do admin
+│   │   │   ├── participantes/route.ts # GET — lista participantes
+│   │   │   └── verify/route.ts     # GET — verifica sessão
+│   │   ├── send-email/route.ts     # POST — envia e-mail + salva no banco
+│   │   └── vagas/route.ts          # GET — contagem de vagas
+│   ├── checkout/page.tsx           # Página de checkout
+│   ├── components/
+│   │   ├── Checkout.tsx            # Componente de pagamento
+│   │   ├── Footer.tsx              # Rodapé
+│   │   ├── GroupExperience.tsx     # Seção de benefícios
+│   │   ├── Hero.tsx                # Seção de abertura
+│   │   ├── RegistrationForm.tsx    # Formulário + contador de vagas
+│   │   └── VisualGallery.tsx       # Galeria de imagens
+│   ├── globals.css                 # Tema e estilos globais
+│   ├── layout.tsx                  # Layout raiz
+│   └── page.tsx                    # Landing page
+├── lib/
+│   ├── auth.ts                     # Autenticação HMAC para admin
+│   └── supabase.ts                 # Clientes Supabase (público + admin)
+└── ...
+```
