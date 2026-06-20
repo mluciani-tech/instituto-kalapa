@@ -36,7 +36,7 @@ export async function GET() {
       .from("inscricoes")
       .select("*", { count: "exact", head: true })
       .eq("turma_id", turmaAtual)
-      .eq("status", "confirmada");
+      .in("status", ["confirmada", "pago"]);
 
     if (error) throw error;
 
