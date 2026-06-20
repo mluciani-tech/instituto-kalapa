@@ -1,17 +1,27 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, Sparkles } from "lucide-react";
 
 function SucessoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [preco, setPreco] = useState(97);
 
   const receiptUrl = searchParams.get("receipt_url");
   const orderNsu = searchParams.get("order_nsu");
   const captureMethod = searchParams.get("capture_method");
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.preco_sessao) setPreco(Number(data.preco_sessao));
+      })
+      .catch(() => {});
+  }, []);
 
   const metodoLabel =
     captureMethod === "pix"
@@ -58,7 +68,7 @@ function SucessoContent() {
               </div>
               <div className="flex justify-between">
                 <span className="text-white/50">Valor</span>
-                <span className="text-white font-medium">R$ 97,00</span>
+                <span className="text-white font-medium">R$ {preco.toLocaleString("pt-BR")},00</span>
               </div>
               {orderNsu && (
                 <div className="flex justify-between">

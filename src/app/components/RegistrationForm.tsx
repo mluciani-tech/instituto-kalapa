@@ -52,8 +52,8 @@ export default function RegistrationForm() {
     const fetchData = async () => {
       try {
         const [vagasRes, configRes] = await Promise.all([
-          fetch("/api/vagas"),
-          fetch("/api/config"),
+          fetch("/api/vagas", { cache: "no-store" }),
+          fetch("/api/config", { cache: "no-store" }),
         ]);
         const vagasData = await vagasRes.json();
         const configData = await configRes.json();
