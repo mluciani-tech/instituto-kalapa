@@ -3,7 +3,19 @@ import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 
 const EMAIL_FROM = process.env.KALAPA_EMAIL_FROM || "contato@institutokalapa.com.br";
 const EMAIL_TO = process.env.KALAPA_EMAIL_TO || "contato@institutokalapa.com.br";
-const TURMA_ATUAL = "2025-01";
+
+const formatCurrency = (value: number) =>
+  value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const getTurmaAtual = async (): Promise<string> => {
+  if (!isAdminConfigured()) return "2025-01";
+  const { data } = await supabaseAdmin!
+    .from("configuracoes")
+    .select("valor")
+    .eq("chave", "turma_atual")
+    .single();
+  return data?.valor || "2025-01";
+};
 
 const apiKey = process.env.RESEND_API_KEY;
 const isResendConfigured =
@@ -12,11 +24,14 @@ const isResendConfigured =
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { nome, email, telefone, motivacao, metodoPagamento, valor } = body;
+    const { nome, email, telefone, motivacao, metodoPagamento, valor, order_nsu } = body;
+
+    const turmaAtual = await getTurmaAtual();
 
     if (isAdminConfigured()) {
       const { error: insertError } = await supabaseAdmin!.from("inscricoes").insert({
-        turma_id: TURMA_ATUAL,
+        turma_id: turmaAtual,
+        order_nsu: order_nsu || null,
         nome,
         email,
         telefone,
@@ -52,7 +67,7 @@ export async function POST(req: Request) {
           <h2 style="color: #282D30; font-size: 18px; margin-top: 0;">Detalhes do pagamento</h2>
           <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #36344d;">
             <tr><td style="padding: 8px 0; font-weight: 600; width: 140px;">Método:</td><td style="padding: 8px 0;">${metodoPagamento?.toUpperCase()}</td></tr>
-            <tr><td style="padding: 8px 0; font-weight: 600;">Valor:</td><td style="padding: 8px 0;">R$ ${valor},00</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: 600;">Valor:</td><td style="padding: 8px 0;">${formatCurrency(Number(valor))}</td></tr>
             <tr><td style="padding: 8px 0; font-weight: 600;">Status:</td><td style="padding: 8px 0; color: #00b090; font-weight: 600;">✓ Processado via InfinitePay</td></tr>
           </table>
         </div>
@@ -69,7 +84,7 @@ export async function POST(req: Request) {
       console.log("MOCK: ENVIANDO E-MAIL DE CONFIRMAÇÃO");
       console.log(`Destinatário: ${EMAIL_TO}`);
       console.log(`Participante: ${nome} | ${email} | ${telefone}`);
-      console.log(`Pagamento: ${metodoPagamento?.toUpperCase()} — R$ ${valor},00`);
+      console.log(`Pagamento: ${metodoPagamento?.toUpperCase()} — ${formatCurrency(Number(valor))}`);
       console.log("=========================================");
 
       return NextResponse.json({

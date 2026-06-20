@@ -19,6 +19,7 @@ ON CONFLICT (chave) DO NOTHING;
 CREATE TABLE IF NOT EXISTS inscricoes (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   turma_id TEXT NOT NULL DEFAULT '2025-01',
+  order_nsu TEXT,
   nome TEXT NOT NULL,
   email TEXT NOT NULL,
   telefone TEXT NOT NULL,
@@ -31,6 +32,14 @@ CREATE TABLE IF NOT EXISTS inscricoes (
 
 -- Alterar coluna valor para suportar centavos (executar se tabela já existir)
 ALTER TABLE inscricoes ALTER COLUMN valor TYPE NUMERIC(10,2) USING valor::NUMERIC;
+
+-- Adicionar coluna order_nsu para identificar inscrições no webhook (executar se não existir)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'inscricoes' AND column_name = 'order_nsu') THEN
+    ALTER TABLE inscricoes ADD COLUMN order_nsu TEXT;
+  END IF;
+END $$;
 
 -- Índices
 CREATE INDEX IF NOT EXISTS idx_inscricoes_turma ON inscricoes(turma_id);

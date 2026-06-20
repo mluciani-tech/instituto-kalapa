@@ -88,6 +88,9 @@ export default function Checkout() {
     };
 
     try {
+      // Gerar order_nsu único antes de tudo
+      const orderNsu = `kalapa-${Date.now()}`;
+
       // 1. Salvar inscrição no Supabase + enviar e-mail
       const emailRes = await fetch("/api/send-email", {
         method: "POST",
@@ -96,6 +99,7 @@ export default function Checkout() {
           ...payload,
           metodoPagamento: metodoSelecionado,
           valor: preco,
+          order_nsu: orderNsu,
         }),
       });
 
@@ -115,7 +119,7 @@ export default function Checkout() {
               description: "Sessão Terapêutica em Grupo — Instituto Kalapa",
             },
           ],
-          order_nsu: `kalapa-${Date.now()}`,
+          order_nsu: orderNsu,
           customer: {
             name: payload.nome,
             email: payload.email,
