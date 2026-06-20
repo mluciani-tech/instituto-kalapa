@@ -42,6 +42,14 @@ export default function AdminPage() {
   const [salvandoPreco, setSalvandoPreco] = useState(false);
   const [precoSucesso, setPrecoSucesso] = useState("");
 
+  // Configurações de vagas
+  const [vagasEditando, setVagasEditando] = useState("");
+  const [salvandoVagas, setSalvandoVagas] = useState(false);
+  const [vagasSucesso, setVagasSucesso] = useState("");
+
+  // Erro de configuração (tabela não existe)
+  const [configError, setConfigError] = useState("");
+
   const checkAuth = useCallback(async () => {
     const res = await fetch("/api/admin/verify");
     if (res.ok) {
@@ -69,12 +77,14 @@ export default function AdminPage() {
       const data = await res.json();
       setConfig(data);
       setPrecoEditando(data.preco_sessao || "97");
+      setVagasEditando(data.vagas_maximas || "15");
     }
   };
 
   const handleSalvarPreco = async () => {
     setSalvandoPreco(true);
     setPrecoSucesso("");
+    setConfigError("");
 
     const res = await fetch("/api/config", {
       method: "PUT",
@@ -82,14 +92,47 @@ export default function AdminPage() {
       body: JSON.stringify({ chave: "preco_sessao", valor: precoEditando }),
     });
 
+    const data = await res.json();
+
     if (res.ok) {
       setConfig((prev) => ({ ...prev, preco_sessao: precoEditando }));
       setPrecoSucesso("Preço atualizado com sucesso!");
       setTimeout(() => setPrecoSucesso(""), 3000);
     } else {
-      setError("Erro ao salvar preço");
+      if (data.hint) {
+        setConfigError(data.error + " " + data.hint);
+      } else {
+        setError("Erro ao salvar preço");
+      }
     }
     setSalvandoPreco(false);
+  };
+
+  const handleSalvarVagas = async () => {
+    setSalvandoVagas(true);
+    setVagasSucesso("");
+    setConfigError("");
+
+    const res = await fetch("/api/config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chave: "vagas_maximas", valor: vagasEditando }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setConfig((prev) => ({ ...prev, vagas_maximas: vagasEditando }));
+      setVagasSucesso("Vagas atualizadas com sucesso!");
+      setTimeout(() => setVagasSucesso(""), 3000);
+    } else {
+      if (data.hint) {
+        setConfigError(data.error + " " + data.hint);
+      } else {
+        setError("Erro ao salvar vagas");
+      }
+    }
+    setSalvandoVagas(false);
   };
 
   useEffect(() => {
@@ -234,6 +277,12 @@ export default function AdminPage() {
             Configurações do Site
           </h2>
 
+          {configError && (
+            <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+              {configError}
+            </div>
+          )}
+
           <div className="grid sm:grid-cols-2 gap-6">
             {/* Preço da Sessão */}
             <div className="p-4 rounded-xl bg-brand-beige/30 border border-brand-beige">
@@ -279,14 +328,38 @@ export default function AdminPage() {
 
             {/* Vagas Máximas */}
             <div className="p-4 rounded-xl bg-brand-beige/30 border border-brand-beige">
-              <label className="block text-sm font-medium text-brand-charcoal mb-2">
+              <label
+                htmlFor="vagas-maximas"
+                className="block text-sm font-medium text-brand-charcoal mb-2"
+              >
                 Vagas Máximas por Turma
               </label>
-              <div className="px-4 py-2.5 bg-brand-beige/50 rounded-lg text-sm text-brand-charcoal/60">
-                {config.vagas_maximas || "15"} vagas
+              <div className="flex items-center gap-3">
+                <input
+                  id="vagas-maximas"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={vagasEditando}
+                  onChange={(e) => setVagasEditando(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple"
+                />
+                <button
+                  onClick={handleSalvarVagas}
+                  disabled={salvandoVagas || vagasEditando === config.vagas_maximas}
+                  className="px-4 py-2.5 bg-brand-purple text-white text-sm font-medium rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors whitespace-nowrap"
+                >
+                  {salvandoVagas ? "Salvando..." : "Salvar"}
+                </button>
               </div>
+              {vagasSucesso && (
+                <p className="mt-2 text-xs text-green-600 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                  {vagasSucesso}
+                </p>
+              )}
               <p className="mt-2 text-xs text-brand-charcoal/40">
-                Para alterar, edite diretamente no banco de dados (tabela configuracoes)
+                Atual: {config.vagas_maximas || "15"} vagas — Atualiza o contador na landing page
               </p>
             </div>
           </div>

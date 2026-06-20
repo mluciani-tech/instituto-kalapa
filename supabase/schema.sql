@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS configuracoes (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Inserir configurações padrão
+-- Inserir configurações padrão (ignora se já existir)
 INSERT INTO configuracoes (chave, valor) VALUES
   ('preco_sessao', '97'),
   ('vagas_maximas', '15'),
@@ -29,33 +29,29 @@ CREATE TABLE IF NOT EXISTS inscricoes (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Índice para buscar por turma
+-- Índices
 CREATE INDEX IF NOT EXISTS idx_inscricoes_turma ON inscricoes(turma_id);
-
--- Índice para buscar por status
 CREATE INDEX IF NOT EXISTS idx_inscricoes_status ON inscricoes(status);
 
 -- Row Level Security
 ALTER TABLE inscricoes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE configuracoes ENABLE ROW LEVEL SECURITY;
 
--- Políticas para configurações
--- Leitura pública (para o preço aparecer na landing page)
+-- Remover políticas antigas (ignora erro se não existir)
+DROP POLICY IF EXISTS "leitura_publica_configuracoes" ON configuracoes;
+DROP POLICY IF EXISTS "atualizacao_admin_configuracoes" ON configuracoes;
+DROP POLICY IF EXISTS "insercao_admin_configuracoes" ON configuracoes;
+DROP POLICY IF EXISTS "leitura_publica_inscricoes" ON inscricoes;
+
+-- Criar políticas atualizadas
 CREATE POLICY "leitura_publica_configuracoes" ON configuracoes
   FOR SELECT USING (true);
 
--- Apenas service_role pode atualizar
 CREATE POLICY "atualizacao_admin_configuracoes" ON configuracoes
   FOR UPDATE USING (auth.role() = 'service_role');
 
--- Apenas service_role pode inserir
 CREATE POLICY "insercao_admin_configuracoes" ON configuracoes
   FOR INSERT WITH CHECK (auth.role() = 'service_role');
 
--- Políticas para inscrições
--- Leitura pública (para o contador de vagas funcionar)
 CREATE POLICY "leitura_publica_inscricoes" ON inscricoes
   FOR SELECT USING (true);
-
--- INSERT/UPDATE/DELETE: apenas via service_role no servidor (sem política pública)
--- O servidor usa a service_role key para inserir/atualizar registros

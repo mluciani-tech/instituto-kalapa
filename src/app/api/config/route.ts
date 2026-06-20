@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifySessionToken } from "@/lib/auth";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 
+const DEFAULTS: Record<string, string> = {
+  preco_sessao: "97",
+  vagas_maximas: "15",
+  turma_atual: "2025-01",
+};
+
 // GET: Buscar configurações (público — usado na landing page)
 export async function GET() {
   if (!isAdminConfigured()) {
-    return NextResponse.json(
-      { error: "Banco não configurado" },
-      { status: 500 }
-    );
+    return NextResponse.json(DEFAULTS);
   }
 
   try {
@@ -16,9 +19,16 @@ export async function GET() {
       .from("configuracoes")
       .select("chave, valor");
 
-    if (error) throw error;
+    if (error) {
+      // Tabela não existe — retornar defaults
+      if (error.message?.includes("does not exist") || error.code === "42P01") {
+        console.warn("[config] Tabela configuracoes não existe. Usando valores padrão.");
+        return NextResponse.json(DEFAULTS);
+      }
+      throw error;
+    }
 
-    const config: Record<string, string> = {};
+    const config: Record<string, string> = { ...DEFAULTS };
     data?.forEach((item) => {
       config[item.chave] = item.valor;
     });
@@ -26,10 +36,7 @@ export async function GET() {
     return NextResponse.json(config);
   } catch (error) {
     console.error("[config] Erro ao buscar configurações:", error);
-    return NextResponse.json(
-      { error: "Erro ao buscar configurações" },
-      { status: 500 }
-    );
+    return NextResponse.json(DEFAULTS);
   }
 }
 
@@ -66,7 +73,18 @@ export async function PUT(req: NextRequest) {
         { onConflict: "chave" }
       );
 
-    if (error) throw error;
+    if (error) {
+      if (error.message?.includes("does not exist") || error.code === "42P01") {
+        return NextResponse.json(
+          {
+            error: "Tabela configuracoes não existe no Supabase.",
+            hint: "Execute o SQL do arquivo supabase/schema.sql no SQL Editor do Supabase para criar a tabela.",
+          },
+          { status: 500 }
+        );
+      }
+      throw error;
+    }
 
     return NextResponse.json({ success: true, chave, valor });
   } catch (error) {
