@@ -65,6 +65,17 @@ export default function Checkout() {
     fetchData();
   }, []);
 
+  // Formatar telefone para formato internacional +55XXXXXXXXXXX
+  const formatPhoneForInfinitePay = (phone: string): string => {
+    const numbers = phone.replace(/\D/g, "");
+    // Se já começa com 55, retornar com +
+    if (numbers.startsWith("55")) {
+      return `+${numbers}`;
+    }
+    // Caso contrário, adicionar +55 na frente
+    return `+55${numbers}`;
+  };
+
   const handleFinalizarPagamento = async () => {
     setProcessando(true);
     setErro("");
@@ -108,7 +119,7 @@ export default function Checkout() {
           customer: {
             name: payload.nome,
             email: payload.email,
-            phone_number: payload.telefone,
+            phone_number: formatPhoneForInfinitePay(payload.telefone),
           },
         }),
       });

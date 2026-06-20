@@ -19,7 +19,17 @@ export async function POST(req: NextRequest) {
       items,
     } = body;
 
-    if (isAdminConfigured() && order_nsu) {
+    // Validar dados obrigatórios
+    if (!order_nsu || !transaction_nsu) {
+      console.error("[webhook] Dados obrigatórios ausentes:", { order_nsu, transaction_nsu });
+      return NextResponse.json(
+        { success: false, message: "Dados obrigatórios ausentes" },
+        { status: 400 }
+      );
+    }
+
+    // Atualizar inscrição no banco
+    if (isAdminConfigured()) {
       const { error } = await supabaseAdmin!.from("inscricoes").update({
         status: "pago",
         metodo_pagamento: capture_method === "pix" ? "pix" : "cartao",
@@ -28,15 +38,20 @@ export async function POST(req: NextRequest) {
 
       if (error) {
         console.error("[webhook] Erro ao atualizar inscricao:", error);
+        return NextResponse.json(
+          { success: false, message: "Erro ao atualizar pedido" },
+          { status: 400 }
+        );
       }
     }
 
-    return NextResponse.json({ received: true });
+    // Responder com sucesso conforme documentação InfinitePay
+    return NextResponse.json({ success: true, message: null });
   } catch (error) {
     console.error("[webhook] Erro:", error);
     return NextResponse.json(
-      { error: "Erro ao processar webhook" },
-      { status: 500 }
+      { success: false, message: "Erro ao processar webhook" },
+      { status: 400 }
     );
   }
 }
