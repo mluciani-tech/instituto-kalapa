@@ -51,8 +51,8 @@ export async function PUT(req: NextRequest) {
   if (!isAdminConfigured()) {
     return NextResponse.json(
       {
-        error: "Variável NEXT_SUPABASE_SERVICE_ROLE_KEY não configurada no Vercel.",
-        hint: "Vá em Settings → Environment Variables, adicione NEXT_SUPABASE_SERVICE_ROLE_KEY com a service_role key do Supabase, salve para Production, e faça Redeploy.",
+        error: "Variável SUPABASE_SERVICE_ROLE_KEY não configurada no Vercel.",
+        hint: "Vá em Settings → Environment Variables, adicione SUPABASE_SERVICE_ROLE_KEY com a service_role key do Supabase, salve para Production, e faça Redeploy.",
       },
       { status: 500 }
     );

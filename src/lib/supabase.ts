@@ -10,8 +10,8 @@ export const supabase =
     : null;
 
 // Cliente server-side (leitura + escrita — usa service_role)
-// NUNCA expor NEXT_SUPABASE_SERVICE_ROLE_KEY em client-side
-const supabaseServiceKey = process.env.NEXT_SUPABASE_SERVICE_ROLE_KEY || "";
+// NUNCA expor em client-side
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 export const supabaseAdmin =
   supabaseUrl && supabaseServiceKey
     ? createClient(supabaseUrl, supabaseServiceKey, {
