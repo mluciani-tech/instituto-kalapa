@@ -201,7 +201,7 @@ export default function Checkout() {
                 <div className="border-t border-white/10 pt-6">
                   <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-5xl md:text-6xl font-bold text-white">
-                      R$ {preco}
+                      R$ {preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </span>
                     <span className="text-white/40 text-lg">/ sessão</span>
                   </div>

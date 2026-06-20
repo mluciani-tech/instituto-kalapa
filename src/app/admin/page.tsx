@@ -51,14 +51,16 @@ export default function AdminPage() {
   const [configError, setConfigError] = useState("");
 
   const formatPrecoDisplay = (value: string) => {
-    const num = parseInt(value.replace(/\D/g, ""), 10);
-    if (isNaN(num)) return "";
-    return num.toLocaleString("pt-BR");
+    const cleaned = value.replace(/[^\d,]/g, "");
+    const parts = cleaned.split(",");
+    if (parts.length > 2) return parts[0] + "," + parts.slice(1).join("");
+    if (parts[1] && parts[1].length > 2) return parts[0] + "," + parts[1].slice(0, 2);
+    return cleaned;
   };
 
   const handlePrecoChange = (raw: string) => {
-    const digits = raw.replace(/\D/g, "");
-    setPrecoEditando(digits);
+    const formatted = formatPrecoDisplay(raw);
+    setPrecoEditando(formatted);
   };
 
   const checkAuth = useCallback(async () => {
@@ -87,7 +89,7 @@ export default function AdminPage() {
     if (res.ok) {
       const data = await res.json();
       setConfig(data);
-      setPrecoEditando(data.preco_sessao || "97");
+      setPrecoEditando((data.preco_sessao || "97").replace(".", ","));
       setVagasEditando(data.vagas_maximas || "15");
     }
   };
@@ -97,16 +99,18 @@ export default function AdminPage() {
     setPrecoSucesso("");
     setConfigError("");
 
+    const valorParaSalvar = precoEditando.replace(",", ".");
+
     const res = await fetch("/api/config", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chave: "preco_sessao", valor: precoEditando }),
+      body: JSON.stringify({ chave: "preco_sessao", valor: valorParaSalvar }),
     });
 
     const data = await res.json();
 
     if (res.ok) {
-      setConfig((prev) => ({ ...prev, preco_sessao: precoEditando }));
+      setConfig((prev) => ({ ...prev, preco_sessao: valorParaSalvar }));
       setPrecoSucesso("Preço atualizado com sucesso!");
       setTimeout(() => setPrecoSucesso(""), 3000);
     } else {
@@ -305,8 +309,8 @@ export default function AdminPage() {
                   <input
                     id="preco-sessao"
                     type="text"
-                    inputMode="numeric"
-                    value={precoEditando ? formatPrecoDisplay(precoEditando) : ""}
+                    inputMode="decimal"
+                    value={precoEditando}
                     onChange={(e) => handlePrecoChange(e.target.value)}
                     placeholder="97"
                     className="w-full pl-10 pr-4 py-2.5 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple"
@@ -314,7 +318,7 @@ export default function AdminPage() {
                 </div>
                 <button
                   onClick={handleSalvarPreco}
-                  disabled={salvandoPreco || precoEditando === config.preco_sessao}
+                  disabled={salvandoPreco || precoEditando.replace(",", ".") === config.preco_sessao}
                   className="px-4 py-2.5 bg-brand-purple text-white text-sm font-medium rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors whitespace-nowrap"
                 >
                   {salvandoPreco ? "Salvando..." : "Salvar"}
@@ -327,7 +331,7 @@ export default function AdminPage() {
                 </p>
               )}
               <p className="mt-2 text-xs text-brand-charcoal/40">
-                Atual: R$ {formatPrecoDisplay(config.preco_sessao || "97")},00 — Atualiza automaticamente na landing page e no checkout
+                Atual: R$ {(config.preco_sessao || "97").replace(".", ",")} — Atualiza automaticamente na landing page e no checkout
               </p>
             </div>
 

@@ -68,7 +68,7 @@ function SucessoContent() {
               </div>
               <div className="flex justify-between">
                 <span className="text-white/50">Valor</span>
-                <span className="text-white font-medium">R$ {preco.toLocaleString("pt-BR")},00</span>
+                <span className="text-white font-medium">R$ {preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
               {orderNsu && (
                 <div className="flex justify-between">

@@ -24,10 +24,13 @@ CREATE TABLE IF NOT EXISTS inscricoes (
   telefone TEXT NOT NULL,
   motivacao TEXT,
   metodo_pagamento TEXT,
-  valor INTEGER DEFAULT 97,
+  valor NUMERIC(10,2) DEFAULT 97,
   status TEXT NOT NULL DEFAULT 'confirmada',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Alterar coluna valor para suportar centavos (executar se tabela já existir)
+ALTER TABLE inscricoes ALTER COLUMN valor TYPE NUMERIC(10,2) USING valor::NUMERIC;
 
 -- Índices
 CREATE INDEX IF NOT EXISTS idx_inscricoes_turma ON inscricoes(turma_id);
