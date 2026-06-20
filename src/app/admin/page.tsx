@@ -50,6 +50,12 @@ export default function AdminPage() {
   // Erro de configuração (tabela não existe)
   const [configError, setConfigError] = useState("");
 
+  const formatPrecoDisplay = (value: string) => {
+    const num = parseInt(value.replace(/\D/g, ""), 10);
+    if (isNaN(num)) return "";
+    return num.toLocaleString("pt-BR");
+  };
+
   const checkAuth = useCallback(async () => {
     const res = await fetch("/api/admin/verify");
     if (res.ok) {
@@ -99,11 +105,8 @@ export default function AdminPage() {
       setPrecoSucesso("Preço atualizado com sucesso!");
       setTimeout(() => setPrecoSucesso(""), 3000);
     } else {
-      if (data.hint) {
-        setConfigError(data.error + " " + data.hint);
-      } else {
-        setError("Erro ao salvar preço");
-      }
+      const msg = data.hint ? `${data.error} ${data.hint}` : (data.error || "Erro ao salvar preço");
+      setConfigError(msg);
     }
     setSalvandoPreco(false);
   };
@@ -126,11 +129,8 @@ export default function AdminPage() {
       setVagasSucesso("Vagas atualizadas com sucesso!");
       setTimeout(() => setVagasSucesso(""), 3000);
     } else {
-      if (data.hint) {
-        setConfigError(data.error + " " + data.hint);
-      } else {
-        setError("Erro ao salvar vagas");
-      }
+      const msg = data.hint ? `${data.error} ${data.hint}` : (data.error || "Erro ao salvar vagas");
+      setConfigError(msg);
     }
     setSalvandoVagas(false);
   };
@@ -322,7 +322,7 @@ export default function AdminPage() {
                 </p>
               )}
               <p className="mt-2 text-xs text-brand-charcoal/40">
-                Atual: R$ {config.preco_sessao || "97"},00 — Atualiza automaticamente na landing page e no checkout
+                Atual: R$ {formatPrecoDisplay(config.preco_sessao || "97")},00 — Atualiza automaticamente na landing page e no checkout
               </p>
             </div>
 
