@@ -34,16 +34,35 @@ export default function Checkout() {
   const [processando, setProcessando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState("");
+  const [preco, setPreco] = useState(97);
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = sessionStorage.getItem("dados_inscricao");
-      if (saved) {
-        setDadosInscricao(JSON.parse(saved));
+    const fetchData = async () => {
+      try {
+        const [sessionData, configRes] = await Promise.all([
+          (async () => {
+            if (typeof window !== "undefined") {
+              const saved = sessionStorage.getItem("dados_inscricao");
+              return saved ? JSON.parse(saved) : null;
+            }
+            return null;
+          })(),
+          fetch("/api/config"),
+        ]);
+
+        if (sessionData) setDadosInscricao(sessionData);
+
+        const configData = await configRes.json();
+        if (configData.preco_sessao) {
+          setPreco(Number(configData.preco_sessao));
+        }
+      } catch {
+        // Use default price
       }
       setLoading(false);
-    }
+    };
+    fetchData();
   }, []);
 
   const handleFinalizarPagamento = async () => {
@@ -65,7 +84,7 @@ export default function Checkout() {
         body: JSON.stringify({
           ...payload,
           metodoPagamento: metodoSelecionado,
-          valor: 97,
+          valor: preco,
         }),
       });
 
@@ -81,7 +100,7 @@ export default function Checkout() {
           items: [
             {
               quantity: 1,
-              price: 9700,
+              price: preco * 100, // Converter para centavos
               description: "Sessão Terapêutica em Grupo — Instituto Kalapa",
             },
           ],
@@ -171,7 +190,7 @@ export default function Checkout() {
                 <div className="border-t border-white/10 pt-6">
                   <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-5xl md:text-6xl font-bold text-white">
-                      R$ 97
+                      R$ {preco}
                     </span>
                     <span className="text-white/40 text-lg">/ sessão</span>
                   </div>
@@ -256,12 +275,12 @@ export default function Checkout() {
                       id="parcelamento"
                       className="w-full bg-brand-charcoal text-white border border-white/10 rounded-lg px-4 py-3.5 text-sm focus:outline-none focus:border-brand-mint transition-colors appearance-none cursor-pointer"
                     >
-                      <option value="1">1x de R$ 97,00</option>
-                      <option value="2">2x de R$ 48,50</option>
-                      <option value="3">3x de R$ 32,33</option>
-                      <option value="4">4x de R$ 24,25</option>
-                      <option value="6">6x de R$ 16,17</option>
-                      <option value="12">12x de R$ 8,08</option>
+                      <option value="1">1x de R$ {preco.toFixed(2).replace(".", ",")}</option>
+                      <option value="2">2x de R$ {(preco / 2).toFixed(2).replace(".", ",")}</option>
+                      <option value="3">3x de R$ {(preco / 3).toFixed(2).replace(".", ",")}</option>
+                      <option value="4">4x de R$ {(preco / 4).toFixed(2).replace(".", ",")}</option>
+                      <option value="6">6x de R$ {(preco / 6).toFixed(2).replace(".", ",")}</option>
+                      <option value="12">12x de R$ {(preco / 12).toFixed(2).replace(".", ",")}</option>
                     </select>
                   </div>
                 )}

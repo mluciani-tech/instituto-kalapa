@@ -24,18 +24,18 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-function getUrgency(filled: number) {
-  const left = VAGAS_MAXIMAS - filled;
+function getUrgency(filled: number, max: number) {
+  const left = max - filled;
   if (left === 0) return { msg: "Vagas esgotadas para esta turma", tone: "sold-out" as const };
   if (left === 1) return { msg: "Última vaga disponível", tone: "peak" as const };
   if (left <= 2) return { msg: `Apenas ${left} vagas restantes`, tone: "urgent" as const };
-  if (filled >= 10) return { msg: "Restam poucas vagas para esta turma", tone: "soft" as const };
+  if (filled >= max * 0.67) return { msg: "Restam poucas vagas para esta turma", tone: "soft" as const };
   return { msg: "Vagas abertas para a próxima sessão", tone: "neutral" as const };
 }
 
-function getSegmentColor(filled: number, index: number) {
+function getSegmentColor(filled: number, index: number, max: number) {
   if (index >= filled) return "rgba(40,45,48,0.12)";
-  const pct = (filled / VAGAS_MAXIMAS) * 100;
+  const pct = (filled / max) * 100;
   if (pct >= 90) return "#673de6";
   if (pct >= 60) return "#CC6223";
   return "#7EC8A0";
@@ -44,24 +44,36 @@ function getSegmentColor(filled: number, index: number) {
 export default function RegistrationForm() {
   const [enviado, setEnviado] = useState(false);
   const [vagasPreenchidas, setVagasPreenchidas] = useState(0);
+  const [preco, setPreco] = useState(97);
+  const [vagasMaximas, setVagasMaximas] = useState(VAGAS_MAXIMAS);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchVagas = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/vagas");
-        const data = await res.json();
-        setVagasPreenchidas(data.preenchidas || 0);
+        const [vagasRes, configRes] = await Promise.all([
+          fetch("/api/vagas"),
+          fetch("/api/config"),
+        ]);
+        const vagasData = await vagasRes.json();
+        const configData = await configRes.json();
+        setVagasPreenchidas(vagasData.preenchidas || 0);
+        if (vagasData.maximas) {
+          setVagasMaximas(vagasData.maximas);
+        }
+        if (configData.preco_sessao) {
+          setPreco(Number(configData.preco_sessao));
+        }
       } catch {
         setVagasPreenchidas(0);
       }
     };
-    fetchVagas();
+    fetchData();
   }, []);
 
-  const vagasRestantes = VAGAS_MAXIMAS - vagasPreenchidas;
+  const vagasRestantes = vagasMaximas - vagasPreenchidas;
   const esgotado = vagasRestantes === 0;
-  const urgency = getUrgency(vagasPreenchidas);
+  const urgency = getUrgency(vagasPreenchidas, vagasMaximas);
 
   const {
     register,
@@ -135,13 +147,13 @@ export default function RegistrationForm() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-brand-charcoal">Vagas da próxima turma</p>
-                <p className="text-xs text-brand-charcoal/40">Grupos reduzidos — máximo {VAGAS_MAXIMAS} participantes</p>
+                <p className="text-xs text-brand-charcoal/40">Grupos reduzidos — máximo {vagasMaximas} participantes</p>
               </div>
             </div>
             <div className="text-right">
               <span className="text-2xl font-bold text-brand-charcoal tabular-nums">
                 {vagasPreenchidas}
-                <span className="text-brand-charcoal/30 text-lg">/{VAGAS_MAXIMAS}</span>
+                <span className="text-brand-charcoal/30 text-lg">/{vagasMaximas}</span>
               </span>
             </div>
           </div>
@@ -149,14 +161,14 @@ export default function RegistrationForm() {
           {/* Barra segmentada de 15 posições */}
           <div className="flex items-center gap-3">
             <div className="flex gap-1 flex-1">
-              {Array.from({ length: VAGAS_MAXIMAS }).map((_, i) => (
+              {Array.from({ length: vagasMaximas }).map((_, i) => (
                 <motion.span
                   key={i}
                   initial={{ scaleY: 0.4, opacity: 0.4 }}
                   animate={{
                     scaleY: 1,
                     opacity: 1,
-                    backgroundColor: getSegmentColor(vagasPreenchidas, i),
+                    backgroundColor: getSegmentColor(vagasPreenchidas, i, vagasMaximas),
                   }}
                   transition={{ delay: 0.3 + i * 0.04, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                   className="h-2 flex-1 rounded-full origin-bottom"
@@ -231,7 +243,7 @@ export default function RegistrationForm() {
                   Vagas esgotadas para esta turma
                 </h3>
                 <p className="text-brand-charcoal/60 max-w-md mx-auto leading-relaxed mb-8">
-                  As {VAGAS_MAXIMAS} vagas da próxima sessão já foram preenchidas.
+                  As {vagasMaximas} vagas da próxima sessão já foram preenchidas.
                   Entre na lista de espera e avisaremos assim que uma vaga abrir
                   ou quando a próxima turma for anunciada.
                 </p>

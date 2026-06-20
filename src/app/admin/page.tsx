@@ -36,11 +36,17 @@ export default function AdminPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [clearing, setClearing] = useState(false);
 
+  // Configurações de preço
+  const [config, setConfig] = useState<Record<string, string>>({});
+  const [precoEditando, setPrecoEditando] = useState("");
+  const [salvandoPreco, setSalvandoPreco] = useState(false);
+  const [precoSucesso, setPrecoSucesso] = useState("");
+
   const checkAuth = useCallback(async () => {
     const res = await fetch("/api/admin/verify");
     if (res.ok) {
       setAuthed(true);
-      await fetchParticipantes();
+      await Promise.all([fetchParticipantes(), fetchConfig()]);
     } else {
       setAuthed(false);
     }
@@ -55,6 +61,35 @@ export default function AdminPage() {
     } else {
       setError("Erro ao carregar participantes");
     }
+  };
+
+  const fetchConfig = async () => {
+    const res = await fetch("/api/config");
+    if (res.ok) {
+      const data = await res.json();
+      setConfig(data);
+      setPrecoEditando(data.preco_sessao || "97");
+    }
+  };
+
+  const handleSalvarPreco = async () => {
+    setSalvandoPreco(true);
+    setPrecoSucesso("");
+
+    const res = await fetch("/api/config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chave: "preco_sessao", valor: precoEditando }),
+    });
+
+    if (res.ok) {
+      setConfig((prev) => ({ ...prev, preco_sessao: precoEditando }));
+      setPrecoSucesso("Preço atualizado com sucesso!");
+      setTimeout(() => setPrecoSucesso(""), 3000);
+    } else {
+      setError("Erro ao salvar preço");
+    }
+    setSalvandoPreco(false);
   };
 
   useEffect(() => {
@@ -191,6 +226,71 @@ export default function AdminPage() {
             <button onClick={() => setError("")} className="float-right font-bold">&times;</button>
           </div>
         )}
+
+        {/* Seção de Configurações */}
+        <div className="mb-8 bg-white rounded-xl border border-brand-beige p-6">
+          <h2 className="text-base font-semibold text-brand-charcoal mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-brand-purple" />
+            Configurações do Site
+          </h2>
+
+          <div className="grid sm:grid-cols-2 gap-6">
+            {/* Preço da Sessão */}
+            <div className="p-4 rounded-xl bg-brand-beige/30 border border-brand-beige">
+              <label
+                htmlFor="preco-sessao"
+                className="block text-sm font-medium text-brand-charcoal mb-2"
+              >
+                Preço da Sessão (R$)
+              </label>
+              <div className="flex items-center gap-3">
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-charcoal/50 text-sm">
+                    R$
+                  </span>
+                  <input
+                    id="preco-sessao"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={precoEditando}
+                    onChange={(e) => setPrecoEditando(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple"
+                  />
+                </div>
+                <button
+                  onClick={handleSalvarPreco}
+                  disabled={salvandoPreco || precoEditando === config.preco_sessao}
+                  className="px-4 py-2.5 bg-brand-purple text-white text-sm font-medium rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors whitespace-nowrap"
+                >
+                  {salvandoPreco ? "Salvando..." : "Salvar"}
+                </button>
+              </div>
+              {precoSucesso && (
+                <p className="mt-2 text-xs text-green-600 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                  {precoSucesso}
+                </p>
+              )}
+              <p className="mt-2 text-xs text-brand-charcoal/40">
+                Atual: R$ {config.preco_sessao || "97"},00 — Atualiza automaticamente na landing page e no checkout
+              </p>
+            </div>
+
+            {/* Vagas Máximas */}
+            <div className="p-4 rounded-xl bg-brand-beige/30 border border-brand-beige">
+              <label className="block text-sm font-medium text-brand-charcoal mb-2">
+                Vagas Máximas por Turma
+              </label>
+              <div className="px-4 py-2.5 bg-brand-beige/50 rounded-lg text-sm text-brand-charcoal/60">
+                {config.vagas_maximas || "15"} vagas
+              </div>
+              <p className="mt-2 text-xs text-brand-charcoal/40">
+                Para alterar, edite diretamente no banco de dados (tabela configuracoes)
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Mobile: cards */}
         <div className="sm:hidden space-y-3">
