@@ -56,6 +56,11 @@ export default function AdminPage() {
     return num.toLocaleString("pt-BR");
   };
 
+  const handlePrecoChange = (raw: string) => {
+    const digits = raw.replace(/\D/g, "");
+    setPrecoEditando(digits);
+  };
+
   const checkAuth = useCallback(async () => {
     const res = await fetch("/api/admin/verify");
     if (res.ok) {
@@ -299,11 +304,11 @@ export default function AdminPage() {
                   </span>
                   <input
                     id="preco-sessao"
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={precoEditando}
-                    onChange={(e) => setPrecoEditando(e.target.value)}
+                    type="text"
+                    inputMode="numeric"
+                    value={precoEditando ? formatPrecoDisplay(precoEditando) : ""}
+                    onChange={(e) => handlePrecoChange(e.target.value)}
+                    placeholder="97"
                     className="w-full pl-10 pr-4 py-2.5 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple"
                   />
                 </div>
