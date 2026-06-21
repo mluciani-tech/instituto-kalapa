@@ -138,7 +138,7 @@ export default function Checkout() {
 
       // 3. Limpar sessionStorage e redirecionar para InfinitePay
       sessionStorage.removeItem("dados_inscricao");
-      window.location.href = checkoutData.url;
+      window.location.href = "https://checkout.infinitepay.io/mlbank/6JLGcYG8sf";
     } catch (error) {
       console.error("Erro no checkout:", error);
       setErro("Erro de conexão. Tente novamente.");
