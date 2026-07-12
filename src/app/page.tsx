@@ -1,7 +1,7 @@
 import Hero from "./components/Hero";
 import GroupExperience from "./components/GroupExperience";
 import VisualGallery from "./components/VisualGallery";
-import RegistrationForm from "./components/RegistrationForm";
+import ProductHighlights from "./components/ProductHighlights";
 import Footer from "./components/Footer";
 
 export default function Home() {
@@ -10,7 +10,7 @@ export default function Home() {
       <Hero />
       <GroupExperience />
       <VisualGallery />
-      <RegistrationForm />
+      <ProductHighlights />
       <Footer />
     </>
   );

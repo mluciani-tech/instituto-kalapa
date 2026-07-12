@@ -1,10 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { QrCode, CreditCard, ShieldCheck, Check, Sparkles, ExternalLink } from "lucide-react";
-import { getProdutoById } from "@/lib/produtos";
+import { QrCode, CreditCard, ShieldCheck, Check, ExternalLink, Package, ArrowLeft } from "lucide-react";
+
+interface Produto {
+  id: string;
+  slug: string;
+  nome: string;
+  descricao: string | null;
+  descricao_curta: string | null;
+  preco: number;
+  imagem_url: string | null;
+  beneficios: string[];
+}
 
 interface DadosInscricao {
   nome: string;
@@ -29,48 +38,31 @@ const metodosPagamento = [
 ];
 
 export default function Checkout() {
+  const [produto, setProduto] = useState<Produto | null>(null);
   const [dadosInscricao, setDadosInscricao] = useState<DadosInscricao | null>(null);
   const [loading, setLoading] = useState(true);
   const [metodoSelecionado, setMetodoSelecionado] = useState("pix");
   const [processando, setProcessando] = useState(false);
-  const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState("");
-  const [preco, setPreco] = useState(97);
-  const [checkoutUrlFallback, setCheckoutUrlFallback] = useState(
-    "https://checkout.infinitepay.io/kalapa/hseV7BoYZT"
-  );
-  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [sessionData, configRes] = await Promise.all([
-          (async () => {
-            if (typeof window !== "undefined") {
-              const saved = sessionStorage.getItem("dados_inscricao");
-              return saved ? JSON.parse(saved) : null;
-            }
-            return null;
-          })(),
-          fetch("/api/config"),
-        ]);
+        const sessionData = typeof window !== "undefined"
+          ? sessionStorage.getItem("dados_inscricao")
+          : null;
+        const produtoId = typeof window !== "undefined"
+          ? sessionStorage.getItem("produto_selecionado")
+          : null;
 
-        if (sessionData) setDadosInscricao(sessionData);
+        if (sessionData) setDadosInscricao(JSON.parse(sessionData));
 
-        const configData = await configRes.json();
-        if (configData.preco_sessao) {
-          setPreco(Number(configData.preco_sessao));
-        }
-
-        // Carregar checkoutUrl do produto selecionado
-        // Por enquanto usa o produto padrão; futuramente virará do sessionStorage
-        const produtoId =
-          (typeof window !== "undefined"
-            ? sessionStorage.getItem("produto_selecionado")
-            : null) || "grupo-autoconhecimento";
-        const produtoData = getProdutoById(produtoId);
-        if (produtoData?.checkoutUrl) {
-          setCheckoutUrlFallback(produtoData.checkoutUrl);
+        if (produtoId) {
+          const res = await fetch(`/api/produtos/${produtoId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setProduto(data);
+          }
         }
       } catch {
         // Use defaults
@@ -80,18 +72,20 @@ export default function Checkout() {
     fetchData();
   }, []);
 
-  // Formatar telefone para formato internacional +55XXXXXXXXXXX
   const formatPhoneForInfinitePay = (phone: string): string => {
     const numbers = phone.replace(/\D/g, "");
-    // Se já começa com 55, retornar com +
     if (numbers.startsWith("55")) {
       return `+${numbers}`;
     }
-    // Caso contrário, adicionar +55 na frente
     return `+55${numbers}`;
   };
 
   const handleFinalizarPagamento = async () => {
+    if (!produto) {
+      setErro("Nenhum produto selecionado. Volte ao catálogo.");
+      return;
+    }
+
     setProcessando(true);
     setErro("");
 
@@ -103,35 +97,19 @@ export default function Checkout() {
     };
 
     try {
-      // Gerar order_nsu único antes de tudo
       const orderNsu = `kalapa-${Date.now()}`;
 
-      // 1. Salvar inscrição no Supabase + enviar e-mail
-      const emailRes = await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...payload,
-          metodoPagamento: metodoSelecionado,
-          valor: preco,
-          order_nsu: orderNsu,
-        }),
-      });
-
-      if (!emailRes.ok) {
-        console.warn("Aviso: Erro ao salvar inscrição, continuando com pagamento...");
-      }
-
-      // 2. Criar link de pagamento InfinitePay
+      // 1. Criar pedido + inscrição + gerar link de pagamento
       const checkoutRes = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          produto_id: produto.id,
           items: [
             {
               quantity: 1,
-              price: preco * 100, // Converter para centavos
-              description: "Grupo de Autoconhecimento — Instituto Kalapa",
+              price: Math.round(produto.preco * 100),
+              description: produto.nome,
             },
           ],
           order_nsu: orderNsu,
@@ -140,21 +118,26 @@ export default function Checkout() {
             email: payload.email,
             phone_number: formatPhoneForInfinitePay(payload.telefone),
           },
+          inscricao: {
+            ...payload,
+            metodoPagamento: metodoSelecionado,
+            valor: produto.preco,
+          },
         }),
       });
 
       const checkoutData = await checkoutRes.json();
 
       if (!checkoutRes.ok || !checkoutData.url) {
-        setErro("Erro ao criar link de pagamento. Tente novamente.");
+        setErro(checkoutData.error || "Erro ao criar link de pagamento. Tente novamente.");
         setProcessando(false);
         return;
       }
 
-      // 3. Limpar sessionStorage e redirecionar para InfinitePay
+      // 2. Limpar sessionStorage e redirecionar
       sessionStorage.removeItem("dados_inscricao");
       sessionStorage.removeItem("produto_selecionado");
-      window.location.href = checkoutData.url || checkoutUrlFallback;
+      window.location.href = checkoutData.url;
     } catch (error) {
       console.error("Erro no checkout:", error);
       setErro("Erro de conexão. Tente novamente.");
@@ -169,6 +152,27 @@ export default function Checkout() {
       </div>
     );
   }
+
+  if (!produto) {
+    return (
+      <div className="min-h-screen bg-brand-charcoal flex items-center justify-center text-white">
+        <div className="text-center">
+          <Package className="w-16 h-16 text-white/30 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Nenhum produto selecionado</h2>
+          <p className="text-white/50 mb-6">Volte ao catálogo e escolha um serviço.</p>
+          <a
+            href="/produtos"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Ver catálogo
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  const preco = produto.preco;
 
   return (
     <section className="relative min-h-screen py-20 bg-brand-charcoal overflow-hidden flex items-center justify-center">
@@ -187,10 +191,10 @@ export default function Checkout() {
             Pagamento Seguro
           </span>
           <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight max-w-2xl mx-auto font-sans">
-            Garanta seu <span className="text-gradient">ingresso</span> para a próxima sessão
+            Finalizar <span className="text-gradient">compra</span>
           </h2>
           <p className="mt-3 text-white/50 text-base max-w-xl mx-auto">
-            Processamento rápido e seguro via InfinitePay. Escolha o melhor método.
+            Processamento rápido e seguro via InfinitePay.
           </p>
         </motion.div>
 
@@ -202,20 +206,22 @@ export default function Checkout() {
             exit={{ opacity: 0 }}
             className="grid md:grid-cols-2 gap-8"
           >
-            {/* Lado esquerdo — Detalhes do ingresso */}
+            {/* Lado esquerdo — Detalhes do produto */}
             <div className="flex flex-col justify-between glass-card rounded-2xl p-8 md:p-10">
               <div>
                 <div className="mb-6">
                   <span className="text-brand-mint text-sm font-semibold tracking-wider uppercase flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-mint animate-pulse" />
-                    {dadosInscricao ? `Inscrição ativa para ${dadosInscricao.nome}` : "Ingresso Selecionado"}
+                    {dadosInscricao ? `Compra de ${dadosInscricao.nome}` : "Produto selecionado"}
                   </span>
                   <h3 className="text-2xl md:text-3xl font-bold text-white mt-2 font-sans">
-                    Grupo de Autoconhecimento
+                    {produto.nome}
                   </h3>
-                  <p className="text-white/50 mt-2 leading-relaxed">
-                    1 encontro a cada 15 dias · Duração de 2h · Grupos reduzidos
-                  </p>
+                  {produto.descricao_curta && (
+                    <p className="text-white/50 mt-2 leading-relaxed">
+                      {produto.descricao_curta}
+                    </p>
+                  )}
                 </div>
 
                 <div className="border-t border-white/10 pt-6">
@@ -225,19 +231,16 @@ export default function Checkout() {
                     </span>
                     <span className="text-white/40 text-lg">/ sessão</span>
                   </div>
-                  <p className="text-white/50 text-sm">
-                    Valor por participante. Você pode participar de sessões avulsas ou fazer parte do grupo contínuo.
-                  </p>
+                  {produto.descricao && (
+                    <p className="text-white/50 text-sm leading-relaxed">
+                      {produto.descricao}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <ul className="mt-8 space-y-3">
-                {[
-                  "Acesso à sessão em grupo ao vivo",
-                  "Material de apoio pós-sessão",
-                  "Grupo de WhatsApp para suporte entre encontros",
-                  "Condições especiais para pacotes mensais",
-                ].map((item) => (
+                {produto.beneficios.map((item) => (
                   <li key={item} className="flex items-start gap-3 text-white/70 text-sm">
                     <Check className="w-4 h-4 text-brand-mint flex-shrink-0 mt-0.5" />
                     {item}
@@ -344,7 +347,7 @@ export default function Checkout() {
 
                 {dadosInscricao && (
                   <p className="text-white/30 text-center text-[10px] mt-2">
-                    Inscrição de: {dadosInscricao.nome} ({dadosInscricao.email})
+                    Compra de: {dadosInscricao.nome} ({dadosInscricao.email})
                   </p>
                 )}
 

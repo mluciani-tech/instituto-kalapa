@@ -3,32 +3,59 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, ArrowRight, Sparkles } from "lucide-react";
+import { Check, ArrowRight, Sparkles, Package } from "lucide-react";
+
+interface Pedido {
+  id: string;
+  order_nsu: string;
+  valor: number;
+  status: string;
+  metodo_pagamento: string | null;
+  receipt_url: string | null;
+  capture_method: string | null;
+  cliente_nome: string;
+  cliente_email: string;
+  produtos: {
+    nome: string;
+    slug: string;
+  } | null;
+}
 
 function SucessoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [preco, setPreco] = useState(97);
+  const [pedido, setPedido] = useState<Pedido | null>(null);
 
   const receiptUrl = searchParams.get("receipt_url");
   const orderNsu = searchParams.get("order_nsu");
   const captureMethod = searchParams.get("capture_method");
+  const transactionNsu = searchParams.get("transaction_nsu");
 
   useEffect(() => {
-    fetch("/api/config")
+    if (!orderNsu) {
+      return;
+    }
+
+    // Buscar pedido pelo order_nsu
+    fetch(`/api/pedido?order_nsu=${orderNsu}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data.preco_sessao) setPreco(Number(data.preco_sessao));
+        if (data && !data.error) {
+          setPedido(data);
+        }
       })
       .catch(() => {});
-  }, []);
+  }, [orderNsu]);
 
   const metodoLabel =
-    captureMethod === "pix"
+    pedido?.metodo_pagamento === "pix"
       ? "Pix"
-      : captureMethod === "credit_card"
+      : captureMethod === "credit_card" || pedido?.capture_method === "credit_card"
       ? "Cartão de Crédito"
       : "Pagamento";
+
+  const valor = pedido?.valor || 0;
+  const nomeProduto = pedido?.produtos?.nome || "Serviço";
 
   return (
     <section className="relative min-h-screen py-20 bg-brand-charcoal overflow-hidden flex items-center justify-center">
@@ -54,26 +81,45 @@ function SucessoContent() {
           </h1>
 
           <p className="text-white/70 text-lg mb-2">
-            Seja bem-vindo(a) ao grupo do Instituto Kalapa.
+            Seja bem-vindo(a) ao Instituto Kalapa.
           </p>
 
+          {/* Produto */}
+          <div className="mt-4 flex items-center justify-center gap-2 text-brand-mint">
+            <Package className="w-5 h-5" />
+            <span className="font-semibold">{nomeProduto}</span>
+          </div>
+
+          {/* Detalhes do pagamento */}
           <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 text-left">
             <h2 className="text-sm font-semibold text-white/60 mb-3 uppercase tracking-wide">
               Detalhes do pagamento
             </h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
+                <span className="text-white/50">Produto</span>
+                <span className="text-white font-medium">{nomeProduto}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-white/50">Método</span>
                 <span className="text-white font-medium">{metodoLabel}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-white/50">Valor</span>
-                <span className="text-white font-medium">R$ {preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                <span className="text-white font-medium">
+                  R$ {valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </span>
               </div>
               {orderNsu && (
                 <div className="flex justify-between">
                   <span className="text-white/50">Pedido</span>
                   <span className="text-white/70 font-mono text-xs">{orderNsu}</span>
+                </div>
+              )}
+              {transactionNsu && (
+                <div className="flex justify-between">
+                  <span className="text-white/50">Transação</span>
+                  <span className="text-white/70 font-mono text-xs">{transactionNsu}</span>
                 </div>
               )}
             </div>
@@ -84,9 +130,9 @@ function SucessoContent() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-            {receiptUrl && (
+            {(receiptUrl || pedido?.receipt_url) && (
               <a
-                href={receiptUrl}
+                href={receiptUrl || pedido?.receipt_url || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-6 py-3 bg-white/10 hover:bg-white/15 text-white text-sm font-medium rounded-xl transition-all duration-200 border border-white/10 hover:border-white/20"

@@ -59,8 +59,6 @@ export async function POST(req: Request) {
         console.error("[send-email] Erro ao inserir no Supabase:", insertError);
       }
     }
-      }
-    }
 
     const html = `
       <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #FAF8F5; padding: 32px; border-radius: 16px;">

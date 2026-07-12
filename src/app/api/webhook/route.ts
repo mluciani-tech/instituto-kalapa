@@ -1,15 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 
-const getTurmaAtual = async (): Promise<string> => {
-  if (!isAdminConfigured()) return "2025-01";
-  const { data } = await supabaseAdmin!
-    .from("configuracoes")
-    .select("valor")
-    .eq("chave", "turma_atual")
-    .single();
-  return data?.valor || "2025-01";
-};
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,62 +18,78 @@ export async function POST(req: NextRequest) {
       receipt_url,
     } = body;
 
-    if (!order_nsu || !transaction_nsu) {
-      console.error("[webhook] Dados obrigatórios ausentes:", { order_nsu, transaction_nsu });
+    if (!order_nsu) {
+      console.error("[webhook] order_nsu ausente");
       return NextResponse.json(
-        { success: false, message: "Dados obrigatórios ausentes" },
+        { success: false, message: "order_nsu obrigatório" },
         { status: 400 }
       );
     }
 
-    if (isAdminConfigured()) {
-      const turmaAtual = await getTurmaAtual();
+    if (!isAdminConfigured()) {
+      return NextResponse.json({ success: true, message: null });
+    }
 
-      // Try to find inscription by order_nsu
-      let inscricaoId: string | null = null;
+    // 1. Buscar pedido pelo order_nsu
+    const { data: pedido, error: pedidoError } = await supabaseAdmin!
+      .from("pedidos")
+      .select("id, status")
+      .eq("order_nsu", order_nsu)
+      .single();
 
-      try {
-        const { data: inscricoes, error: findError } = await supabaseAdmin!
-          .from("inscricoes")
-          .select("id")
-          .eq("order_nsu", order_nsu)
-          .eq("turma_id", turmaAtual)
-          .limit(1);
+    if (pedidoError || !pedido) {
+      console.warn("[webhook] Pedido não encontrado:", order_nsu);
+      // Fallback: tentar atualizar inscrição direta (legado)
+      await fallbackInscricao(order_nsu, paid_amount, capture_method);
+      return NextResponse.json({ success: true, message: null });
+    }
 
-        if (!findError && inscricoes && inscricoes.length > 0) {
-          inscricaoId = inscricoes[0].id;
-        }
-      } catch {
-        // order_nsu column might not exist
-        console.warn("[webhook] Busca por order_nsu falhou (coluna pode não existir)");
-      }
+    // 2. Atualizar pedido
+    const valorReais = paid_amount ? paid_amount / 100 : amount ? amount / 100 : 0;
 
-      // Fallback: find last pending inscription for this turma
-      if (!inscricaoId) {
-        console.warn("[webhook] Usando fallback: última inscrição pendente da turma", turmaAtual);
-        const { data: ultimaInscricao } = await supabaseAdmin!
-          .from("inscricoes")
-          .select("id")
-          .eq("turma_id", turmaAtual)
-          .eq("status", "confirmada")
-          .order("created_at", { ascending: false })
-          .limit(1);
+    await supabaseAdmin!.from("pedidos").update({
+      status: "pago",
+      metodo_pagamento: capture_method === "pix" ? "pix" : "cartao",
+      transaction_nsu: transaction_nsu || null,
+      receipt_url: receipt_url || null,
+      capture_method: capture_method || null,
+      valor: valorReais,
+      updated_at: new Date().toISOString(),
+    }).eq("id", pedido.id);
 
-        if (ultimaInscricao && ultimaInscricao.length > 0) {
-          inscricaoId = ultimaInscricao[0].id;
-        }
-      }
+    console.log("[webhook] Pedido atualizado:", pedido.id);
 
-      if (inscricaoId) {
-        const valorReais = paid_amount / 100;
+    // 3. Atualizar inscrição vinculada
+    const { data: inscricao } = await supabaseAdmin!
+      .from("inscricoes")
+      .select("id")
+      .eq("pedido_id", pedido.id)
+      .limit(1)
+      .single();
+
+    if (inscricao) {
+      await supabaseAdmin!.from("inscricoes").update({
+        status: "pago",
+        metodo_pagamento: capture_method === "pix" ? "pix" : "cartao",
+        valor: valorReais,
+      }).eq("id", inscricao.id);
+      console.log("[webhook] Inscrição atualizada:", inscricao.id);
+    } else {
+      // Fallback: inscrição sem pedido_id, buscar por order_nsu
+      const { data: inscricaoLegado } = await supabaseAdmin!
+        .from("inscricoes")
+        .select("id")
+        .eq("order_nsu", order_nsu)
+        .limit(1)
+        .single();
+
+      if (inscricaoLegado) {
         await supabaseAdmin!.from("inscricoes").update({
           status: "pago",
           metodo_pagamento: capture_method === "pix" ? "pix" : "cartao",
           valor: valorReais,
-        }).eq("id", inscricaoId);
-        console.log("[webhook] Inscrição atualizada para pago:", inscricaoId);
-      } else {
-        console.warn("[webhook] Nenhuma inscrição encontrada para atualizar. order_nsu:", order_nsu);
+        }).eq("id", inscricaoLegado.id);
+        console.log("[webhook] Inscrição legada atualizada:", inscricaoLegado.id);
       }
     }
 
@@ -92,5 +100,35 @@ export async function POST(req: NextRequest) {
       { success: false, message: "Erro ao processar webhook" },
       { status: 400 }
     );
+  }
+}
+
+// Fallback para inscrições legadas (sem tabela pedidos)
+async function fallbackInscricao(
+  order_nsu: string,
+  paid_amount: number,
+  capture_method: string
+) {
+  try {
+    const { data: inscricao } = await supabaseAdmin!
+      .from("inscricoes")
+      .select("id")
+      .eq("order_nsu", order_nsu)
+      .limit(1)
+      .single();
+
+    if (inscricao) {
+      const valorReais = paid_amount / 100;
+      await supabaseAdmin!.from("inscricoes").update({
+        status: "pago",
+        metodo_pagamento: capture_method === "pix" ? "pix" : "cartao",
+        valor: valorReais,
+      }).eq("id", inscricao.id);
+      console.log("[webhook] Fallback: inscrição atualizada:", inscricao.id);
+    } else {
+      console.warn("[webhook] Fallback: nenhuma inscrição encontrada para:", order_nsu);
+    }
+  } catch (err) {
+    console.error("[webhook] Erro no fallback:", err);
   }
 }
