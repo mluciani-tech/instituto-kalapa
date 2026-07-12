@@ -73,8 +73,8 @@ export default function Hero() {
             variants={itemVariants}
             className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight text-white"
           >
-            Você não precisa{" "}
-            <span className="text-gradient">atravessar sozinho</span> o que sente
+            A dor pode marcar a sua história, mas ela{" "}
+            <span className="text-gradient">não precisa definir</span> a sua vida
           </motion.h1>
 
           {/* Subheadline */}
@@ -82,11 +82,15 @@ export default function Hero() {
             variants={itemVariants}
             className="text-lg md:text-xl text-white/70 max-w-2xl leading-relaxed font-light"
           >
-            No Instituto Kalapa, cada encontro quinzenal é um espaço seguro
-            onde vozes se encontram, histórias se entrelaçam e a cura
-            acontece de forma coletiva.{" "}
+            O Instituto Kalapa é um espaço de acolhimento, ciência e humanidade,
+            onde cada passo em direção à consciência abre caminho para uma{" "}
             <strong className="text-white/90 font-medium font-sans">
-              Sua próxima sessão está a um passo.
+              transformação real.
+            </strong>
+            <br />
+            Toda transformação começa na menor unidade:{" "}
+            <strong className="text-white/90 font-medium font-sans">
+              uma nova escolha.
             </strong>
           </motion.p>
 
