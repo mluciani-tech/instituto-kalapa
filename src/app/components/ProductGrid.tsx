@@ -5,24 +5,38 @@ import { motion } from "framer-motion";
 import { Package } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
 
+interface VagasInfo {
+  preenchidas: number;
+  maximas: number;
+  restantes: number;
+}
+
 export default function ProductGrid() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [vagas, setVagas] = useState<VagasInfo | null>(null);
 
   useEffect(() => {
-    const fetchProdutos = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/produtos");
-        if (res.ok) {
-          const data = await res.json();
-          setProdutos(data);
+        const [prodRes, vagasRes] = await Promise.all([
+          fetch("/api/produtos"),
+          fetch("/api/vagas"),
+        ]);
+
+        if (prodRes.ok) {
+          setProdutos(await prodRes.json());
+        }
+
+        if (vagasRes.ok) {
+          setVagas(await vagasRes.json());
         }
       } catch (err) {
-        console.error("Erro ao buscar produtos:", err);
+        console.error("Erro ao buscar dados:", err);
       }
       setLoading(false);
     };
-    fetchProdutos();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -50,7 +64,12 @@ export default function ProductGrid() {
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
     >
       {produtos.map((produto, index) => (
-        <ProductCard key={produto.id} produto={produto} index={index} />
+        <ProductCard
+          key={produto.id}
+          produto={produto}
+          index={index}
+          vagas={vagas}
+        />
       ))}
     </motion.div>
   );

@@ -18,12 +18,19 @@ export interface Produto {
   ordem: number;
 }
 
+interface VagasInfo {
+  preenchidas: number;
+  maximas: number;
+  restantes: number;
+}
+
 interface ProductCardProps {
   produto: Produto;
   index?: number;
+  vagas?: VagasInfo | null;
 }
 
-export default function ProductCard({ produto, index = 0 }: ProductCardProps) {
+export default function ProductCard({ produto, index = 0, vagas }: ProductCardProps) {
   const router = useRouter();
 
   const handleEscolher = () => {
@@ -35,6 +42,9 @@ export default function ProductCard({ produto, index = 0 }: ProductCardProps) {
     style: "currency",
     currency: "BRL",
   });
+
+  const vagasEsgotadas = vagas && vagas.restantes <= 0;
+  const vagasQuaseEsgotadas = vagas && vagas.restantes > 0 && vagas.restantes <= 3;
 
   return (
     <motion.div
@@ -85,7 +95,7 @@ export default function ProductCard({ produto, index = 0 }: ProductCardProps) {
 
         {/* Benefícios */}
         {produto.beneficios && produto.beneficios.length > 0 && (
-          <ul className="space-y-2 mb-6">
+          <ul className="space-y-2 mb-4">
             {produto.beneficios.slice(0, 3).map((b) => (
               <li key={b} className="flex items-start gap-2 text-sm text-gray-600">
                 <Check className="w-4 h-4 text-brand-mint flex-shrink-0 mt-0.5" />
@@ -93,6 +103,36 @@ export default function ProductCard({ produto, index = 0 }: ProductCardProps) {
               </li>
             ))}
           </ul>
+        )}
+
+        {/* Contador de vagas */}
+        {vagas && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between text-sm mb-1.5">
+              <span className="text-gray-500">
+                Vagas da próxima turma
+              </span>
+              <span className={`font-bold ${vagasEsgotadas ? 'text-red-500' : vagasQuaseEsgotadas ? 'text-brand-terracotta' : 'text-brand-charcoal'}`}>
+                {vagas.restantes}/{vagas.maximas}
+              </span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  vagasEsgotadas ? 'bg-red-400' : vagasQuaseEsgotadas ? 'bg-brand-terracotta' : 'bg-brand-mint'
+                }`}
+                style={{ width: `${(vagas.preenchidas / vagas.maximas) * 100}%` }}
+              />
+            </div>
+            <p className={`text-xs mt-1 ${vagasEsgotadas ? 'text-red-500 font-semibold' : vagasQuaseEsgotadas ? 'text-brand-terracotta font-semibold' : 'text-gray-400'}`}>
+              {vagasEsgotadas
+                ? 'Turma lotada'
+                : vagasQuaseEsgotadas
+                  ? `Última${vagas.restantes === 1 ? '' : 's'} ${vagas.restantes} vaga${vagas.restantes === 1 ? '' : 's'}!`
+                  : `Grupos reduzidos — máximo ${vagas.maximas} participantes`
+              }
+            </p>
+          </div>
         )}
 
         {/* Preço + CTA */}
@@ -106,10 +146,19 @@ export default function ProductCard({ produto, index = 0 }: ProductCardProps) {
 
           <button
             onClick={handleEscolher}
-            className="w-full py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer"
+            disabled={!!vagasEsgotadas}
+            className={`w-full py-3 font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+              vagasEsgotadas
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-lg shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
+            }`}
           >
-            Escolher
-            <ArrowRight className="w-4 h-4" />
+            {vagasEsgotadas ? 'Turma lotada' : (
+              <>
+                Escolher
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       </div>
