@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifySessionToken } from "@/lib/auth";
 
 const INFINITEPAY_API = "https://api.checkout.infinitepay.io/links";
-const INFINITEPAY_HANDLE = process.env.INFINITEPAY_HANDLE || "marcio-luciani";
+const INFINITEPAY_HANDLE = process.env.INFINITEPAY_HANDLE || "kalapa";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://instituto-kalapa.vercel.app";
 
 interface CheckoutItem {

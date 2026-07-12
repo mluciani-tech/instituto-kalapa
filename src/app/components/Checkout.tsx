@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { QrCode, CreditCard, ShieldCheck, Check, Sparkles, ExternalLink } from "lucide-react";
+import { getProdutoById } from "@/lib/produtos";
 
 interface DadosInscricao {
   nome: string;
@@ -35,6 +36,9 @@ export default function Checkout() {
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState("");
   const [preco, setPreco] = useState(97);
+  const [checkoutUrl, setCheckoutUrl] = useState(
+    "https://checkout.infinitepay.io/kalapa/hseV7BoYZT"
+  );
   const router = useRouter();
 
   useEffect(() => {
@@ -57,8 +61,19 @@ export default function Checkout() {
         if (configData.preco_sessao) {
           setPreco(Number(configData.preco_sessao));
         }
+
+        // Carregar checkoutUrl do produto selecionado
+        // Por enquanto usa o produto padrão; futuramente virará do sessionStorage
+        const produtoId =
+          (typeof window !== "undefined"
+            ? sessionStorage.getItem("produto_selecionado")
+            : null) || "grupo-autoconhecimento";
+        const produtoData = getProdutoById(produtoId);
+        if (produtoData?.checkoutUrl) {
+          setCheckoutUrl(produtoData.checkoutUrl);
+        }
       } catch {
-        // Use default price
+        // Use defaults
       }
       setLoading(false);
     };
@@ -116,7 +131,7 @@ export default function Checkout() {
             {
               quantity: 1,
               price: preco * 100, // Converter para centavos
-              description: "Sessão Terapêutica em Grupo — Instituto Kalapa",
+              description: "Grupo de Autoconhecimento — Instituto Kalapa",
             },
           ],
           order_nsu: orderNsu,
@@ -138,7 +153,8 @@ export default function Checkout() {
 
       // 3. Limpar sessionStorage e redirecionar para InfinitePay
       sessionStorage.removeItem("dados_inscricao");
-      window.location.href = "https://checkout.infinitepay.io/mlbank/6JLGcYG8sf";
+      sessionStorage.removeItem("produto_selecionado");
+      window.location.href = checkoutUrl;
     } catch (error) {
       console.error("Erro no checkout:", error);
       setErro("Erro de conexão. Tente novamente.");
@@ -195,7 +211,7 @@ export default function Checkout() {
                     {dadosInscricao ? `Inscrição ativa para ${dadosInscricao.nome}` : "Ingresso Selecionado"}
                   </span>
                   <h3 className="text-2xl md:text-3xl font-bold text-white mt-2 font-sans">
-                    Sessão Terapêutica em Grupo
+                    Grupo de Autoconhecimento
                   </h3>
                   <p className="text-white/50 mt-2 leading-relaxed">
                     1 encontro a cada 15 dias · Duração de 2h · Grupos reduzidos
