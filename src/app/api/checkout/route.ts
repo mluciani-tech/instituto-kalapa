@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifySessionToken } from "@/lib/auth";
 
-const INFINITEPAY_API = "https://api.checkout.infinitepay.io/links";
+const INFINITEPAY_API = "https://api.infinitepay.io/invoices/public/checkout/links";
 const INFINITEPAY_HANDLE = process.env.INFINITEPAY_HANDLE || "kalapa";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://instituto-kalapa.vercel.app";
 
@@ -12,6 +11,7 @@ interface CheckoutItem {
 }
 
 interface CheckoutPayload {
+  handle: string;
   items: CheckoutItem[];
   order_nsu?: string;
   redirect_url?: string;
@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     const payload: CheckoutPayload = {
+      handle: INFINITEPAY_HANDLE,
       items,
       order_nsu: order_nsu || `kalapa-${Date.now()}`,
       redirect_url: `${SITE_URL}/checkout/sucesso`,
@@ -51,10 +52,7 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        handle: INFINITEPAY_HANDLE,
-        ...payload,
-      }),
+      body: JSON.stringify(payload),
     });
 
     const data = await response.json();
@@ -67,8 +65,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const checkoutUrl = data.link || data.url || data.checkout_url;
+
     return NextResponse.json({
-      url: data.url,
+      url: checkoutUrl,
       order_nsu: payload.order_nsu,
     });
   } catch (error) {
