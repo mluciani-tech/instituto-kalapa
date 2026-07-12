@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload: Record<string, any> = {
       handle: INFINITEPAY_HANDLE,
-      itens: items,
+      items: items,
       order_nsu: order_nsu || `kalapa-${Date.now()}`,
       redirect_url: `${SITE_URL}/checkout/sucesso`,
       webhook_url: `${SITE_URL}/api/webhook`,
