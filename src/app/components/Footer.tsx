@@ -7,7 +7,7 @@ export default function Footer() {
         {/* Logo / Nome */}
         <div>
           <span className="text-white font-bold text-xl tracking-tight">
-            Instituto Kalapa
+            INstituto Kalapa
           </span>
           <p className="text-white/30 text-sm mt-1">
             Transformação Comportamental
@@ -29,7 +29,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="text-white/20 text-xs text-center md:text-right">
-          <p>© {new Date().getFullYear()} Instituto Kalapa.</p>
+          <p>© {new Date().getFullYear()} INstituto Kalapa.</p>
           <p>Todos os direitos reservados.</p>
         </div>
       </div>

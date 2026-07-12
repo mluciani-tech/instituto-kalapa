@@ -74,7 +74,7 @@ export default function GroupExperience() {
             <span className="text-gradient">encontro entre almas</span>
           </h2>
           <p className="mt-6 text-lg text-brand-charcoal/60 max-w-2xl mx-auto leading-relaxed">
-            As sessões em grupo do Instituto Kalapa são conduzidas por
+            As sessões em grupo do INstituto Kalapa são conduzidas por
             profissionais experientes, em um ambiente cuidadosamente preparado
             para promover segurança, escuta ativa e evolução conjunta.
           </p>
@@ -128,7 +128,7 @@ export default function GroupExperience() {
             em força.&rdquo;
           </p>
           <p className="text-white/60 font-medium relative z-10">
-            — Equipe Instituto Kalapa
+            — Equipe INstituto Kalapa
           </p>
         </motion.div>
       </div>

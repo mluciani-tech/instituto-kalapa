@@ -40,7 +40,7 @@ export default function Hero() {
         className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-luminosity"
         style={{
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')",
+            "url('/fotoSiteHome.jpeg')",
         }}
         role="img"
         aria-label="Pessoa em momento de introspecção, iluminada naturalmente em ambiente com tons terrosos e verde menta"
@@ -57,17 +57,6 @@ export default function Hero() {
           animate="visible"
           className="flex flex-col gap-8 md:gap-10"
         >
-          {/* Badge */}
-          <motion.div
-            variants={itemVariants}
-            className="inline-flex items-center gap-2 self-start px-4 py-2 rounded-full border border-white/20 glass-card"
-          >
-            <div className="w-2.5 h-2.5 rounded-full bg-brand-mint animate-pulse" />
-            <span className="text-sm font-medium text-white/90 tracking-wide">
-              Grupos quinzenais — Presencial
-            </span>
-          </motion.div>
-
           {/* Headline */}
           <motion.h1
             variants={itemVariants}
@@ -82,7 +71,7 @@ export default function Hero() {
             variants={itemVariants}
             className="text-lg md:text-xl text-white/70 max-w-2xl leading-relaxed font-light"
           >
-            O Instituto Kalapa é um espaço de acolhimento, ciência e humanidade,
+            O INstituto Kalapa é um espaço de acolhimento, ciência e humanidade,
             onde cada passo em direção à consciência abre caminho para uma{" "}
             <strong className="text-white/90 font-medium font-sans">
               transformação real.
@@ -100,14 +89,20 @@ export default function Hero() {
               href="/produtos"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 hover:-translate-y-0.5"
             >
-              Ver nossos serviços
+              Encontros de Grupos
               <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
             <a
               href="#experiencia"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-all duration-300 glass-card hover:bg-white/12"
             >
-              Conheça a experiência
+              Terapias Individuais
+            </a>
+            <a
+              href="#sobre"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-all duration-300 glass-card hover:bg-white/12"
+            >
+              Sobre o INstituto Kalapa
             </a>
           </motion.div>
 

@@ -390,7 +390,7 @@ export default function RegistrationForm() {
                 </button>
 
                 <p className="text-center text-brand-charcoal/30 text-xs">
-                  Seus dados estão seguros e serão usados exclusivamente para contato sobre as sessões do Instituto Kalapa.
+                  Seus dados estão seguros e serão usados exclusivamente para contato sobre as sessões do INstituto Kalapa.
                 </p>
               </motion.form>
             )}

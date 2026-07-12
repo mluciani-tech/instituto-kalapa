@@ -276,7 +276,7 @@ export default function AdminPage() {
       <div className="min-h-screen bg-brand-beige-light flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-brand-purple">Instituto Kalapa</h1>
+            <h1 className="text-2xl font-bold text-brand-purple">INstituto Kalapa</h1>
             <p className="text-brand-charcoal/60 mt-1 text-sm">Área restrita</p>
           </div>
           <form onSubmit={handleLogin} className="bg-white rounded-xl p-6 shadow-sm border border-brand-beige">
@@ -319,7 +319,7 @@ export default function AdminPage() {
       <header className="bg-white border-b border-brand-beige sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-base font-bold text-brand-purple">Instituto Kalapa</h1>
+            <h1 className="text-base font-bold text-brand-purple">INstituto Kalapa</h1>
             <span className="text-xs text-brand-charcoal/40">Admin</span>
           </div>
           <div className="flex items-center gap-4">

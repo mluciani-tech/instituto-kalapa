@@ -81,7 +81,7 @@ function SucessoContent() {
           </h1>
 
           <p className="text-white/70 text-lg mb-2">
-            Seja bem-vindo(a) ao Instituto Kalapa.
+            Seja bem-vindo(a) ao INstituto Kalapa.
           </p>
 
           {/* Produto */}

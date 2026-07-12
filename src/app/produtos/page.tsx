@@ -3,7 +3,7 @@ import ProductGrid from "../components/ProductGrid";
 import Footer from "../components/Footer";
 
 export const metadata: Metadata = {
-  title: "Produtos — Instituto Kalapa",
+  title: "Produtos — INstituto Kalapa",
   description:
     "Conheça nossos serviços e encontre a experiência ideal para o seu momento de autoconhecimento.",
 };

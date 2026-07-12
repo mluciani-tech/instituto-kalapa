@@ -63,7 +63,7 @@ export async function POST(req: Request) {
     const html = `
       <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #FAF8F5; padding: 32px; border-radius: 16px;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="color: #673de6; font-size: 24px; margin: 0;">Instituto Kalapa</h1>
+          <h1 style="color: #673de6; font-size: 24px; margin: 0;">INstituto Kalapa</h1>
           <p style="color: #727586; font-size: 14px; margin-top: 4px;">Nova inscrição + Pagamento confirmado</p>
         </div>
 
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
         </div>
 
         <p style="text-align: center; color: #727586; font-size: 12px; margin-top: 32px;">
-          Instituto Kalapa — Transformação Comportamental
+          INstituto Kalapa — Transformação Comportamental
         </p>
       </div>
     `;
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
     const resend = new Resend(apiKey);
 
     const { data, error } = await resend.emails.send({
-      from: `Instituto Kalapa <${EMAIL_FROM}>`,
+      from: `INstituto Kalapa <${EMAIL_FROM}>`,
       to: [EMAIL_TO],
       subject: `Nova Inscrição + Pagamento — ${nome}`,
       html,

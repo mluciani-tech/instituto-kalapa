@@ -1,5 +1,5 @@
 /**
- * Catálogo de produtos/serviços do Instituto Kalapa.
+ * Catálogo de produtos/serviços do INstituto Kalapa.
  *
  * Para adicionar um novo produto:
  * 1. Crie o link de pagamento no painel InfinitePay (conta: kalapa)
