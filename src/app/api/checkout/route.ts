@@ -4,25 +4,6 @@ const INFINITEPAY_API = "https://api.infinitepay.io/invoices/public/checkout/lin
 const INFINITEPAY_HANDLE = process.env.INFINITEPAY_HANDLE || "kalapa";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://instituto-kalapa.vercel.app";
 
-interface CheckoutItem {
-  quantity: number;
-  price: number;
-  description: string;
-}
-
-interface CheckoutPayload {
-  handle: string;
-  items: CheckoutItem[];
-  order_nsu?: string;
-  redirect_url?: string;
-  webhook_url?: string;
-  customer?: {
-    name?: string;
-    email?: string;
-    phone_number?: string;
-  };
-}
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -35,9 +16,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const payload: CheckoutPayload = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload: Record<string, any> = {
       handle: INFINITEPAY_HANDLE,
-      items,
+      itens: items,
       order_nsu: order_nsu || `kalapa-${Date.now()}`,
       redirect_url: `${SITE_URL}/checkout/sucesso`,
       webhook_url: `${SITE_URL}/api/webhook`,
