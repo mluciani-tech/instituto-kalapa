@@ -53,7 +53,7 @@ export default function VisualGallery() {
   return (
     <section className="relative py-24 md:py-32 bg-brand-offwhite overflow-hidden">
       {/* Textura de fundo */}
-      <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_70%_30%,#CC6223_1px,transparent_1px)] bg-[length:50px_50px]" />
+      <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_70%_30%,#B8965A_1px,transparent_1px)] bg-[length:50px_50px]" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8">
         {/* Cabeçalho */}

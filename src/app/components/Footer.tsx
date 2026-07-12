@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="relative py-16 bg-brand-charcoal overflow-hidden">
-      <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_50%_0%,#673de6_1px,transparent_1px)] bg-[length:30px_30px]" />
+      <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_50%_0%,#1A3C4D_1px,transparent_1px)] bg-[length:30px_30px]" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
         {/* Logo / Nome */}

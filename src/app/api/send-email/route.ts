@@ -61,15 +61,15 @@ export async function POST(req: Request) {
     }
 
     const html = `
-      <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #FAF8F5; padding: 32px; border-radius: 16px;">
+      <div style="font-family: Inter, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #F8F4ED; padding: 32px; border-radius: 16px;">
         <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="color: #673de6; font-size: 24px; margin: 0;">INstituto Kalapa</h1>
-          <p style="color: #727586; font-size: 14px; margin-top: 4px;">Nova inscrição + Pagamento confirmado</p>
+          <h1 style="color: #1A3C4D; font-size: 24px; margin: 0;">INstituto Kalapa</h1>
+          <p style="color: #7D8C6E; font-size: 14px; margin-top: 4px;">Nova inscrição + Pagamento confirmado</p>
         </div>
 
         <div style="background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;">
-          <h2 style="color: #282D30; font-size: 18px; margin-top: 0;">Dados do participante</h2>
-          <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #36344d;">
+          <h2 style="color: #4A4A4A; font-size: 18px; margin-top: 0;">Dados do participante</h2>
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #4A4A4A;">
             <tr><td style="padding: 8px 0; font-weight: 600; width: 140px;">Nome:</td><td style="padding: 8px 0;">${nome}</td></tr>
             <tr><td style="padding: 8px 0; font-weight: 600;">E-mail:</td><td style="padding: 8px 0;">${email}</td></tr>
             <tr><td style="padding: 8px 0; font-weight: 600;">WhatsApp:</td><td style="padding: 8px 0;">${telefone}</td></tr>
@@ -78,15 +78,15 @@ export async function POST(req: Request) {
         </div>
 
         <div style="background: #fff; border-radius: 12px; padding: 24px;">
-          <h2 style="color: #282D30; font-size: 18px; margin-top: 0;">Detalhes do pagamento</h2>
-          <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #36344d;">
+          <h2 style="color: #4A4A4A; font-size: 18px; margin-top: 0;">Detalhes do pagamento</h2>
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #4A4A4A;">
             <tr><td style="padding: 8px 0; font-weight: 600; width: 140px;">Método:</td><td style="padding: 8px 0;">${metodoPagamento?.toUpperCase()}</td></tr>
             <tr><td style="padding: 8px 0; font-weight: 600;">Valor:</td><td style="padding: 8px 0;">${formatCurrency(Number(valor))}</td></tr>
-            <tr><td style="padding: 8px 0; font-weight: 600;">Status:</td><td style="padding: 8px 0; color: #00b090; font-weight: 600;">✓ Processado via InfinitePay</td></tr>
+            <tr><td style="padding: 8px 0; font-weight: 600;">Status:</td><td style="padding: 8px 0; color: #7D8C6E; font-weight: 600;">✓ Processado via InfinitePay</td></tr>
           </table>
         </div>
 
-        <p style="text-align: center; color: #727586; font-size: 12px; margin-top: 32px;">
+        <p style="text-align: center; color: #7D8C6E; font-size: 12px; margin-top: 32px;">
           INstituto Kalapa — Transformação Comportamental
         </p>
       </div>

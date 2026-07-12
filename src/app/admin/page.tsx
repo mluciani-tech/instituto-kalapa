@@ -91,6 +91,8 @@ export default function AdminPage() {
     ativo: true,
     ordem: "0",
   });
+  const [produtoImagemFile, setProdutoImagemFile] = useState<File | null>(null);
+  const [uploadingImagem, setUploadingImagem] = useState(false);
   const [salvandoProduto, setSalvandoProduto] = useState(false);
   const [produtoSucesso, setProdutoSucesso] = useState("");
 
@@ -193,14 +195,42 @@ export default function AdminPage() {
       preco: "", imagem_url: "", beneficios: "", destaque: false,
       ativo: true, ordem: "0",
     });
+    setProdutoImagemFile(null);
     setProdutoEditando(null);
   };
 
   const handleSalvarProduto = async () => {
     setSalvandoProduto(true);
     setProdutoSucesso("");
+    
+    let imagemUrl = produtoForm.imagem_url;
+    
+    // Upload image if file selected
+    if (produtoImagemFile) {
+      setUploadingImagem(true);
+      const formData = new FormData();
+      formData.append("file", produtoImagemFile);
+      
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (uploadRes.ok) {
+        const uploadData = await uploadRes.json();
+        imagemUrl = uploadData.url;
+      } else {
+        setError("Erro ao fazer upload da imagem");
+        setSalvandoProduto(false);
+        setUploadingImagem(false);
+        return;
+      }
+      setUploadingImagem(false);
+    }
+    
     const payload = {
       ...produtoForm,
+      imagem_url: imagemUrl,
       preco: parseFloat(produtoForm.preco.replace(",", ".")) || 0,
       ordem: parseInt(produtoForm.ordem) || 0,
       beneficios: produtoForm.beneficios.split("\n").filter((b) => b.trim()),
@@ -244,6 +274,7 @@ export default function AdminPage() {
       ativo: p.ativo,
       ordem: p.ordem.toString(),
     });
+    setProdutoImagemFile(null);
     setShowProdutoForm(true);
   };
 
@@ -495,13 +526,39 @@ export default function AdminPage() {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">URL da Imagem</label>
-                    <input
-                      value={produtoForm.imagem_url}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, imagem_url: e.target.value })}
-                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                      placeholder="https://..."
-                    />
+                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Imagem do Produto</label>
+                    <div className="flex items-center gap-4">
+                      <label className="flex-1 flex items-center justify-center px-4 py-3 border-2 border-dashed border-brand-beige rounded-lg cursor-pointer hover:border-brand-purple/50 transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setProdutoImagemFile(file);
+                              // Preview
+                              const reader = new FileReader();
+                              reader.onload = (ev) => {
+                                setProdutoForm({ ...produtoForm, imagem_url: ev.target?.result as string });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <span className="text-sm text-brand-charcoal/50">
+                          {produtoImagemFile ? produtoImagemFile.name : "Clique para selecionar imagem"}
+                        </span>
+                      </label>
+                      {produtoForm.imagem_url && (
+                        <img
+                          src={produtoForm.imagem_url}
+                          alt="Preview"
+                          className="w-16 h-16 object-cover rounded-lg border border-brand-beige"
+                        />
+                      )}
+                    </div>
+                    <p className="text-xs text-brand-charcoal/40 mt-1">JPEG, PNG, WebP ou GIF. Máximo 5MB.</p>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">
@@ -542,7 +599,7 @@ export default function AdminPage() {
                     disabled={salvandoProduto || !produtoForm.nome || !produtoForm.slug || !produtoForm.preco}
                     className="px-4 py-2 bg-brand-purple text-white text-sm font-medium rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors"
                   >
-                    {salvandoProduto ? "Salvando..." : "Salvar"}
+                    {uploadingImagem ? "Enviando imagem..." : salvandoProduto ? "Salvando..." : "Salvar"}
                   </button>
                   <button
                     onClick={() => { setShowProdutoForm(false); resetProdutoForm(); }}

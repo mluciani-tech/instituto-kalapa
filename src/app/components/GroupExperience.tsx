@@ -55,7 +55,7 @@ export default function GroupExperience() {
   return (
     <section id="experiencia" className="relative py-24 md:py-32 bg-brand-offwhite overflow-hidden">
       {/* Textura de fundo sutil */}
-      <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_50%_50%,#673de6_1px,transparent_1px)] bg-[length:40px_40px]" />
+      <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_50%_50%,#1A3C4D_1px,transparent_1px)] bg-[length:40px_40px]" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8">
         {/* Cabeçalho */}

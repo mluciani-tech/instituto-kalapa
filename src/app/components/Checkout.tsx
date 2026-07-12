@@ -177,7 +177,7 @@ export default function Checkout() {
   return (
     <section className="relative min-h-screen py-20 bg-brand-charcoal overflow-hidden flex items-center justify-center">
       <div className="absolute inset-0 bg-gradient-to-br from-brand-charcoal via-brand-purple-deep/30 to-brand-charcoal" />
-      <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_30%_50%,#CC6223_1px,transparent_1px)] bg-[length:30px_30px]" />
+      <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_30%_50%,#B8965A_1px,transparent_1px)] bg-[length:30px_30px]" />
 
       <div className="relative z-10 w-full max-w-4xl mx-auto px-6 md:px-8">
         <motion.div

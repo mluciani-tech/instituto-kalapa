@@ -34,11 +34,11 @@ function getUrgency(filled: number, max: number) {
 }
 
 function getSegmentColor(filled: number, index: number, max: number) {
-  if (index >= filled) return "rgba(40,45,48,0.12)";
+  if (index >= filled) return "rgba(74,74,74,0.12)";
   const pct = (filled / max) * 100;
-  if (pct >= 90) return "#673de6";
-  if (pct >= 60) return "#CC6223";
-  return "#7EC8A0";
+  if (pct >= 90) return "#1A3C4D";
+  if (pct >= 60) return "#B8965A";
+  return "#7D8C6E";
 }
 
 export default function RegistrationForm() {
