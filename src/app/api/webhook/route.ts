@@ -37,24 +37,28 @@ export async function POST(req: NextRequest) {
     if (isAdminConfigured()) {
       const turmaAtual = await getTurmaAtual();
 
-      // Buscar inscrição pelo order_nsu para atualizar apenas esta
-      const { data: inscricoes } = await supabaseAdmin!
-        .from("inscricoes")
-        .select("id")
-        .eq("order_nsu", order_nsu)
-        .eq("turma_id", turmaAtual)
-        .limit(1);
+      // Try to find inscription by order_nsu
+      let inscricaoId: string | null = null;
 
-      if (inscricoes && inscricoes.length > 0) {
-        const valorReais = paid_amount / 100;
-        await supabaseAdmin!.from("inscricoes").update({
-          status: "pago",
-          metodo_pagamento: capture_method === "pix" ? "pix" : "cartao",
-          valor: valorReais,
-        }).eq("id", inscricoes[0].id);
-      } else {
-        // Fallback: se não encontrou pelo order_nsu, busca a última inscrição pendente da turma
-        console.warn("[webhook] Inscrição não encontrada pelo order_nsu:", order_nsu);
+      try {
+        const { data: inscricoes, error: findError } = await supabaseAdmin!
+          .from("inscricoes")
+          .select("id")
+          .eq("order_nsu", order_nsu)
+          .eq("turma_id", turmaAtual)
+          .limit(1);
+
+        if (!findError && inscricoes && inscricoes.length > 0) {
+          inscricaoId = inscricoes[0].id;
+        }
+      } catch {
+        // order_nsu column might not exist
+        console.warn("[webhook] Busca por order_nsu falhou (coluna pode não existir)");
+      }
+
+      // Fallback: find last pending inscription for this turma
+      if (!inscricaoId) {
+        console.warn("[webhook] Usando fallback: última inscrição pendente da turma", turmaAtual);
         const { data: ultimaInscricao } = await supabaseAdmin!
           .from("inscricoes")
           .select("id")
@@ -64,13 +68,20 @@ export async function POST(req: NextRequest) {
           .limit(1);
 
         if (ultimaInscricao && ultimaInscricao.length > 0) {
-          const valorReais = paid_amount / 100;
-          await supabaseAdmin!.from("inscricoes").update({
-            status: "pago",
-            metodo_pagamento: capture_method === "pix" ? "pix" : "cartao",
-            valor: valorReais,
-          }).eq("id", ultimaInscricao[0].id);
+          inscricaoId = ultimaInscricao[0].id;
         }
+      }
+
+      if (inscricaoId) {
+        const valorReais = paid_amount / 100;
+        await supabaseAdmin!.from("inscricoes").update({
+          status: "pago",
+          metodo_pagamento: capture_method === "pix" ? "pix" : "cartao",
+          valor: valorReais,
+        }).eq("id", inscricaoId);
+        console.log("[webhook] Inscrição atualizada para pago:", inscricaoId);
+      } else {
+        console.warn("[webhook] Nenhuma inscrição encontrada para atualizar. order_nsu:", order_nsu);
       }
     }
 

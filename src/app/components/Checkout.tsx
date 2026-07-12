@@ -36,7 +36,7 @@ export default function Checkout() {
   const [sucesso, setSucesso] = useState(false);
   const [erro, setErro] = useState("");
   const [preco, setPreco] = useState(97);
-  const [checkoutUrl, setCheckoutUrl] = useState(
+  const [checkoutUrlFallback, setCheckoutUrlFallback] = useState(
     "https://checkout.infinitepay.io/kalapa/hseV7BoYZT"
   );
   const router = useRouter();
@@ -70,7 +70,7 @@ export default function Checkout() {
             : null) || "grupo-autoconhecimento";
         const produtoData = getProdutoById(produtoId);
         if (produtoData?.checkoutUrl) {
-          setCheckoutUrl(produtoData.checkoutUrl);
+          setCheckoutUrlFallback(produtoData.checkoutUrl);
         }
       } catch {
         // Use defaults
@@ -154,7 +154,7 @@ export default function Checkout() {
       // 3. Limpar sessionStorage e redirecionar para InfinitePay
       sessionStorage.removeItem("dados_inscricao");
       sessionStorage.removeItem("produto_selecionado");
-      window.location.href = checkoutUrl;
+      window.location.href = checkoutData.url || checkoutUrlFallback;
     } catch (error) {
       console.error("Erro no checkout:", error);
       setErro("Erro de conexão. Tente novamente.");

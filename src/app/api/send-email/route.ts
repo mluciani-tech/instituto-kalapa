@@ -29,9 +29,8 @@ export async function POST(req: Request) {
     const turmaAtual = await getTurmaAtual();
 
     if (isAdminConfigured()) {
-      const { error: insertError } = await supabaseAdmin!.from("inscricoes").insert({
+      const inscriptionData: Record<string, unknown> = {
         turma_id: turmaAtual,
-        order_nsu: order_nsu || null,
         nome,
         email,
         telefone,
@@ -39,10 +38,27 @@ export async function POST(req: Request) {
         metodo_pagamento: metodoPagamento,
         valor,
         status: "confirmada",
-      });
+      };
 
-      if (insertError) {
+      // Try with order_nsu first
+      if (order_nsu) {
+        inscriptionData.order_nsu = order_nsu;
+      }
+
+      let { error: insertError } = await supabaseAdmin!.from("inscricoes").insert(inscriptionData);
+
+      // If failed (likely missing order_nsu column), retry without it
+      if (insertError && order_nsu && insertError.message?.includes("order_nsu")) {
+        console.warn("[send-email] Coluna order_nsu não existe yet, inserindo sem ela");
+        delete inscriptionData.order_nsu;
+        const retry = await supabaseAdmin!.from("inscricoes").insert(inscriptionData);
+        if (retry.error) {
+          console.error("[send-email] Erro ao inserir no Supabase:", retry.error);
+        }
+      } else if (insertError) {
         console.error("[send-email] Erro ao inserir no Supabase:", insertError);
+      }
+    }
       }
     }
 
