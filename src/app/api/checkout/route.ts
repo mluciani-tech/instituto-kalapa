@@ -91,7 +91,10 @@ export async function POST(req: NextRequest) {
     };
 
     if (customer) {
-      payload.customer = customer;
+      const phoneDigits = (customer.phone_number || "").replace(/\D/g, "");
+      if (phoneDigits.length >= 10) {
+        payload.customer = customer;
+      }
     }
 
     const response = await fetch(INFINITEPAY_API, {

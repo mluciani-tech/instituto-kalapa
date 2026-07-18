@@ -72,8 +72,9 @@ export default function Checkout() {
     fetchData();
   }, []);
 
-  const formatPhoneForInfinitePay = (phone: string): string => {
+  const formatPhoneForInfinitePay = (phone: string): string | null => {
     const numbers = phone.replace(/\D/g, "");
+    if (numbers.length < 10) return null;
     if (numbers.startsWith("55")) {
       return `+${numbers}`;
     }
@@ -113,11 +114,12 @@ export default function Checkout() {
             },
           ],
           order_nsu: orderNsu,
-          customer: {
-            name: payload.nome,
-            email: payload.email,
-            phone_number: formatPhoneForInfinitePay(payload.telefone),
-          },
+          customer: (() => {
+            const phone = formatPhoneForInfinitePay(payload.telefone);
+            const c: Record<string, string> = { name: payload.nome, email: payload.email };
+            if (phone) c.phone_number = phone;
+            return c;
+          })(),
           inscricao: {
             ...payload,
             metodoPagamento: metodoSelecionado,
