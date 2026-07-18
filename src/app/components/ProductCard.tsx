@@ -114,7 +114,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                 Vagas da próxima turma
               </span>
               <span className={`font-bold ${vagasEsgotadas ? 'text-red-500' : vagasQuaseEsgotadas ? 'text-brand-terracotta' : 'text-brand-charcoal'}`}>
-                {vagas.restantes}/{vagas.maximas}
+                {vagas.preenchidas}/{vagas.maximas}
               </span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
