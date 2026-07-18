@@ -14,22 +14,37 @@ interface VagasInfo {
 export default function ProductGrid() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [vagas, setVagas] = useState<VagasInfo | null>(null);
+  const [vagasMap, setVagasMap] = useState<Record<string, VagasInfo>>({});
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [prodRes, vagasRes] = await Promise.all([
-          fetch("/api/produtos"),
-          fetch("/api/vagas"),
-        ]);
-
-        if (prodRes.ok) {
-          setProdutos(await prodRes.json());
+        const prodRes = await fetch("/api/produtos");
+        if (!prodRes.ok) {
+          setLoading(false);
+          return;
         }
+        const produtosData: Produto[] = await prodRes.json();
+        setProdutos(produtosData);
 
-        if (vagasRes.ok) {
-          setVagas(await vagasRes.json());
+        // Fetch vagas for products that have a limit
+        const produtosComVagas = produtosData.filter((p) => p.vagas_maximas != null);
+        if (produtosComVagas.length > 0) {
+          const vagasResults = await Promise.all(
+            produtosComVagas.map((p) =>
+              fetch(`/api/vagas?produto_id=${p.id}`)
+                .then((r) => r.ok ? r.json() : null)
+                .catch(() => null)
+            )
+          );
+
+          const map: Record<string, VagasInfo> = {};
+          produtosComVagas.forEach((p, i) => {
+            if (vagasResults[i]) {
+              map[p.id] = vagasResults[i];
+            }
+          });
+          setVagasMap(map);
         }
       } catch (err) {
         console.error("Erro ao buscar dados:", err);
@@ -68,7 +83,7 @@ export default function ProductGrid() {
           key={produto.id}
           produto={produto}
           index={index}
-          vagas={vagas}
+          vagas={produto.vagas_maximas != null ? vagasMap[produto.id] || null : null}
         />
       ))}
     </motion.div>

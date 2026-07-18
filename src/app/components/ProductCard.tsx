@@ -16,6 +16,7 @@ export interface Produto {
   destaque: boolean;
   ativo: boolean;
   ordem: number;
+  vagas_maximas: number | null;
 }
 
 interface VagasInfo {

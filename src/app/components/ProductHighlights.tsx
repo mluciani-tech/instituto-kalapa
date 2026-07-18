@@ -5,14 +5,44 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
 
+interface VagasInfo {
+  preenchidas: number;
+  maximas: number;
+  restantes: number;
+}
+
 export default function ProductHighlights() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [vagasMap, setVagasMap] = useState<Record<string, VagasInfo>>({});
 
   useEffect(() => {
     fetch("/api/produtos")
       .then((r) => r.json())
-      .then((data) => setProdutos(data.filter((p: Produto) => p.destaque)))
+      .then(async (data: Produto[]) => {
+        const destaques = data.filter((p: Produto) => p.destaque);
+        setProdutos(destaques);
+
+        // Fetch vagas for highlighted products with limit
+        const produtosComVagas = destaques.filter((p) => p.vagas_maximas != null);
+        if (produtosComVagas.length > 0) {
+          const vagasResults = await Promise.all(
+            produtosComVagas.map((p) =>
+              fetch(`/api/vagas?produto_id=${p.id}`)
+                .then((r) => r.ok ? r.json() : null)
+                .catch(() => null)
+            )
+          );
+
+          const map: Record<string, VagasInfo> = {};
+          produtosComVagas.forEach((p, i) => {
+            if (vagasResults[i]) {
+              map[p.id] = vagasResults[i];
+            }
+          });
+          setVagasMap(map);
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -44,7 +74,12 @@ export default function ProductHighlights() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {produtos.slice(0, 3).map((produto, index) => (
-            <ProductCard key={produto.id} produto={produto} index={index} />
+            <ProductCard
+              key={produto.id}
+              produto={produto}
+              index={index}
+              vagas={produto.vagas_maximas != null ? vagasMap[produto.id] || null : null}
+            />
           ))}
         </div>
 

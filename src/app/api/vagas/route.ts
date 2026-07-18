@@ -1,37 +1,66 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabase, supabaseAdmin, isSupabaseConfigured, isAdminConfigured } from "@/lib/supabase";
 
 const VAGAS_PADRAO = 15;
 const TURMA_PADRAO = "2025-01";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json({
       preenchidas: 0,
       maximas: VAGAS_PADRAO,
       restantes: VAGAS_PADRAO,
       mock: true,
-      message: "Supabase não configurado. Defina NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+      message: "Supabase não configurado.",
     });
   }
 
+  const { searchParams } = new URL(req.url);
+  const produtoId = searchParams.get("produto_id");
+
   try {
-    // Buscar configurações dinâmicas
-    let vagasMaximas = VAGAS_PADRAO;
     let turmaAtual = TURMA_PADRAO;
+    let vagasMaximas: number | null = null;
 
     if (isAdminConfigured()) {
+      // Busca turma atual
       const { data: config } = await supabaseAdmin!
         .from("configuracoes")
         .select("chave, valor")
-        .in("chave", ["vagas_maximas", "turma_atual"]);
+        .in("chave", ["turma_atual"]);
 
       config?.forEach((item) => {
-        if (item.chave === "vagas_maximas") vagasMaximas = Number(item.valor);
         if (item.chave === "turma_atual") turmaAtual = item.valor;
       });
+
+      // Se tem produto_id, busca o limite específico do produto
+      if (produtoId) {
+        const { data: produto } = await supabaseAdmin!
+          .from("produtos")
+          .select("vagas_maximas")
+          .eq("id", produtoId)
+          .single();
+
+        if (produto?.vagas_maximas != null) {
+          vagasMaximas = produto.vagas_maximas;
+        }
+      }
+
+      // Fallback: se não achou limite no produto, busca global
+      if (vagasMaximas == null) {
+        const { data: configVagas } = await supabaseAdmin!
+          .from("configuracoes")
+          .select("valor")
+          .eq("chave", "vagas_maximas")
+          .single();
+
+        vagasMaximas = configVagas ? Number(configVagas.valor) : VAGAS_PADRAO;
+      }
+    } else {
+      vagasMaximas = VAGAS_PADRAO;
     }
 
+    // Conta inscrições confirmadas
     const { count, error } = await supabase!
       .from("inscricoes")
       .select("*", { count: "exact", head: true })

@@ -27,6 +27,7 @@ type Produto = {
   destaque: boolean;
   ativo: boolean;
   ordem: number;
+  vagas_maximas: number | null;
   created_at: string;
 };
 
@@ -87,6 +88,7 @@ export default function AdminPage() {
     preco: "",
     imagem_url: "",
     beneficios: "",
+    vagas_maximas: "",
     destaque: false,
     ativo: true,
     ordem: "0",
@@ -192,8 +194,8 @@ export default function AdminPage() {
   const resetProdutoForm = () => {
     setProdutoForm({
       slug: "", nome: "", descricao: "", descricao_curta: "",
-      preco: "", imagem_url: "", beneficios: "", destaque: false,
-      ativo: true, ordem: "0",
+      preco: "", imagem_url: "", beneficios: "", vagas_maximas: "",
+      destaque: false, ativo: true, ordem: "0",
     });
     setProdutoImagemFile(null);
     setProdutoEditando(null);
@@ -231,6 +233,7 @@ export default function AdminPage() {
     const payload = {
       ...produtoForm,
       imagem_url: imagemUrl,
+      vagas_maximas: produtoForm.vagas_maximas ? parseInt(produtoForm.vagas_maximas) : null,
       preco: parseFloat(produtoForm.preco.replace(",", ".")) || 0,
       ordem: parseInt(produtoForm.ordem) || 0,
       beneficios: produtoForm.beneficios.split("\n").filter((b) => b.trim()),
@@ -270,6 +273,7 @@ export default function AdminPage() {
       preco: p.preco.toString().replace(".", ","),
       imagem_url: p.imagem_url || "",
       beneficios: p.beneficios.join("\n"),
+      vagas_maximas: p.vagas_maximas != null ? p.vagas_maximas.toString() : "",
       destaque: p.destaque,
       ativo: p.ativo,
       ordem: p.ordem.toString(),
@@ -403,44 +407,14 @@ export default function AdminPage() {
               <span className="w-2 h-2 rounded-full bg-brand-purple" />
               Configurações do Site
             </h2>
-            {configError && (
-              <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">{configError}</div>
-            )}
             <div className="max-w-md">
-              <label htmlFor="vagas-maximas" className="block text-sm font-medium text-brand-charcoal mb-2">
-                Vagas Máximas por Turma
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  id="vagas-maximas"
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={vagasEditando}
-                  onChange={(e) => setVagasEditando(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple"
-                />
-                <button
-                  onClick={handleSalvarVagas}
-                  disabled={salvandoVagas || vagasEditando === config.vagas_maximas}
-                  className="px-4 py-2.5 bg-brand-purple text-white text-sm font-medium rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors whitespace-nowrap"
-                >
-                  {salvandoVagas ? "Salvando..." : "Salvar"}
-                </button>
-              </div>
-              {vagasSucesso && (
-                <p className="mt-2 text-xs text-green-600 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                  {vagasSucesso}
-                </p>
-              )}
-              <p className="mt-2 text-xs text-brand-charcoal/40">
-                Turma atual: {config.turma_atual || "2025-01"}
+              <p className="text-sm text-brand-charcoal/60">
+                Turma atual: <strong>{config.turma_atual || "2025-01"}</strong>
+              </p>
+              <p className="mt-3 text-xs text-brand-charcoal/40">
+                O limite de vagas agora é definido por produto na aba <strong>Produtos</strong>.
               </p>
             </div>
-            <p className="mt-4 text-xs text-brand-charcoal/40">
-              Preço e outros detalhes são gerenciados na seção de Produtos.
-            </p>
           </div>
         )}
 
@@ -505,6 +479,17 @@ export default function AdminPage() {
                       placeholder="0"
                       inputMode="numeric"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Limite de Pessoas <span className="text-brand-charcoal/30">(opcional)</span></label>
+                    <input
+                      value={produtoForm.vagas_maximas}
+                      onChange={(e) => setProdutoForm({ ...produtoForm, vagas_maximas: e.target.value })}
+                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
+                      placeholder="Ex: 15"
+                      inputMode="numeric"
+                    />
+                    <p className="text-xs text-brand-charcoal/30 mt-1">Deixe em branco se não houver limite de vagas.</p>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Descrição Curta</label>
@@ -627,7 +612,7 @@ export default function AdminPage() {
                         {p.destaque && <span className="text-xs bg-brand-terracotta/10 text-brand-terracotta px-1.5 py-0.5 rounded">Destaque</span>}
                       </div>
                       <p className="text-xs text-brand-charcoal/40 mt-0.5">
-                        {p.slug} · R$ {p.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} · Ordem: {p.ordem}
+                        {p.slug} · R$ {p.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} · Ordem: {p.ordem}{p.vagas_maximas != null ? ` · Limite: ${p.vagas_maximas} pessoas` : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 ml-4">

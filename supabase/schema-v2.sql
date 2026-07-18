@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS produtos (
   destaque BOOLEAN DEFAULT false,
   ativo BOOLEAN DEFAULT true,
   ordem INTEGER DEFAULT 0,
+  vagas_maximas INTEGER,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

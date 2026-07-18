@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { slug, nome, descricao, descricao_curta, preco, imagem_url, beneficios, destaque, ativo, ordem } = body;
+  const { slug, nome, descricao, descricao_curta, preco, imagem_url, beneficios, destaque, ativo, ordem, vagas_maximas } = body;
 
   if (!slug || !nome || preco === undefined) {
     return NextResponse.json(
@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
       destaque: destaque || false,
       ativo: ativo !== false,
       ordem: ordem || 0,
+      vagas_maximas: vagas_maximas != null ? Number(vagas_maximas) : null,
     })
     .select()
     .single();
