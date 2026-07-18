@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { supabaseAdmin } from "@/lib/supabase";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const BUCKET = "produtos";
 
 export async function POST(req: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Supabase não configurado" },
+        { status: 500 }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
@@ -29,17 +35,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await mkdir(UPLOAD_DIR, { recursive: true });
+    // Garantir que o bucket existe
+    await supabaseAdmin.storage.createBucket(BUCKET, { public: true, fileSizeLimit: MAX_SIZE })
+      .then(() => {})
+      .catch(() => {});
 
     const ext = file.name.split(".").pop() || "jpg";
     const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
-    const filepath = path.join(UPLOAD_DIR, filename);
 
     const bytes = await file.arrayBuffer();
-    await writeFile(filepath, Buffer.from(bytes));
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from(BUCKET)
+      .upload(filename, Buffer.from(bytes), {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("Supabase storage upload error:", uploadError);
+      return NextResponse.json(
+        { error: "Erro ao fazer upload da imagem" },
+        { status: 500 }
+      );
+    }
+
+    const { data: publicUrl } = supabaseAdmin.storage
+      .from(BUCKET)
+      .getPublicUrl(filename);
 
     return NextResponse.json({
-      url: `/uploads/${filename}`,
+      url: publicUrl.publicUrl,
       filename,
     });
   } catch (error) {
