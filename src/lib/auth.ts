@@ -3,7 +3,15 @@ import crypto from "crypto";
 const SESSION_DURATION = 24 * 60 * 60 * 1000;
 
 function getSecret(): string {
-  return process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD || "";
+  const secret = process.env.SESSION_SECRET;
+  if (secret) return secret;
+
+  // Fallback legado: avisa pois a senha admin não deve ser usada como secret
+  const fallback = process.env.ADMIN_PASSWORD;
+  if (fallback) {
+    console.warn("[auth] SESSION_SECRET não configurado — usando ADMIN_PASSWORD como fallback. Defina SESSION_SECRET nas env vars.");
+  }
+  return fallback || "";
 }
 
 export function createSessionToken(password: string): string | null {

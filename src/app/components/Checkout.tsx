@@ -3,17 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { QrCode, CreditCard, ShieldCheck, Check, ExternalLink, Package, ArrowLeft } from "lucide-react";
-
-interface Produto {
-  id: string;
-  slug: string;
-  nome: string;
-  descricao: string | null;
-  descricao_curta: string | null;
-  preco: number;
-  imagem_url: string | null;
-  beneficios: string[];
-}
+import type { Produto } from "@/lib/types";
 
 interface DadosInscricao {
   nome: string;
@@ -98,22 +88,13 @@ export default function Checkout() {
     };
 
     try {
-      const orderNsu = `kalapa-${Date.now()}`;
-
-      // 1. Criar pedido + inscrição + gerar link de pagamento
+      // Preço e itens são montados no servidor a partir do produto_id —
+      // o cliente envia apenas identificação e dados de contato
       const checkoutRes = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           produto_id: produto.id,
-          items: [
-            {
-              quantity: 1,
-              price: Math.round(produto.preco * 100),
-              description: produto.nome,
-            },
-          ],
-          order_nsu: orderNsu,
           customer: (() => {
             const phone = formatPhoneForInfinitePay(payload.telefone);
             const c: Record<string, string> = { name: payload.nome, email: payload.email };

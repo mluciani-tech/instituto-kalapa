@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
-import { verifySessionToken } from "@/lib/auth";
+import { checkAdminAuth } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
-
-function checkAuth(req: NextRequest) {
-  const cookie = req.headers.get("cookie") || "";
-  const match = cookie.match(/admin_session=([^;]+)/);
-  if (!match) return false;
-  return verifySessionToken(match[1]);
-}
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
+  if (!checkAdminAuth(req)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
@@ -41,7 +34,7 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
+  if (!checkAdminAuth(req)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
@@ -91,7 +84,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
+  if (!checkAdminAuth(req)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 

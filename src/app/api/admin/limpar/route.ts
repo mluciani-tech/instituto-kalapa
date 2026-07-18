@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifySessionToken } from "@/lib/auth";
+import { checkAdminAuth } from "@/lib/admin-auth";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 
 export async function DELETE(req: NextRequest) {
-  const token = req.cookies.get("admin_session")?.value;
-
-  if (!token || !verifySessionToken(token)) {
+  if (!checkAdminAuth(req)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 

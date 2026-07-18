@@ -3,27 +3,9 @@
 import { motion } from "framer-motion";
 import { Check, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { Produto, VagasInfo } from "@/lib/types";
 
-export interface Produto {
-  id: string;
-  slug: string;
-  nome: string;
-  descricao: string | null;
-  descricao_curta: string | null;
-  preco: number;
-  imagem_url: string | null;
-  beneficios: string[];
-  destaque: boolean;
-  ativo: boolean;
-  ordem: number;
-  vagas_maximas: number | null;
-}
-
-interface VagasInfo {
-  preenchidas: number;
-  maximas: number;
-  restantes: number;
-}
+export type { Produto };
 
 interface ProductCardProps {
   produto: Produto;

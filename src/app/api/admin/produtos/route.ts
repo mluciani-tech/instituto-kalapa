@@ -1,18 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
-import { verifySessionToken } from "@/lib/auth";
+import { checkAdminAuth } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
-function checkAuth(req: NextRequest) {
-  const cookie = req.headers.get("cookie") || "";
-  const match = cookie.match(/admin_session=([^;]+)/);
-  if (!match) return false;
-  return verifySessionToken(match[1]);
-}
-
 export async function GET(req: NextRequest) {
-  if (!checkAuth(req)) {
+  if (!checkAdminAuth(req)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
@@ -40,7 +33,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!checkAuth(req)) {
+  if (!checkAdminAuth(req)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 

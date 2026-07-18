@@ -4,12 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
-
-interface VagasInfo {
-  preenchidas: number;
-  maximas: number;
-  restantes: number;
-}
+import type { VagasInfo } from "@/lib/types";
 
 export default function ProductHighlights() {
   const [produtos, setProdutos] = useState<Produto[]>([]);

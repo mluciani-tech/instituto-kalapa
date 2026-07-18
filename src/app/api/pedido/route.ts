@@ -20,10 +20,18 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  // Retorna apenas dados do pedido/produto — NUNCA dados pessoais
+  // do cliente (nome, e-mail, telefone ficam restritos ao admin)
   const { data, error } = await supabaseAdmin!
     .from("pedidos")
     .select(`
-      *,
+      order_nsu,
+      valor,
+      status,
+      metodo_pagamento,
+      capture_method,
+      receipt_url,
+      created_at,
       produtos (nome, slug)
     `)
     .eq("order_nsu", orderNsu)

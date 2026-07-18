@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
-import { verifySessionToken } from "@/lib/auth";
+import { checkAdminAuth } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
-function checkAuth(req: NextRequest) {
-  const cookie = req.headers.get("cookie") || "";
-  const match = cookie.match(/admin_session=([^;]+)/);
-  if (!match) return false;
-  return verifySessionToken(match[1]);
-}
+const DEFAULT_PER_PAGE = 20;
 
 export async function GET(req: NextRequest) {
-  if (!checkAuth(req)) {
+  if (!checkAdminAuth(req)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
@@ -23,13 +18,20 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const { data, error } = await supabaseAdmin!
+  const { searchParams } = new URL(req.url);
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
+  const perPage = Math.min(100, Math.max(1, parseInt(searchParams.get("perPage") || String(DEFAULT_PER_PAGE)) || DEFAULT_PER_PAGE));
+  const from = (page - 1) * perPage;
+  const to = from + perPage - 1;
+
+  const { data, error, count } = await supabaseAdmin!
     .from("pedidos")
     .select(`
       *,
       produtos (nome, slug)
-    `)
-    .order("created_at", { ascending: false });
+    `, { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) {
     console.error("[admin/pedidos] Erro:", error);
@@ -39,5 +41,13 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  return NextResponse.json(data);
+  const total = count || 0;
+
+  return NextResponse.json({
+    data,
+    total,
+    page,
+    perPage,
+    totalPages: Math.max(1, Math.ceil(total / perPage)),
+  });
 }

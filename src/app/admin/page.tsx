@@ -1,49 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import type { Produto, Pedido, Participante } from "@/lib/types";
 
-type Participante = {
-  id: string;
-  turma_id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  motivacao: string | null;
-  metodo_pagamento: string | null;
-  valor: number;
-  status: string;
-  created_at: string;
-};
-
-type Produto = {
-  id: string;
-  slug: string;
-  nome: string;
-  descricao: string | null;
-  descricao_curta: string | null;
-  preco: number;
-  imagem_url: string | null;
-  beneficios: string[];
-  destaque: boolean;
-  ativo: boolean;
-  ordem: number;
-  vagas_maximas: number | null;
-  created_at: string;
-};
-
-type Pedido = {
-  id: string;
-  order_nsu: string;
-  cliente_nome: string;
-  cliente_email: string;
-  cliente_telefone: string | null;
-  valor: number;
-  status: string;
-  metodo_pagamento: string | null;
-  capture_method: string | null;
-  receipt_url: string | null;
-  created_at: string;
-  produtos: { nome: string; slug: string } | null;
+type Paginated<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
 };
 
 type Tab = "config" | "produtos" | "pedidos" | "participantes";
@@ -100,9 +65,15 @@ export default function AdminPage() {
 
   // Pedidos
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [pedidosPage, setPedidosPage] = useState(1);
+  const [pedidosTotalPages, setPedidosTotalPages] = useState(1);
+  const [pedidosTotal, setPedidosTotal] = useState(0);
 
   // Participantes
   const [participantes, setParticipantes] = useState<Participante[]>([]);
+  const [participantesPage, setParticipantesPage] = useState(1);
+  const [participantesTotalPages, setParticipantesTotalPages] = useState(1);
+  const [participantesTotal, setParticipantesTotal] = useState(0);
   const [showConfirm, setShowConfirm] = useState(false);
   const [clearing, setClearing] = useState(false);
 
@@ -131,15 +102,27 @@ export default function AdminPage() {
     if (res.ok) setProdutos(await res.json());
   };
 
-  const fetchPedidos = async () => {
-    const res = await fetch("/api/admin/pedidos");
-    if (res.ok) setPedidos(await res.json());
-  };
+  const fetchPedidos = useCallback(async (page = pedidosPage) => {
+    const res = await fetch(`/api/admin/pedidos?page=${page}&perPage=20`);
+    if (res.ok) {
+      const json: Paginated<Pedido> = await res.json();
+      setPedidos(json.data);
+      setPedidosPage(json.page);
+      setPedidosTotalPages(json.totalPages);
+      setPedidosTotal(json.total);
+    }
+  }, [pedidosPage]);
 
-  const fetchParticipantes = async () => {
-    const res = await fetch("/api/admin/participantes");
-    if (res.ok) setParticipantes(await res.json());
-  };
+  const fetchParticipantes = useCallback(async (page = participantesPage) => {
+    const res = await fetch(`/api/admin/participantes?page=${page}&perPage=20`);
+    if (res.ok) {
+      const json: Paginated<Participante> = await res.json();
+      setParticipantes(json.data);
+      setParticipantesPage(json.page);
+      setParticipantesTotalPages(json.totalPages);
+      setParticipantesTotal(json.total);
+    }
+  }, [participantesPage]);
 
   useEffect(() => { checkAuth(); }, [checkAuth]);
 
@@ -274,9 +257,9 @@ export default function AdminPage() {
       imagem_url: p.imagem_url || "",
       beneficios: p.beneficios.join("\n"),
       vagas_maximas: p.vagas_maximas != null ? p.vagas_maximas.toString() : "",
-      destaque: p.destaque,
-      ativo: p.ativo,
-      ordem: p.ordem.toString(),
+      destaque: p.destaque ?? false,
+      ativo: p.ativo ?? true,
+      ordem: (p.ordem ?? 0).toString(),
     });
     setProdutoImagemFile(null);
     setShowProdutoForm(true);
@@ -293,6 +276,9 @@ export default function AdminPage() {
     const res = await fetch("/api/admin/limpar", { method: "DELETE" });
     if (res.ok) {
       setParticipantes([]);
+      setParticipantesTotal(0);
+      setParticipantesPage(1);
+      setParticipantesTotalPages(1);
       setShowConfirm(false);
     }
     setClearing(false);
@@ -716,6 +702,29 @@ export default function AdminPage() {
                     </table>
                   </div>
                 </div>
+                {pedidosTotalPages > 1 && (
+                  <div className="flex items-center justify-between mt-4 text-sm">
+                    <span className="text-brand-charcoal/50">
+                      {pedidosTotal} pedidos — página {pedidosPage} de {pedidosTotalPages}
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => fetchPedidos(pedidosPage - 1)}
+                        disabled={pedidosPage <= 1}
+                        className="px-3 py-1.5 rounded-lg border border-brand-beige text-brand-charcoal/70 hover:bg-brand-beige/50 disabled:opacity-40 transition-colors"
+                      >
+                        Anterior
+                      </button>
+                      <button
+                        onClick={() => fetchPedidos(pedidosPage + 1)}
+                        disabled={pedidosPage >= pedidosTotalPages}
+                        className="px-3 py-1.5 rounded-lg border border-brand-beige text-brand-charcoal/70 hover:bg-brand-beige/50 disabled:opacity-40 transition-colors"
+                      >
+                        Próxima
+                      </button>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -796,7 +805,30 @@ export default function AdminPage() {
                 </table>
               </div>
             </div>
-            {participantes.length > 0 && (
+            {participantesTotalPages > 1 && (
+              <div className="flex items-center justify-between mt-4 text-sm">
+                <span className="text-brand-charcoal/50">
+                  {participantesTotal} participantes — página {participantesPage} de {participantesTotalPages}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => fetchParticipantes(participantesPage - 1)}
+                    disabled={participantesPage <= 1}
+                    className="px-3 py-1.5 rounded-lg border border-brand-beige text-brand-charcoal/70 hover:bg-brand-beige/50 disabled:opacity-40 transition-colors"
+                  >
+                    Anterior
+                  </button>
+                  <button
+                    onClick={() => fetchParticipantes(participantesPage + 1)}
+                    disabled={participantesPage >= participantesTotalPages}
+                    className="px-3 py-1.5 rounded-lg border border-brand-beige text-brand-charcoal/70 hover:bg-brand-beige/50 disabled:opacity-40 transition-colors"
+                  >
+                    Próxima
+                  </button>
+                </div>
+              </div>
+            )}
+            {participantesTotal > 0 && (
               <div className="mt-8 border-t border-brand-beige pt-6">
                 <h2 className="text-sm font-medium text-red-700 mb-2">Zona de risco</h2>
                 <p className="text-xs text-brand-charcoal/50 mb-3">
@@ -820,7 +852,7 @@ export default function AdminPage() {
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-base font-semibold text-brand-charcoal mb-2">Limpar todos os dados?</h3>
             <p className="text-sm text-brand-charcoal/60 mb-5">
-              Todos os {participantes.length} participantes serão removidos permanentemente.
+              Todos os {participantesTotal} participantes serão removidos permanentemente.
             </p>
             <div className="flex gap-3 justify-end">
               <button onClick={() => setShowConfirm(false)} className="px-4 py-2 text-sm text-brand-charcoal/60 hover:text-brand-charcoal transition-colors">
