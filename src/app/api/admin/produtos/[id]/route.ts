@@ -60,6 +60,17 @@ export async function PUT(
     }
   }
 
+  if (updates.slug && typeof updates.slug === "string") {
+    updates.slug = updates.slug
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
   updates.updated_at = new Date().toISOString();
 
   const { data, error } = await supabaseAdmin!
@@ -70,7 +81,7 @@ export async function PUT(
     .single();
 
   if (error) {
-    console.error("[admin/produtos] Erro ao atualizar:", error);
+    console.error("[admin/produtos] Erro ao atualizar:", JSON.stringify(error, null, 2));
     return NextResponse.json(
       { error: "Erro ao atualizar produto" },
       { status: 500 }
