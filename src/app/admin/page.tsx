@@ -77,6 +77,16 @@ export default function AdminPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [clearing, setClearing] = useState(false);
 
+  // Edição de contato (pedido ou participante)
+  const [editando, setEditando] = useState<{
+    tipo: "pedido" | "participante";
+    id: string;
+    nome: string;
+    email: string;
+    telefone: string;
+  } | null>(null);
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false);
+
   const checkAuth = useCallback(async () => {
     const res = await fetch("/api/admin/verify");
     if (res.ok) {
@@ -282,6 +292,35 @@ export default function AdminPage() {
       setShowConfirm(false);
     }
     setClearing(false);
+  };
+
+  // Edição handlers
+  const handleSalvarEdicao = async () => {
+    if (!editando) return;
+    setSalvandoEdicao(true);
+    const url =
+      editando.tipo === "pedido"
+        ? `/api/admin/pedidos/${editando.id}`
+        : `/api/admin/participantes/${editando.id}`;
+
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome: editando.nome,
+        email: editando.email,
+        telefone: editando.telefone,
+      }),
+    });
+
+    if (res.ok) {
+      setEditando(null);
+      await Promise.all([fetchPedidos(), fetchParticipantes()]);
+    } else {
+      const data = await res.json();
+      setError(data.error || "Erro ao salvar edição");
+    }
+    setSalvandoEdicao(false);
   };
 
   if (loading) {
@@ -673,6 +712,7 @@ export default function AdminPage() {
                           <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Valor</th>
                           <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Status</th>
                           <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Data</th>
+                          <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Ações</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -696,6 +736,20 @@ export default function AdminPage() {
                               </span>
                             </td>
                             <td className="px-4 py-3 text-brand-charcoal/50 text-xs">{formatDate(ped.created_at)}</td>
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => setEditando({
+                                  tipo: "pedido",
+                                  id: ped.id,
+                                  nome: ped.cliente_nome,
+                                  email: ped.cliente_email,
+                                  telefone: ped.cliente_telefone || "",
+                                })}
+                                className="px-3 py-1.5 text-xs text-brand-charcoal/70 hover:bg-brand-beige rounded-lg border border-brand-beige transition-colors"
+                              >
+                                Editar
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -771,12 +825,13 @@ export default function AdminPage() {
                       <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70 hidden md:table-cell">Motivação</th>
                       <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70 hidden lg:table-cell">Pagamento</th>
                       <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70 hidden sm:table-cell">Data</th>
+                      <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
                     {participantes.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-12 text-brand-charcoal/40">
+                        <td colSpan={7} className="text-center py-12 text-brand-charcoal/40">
                           Nenhum participante cadastrado.
                         </td>
                       </tr>
@@ -798,6 +853,20 @@ export default function AdminPage() {
                             </span>
                           </td>
                           <td className="px-4 py-3 text-brand-charcoal/50 text-xs hidden sm:table-cell">{formatDate(p.created_at)}</td>
+                          <td className="px-4 py-3">
+                            <button
+                              onClick={() => setEditando({
+                                tipo: "participante",
+                                id: p.id,
+                                nome: p.nome,
+                                email: p.email,
+                                telefone: p.telefone || "",
+                              })}
+                              className="px-3 py-1.5 text-xs text-brand-charcoal/70 hover:bg-brand-beige rounded-lg border border-brand-beige transition-colors"
+                            >
+                              Editar
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -845,6 +914,64 @@ export default function AdminPage() {
           </>
         )}
       </main>
+
+      {/* Modal de edição de contato */}
+      {editando && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" style={{ overscrollBehavior: "contain" }}>
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-base font-semibold text-brand-charcoal mb-1">
+              Editar {editando.tipo === "pedido" ? "cliente" : "participante"}
+            </h3>
+            <p className="text-xs text-brand-charcoal/50 mb-4">
+              Atualize os dados de contato. Compras novas capturam automaticamente da InfinitePay.
+            </p>
+            <div className="space-y-3 mb-5">
+              <div>
+                <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Nome</label>
+                <input
+                  type="text"
+                  value={editando.nome}
+                  onChange={(e) => setEditando({ ...editando, nome: e.target.value })}
+                  className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-purple"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">E-mail</label>
+                <input
+                  type="email"
+                  value={editando.email}
+                  onChange={(e) => setEditando({ ...editando, email: e.target.value })}
+                  className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-purple"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">WhatsApp</label>
+                <input
+                  type="text"
+                  value={editando.telefone}
+                  onChange={(e) => setEditando({ ...editando, telefone: e.target.value })}
+                  className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-purple"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setEditando(null)}
+                className="px-4 py-2 text-sm text-brand-charcoal/60 hover:text-brand-charcoal transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSalvarEdicao}
+                disabled={salvandoEdicao || !editando.nome.trim() || !editando.email.trim()}
+                className="px-4 py-2 text-sm bg-brand-purple text-white rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors"
+              >
+                {salvandoEdicao ? "Salvando..." : "Salvar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de confirmação */}
       {showConfirm && (
