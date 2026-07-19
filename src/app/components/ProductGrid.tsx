@@ -26,8 +26,10 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
         let produtosData: Produto[] = await prodRes.json();
 
         if (categoria) {
+          const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          const cat = normalize(categoria);
           produtosData = produtosData.filter(
-            (p) => p.categoria?.toLowerCase() === categoria.toLowerCase()
+            (p) => normalize(p.categoria || "") === cat
           );
         }
 

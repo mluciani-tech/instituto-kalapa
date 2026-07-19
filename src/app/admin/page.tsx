@@ -752,7 +752,7 @@ export default function AdminPage() {
                         {p.destaque && <span className="text-xs bg-brand-terracotta/10 text-brand-terracotta px-1.5 py-0.5 rounded">Destaque</span>}
                       </div>
                       <p className="text-xs text-brand-charcoal/40 mt-0.5">
-                        {p.slug} · {p.preco != null && p.preco > 0 ? `R$ ${(p.preco ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "Gratuito"} · Ordem: {p.ordem}{p.categoria ? ` · ${p.categoria}` : ""}{p.vagas_maximas != null ? ` · Limite: ${p.vagas_maximas} pessoas` : ""}
+                        {p.slug}{p.preco != null && p.preco > 0 ? ` · R$ ${(p.preco ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : ""} · Ordem: {p.ordem}{p.categoria ? ` · ${p.categoria}` : ""}{p.vagas_maximas != null ? ` · Limite: ${p.vagas_maximas} pessoas` : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
