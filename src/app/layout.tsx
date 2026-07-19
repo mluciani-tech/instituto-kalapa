@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import Header from "./components/Header";
 
 export const metadata: Metadata = {
   title: "INstituto Kalapa — Sessões Terapêuticas em Grupo",
@@ -57,22 +58,7 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* Logo fixo no canto superior esquerdo */}
-        <div className="fixed top-4 left-4 z-50">
-          <a
-            href="/"
-            aria-label="INstituto Kalapa — voltar para a página inicial"
-            className="block rounded-2xl transition-transform duration-300 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
-          >
-            <img
-              src="/logo-kalapa.png"
-              alt=""
-              width={80}
-              height={80}
-              className="w-16 h-16 md:w-20 md:h-20 object-contain rounded-2xl bg-white/85 backdrop-blur-md border border-white/60 shadow-lg shadow-brand-purple-deep/15 p-1.5"
-            />
-          </a>
-        </div>
+        <Header />
         {children}
         <script
           type="application/ld+json"
