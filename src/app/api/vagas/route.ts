@@ -8,6 +8,8 @@ import {
   countInscricoesPagas,
 } from "@/lib/vagas";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   if (!isSupabaseConfigured()) {
     return NextResponse.json({

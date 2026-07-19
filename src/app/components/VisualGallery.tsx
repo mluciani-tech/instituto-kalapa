@@ -15,7 +15,7 @@ const imagens = [
     src: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80",
     alt: "Duas pessoas em um gesto de apoio mútuo, mãos entrelaçadas em ambiente com iluminação suave",
     icon: Camera,
-    className: "md:col-span-2 md:row-span-2",
+    className: "",
   },
   {
     titulo: "Sala de Estar Terapêutica",
@@ -90,9 +90,7 @@ export default function VisualGallery() {
               >
                 <div className="group cursor-default h-full">
                   {/* Imagem real do Unsplash */}
-                  <div className={`relative overflow-hidden rounded-xl mb-5 bg-brand-charcoal/10 ${
-                    index === 0 ? "aspect-[4/3] md:aspect-[16/10]" : "aspect-[4/5]"
-                  }`}>
+                  <div className="relative overflow-hidden rounded-xl mb-5 bg-brand-charcoal/10 aspect-[4/5]">
                     <Image
                       src={imagem.src}
                       alt={imagem.alt}

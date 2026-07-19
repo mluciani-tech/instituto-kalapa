@@ -123,6 +123,10 @@ export default function AdminPage() {
   } | null>(null);
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
+  // Exclusão de pedidos
+  const [pedidoParaExcluir, setPedidoParaExcluir] = useState<string | null>(null);
+  const [excluindoPedido, setExcluindoPedido] = useState(false);
+
   const checkAuth = useCallback(async () => {
     const res = await fetch("/api/admin/verify");
     if (res.ok) {
@@ -369,6 +373,22 @@ export default function AdminPage() {
       setError(data.error || "Erro ao salvar edição");
     }
     setSalvandoEdicao(false);
+  };
+
+  const handleExcluirPedido = async () => {
+    if (!pedidoParaExcluir) return;
+    setExcluindoPedido(true);
+    const res = await fetch(`/api/admin/pedidos/${pedidoParaExcluir}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      setPedidoParaExcluir(null);
+      await Promise.all([fetchPedidos(), fetchParticipantes()]);
+    } else {
+      const data = await res.json();
+      setError(data.error || "Erro ao excluir pedido");
+    }
+    setExcluindoPedido(false);
   };
 
   if (loading) {
@@ -759,6 +779,14 @@ export default function AdminPage() {
                         </p>
                         <p className="font-mono text-brand-charcoal/40">{ped.order_nsu}</p>
                         <p className="text-brand-charcoal/40">{formatDate(ped.created_at)}</p>
+                        {ped.status === "pendente" && (
+                          <button
+                            onClick={() => setPedidoParaExcluir(ped.id)}
+                            className="mt-2 text-xs text-red-600 hover:underline block"
+                          >
+                            Excluir transação
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -835,18 +863,28 @@ export default function AdminPage() {
                             </td>
                             <td className="px-4 py-3 text-brand-charcoal/50 text-xs">{formatDate(ped.created_at)}</td>
                             <td className="px-4 py-3">
-                              <button
-                                onClick={() => setEditando({
-                                  tipo: "pedido",
-                                  id: ped.id,
-                                  nome: ped.cliente_nome,
-                                  email: ped.cliente_email,
-                                  telefone: ped.cliente_telefone || "",
-                                })}
-                                className="px-3 py-1.5 text-xs text-brand-charcoal/70 hover:bg-brand-beige rounded-lg border border-brand-beige transition-colors"
-                              >
-                                Editar
-                              </button>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => setEditando({
+                                    tipo: "pedido",
+                                    id: ped.id,
+                                    nome: ped.cliente_nome,
+                                    email: ped.cliente_email,
+                                    telefone: ped.cliente_telefone || "",
+                                  })}
+                                  className="px-3 py-1.5 text-xs text-brand-charcoal/70 hover:bg-brand-beige rounded-lg border border-brand-beige transition-colors"
+                                >
+                                  Editar
+                                </button>
+                                {ped.status === "pendente" && (
+                                  <button
+                                    onClick={() => setPedidoParaExcluir(ped.id)}
+                                    className="px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
+                                  >
+                                    Excluir
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -1125,6 +1163,26 @@ export default function AdminPage() {
               </button>
               <button onClick={handleClear} disabled={clearing} className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors">
                 {clearing ? "Limpando..." : "Sim, limpar tudo"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmação de exclusão de pedido */}
+      {pedidoParaExcluir && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" style={{ overscrollBehavior: "contain" }}>
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-base font-semibold text-brand-charcoal mb-2">Excluir transação pendente?</h3>
+            <p className="text-sm text-brand-charcoal/60 mb-5">
+              Esta ação excluirá permanentemente o pedido e quaisquer inscrições associadas. Deseja continuar?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setPedidoParaExcluir(null)} className="px-4 py-2 text-sm text-brand-charcoal/60 hover:text-brand-charcoal transition-colors">
+                Cancelar
+              </button>
+              <button onClick={handleExcluirPedido} disabled={excluindoPedido} className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors">
+                {excluindoPedido ? "Excluindo..." : "Excluir permanentemente"}
               </button>
             </div>
           </div>

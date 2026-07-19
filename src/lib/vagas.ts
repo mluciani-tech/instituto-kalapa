@@ -29,7 +29,7 @@ export async function getVagasMaximas(produtoId?: string | null): Promise<number
       .eq("id", produtoId)
       .single();
 
-    if (produto?.vagas_maximas != null) {
+    if (produto?.vagas_maximas != null && produto.vagas_maximas > 0) {
       return produto.vagas_maximas;
     }
   }

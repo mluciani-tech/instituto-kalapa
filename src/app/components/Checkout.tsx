@@ -190,32 +190,32 @@ export default function Checkout() {
             className="grid md:grid-cols-2 gap-8"
           >
             {/* Lado esquerdo — Detalhes do produto */}
-            <div className="flex flex-col justify-between glass-card rounded-2xl p-8 md:p-10">
+            <div className="flex flex-col justify-between glass-card-light rounded-2xl p-8 md:p-10">
               <div>
                 <div className="mb-6">
                   <span className="text-brand-mint text-sm font-semibold tracking-wider uppercase flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-mint animate-pulse" />
                     {dadosInscricao ? `Compra de ${dadosInscricao.nome}` : "Produto selecionado"}
                   </span>
-                  <h3 className="text-2xl md:text-3xl font-bold text-white mt-2 font-sans">
+                  <h3 className="text-2xl md:text-3xl font-bold text-brand-charcoal mt-2 font-sans">
                     {produto.nome}
                   </h3>
                   {produto.descricao_curta && (
-                    <p className="text-white/50 mt-2 leading-relaxed">
+                    <p className="text-brand-charcoal/60 mt-2 leading-relaxed">
                       {produto.descricao_curta}
                     </p>
                   )}
                 </div>
 
-                <div className="border-t border-white/10 pt-6">
+                <div className="border-t border-brand-charcoal/10 pt-6">
                   <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-5xl md:text-6xl font-bold text-white">
+                    <span className="text-5xl md:text-6xl font-bold text-brand-charcoal">
                       R$ {preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </span>
-                    <span className="text-white/40 text-lg">/ sessão</span>
+                    <span className="text-brand-charcoal/45 text-lg">/ sessão</span>
                   </div>
                   {produto.descricao && (
-                    <p className="text-white/50 text-sm leading-relaxed">
+                    <p className="text-brand-charcoal/60 text-sm leading-relaxed">
                       {produto.descricao}
                     </p>
                   )}
@@ -224,7 +224,7 @@ export default function Checkout() {
 
               <ul className="mt-8 space-y-3">
                 {produto.beneficios.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-white/70 text-sm">
+                  <li key={item} className="flex items-start gap-3 text-brand-charcoal/70 text-sm">
                     <Check className="w-4 h-4 text-brand-mint flex-shrink-0 mt-0.5" />
                     {item}
                   </li>
@@ -235,7 +235,7 @@ export default function Checkout() {
             {/* Lado direito — Métodos de pagamento */}
             <div className="glass-card rounded-2xl p-8 md:p-10 flex flex-col justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-white mb-6">
+                <h3 className="text-lg font-semibold text-brand-charcoal mb-6">
                   Forma de pagamento
                 </h3>
 
@@ -247,28 +247,28 @@ export default function Checkout() {
                       className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
                         metodoSelecionado === metodo.id
                           ? "border-brand-mint bg-brand-mint/10"
-                          : "border-white/10 hover:border-white/20 hover:bg-white/5"
+                          : "border-brand-charcoal/10 hover:border-brand-charcoal/20 hover:bg-brand-charcoal/5"
                       }`}
                     >
                       <div
                         className={`${
                           metodoSelecionado === metodo.id
                             ? "text-brand-mint"
-                            : "text-white/40"
+                            : "text-brand-charcoal/40"
                         }`}
                       >
                         {metodo.icone}
                       </div>
                       <div className="text-left">
-                        <div className="text-white font-medium">{metodo.nome}</div>
-                        <div className="text-white/40 text-sm">{metodo.descricao}</div>
+                        <div className="text-brand-charcoal font-medium">{metodo.nome}</div>
+                        <div className="text-brand-charcoal/50 text-sm">{metodo.descricao}</div>
                       </div>
                       <div className="ml-auto">
                         <div
                           className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                             metodoSelecionado === metodo.id
                               ? "border-brand-mint"
-                              : "border-white/20"
+                              : "border-brand-charcoal/20"
                           }`}
                         >
                           {metodoSelecionado === metodo.id && (
@@ -281,16 +281,16 @@ export default function Checkout() {
                 </div>
 
                 {metodoSelecionado === "cartao" && (
-                  <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <div className="mb-6 p-4 rounded-xl bg-brand-charcoal/5 border border-brand-charcoal/10">
                     <label
                       htmlFor="parcelamento"
-                      className="text-white/60 text-sm block mb-2"
+                      className="text-brand-charcoal/60 text-sm block mb-2"
                     >
                       Parcelamento
                     </label>
                     <select
                       id="parcelamento"
-                      className="w-full bg-brand-charcoal text-white border border-white/10 rounded-lg px-4 py-3.5 text-sm focus:outline-none focus:border-brand-mint transition-colors appearance-none cursor-pointer"
+                      className="w-full bg-white text-brand-charcoal border border-brand-charcoal/10 rounded-lg px-4 py-3.5 text-sm focus:outline-none focus:border-brand-mint transition-colors appearance-none cursor-pointer"
                     >
                       <option value="1">1x de R$ {preco.toFixed(2).replace(".", ",")}</option>
                       <option value="2">2x de R$ {(preco / 2).toFixed(2).replace(".", ",")}</option>
@@ -305,7 +305,7 @@ export default function Checkout() {
 
               <div>
                 {erro && (
-                  <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                  <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
                     {erro}
                   </div>
                 )}
@@ -329,20 +329,20 @@ export default function Checkout() {
                 </button>
 
                 {dadosInscricao && (
-                  <p className="text-white/30 text-center text-[10px] mt-2">
+                  <p className="text-brand-charcoal/40 text-center text-[10px] mt-2">
                     Compra de: {dadosInscricao.nome} ({dadosInscricao.email})
                   </p>
                 )}
 
-                <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-center gap-3">
-                  <ShieldCheck className="w-5 h-5 text-white/30" />
-                  <span className="text-white/30 text-sm tracking-wide">
+                <div className="mt-6 pt-6 border-t border-brand-charcoal/10 flex items-center justify-center gap-3">
+                  <ShieldCheck className="w-5 h-5 text-brand-charcoal/30" />
+                  <span className="text-brand-charcoal/40 text-sm tracking-wide">
                     Processamento seguro por{" "}
-                    <strong className="text-white/50">InfinitePay</strong>
+                    <strong className="text-brand-charcoal/60">InfinitePay</strong>
                   </span>
                 </div>
 
-                <div className="mt-6 flex items-center justify-center gap-6 text-white/20 text-xs">
+                <div className="mt-6 flex items-center justify-center gap-6 text-brand-charcoal/30 text-xs">
                   <span>SSL Criptografado</span>
                   <span>Dados Protegidos</span>
                   <span>LGPD</span>

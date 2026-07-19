@@ -86,3 +86,61 @@ export async function PATCH(
 
   return NextResponse.json(data);
 }
+
+// DELETE: excluir pedido e inscrição vinculada
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!checkAdminAuth(req)) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  if (!isAdminConfigured()) {
+    return NextResponse.json(
+      { error: "Supabase não configurado" },
+      { status: 500 }
+    );
+  }
+
+  const { id } = await params;
+
+  try {
+    // 1. Excluir inscrições vinculadas primeiro por causa da FK (Foreign Key) se houver
+    const { error: errorInsc } = await supabaseAdmin!
+      .from("inscricoes")
+      .delete()
+      .eq("pedido_id", id);
+
+    if (errorInsc) {
+      console.error("[admin/pedidos] Erro ao excluir inscrição vinculada:", errorInsc);
+      return NextResponse.json(
+        { error: "Erro ao excluir inscrição vinculada" },
+        { status: 500 }
+      );
+    }
+
+    // 2. Excluir o pedido em si
+    const { error: errorPedido } = await supabaseAdmin!
+      .from("pedidos")
+      .delete()
+      .eq("id", id);
+
+    if (errorPedido) {
+      console.error("[admin/pedidos] Erro ao excluir pedido:", errorPedido);
+      return NextResponse.json(
+        { error: "Erro ao excluir pedido" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("[admin/pedidos] Erro inesperado ao excluir:", error);
+    return NextResponse.json(
+      { error: "Erro inesperado ao excluir pedido" },
+      { status: 500 }
+    );
+  }
+}
+
