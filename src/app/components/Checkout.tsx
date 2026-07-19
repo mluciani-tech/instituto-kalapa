@@ -174,7 +174,7 @@ export default function Checkout() {
             Pagamento Seguro
           </span>
           <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight max-w-2xl mx-auto font-sans">
-            Finalizar <span className="text-gradient">compra</span>
+            Finalizar compra
           </h2>
           <p className="mt-3 text-white/50 text-base max-w-xl mx-auto">
             Processamento rápido e seguro via InfinitePay.

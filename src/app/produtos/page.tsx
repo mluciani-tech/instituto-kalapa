@@ -21,8 +21,7 @@ export default function ProdutosPage() {
             ✦ Nossos serviços
           </span>
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 font-sans">
-            Escolha a experiência ideal{" "}
-            <span className="text-gradient">para você</span>
+            Escolha a experiência ideal para você
           </h1>
           <p className="text-white/60 text-lg max-w-2xl mx-auto">
             Cada sessão é um convite à transformação. Selecione o serviço que
