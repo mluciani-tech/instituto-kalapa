@@ -51,8 +51,9 @@ export default function ProductGrid() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-10 h-10 border-4 border-brand-purple border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center py-20" role="status">
+        <div aria-hidden="true" className="w-10 h-10 border-4 border-brand-purple border-t-transparent rounded-full animate-spin" />
+        <span className="sr-only">Carregando…</span>
       </div>
     );
   }
@@ -60,8 +61,8 @@ export default function ProductGrid() {
   if (produtos.length === 0) {
     return (
       <div className="text-center py-20">
-        <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-400 text-lg">Nenhum produto disponível no momento.</p>
+        <Package aria-hidden="true" className="w-12 h-12 text-brand-charcoal/25 mx-auto mb-4" />
+        <p className="text-brand-charcoal/45 text-lg">Nenhum produto disponível no momento.</p>
       </div>
     );
   }

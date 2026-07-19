@@ -42,8 +42,7 @@ export default function Hero() {
           backgroundImage:
             "url('/fotoSiteHome.jpeg')",
         }}
-        role="img"
-        aria-label="Pessoa em momento de introspecção, iluminada naturalmente em ambiente com tons terrosos e verde menta"
+        aria-hidden="true"
       />
 
       {/* Vinheta cinematográfica */}
@@ -63,7 +62,7 @@ export default function Hero() {
             className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight text-white"
           >
             A dor pode marcar a sua história, mas ela{" "}
-            <span className="text-gradient">não precisa definir</span> a sua vida
+            <span className="text-gradient-gold">não precisa definir</span> a sua vida
           </motion.h1>
 
           {/* Subheadline */}
@@ -87,20 +86,20 @@ export default function Hero() {
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
             <a
               href="/produtos"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-[background-color,box-shadow,transform] duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
             >
               Vivência
-              <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+              <ArrowRight aria-hidden="true" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
             <a
               href="#experiencia"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-all duration-300 glass-card hover:bg-white/12"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-[background-color,border-color] duration-300 glass-card hover:bg-white/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
             >
               Terapias Individuais
             </a>
             <a
               href="#sobre"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-all duration-300 glass-card hover:bg-white/12"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-[background-color,border-color] duration-300 glass-card hover:bg-white/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
             >
               Sobre o INstituto Kalapa
             </a>
@@ -109,18 +108,18 @@ export default function Hero() {
           {/* Indicadores de confiança */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-wrap items-center gap-6 pt-4 text-white/50 text-sm"
+            className="flex flex-wrap items-center gap-6 pt-4 text-white/60 text-sm"
           >
-            <div className="flex items-center gap-2 hover:text-white/70 transition-colors duration-200">
-              <CheckCircle2 className="w-4 h-4 text-brand-mint" />
+            <div className="flex items-center gap-2 hover:text-white/80 transition-colors duration-200">
+              <CheckCircle2 aria-hidden="true" className="w-4 h-4 text-brand-mint" />
               <span>Profissionais certificados</span>
             </div>
-            <div className="flex items-center gap-2 hover:text-white/70 transition-colors duration-200">
-              <HeartHandshake className="w-4 h-4 text-brand-mint" />
+            <div className="flex items-center gap-2 hover:text-white/80 transition-colors duration-200">
+              <HeartHandshake aria-hidden="true" className="w-4 h-4 text-brand-mint" />
               <span>Ambiente seguro e sigiloso</span>
             </div>
-            <div className="flex items-center gap-2 hover:text-white/70 transition-colors duration-200">
-              <ShieldCheck className="w-4 h-4 text-brand-mint" />
+            <div className="flex items-center gap-2 hover:text-white/80 transition-colors duration-200">
+              <ShieldCheck aria-hidden="true" className="w-4 h-4 text-brand-mint" />
               <span>Pagamento seguro via InfinitePay</span>
             </div>
           </motion.div>

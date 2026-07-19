@@ -39,7 +39,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#4A4A4A",
+  themeColor: "#F8F4ED",
   colorScheme: "light",
 };
 
@@ -59,11 +59,17 @@ export default function RootLayout({
         />
         {/* Logo fixo no canto superior esquerdo */}
         <div className="fixed top-4 left-4 z-50">
-          <a href="/" className="block hover:scale-105 transition-transform duration-300">
+          <a
+            href="/"
+            aria-label="INstituto Kalapa — voltar para a página inicial"
+            className="block rounded-2xl transition-transform duration-300 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
+          >
             <img
-              src="/logo-kalapa-rounded.png"
-              alt="INstituto Kalapa"
-              className="w-32 h-32 md:w-40 md:h-40 object-contain rounded-2xl shadow-lg bg-white/90 p-1"
+              src="/logo-kalapa.png"
+              alt=""
+              width={80}
+              height={80}
+              className="w-16 h-16 md:w-20 md:h-20 object-contain rounded-2xl bg-white/85 backdrop-blur-md border border-white/60 shadow-lg shadow-brand-purple-deep/15 p-1.5"
             />
           </a>
         </div>

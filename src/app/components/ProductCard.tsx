@@ -38,7 +38,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
         delay: index * 0.1,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="group relative glass-card-light rounded-2xl overflow-hidden flex flex-col"
+      className="group relative glass-card-light rounded-2xl overflow-hidden flex flex-col transition-[box-shadow,transform] duration-300 hover:shadow-xl hover:shadow-brand-purple/10 hover:-translate-y-1"
     >
       {/* Imagem */}
       <div className="relative h-48 overflow-hidden">
@@ -46,6 +46,8 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
           <img
             src={produto.imagem_url}
             alt={produto.nome}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
@@ -67,11 +69,11 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
         </h3>
 
         {produto.descricao_curta && (
-          <p className="text-sm text-gray-500 mb-3">{produto.descricao_curta}</p>
+          <p className="text-sm text-brand-charcoal/60 mb-3">{produto.descricao_curta}</p>
         )}
 
         {produto.descricao && (
-          <p className="text-sm text-gray-600 leading-relaxed mb-4 flex-1">
+          <p className="text-sm text-brand-charcoal/70 leading-relaxed mb-4 flex-1">
             {produto.descricao}
           </p>
         )}
@@ -80,8 +82,8 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
         {produto.beneficios && produto.beneficios.length > 0 && (
           <ul className="space-y-2 mb-4">
             {produto.beneficios.slice(0, 3).map((b) => (
-              <li key={b} className="flex items-start gap-2 text-sm text-gray-600">
-                <Check className="w-4 h-4 text-brand-mint flex-shrink-0 mt-0.5" />
+              <li key={b} className="flex items-start gap-2 text-sm text-brand-charcoal/70">
+                <Check aria-hidden="true" className="w-4 h-4 text-brand-mint flex-shrink-0 mt-0.5" />
                 {b}
               </li>
             ))}
@@ -92,22 +94,22 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
         {vagas && (
           <div className="mb-4">
             <div className="flex items-center justify-between text-sm mb-1.5">
-              <span className="text-gray-500">
+              <span className="text-brand-charcoal/60">
                 Vagas da próxima turma
               </span>
-              <span className={`font-bold ${vagasEsgotadas ? 'text-red-500' : vagasQuaseEsgotadas ? 'text-brand-terracotta' : 'text-brand-charcoal'}`}>
+              <span className={`font-bold tabular-nums ${vagasEsgotadas ? 'text-red-500' : vagasQuaseEsgotadas ? 'text-brand-terracotta' : 'text-brand-charcoal'}`}>
                 {vagas.preenchidas}/{vagas.maximas}
               </span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-brand-charcoal/10 rounded-full h-2 overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${
+                className={`h-full rounded-full transition-[width] duration-500 ${
                   vagasEsgotadas ? 'bg-red-400' : vagasQuaseEsgotadas ? 'bg-brand-terracotta' : 'bg-brand-mint'
                 }`}
                 style={{ width: `${(vagas.preenchidas / vagas.maximas) * 100}%` }}
               />
             </div>
-            <p className={`text-xs mt-1 ${vagasEsgotadas ? 'text-red-500 font-semibold' : vagasQuaseEsgotadas ? 'text-brand-terracotta font-semibold' : 'text-gray-400'}`}>
+            <p className={`text-xs mt-1 ${vagasEsgotadas ? 'text-red-500 font-semibold' : vagasQuaseEsgotadas ? 'text-brand-terracotta font-semibold' : 'text-brand-charcoal/45'}`}>
               {vagasEsgotadas
                 ? 'Turma lotada'
                 : vagasQuaseEsgotadas
@@ -119,27 +121,27 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
         )}
 
         {/* Preço + CTA */}
-        <div className="mt-auto pt-4 border-t border-gray-100">
+        <div className="mt-auto pt-4 border-t border-brand-charcoal/10">
           <div className="flex items-end gap-1 mb-3">
-            <span className="text-3xl font-bold text-brand-charcoal">
+            <span className="text-3xl font-bold text-brand-charcoal tabular-nums">
               {precoFormatado}
             </span>
-            <span className="text-sm text-gray-400 mb-1">/ sessão</span>
+            <span className="text-sm text-brand-charcoal/45 mb-1">/ sessão</span>
           </div>
 
           <button
             onClick={handleEscolher}
             disabled={!!vagasEsgotadas}
-            className={`w-full py-3 font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+            className={`w-full py-3 font-semibold rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
               vagasEsgotadas
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                ? 'bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed'
                 : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-lg shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
             }`}
           >
             {vagasEsgotadas ? 'Turma lotada' : (
               <>
                 Escolher
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight aria-hidden="true" className="w-4 h-4" />
               </>
             )}
           </button>

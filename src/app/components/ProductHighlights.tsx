@@ -56,13 +56,13 @@ export default function ProductHighlights() {
           className="text-center mb-12"
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-purple/10 text-brand-purple text-sm font-semibold tracking-wide mb-4">
-            <Sparkles className="w-4 h-4" />
+            <Sparkles aria-hidden="true" className="w-4 h-4" />
             Em destaque
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-brand-charcoal font-sans">
             Nossos serviços
           </h2>
-          <p className="mt-3 text-gray-500 text-lg max-w-xl mx-auto">
+          <p className="mt-3 text-brand-charcoal/60 text-lg max-w-xl mx-auto">
             Encontre a experiência que mais ressoa com o seu momento.
           </p>
         </motion.div>
@@ -86,10 +86,10 @@ export default function ProductHighlights() {
         >
           <a
             href="/produtos"
-            className="inline-flex items-center gap-2 text-brand-purple font-semibold hover:text-brand-purple-dark transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2.5 -mx-3 rounded-lg text-brand-purple font-semibold hover:text-brand-purple-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple focus-visible:ring-offset-2 focus-visible:ring-offset-brand-offwhite"
           >
             Ver todos os serviços
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight aria-hidden="true" className="w-4 h-4" />
           </a>
         </motion.div>
       </div>
