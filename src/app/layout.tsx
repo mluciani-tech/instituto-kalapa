@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     "bem-estar",
     "saúde mental",
     "sessão terapêutica",
-    "InfinitePay",
+    "constelação familiar",
   ],
   openGraph: {
     title: "INstituto Kalapa — Sessões Terapêuticas em Grupo",
@@ -74,6 +74,21 @@ export default function RootLayout({
           </a>
         </div>
         {children}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "HealthAndBeautyBusiness",
+              name: "INstituto Kalapa",
+              description: "Sessões terapêuticas em grupo para autoconhecimento e transformação.",
+              url: "https://www.institutokalapa.com.br",
+              logo: "https://www.institutokalapa.com.br/logo-kalapa.png",
+              sameAs: [],
+              priceRange: "$$",
+            }),
+          }}
+        />
       </body>
     </html>
   );

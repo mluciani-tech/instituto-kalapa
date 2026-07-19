@@ -26,22 +26,22 @@ export default function Footer() {
         {/* Links */}
         <div className="flex flex-wrap items-center justify-center gap-2 md:gap-6 text-white/40 text-sm">
           <a
-            href="#"
+            href="/"
             className="px-3 py-2.5 rounded-lg hover:text-white/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta"
           >
             Home
           </a>
           <a
-            href="#experiencia"
+            href="/#experiencia"
             className="px-3 py-2.5 rounded-lg hover:text-white/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta"
           >
             Experiência
           </a>
           <a
-            href="#inscricao"
+            href="/produtos"
             className="px-3 py-2.5 rounded-lg hover:text-white/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta"
           >
-            Inscrição
+            Serviços
           </a>
         </div>
 

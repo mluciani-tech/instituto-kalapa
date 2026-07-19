@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
+import { BentoGrid } from "@/components/ui/bento-grid";
 import CardHoverEffect from "@/components/ui/card-hover-effect";
 import SplitText from "@/components/ui/split-text";
 import { Camera, Home, Users } from "lucide-react";

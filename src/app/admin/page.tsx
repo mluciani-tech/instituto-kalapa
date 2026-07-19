@@ -1093,7 +1093,7 @@ export default function AdminPage() {
 
       {/* Modal de edição de contato */}
       {editando && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" style={{ overscrollBehavior: "contain" }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" style={{ overscrollBehavior: "contain" }} role="dialog" aria-modal="true" aria-label="Editar contato" onKeyDown={(e) => { if (e.key === "Escape") setEditando(null); }}>
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-base font-semibold text-brand-charcoal mb-1">
               Editar {editando.tipo === "pedido" ? "cliente" : "participante"}
@@ -1151,7 +1151,7 @@ export default function AdminPage() {
 
       {/* Modal de confirmação */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" style={{ overscrollBehavior: "contain" }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" style={{ overscrollBehavior: "contain" }} role="dialog" aria-modal="true" aria-label="Confirmar limpeza" onKeyDown={(e) => { if (e.key === "Escape") setShowConfirm(false); }}>
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-base font-semibold text-brand-charcoal mb-2">Limpar todos os dados?</h3>
             <p className="text-sm text-brand-charcoal/60 mb-5">
@@ -1171,7 +1171,7 @@ export default function AdminPage() {
 
       {/* Modal de confirmação de exclusão de pedido */}
       {pedidoParaExcluir && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" style={{ overscrollBehavior: "contain" }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" style={{ overscrollBehavior: "contain" }} role="dialog" aria-modal="true" aria-label="Confirmar exclusão" onKeyDown={(e) => { if (e.key === "Escape") setPedidoParaExcluir(null); }}>
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-base font-semibold text-brand-charcoal mb-2">Excluir transação pendente?</h3>
             <p className="text-sm text-brand-charcoal/60 mb-5">

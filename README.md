@@ -1,14 +1,13 @@
 # Instituto Kalapa — Landing Page
 
-Landing page de conversão para o Instituto Kalapa com venda de ingressos para sessões terapêuticas em grupo quinzenais (presenciais), contagem real de vagas via Supabase, pagamento via InfinitePay (API real), preço dinâmico configurável via admin e painel administrativo completo.
+Landing page de conversão para o Instituto Kalapa com catálogo de serviços, contagem real de vagas via Supabase, pagamento via InfinitePay (API real), painel administrativo completo e checkout com design premium.
 
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router) + Turbopack
 - **Linguagem:** TypeScript
 - **Estilos:** Tailwind CSS v4
-- **Animações:** Framer Motion
-- **Formulários:** react-hook-form + Zod
+- **Animações:** Framer Motion + ReactBits/Magic UI components
 - **Banco:** Supabase (PostgreSQL + RLS)
 - **Pagamento:** InfinitePay API (links dinâmicos)
 - **E-mail:** Resend (com fallback mock)
@@ -17,29 +16,28 @@ Landing page de conversão para o Instituto Kalapa com venda de ingressos para s
 
 ## Funcionalidades
 
-- **Hero cinematográfico** com gradiente, overlay e imagem de fundo
-- **Seção "A Experiência do Grupo"** com benefícios da terapia em grupo
-- **Galeria visual** com imagens cinematográficas do Unsplash
-- **Formulário de inscrição** com validação Zod, máscara de telefone e contador de vagas em tempo real
-- **Preço dinâmico** configurável no admin, atualiza em tempo real na landing page, checkout e pós-pagamento
-- **Checkout com InfinitePay** via API (Pix/Cartão), parcelamento até 12x
-- **Webhook de pagamento** com filtro por `order_nsu` (atualiza apenas a inscrição correta)
-- **Pós-pagamento** com preço dinâmico e link para comprovante
+- **Hero** com animação BlurText (blur→focus) e gradiente cinematográfico
+- **Seção "A Experiência do Grupo"** com SplitText, GlareHover e ShinyText
+- **Galeria visual** com BentoGrid e CardHoverEffect
+- **Catálogo de produtos** com cards StarBorder (borda animada) e contador de vagas
+- **Checkout premium** com cards glass-card-light, Pix/Cartão, parcelamento até 12x
+- **Webhook de pagamento** com verificação HMAC por order (token único, não reutilizável)
+- **Pós-pagamento** com confirmação e link para comprovante
 - **Painel Admin** (`/admin`) com:
   - Login com HMAC-SHA256 (cookie httpOnly, 24h expiry)
-  - Edição de preço da sessão (com suporte a centavos: R$ 40,50)
-  - Edição de vagas máximas por turma
-  - CRUD de produtos (criar, editar, desativar)
-  - Upload de imagens para Supabase Storage
+  - CRUD de produtos (criar, editar, desativar, vagas por produto)
+  - Upload de imagens para Supabase Storage (auth required)
   - Tabela de pedidos com busca, sort e paginação
   - Tabela de inscrições com busca, sort e paginação
-  - Edição de dados de contato (nome, email, WhatsApp) com sincronização pedido↔inscrição
+  - Edição de dados de contato com sincronização pedido↔inscrição
+  - Exclusão de pedidos pendentes
   - Opção de limpar banco de dados
-- **Webhook seguro** com verificação de assinatura InfinitePay + captura de dados do cliente
-- **Preço server-side** — valor nunca exposto no frontend, validado no backend
+- **Middleware** com proteção centralizada para rotas `/api/admin/*`
+- **Security headers** (X-Frame-Options, HSTS, CSP, etc.)
+- **Error boundaries** e loading states para todas as páginas
 - **Notificação por e-mail** via Resend com formatação de moeda brasileira
-- **Responsivo** — mobile-first, touch targets ≥44px, safe areas, viewport-fit
-- **Acessibilidade** — `autocomplete`, `aria-live`, `role`, `prefers-reduced-motion`, `inputmode`, `focus-visible`, `aria-label`
+- **Responsivo** — mobile-first, touch targets ≥44px, safe areas
+- **Acessibilidade** — `aria-modal`, `role="dialog"`, Escape para fechar modais, `prefers-reduced-motion`, `focus-visible`
 
 ## Pré-requisitos
 
@@ -49,16 +47,20 @@ Landing page de conversão para o Instituto Kalapa com venda de ingressos para s
 ## Setup
 
 ```bash
-# Instalar dependências
 npm install
-
-# Copiar variáveis de ambiente
 cp .env.example .env.local
-
 # Editar .env.local com suas credenciais
-
-# Iniciar servidor de desenvolvimento
 npx next dev -p 3000
+```
+
+## Scripts
+
+```bash
+npm run dev          # Servidor de desenvolvimento
+npm run build        # Build de produção
+npm run start        # Iniciar servidor de produção
+npm run lint         # ESLint
+npm run typecheck    # Verificação de tipos TypeScript
 ```
 
 ## Variáveis de Ambiente
@@ -69,84 +71,47 @@ npx next dev -p 3000
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Sim | Chave pública (anon) do Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Sim | Chave secreta do servidor (service_role) — **sem prefixo NEXT_** |
 | `ADMIN_PASSWORD` | Sim | Senha do painel administrativo `/admin` |
-| `SESSION_SECRET` | Não | Para assinar cookie de sessão (fallback = ADMIN_PASSWORD) |
+| `SESSION_SECRET` | Sim | Para assinar cookie de sessão e tokens HMAC de webhook |
+| `WEBHOOK_SECRET` | Sim | Secret para verificação de origem do webhook InfinitePay |
 | `INFINITEPAY_HANDLE` | Sim | Handle InfinitePay (sem @) para criar links de pagamento |
 | `NEXT_PUBLIC_SITE_URL` | Sim | URL do site (para redirect e webhook da InfinitePay) |
 | `RESEND_API_KEY` | Não | Chave da API Resend (mock se ausente) |
 | `KALAPA_EMAIL_FROM` | Não | Remetente do e-mail de notificação |
 | `KALAPA_EMAIL_TO` | Não | Destinatário do e-mail de notificação |
 
-> **Importante:** No Vercel, a variável `SUPABASE_SERVICE_ROLE_KEY` deve estar marcada como **Production** (não apenas Preview).
-
 ## Supabase
 
 ### Schema
 
-Execute o conteúdo de `supabase/schema.sql` no SQL Editor do Supabase. O script é idempotente (pode ser executado várias vezes com segurança).
-
-### RLS
-
-- `SELECT`: público (para o contador de vagas funcionar)
-- `INSERT/UPDATE/DELETE`: apenas via `service_role` (server-side)
-- A chave anon (pública) só pode **ler** dados
+Execute na ordem:
+1. `supabase/schema.sql` — tabelas base (configuracoes + inscricoes)
+2. `supabase/schema-v2.sql` — adiciona produtos, pedidos, vincula inscricoes
+3. `supabase/migrate-vagas-per-produto.sql` — adiciona `vagas_maximas` por produto
 
 ### Estrutura das tabelas
 
-```sql
--- Configurações do site (preço, vagas, turma)
-CREATE TABLE configuracoes (
-  chave TEXT PRIMARY KEY,
-  valor TEXT NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Inscrições
-CREATE TABLE inscricoes (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  turma_id TEXT NOT NULL DEFAULT '2025-01',
-  order_nsu TEXT,
-  nome TEXT NOT NULL,
-  email TEXT NOT NULL,
-  telefone TEXT NOT NULL,
-  motivacao TEXT,
-  metodo_pagamento TEXT,
-  valor NUMERIC(10,2) DEFAULT 97,
-  status TEXT NOT NULL DEFAULT 'confirmada',
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### Configurações padrão
-
-| Chave | Valor | Descrição |
-|---|---|---|
-| `preco_sessao` | `97` | Preço em reais (suporta centavos) |
-| `vagas_maximas` | `15` | Limite de vagas por turma |
-| `turma_atual` | `2025-01` | ID da turma ativa |
+- **configuracoes** — chave/valor (turma_atual, vagas_maximas)
+- **produtos** — catálogo de serviços (nome, preço, vagas_maximas, destaque)
+- **pedidos** — transações (order_nsu, produto_id, status, valor)
+- **inscricoes** — participantes (turma_id, pedido_id, nome, email, status)
 
 ## Fluxo de Pagamento
 
-1. Usuário preenche formulário → dados salvos no `sessionStorage`
-2. Redirecionado para checkout → escolhe Pix ou Cartão
-3. Checkout cria inscrição (`status: "confirmada"`) + envia e-mail
+1. Usuário escolhe produto → redirecionado para formulário de inscrição
+2. Dados salvos no `sessionStorage` → redirecionado para checkout
+3. Checkout cria pedido (`status: "pendente"`) + inscrição (`status: "pendente"`)
 4. InfinitePay cria link de pagamento dinâmico
-5. Usuário paga no InfinitePay
-6. Webhook recebe confirmação → atualiza inscrição (`status: "pago"`)
-7. Pós-pagamento mostra confirmação com preço dinâmico
+5. Usuário paga → Webhook com token HMAC confirma pagamento
+6. Pedido e inscrição atualizados para `status: "pago"` → vaga ocupada
+7. Página de sucesso mostra confirmação
 
 ## Deploy
 
-O projeto está configurado para deploy automático no Vercel via GitHub:
+Deploy automático via Vercel:
 
 ```bash
 git add -A && git commit -m "mensagem" && git push origin main
 ```
-
-O Vercel detecta o push e faz deploy automático.
-
-### Variáveis no Vercel
-
-Todas as variáveis devem ser configuradas no **Settings → Environment Variables** do Vercel, marcadas para **Production**.
 
 ## Links
 
@@ -154,62 +119,12 @@ Todas as variáveis devem ser configuradas no **Settings → Environment Variabl
 - **Painel Admin:** https://www.institutokalapa.com.br/admin
 - **GitHub:** https://github.com/mluciani-tech/instituto-kalapa
 
-## Estrutura do Projeto
-
-```
-src/
-├── app/
-│   ├── admin/page.tsx                     # Painel administrativo completo
-│   ├── api/
-│   │   ├── admin/
-│   │   │   ├── limpar/route.ts            # DELETE — limpa registros
-│   │   │   ├── login/route.ts             # POST — login admin
-│   │   │   ├── logout/route.ts            # POST — logout admin
-│   │   │   ├── pedidos/route.ts           # GET — lista pedidos (busca + sort)
-│   │   │   ├── pedidos/[id]/route.ts      # PATCH — edita pedido + sincroniza inscrição
-│   │   │   ├── participantes/route.ts     # GET — lista inscrições (busca + sort)
-│   │   │   ├── participantes/[id]/route.ts # PATCH — edita inscrição + sincroniza pedido
-│   │   │   ├── produtos/route.ts          # GET/POST — CRUD produtos
-│   │   │   ├── produtos/[id]/route.ts     # PUT/DELETE — editar/desativar produto
-│   │   │   └── verify/route.ts            # GET — verifica sessão
-│   │   ├── checkout/route.ts              # POST — cria link InfinitePay (preço server-side)
-│   │   ├── config/route.ts                # GET/PUT — configurações dinâmicas
-│   │   ├── send-email/route.ts            # POST — salva inscrição + envia e-mail
-│   │   ├── upload/route.ts                # POST — upload imagem para Supabase Storage
-│   │   ├── vagas/route.ts                 # GET — contagem de vagas
-│   │   └── webhook/route.ts              # POST — confirmação pagamento (assinatura verificada)
-│   ├── checkout/
-│   │   ├── page.tsx                       # Página de checkout
-│   │   └── sucesso/page.tsx               # Pós-pagamento
-│   ├── components/
-│   │   ├── Checkout.tsx                   # Componente de pagamento
-│   │   ├── Footer.tsx                     # Rodapé
-│   │   ├── GroupExperience.tsx            # Benefícios do grupo
-│   │   ├── Hero.tsx                       # Seção de abertura
-│   │   ├── ProductCard.tsx                # Card de produto
-│   │   ├── ProductGrid.tsx                # Grid de produtos
-│   │   ├── ProductHighlights.tsx          # Destaques do produto
-│   │   ├── RegistrationForm.tsx           # Formulário + contador vagas
-│   │   └── VisualGallery.tsx              # Galeria de imagens
-│   ├── globals.css                        # Tema e estilos globais
-│   ├── layout.tsx                         # Layout raiz
-│   └── page.tsx                           # Landing page
-├── lib/
-│   ├── admin-auth.ts                      # Autenticação HMAC admin
-│   ├── supabase.ts                        # Clientes Supabase
-│   └── types.ts                           # Tipos TypeScript
-├── supabase/
-│   └── schema.sql                         # Schema completo do banco
-├── .env.example                           # Template de variáveis
-└── .env.local                             # Credenciais (não commitado)
-```
-
 ## Cores do Tema
 
 | Cor | Hex | Uso |
 |---|---|---|
-| Roxo | `#673de6` | Cor principal, botões, links |
-| Terracota | `#CC6223` | CTA, destaques, urgência |
-| Bege | `#F3E5D6` | Fundo claro |
-| Verde Menta | `#7EC8A0` | Confirmação, sucesso |
-| Charcoal | `#282D30` | Fundo escuro, texto |
+| Brand Purple | `#1A3C4D` | Cor principal, headings |
+| Brand Terracotta | `#B8965A` | CTAs, destaques, StarBorder |
+| Brand Mint | `#7D8C6E` | Confirmação, sucesso |
+| Brand Charcoal | `#4A4A4A` | Texto, fundo escuro |
+| Brand Off-white | `#F8F4ED` | Fundo claro |

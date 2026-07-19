@@ -102,7 +102,7 @@ export default function Hero() {
               Terapias Individuais
             </a>
             <a
-              href="#sobre"
+              href="#experiencia"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-[background-color,border-color] duration-300 glass-card hover:bg-white/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
             >
               Sobre o INstituto Kalapa
