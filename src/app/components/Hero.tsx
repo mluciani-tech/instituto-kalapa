@@ -38,7 +38,7 @@ export default function Hero() {
 
       {/* Imagem de fundo simulada — pessoa em introspecção */}
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-luminosity"
+        className="absolute inset-0 bg-cover bg-center opacity-70"
         style={{
           backgroundImage:
             "url('/fotoSiteHome.jpeg')",
