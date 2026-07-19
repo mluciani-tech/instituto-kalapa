@@ -74,6 +74,7 @@ export default function GroupExperience() {
               glareColor="rgba(184, 150, 90, 0.15)"
               glareSize={400}
               borderRadius={16}
+              className="h-full"
             >
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -84,7 +85,7 @@ export default function GroupExperience() {
                   delay: index * 0.1,
                   ease: [0.16, 1, 0.3, 1],
                 }}
-                className="flex gap-5 p-6 md:p-8 rounded-2xl glass-card-light hover:bg-white/90 transition-all duration-300 group"
+                className="flex gap-5 p-6 md:p-8 rounded-2xl glass-card-light hover:bg-white/90 transition-all duration-300 group h-full"
               >
                 <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl bg-brand-purple-light text-brand-purple group-hover:bg-brand-purple group-hover:text-white transition-colors duration-300">
                   {beneficio.icone}
