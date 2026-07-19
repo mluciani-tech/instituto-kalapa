@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = createSessionToken(password);
+    const token = await createSessionToken(password);
 
     if (!token) {
       return NextResponse.json(

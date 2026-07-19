@@ -42,7 +42,7 @@ export async function GET() {
 
 // PUT: Atualizar configurações (apenas admin autenticado)
 export async function PUT(req: NextRequest) {
-  if (!checkAdminAuth(req)) {
+  if (!(await checkAdminAuth(req))) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 

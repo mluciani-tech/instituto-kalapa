@@ -5,7 +5,7 @@ import { checkAdminAuth } from "@/lib/admin-auth";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  if (!checkAdminAuth(req)) {
+  if (!(await checkAdminAuth(req))) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!checkAdminAuth(req)) {
+  if (!(await checkAdminAuth(req))) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 

@@ -3,7 +3,7 @@ import { checkAdminAuth } from "@/lib/admin-auth";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 
 export async function DELETE(req: NextRequest) {
-  if (!checkAdminAuth(req)) {
+  if (!(await checkAdminAuth(req))) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 

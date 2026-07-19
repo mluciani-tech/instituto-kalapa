@@ -8,7 +8,7 @@ const BUCKET = "produtos";
 
 export async function POST(req: NextRequest) {
   try {
-    if (!checkAdminAuth(req)) {
+    if (!(await checkAdminAuth(req))) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 

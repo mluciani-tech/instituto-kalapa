@@ -6,7 +6,7 @@ const DEFAULT_PER_PAGE = 20;
 const ALLOWED_SORT_PEDIDOS = ["cliente_nome", "cliente_email", "valor", "status", "order_nsu", "created_at"];
 
 export async function GET(req: NextRequest) {
-  if (!checkAdminAuth(req)) {
+  if (!(await checkAdminAuth(req))) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 

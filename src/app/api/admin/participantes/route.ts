@@ -6,7 +6,7 @@ const DEFAULT_PER_PAGE = 20;
 const ALLOWED_SORT_PARTICIPANTES = ["nome", "email", "telefone", "turma_id", "metodo_pagamento", "created_at"];
 
 export async function GET(req: NextRequest) {
-  if (!checkAdminAuth(req)) {
+  if (!(await checkAdminAuth(req))) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
