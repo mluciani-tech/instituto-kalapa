@@ -348,7 +348,7 @@ export default function AdminPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30 focus:border-brand-purple"
+              className="w-full px-4 py-3 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30 focus-visible:border-brand-purple"
               placeholder="Digite a senha"
               autoComplete="current-password"
             />
@@ -421,7 +421,9 @@ export default function AdminPage() {
         {error && (
           <div role="alert" className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
             {error}
-            <button onClick={() => setError("")} className="float-right font-bold">&times;</button>
+            <button onClick={() => setError("")} className="float-right font-bold" aria-label="Fechar">
+              &times;
+            </button>
           </div>
         )}
 
@@ -469,71 +471,71 @@ export default function AdminPage() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Nome *</label>
-                    <input
-                      value={produtoForm.nome}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, nome: e.target.value })}
-                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                      placeholder="Ex: Grupo de Autoconhecimento"
-                    />
+<input
+                       value={produtoForm.nome}
+                       onChange={(e) => setProdutoForm({ ...produtoForm, nome: e.target.value })}
+                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                       placeholder="Ex: Grupo de Autoconhecimento"
+                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Slug *</label>
-                    <input
-                      value={produtoForm.slug}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, slug: e.target.value })}
-                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                      placeholder="grupo-autoconhecimento"
-                    />
+<input
+                       value={produtoForm.slug}
+                       onChange={(e) => setProdutoForm({ ...produtoForm, slug: e.target.value })}
+                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                       placeholder="grupo-autoconhecimento"
+                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Preço (R$) *</label>
-                    <input
-                      value={produtoForm.preco}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, preco: e.target.value })}
-                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                      placeholder="97,00"
-                      inputMode="decimal"
-                    />
+<input
+                       value={produtoForm.preco}
+                       onChange={(e) => setProdutoForm({ ...produtoForm, preco: e.target.value })}
+                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                       placeholder="97,00"
+                       inputMode="decimal"
+                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Ordem</label>
-                    <input
-                      value={produtoForm.ordem}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, ordem: e.target.value })}
-                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                      placeholder="0"
-                      inputMode="numeric"
-                    />
+<input
+                       value={produtoForm.ordem}
+                       onChange={(e) => setProdutoForm({ ...produtoForm, ordem: e.target.value })}
+                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                       placeholder="0"
+                       inputMode="numeric"
+                     />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Limite de Pessoas <span className="text-brand-charcoal/30">(opcional)</span></label>
-                    <input
-                      value={produtoForm.vagas_maximas}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, vagas_maximas: e.target.value })}
-                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                      placeholder="Ex: 15"
-                      inputMode="numeric"
-                    />
+<input
+                       value={produtoForm.vagas_maximas}
+                       onChange={(e) => setProdutoForm({ ...produtoForm, vagas_maximas: e.target.value })}
+                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                       placeholder="Ex: 15"
+                       inputMode="numeric"
+                     />
                     <p className="text-xs text-brand-charcoal/30 mt-1">Deixe em branco se não houver limite de vagas.</p>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Descrição Curta</label>
-                    <input
-                      value={produtoForm.descricao_curta}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, descricao_curta: e.target.value })}
-                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                      placeholder="Encontros quinzenais · 2h · Grupos reduzidos"
-                    />
+<input
+                       value={produtoForm.descricao_curta}
+                       onChange={(e) => setProdutoForm({ ...produtoForm, descricao_curta: e.target.value })}
+                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                       placeholder="Encontros quinzenais · 2h · Grupos reduzidos"
+                     />
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Descrição</label>
-                    <textarea
-                      value={produtoForm.descricao}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, descricao: e.target.value })}
-                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                      rows={3}
-                      placeholder="Descrição completa do produto..."
-                    />
+<textarea
+                       value={produtoForm.descricao}
+                       onChange={(e) => setProdutoForm({ ...produtoForm, descricao: e.target.value })}
+                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                       rows={3}
+                       placeholder="Descrição completa do produto..."
+                     />
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Imagem do Produto</label>
@@ -574,13 +576,13 @@ export default function AdminPage() {
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">
                       Benefícios (1 por linha)
                     </label>
-                    <textarea
-                      value={produtoForm.beneficios}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, beneficios: e.target.value })}
-                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/30"
-                      rows={4}
-                      placeholder="Acesso à sessão ao vivo&#10;Material de apoio&#10;Grupo de WhatsApp"
-                    />
+<textarea
+                       value={produtoForm.beneficios}
+                       onChange={(e) => setProdutoForm({ ...produtoForm, beneficios: e.target.value })}
+                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                       rows={4}
+                       placeholder="Acesso à sessão ao vivo&#10;Material de apoio&#10;Grupo de WhatsApp"
+                     />
                   </div>
                   <div className="flex items-center gap-6">
                     <label className="flex items-center gap-2 text-sm text-brand-charcoal/70">
@@ -928,30 +930,30 @@ export default function AdminPage() {
             <div className="space-y-3 mb-5">
               <div>
                 <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Nome</label>
-                <input
-                  type="text"
-                  value={editando.nome}
-                  onChange={(e) => setEditando({ ...editando, nome: e.target.value })}
-                  className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-purple"
-                />
+<input
+                   type="text"
+                   value={editando.nome}
+                   onChange={(e) => setEditando({ ...editando, nome: e.target.value })}
+                   className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus-visible:border-brand-purple"
+                 />
               </div>
               <div>
                 <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">E-mail</label>
-                <input
-                  type="email"
-                  value={editando.email}
-                  onChange={(e) => setEditando({ ...editando, email: e.target.value })}
-                  className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-purple"
-                />
+<input
+                   type="email"
+                   value={editando.email}
+                   onChange={(e) => setEditando({ ...editando, email: e.target.value })}
+                   className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus-visible:border-brand-purple"
+                 />
               </div>
               <div>
                 <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">WhatsApp</label>
-                <input
-                  type="text"
-                  value={editando.telefone}
-                  onChange={(e) => setEditando({ ...editando, telefone: e.target.value })}
-                  className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-purple"
-                />
+<input
+                   type="text"
+                   value={editando.telefone}
+                   onChange={(e) => setEditando({ ...editando, telefone: e.target.value })}
+                   className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus-visible:border-brand-purple"
+                 />
               </div>
             </div>
             <div className="flex gap-3 justify-end">
