@@ -64,8 +64,8 @@ export default function VisualGallery() {
             duration={0.8}
           />
           <p className="mt-4 text-brand-charcoal/60 text-lg max-w-xl mx-auto">
-            Cada detalhe do ambiente foi pensado para que você se sinta seguro,
-            confortável e pronto para se conectar consigo mesmo e com os outros.
+            Há mais de 10 anos, criamos experiências que transformam pessoas,
+            famílias, relações e organizações, despertando consciência e novos caminhos.
           </p>
         </motion.div>
 
