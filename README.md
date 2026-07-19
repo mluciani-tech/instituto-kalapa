@@ -16,16 +16,18 @@ Landing page de conversão para o Instituto Kalapa com catálogo de serviços, c
 
 ## Funcionalidades
 
-- **Hero** com animação BlurText (blur→focus) e gradiente cinematográfico
+- **Hero** com imagem de fundo real do Instituto e animação BlurText
 - **Seção "A Experiência do Grupo"** com SplitText, GlareHover e ShinyText
-- **Galeria visual** com BentoGrid e CardHoverEffect
+- **Galeria visual** com 11 fotos reais do Instituto Kalapa (grid responsivo 2-3 colunas)
 - **Catálogo de produtos** com cards StarBorder (borda animada) e contador de vagas
+- **Filtro por slug/categoria** — produtos filtrados por slug ou categoria na URL
 - **Checkout premium** com cards glass-card-light, Pix/Cartão, parcelamento até 12x
 - **Webhook de pagamento** com verificação HMAC por order (token único, não reutilizável)
 - **Pós-pagamento** com confirmação e link para comprovante
 - **Painel Admin** (`/admin`) com:
   - Login com HMAC-SHA256 (cookie httpOnly, 24h expiry)
   - CRUD de produtos (criar, editar, desativar, vagas por produto)
+  - Slug auto-normalizado (URL-friendly, sem acentos)
   - Upload de imagens para Supabase Storage (auth required)
   - Tabela de pedidos com busca, sort e paginação
   - Tabela de inscrições com busca, sort e paginação
@@ -87,11 +89,14 @@ Execute na ordem:
 1. `supabase/schema.sql` — tabelas base (configuracoes + inscricoes)
 2. `supabase/schema-v2.sql` — adiciona produtos, pedidos, vincula inscricoes
 3. `supabase/migrate-vagas-per-produto.sql` — adiciona `vagas_maximas` por produto
+4. `supabase/migrate-categoria.sql` — adiciona coluna `categoria`
+5. `supabase/migrate-forma-pagamento.sql` — adiciona coluna `forma_pagamento_disponivel`
+6. `supabase/migrate-slug-unique.sql` — remove constraint UNIQUE do slug (permite filtro por slug)
 
 ### Estrutura das tabelas
 
 - **configuracoes** — chave/valor (turma_atual, vagas_maximas)
-- **produtos** — catálogo de serviços (nome, preço, vagas_maximas, destaque)
+- **produtos** — catálogo de serviços (nome, slug, preço, vagas_maximas, destaque, categoria)
 - **pedidos** — transações (order_nsu, produto_id, status, valor)
 - **inscricoes** — participantes (turma_id, pedido_id, nome, email, status)
 
