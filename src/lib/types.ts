@@ -6,7 +6,7 @@ export interface Produto {
   nome: string;
   descricao: string | null;
   descricao_curta: string | null;
-  preco: number;
+  preco?: number | null;
   imagem_url: string | null;
   beneficios: string[];
   destaque?: boolean;

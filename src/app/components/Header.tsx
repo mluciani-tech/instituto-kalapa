@@ -8,7 +8,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/produtos?categoria=vivencias", label: "Vivências" },
   { href: "/produtos?categoria=atendimentos", label: "Atendimentos" },
-  { href: "/produtos?categoria=constelacao", label: "Constelação" },
+  { href: "/produtos?categoria=calendario", label: "Calendário" },
 ];
 
 const contatos = {
@@ -95,11 +95,7 @@ export default function Header() {
               alt=""
               width={96}
               height={96}
-              className={`w-20 h-20 md:w-24 md:h-24 object-contain rounded-xl p-1 transition-transform duration-300 group-hover:scale-105 ${
-                scrolled
-                  ? "bg-white/85 backdrop-blur-md border border-white/60 shadow-sm"
-                  : "bg-transparent mix-blend-screen"
-              }`}
+              className="w-20 h-20 md:w-24 md:h-24 object-contain rounded-xl p-1 bg-white shadow-md transition-transform duration-300 group-hover:scale-105"
             />
             <div className="leading-tight">
               <span className={`block font-bold text-base md:text-lg tracking-tight transition-colors ${textColor}`}>

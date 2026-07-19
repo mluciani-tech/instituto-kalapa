@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { QrCode, CreditCard, ShieldCheck, Check, ExternalLink, Package, ArrowLeft } from "lucide-react";
+import { QrCode, CreditCard, ShieldCheck, Check, ExternalLink, Package, ArrowLeft, CheckCircle2 } from "lucide-react";
 import type { Produto } from "@/lib/types";
 
 interface DadosInscricao {
@@ -155,7 +155,8 @@ export default function Checkout() {
     );
   }
 
-  const preco = produto.preco;
+  const preco = produto.preco ?? 0;
+  const isGratuito = preco <= 0;
 
   return (
     <section className="relative min-h-screen py-20 bg-brand-charcoal overflow-hidden flex items-center justify-center">
@@ -209,10 +210,18 @@ export default function Checkout() {
 
                 <div className="border-t border-brand-charcoal/10 pt-6">
                   <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-5xl md:text-6xl font-bold text-brand-charcoal">
-                      R$ {preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </span>
-                    <span className="text-brand-charcoal/45 text-lg">/ sessão</span>
+                    {isGratuito ? (
+                      <span className="text-5xl md:text-6xl font-bold text-brand-mint">
+                        Gratuito
+                      </span>
+                    ) : (
+                      <>
+                        <span className="text-5xl md:text-6xl font-bold text-brand-charcoal">
+                          R$ {preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </span>
+                        <span className="text-brand-charcoal/45 text-lg">/ sessão</span>
+                      </>
+                    )}
                   </div>
                   {produto.descricao && (
                     <p className="text-brand-charcoal/60 text-sm leading-relaxed">
@@ -232,119 +241,167 @@ export default function Checkout() {
               </ul>
             </div>
 
-            {/* Lado direito — Métodos de pagamento */}
+            {/* Lado direito — Métodos de pagamento ou confirmação gratuita */}
             <div className="glass-card-light rounded-2xl p-8 md:p-10 flex flex-col justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-brand-charcoal mb-6">
-                  Forma de pagamento
-                </h3>
+              {isGratuito ? (
+                /* Produto gratuito — sem pagamento */
+                <div className="flex flex-col items-center justify-center text-center py-8">
+                  <CheckCircle2 className="w-16 h-16 text-brand-mint mb-4" />
+                  <h3 className="text-lg font-semibold text-brand-charcoal mb-2">
+                    Inscrição gratuita
+                  </h3>
+                  <p className="text-brand-charcoal/50 text-sm mb-8 max-w-xs">
+                    Confirme seus dados para garantir sua vaga.
+                  </p>
 
-                <div className="space-y-3 mb-8">
-                  {metodosPagamento.map((metodo) => (
+                  <div>
+                    {erro && (
+                      <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+                        {erro}
+                      </div>
+                    )}
+
                     <button
-                      key={metodo.id}
-                      onClick={() => setMetodoSelecionado(metodo.id)}
-                      className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
-                        metodoSelecionado === metodo.id
-                          ? "border-brand-mint bg-brand-mint/10"
-                          : "border-brand-charcoal/10 hover:border-brand-charcoal/20 hover:bg-brand-charcoal/5"
-                      }`}
+                      onClick={handleFinalizarPagamento}
+                      disabled={processando}
+                      className="w-full py-4 bg-brand-mint hover:bg-brand-mint-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-mint/25 hover:shadow-brand-mint/40 cursor-pointer disabled:opacity-50 text-sm md:text-base flex items-center justify-center gap-2"
                     >
-                      <div
-                        className={`${
-                          metodoSelecionado === metodo.id
-                            ? "text-brand-mint"
-                            : "text-brand-charcoal/40"
-                        }`}
-                      >
-                        {metodo.icone}
-                      </div>
-                      <div className="text-left">
-                        <div className="text-brand-charcoal font-medium">{metodo.nome}</div>
-                        <div className="text-brand-charcoal/50 text-sm">{metodo.descricao}</div>
-                      </div>
-                      <div className="ml-auto">
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      {processando ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Confirmando...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-5 h-5" />
+                          Confirmar inscrição
+                        </>
+                      )}
+                    </button>
+
+                    {dadosInscricao && (
+                      <p className="text-brand-charcoal/40 text-center text-[10px] mt-3">
+                        Inscrição de: {dadosInscricao.nome} ({dadosInscricao.email})
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* Produto pago — fluxo normal */
+                <>
+                  <div>
+                    <h3 className="text-lg font-semibold text-brand-charcoal mb-6">
+                      Forma de pagamento
+                    </h3>
+
+                    <div className="space-y-3 mb-8">
+                      {metodosPagamento.map((metodo) => (
+                        <button
+                          key={metodo.id}
+                          onClick={() => setMetodoSelecionado(metodo.id)}
+                          className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
                             metodoSelecionado === metodo.id
-                              ? "border-brand-mint"
-                              : "border-brand-charcoal/20"
+                              ? "border-brand-mint bg-brand-mint/10"
+                              : "border-brand-charcoal/10 hover:border-brand-charcoal/20 hover:bg-brand-charcoal/5"
                           }`}
                         >
-                          {metodoSelecionado === metodo.id && (
-                            <div className="w-2.5 h-2.5 rounded-full bg-brand-mint" />
-                          )}
-                        </div>
+                          <div
+                            className={`${
+                              metodoSelecionado === metodo.id
+                                ? "text-brand-mint"
+                                : "text-brand-charcoal/40"
+                            }`}
+                          >
+                            {metodo.icone}
+                          </div>
+                          <div className="text-left">
+                            <div className="text-brand-charcoal font-medium">{metodo.nome}</div>
+                            <div className="text-brand-charcoal/50 text-sm">{metodo.descricao}</div>
+                          </div>
+                          <div className="ml-auto">
+                            <div
+                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                metodoSelecionado === metodo.id
+                                  ? "border-brand-mint"
+                                  : "border-brand-charcoal/20"
+                              }`}
+                            >
+                              {metodoSelecionado === metodo.id && (
+                                <div className="w-2.5 h-2.5 rounded-full bg-brand-mint" />
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {metodoSelecionado === "cartao" && (
+                      <div className="mb-6 p-4 rounded-xl bg-brand-charcoal/5 border border-brand-charcoal/10">
+                        <label
+                          htmlFor="parcelamento"
+                          className="text-brand-charcoal/60 text-sm block mb-2"
+                        >
+                          Parcelamento
+                        </label>
+                        <select
+                          id="parcelamento"
+                          className="w-full bg-white text-brand-charcoal border border-brand-charcoal/10 rounded-lg px-4 py-3.5 text-sm focus:outline-none focus:border-brand-mint transition-colors appearance-none cursor-pointer"
+                        >
+                          <option value="1">1x de R$ {preco.toFixed(2).replace(".", ",")}</option>
+                          <option value="2">2x de R$ {(preco / 2).toFixed(2).replace(".", ",")}</option>
+                          <option value="3">3x de R$ {(preco / 3).toFixed(2).replace(".", ",")}</option>
+                        </select>
                       </div>
+                    )}
+                  </div>
+
+                  <div>
+                    {erro && (
+                      <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+                        {erro}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleFinalizarPagamento}
+                      disabled={processando}
+                      className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 cursor-pointer disabled:opacity-50 text-sm md:text-base flex items-center justify-center gap-2"
+                    >
+                      {processando ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Redirecionando para pagamento...
+                        </>
+                      ) : (
+                        <>
+                          Pagar com InfinitePay
+                          <ExternalLink className="w-4 h-4" />
+                        </>
+                      )}
                     </button>
-                  ))}
-                </div>
 
-                {metodoSelecionado === "cartao" && (
-                  <div className="mb-6 p-4 rounded-xl bg-brand-charcoal/5 border border-brand-charcoal/10">
-                    <label
-                      htmlFor="parcelamento"
-                      className="text-brand-charcoal/60 text-sm block mb-2"
-                    >
-                      Parcelamento
-                    </label>
-                    <select
-                      id="parcelamento"
-                      className="w-full bg-white text-brand-charcoal border border-brand-charcoal/10 rounded-lg px-4 py-3.5 text-sm focus:outline-none focus:border-brand-mint transition-colors appearance-none cursor-pointer"
-                    >
-                      <option value="1">1x de R$ {preco.toFixed(2).replace(".", ",")}</option>
-                      <option value="2">2x de R$ {(preco / 2).toFixed(2).replace(".", ",")}</option>
-                      <option value="3">3x de R$ {(preco / 3).toFixed(2).replace(".", ",")}</option>
-                    </select>
+                    {dadosInscricao && (
+                      <p className="text-brand-charcoal/40 text-center text-[10px] mt-2">
+                        Compra de: {dadosInscricao.nome} ({dadosInscricao.email})
+                      </p>
+                    )}
+
+                    <div className="mt-6 pt-6 border-t border-brand-charcoal/10 flex items-center justify-center gap-3">
+                      <ShieldCheck className="w-5 h-5 text-brand-charcoal/30" />
+                      <span className="text-brand-charcoal/40 text-sm tracking-wide">
+                        Processamento seguro por{" "}
+                        <strong className="text-brand-charcoal/60">InfinitePay</strong>
+                      </span>
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-center gap-6 text-brand-charcoal/30 text-xs">
+                      <span>SSL Criptografado</span>
+                      <span>Dados Protegidos</span>
+                      <span>LGPD</span>
+                    </div>
                   </div>
-                )}
-              </div>
-
-              <div>
-                {erro && (
-                  <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
-                    {erro}
-                  </div>
-                )}
-
-                <button
-                  onClick={handleFinalizarPagamento}
-                  disabled={processando}
-                  className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 cursor-pointer disabled:opacity-50 text-sm md:text-base flex items-center justify-center gap-2"
-                >
-                  {processando ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Redirecionando para pagamento...
-                    </>
-                  ) : (
-                    <>
-                      Pagar com InfinitePay
-                      <ExternalLink className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-
-                {dadosInscricao && (
-                  <p className="text-brand-charcoal/40 text-center text-[10px] mt-2">
-                    Compra de: {dadosInscricao.nome} ({dadosInscricao.email})
-                  </p>
-                )}
-
-                <div className="mt-6 pt-6 border-t border-brand-charcoal/10 flex items-center justify-center gap-3">
-                  <ShieldCheck className="w-5 h-5 text-brand-charcoal/30" />
-                  <span className="text-brand-charcoal/40 text-sm tracking-wide">
-                    Processamento seguro por{" "}
-                    <strong className="text-brand-charcoal/60">InfinitePay</strong>
-                  </span>
-                </div>
-
-                <div className="mt-6 flex items-center justify-center gap-6 text-brand-charcoal/30 text-xs">
-                  <span>SSL Criptografado</span>
-                  <span>Dados Protegidos</span>
-                  <span>LGPD</span>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           </motion.div>
         </AnimatePresence>

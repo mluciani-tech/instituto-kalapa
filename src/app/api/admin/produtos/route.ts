@@ -47,9 +47,9 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { slug, nome, descricao, descricao_curta, preco, imagem_url, beneficios, destaque, ativo, ordem, vagas_maximas } = body;
 
-  if (!slug || !nome || preco === undefined) {
+  if (!slug || !nome) {
     return NextResponse.json(
-      { error: "slug, nome e preco são obrigatórios" },
+      { error: "slug e nome são obrigatórios" },
       { status: 400 }
     );
   }

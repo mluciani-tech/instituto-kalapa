@@ -22,10 +22,11 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
     router.push("/checkout");
   };
 
-  const precoFormatado = produto.preco.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
+  const preco = produto.preco ?? 0;
+  const isGratuito = preco <= 0;
+  const precoFormatado = isGratuito
+    ? "Gratuito"
+    : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const vagasEsgotadas = vagas && vagas.restantes <= 0;
   const vagasQuaseEsgotadas = vagas && vagas.restantes > 0 && vagas.restantes <= 3;
@@ -134,7 +135,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                 <span className="text-3xl font-bold text-brand-charcoal tabular-nums">
                   {precoFormatado}
                 </span>
-                <span className="text-sm text-brand-charcoal/45 mb-1">/ sessão</span>
+                {!isGratuito && <span className="text-sm text-brand-charcoal/45 mb-1">/ sessão</span>}
               </div>
 
               <button

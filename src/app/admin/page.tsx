@@ -321,7 +321,7 @@ export default function AdminPage() {
       nome: p.nome,
       descricao: p.descricao || "",
       descricao_curta: p.descricao_curta || "",
-      preco: p.preco.toString().replace(".", ","),
+      preco: (p.preco ?? 0).toString().replace(".", ","),
       imagem_url: p.imagem_url || "",
       beneficios: p.beneficios.join("\n"),
       vagas_maximas: p.vagas_maximas != null ? p.vagas_maximas.toString() : "",
@@ -589,7 +589,7 @@ export default function AdminPage() {
                      />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Preço (R$) *</label>
+                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Preço (R$)</label>
 <input
                        value={produtoForm.preco}
                        onChange={(e) => setProdutoForm({ ...produtoForm, preco: e.target.value })}
@@ -719,7 +719,7 @@ export default function AdminPage() {
                 <div className="flex gap-3 mt-4">
                   <button
                     onClick={handleSalvarProduto}
-                    disabled={salvandoProduto || !produtoForm.nome || !produtoForm.slug || !produtoForm.preco}
+                    disabled={salvandoProduto || !produtoForm.nome || !produtoForm.slug}
                     className="px-4 py-2 bg-brand-purple text-white text-sm font-medium rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors"
                   >
                     {uploadingImagem ? "Enviando imagem..." : salvandoProduto ? "Salvando..." : "Salvar"}
@@ -750,7 +750,7 @@ export default function AdminPage() {
                         {p.destaque && <span className="text-xs bg-brand-terracotta/10 text-brand-terracotta px-1.5 py-0.5 rounded">Destaque</span>}
                       </div>
                       <p className="text-xs text-brand-charcoal/40 mt-0.5">
-                        {p.slug} · R$ {p.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} · Ordem: {p.ordem}{p.categoria ? ` · ${p.categoria}` : ""}{p.vagas_maximas != null ? ` · Limite: ${p.vagas_maximas} pessoas` : ""}
+                        {p.slug} · {p.preco != null && p.preco > 0 ? `R$ ${(p.preco ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "Gratuito"} · Ordem: {p.ordem}{p.categoria ? ` · ${p.categoria}` : ""}{p.vagas_maximas != null ? ` · Limite: ${p.vagas_maximas} pessoas` : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
