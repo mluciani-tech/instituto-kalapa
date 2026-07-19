@@ -87,6 +87,7 @@ export default function AdminPage() {
     beneficios: "",
     vagas_maximas: "",
     categoria: "",
+    forma_pagamento_disponivel: "ambos",
     destaque: false,
     ativo: true,
     ordem: "0",
@@ -245,7 +246,7 @@ export default function AdminPage() {
     setProdutoForm({
       slug: "", nome: "", descricao: "", descricao_curta: "",
       preco: "", imagem_url: "", beneficios: "", vagas_maximas: "",
-      categoria: "", destaque: false, ativo: true, ordem: "0",
+      categoria: "", forma_pagamento_disponivel: "ambos", destaque: false, ativo: true, ordem: "0",
     });
     setProdutoImagemFile(null);
     setProdutoEditando(null);
@@ -326,6 +327,7 @@ export default function AdminPage() {
       beneficios: p.beneficios.join("\n"),
       vagas_maximas: p.vagas_maximas != null ? p.vagas_maximas.toString() : "",
       categoria: p.categoria || "",
+      forma_pagamento_disponivel: p.forma_pagamento_disponivel || "ambos",
       destaque: p.destaque ?? false,
       ativo: p.ativo ?? true,
       ordem: (p.ordem ?? 0).toString(),
@@ -617,6 +619,18 @@ export default function AdminPage() {
                        placeholder="Ex: atendimentos, vivencias"
                      />
                     <p className="text-xs text-brand-charcoal/30 mt-1">Agrupa produtos na página inicial.</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Forma de Pagamento</label>
+                    <select
+                      value={produtoForm.forma_pagamento_disponivel}
+                      onChange={(e) => setProdutoForm({ ...produtoForm, forma_pagamento_disponivel: e.target.value })}
+                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                    >
+                      <option value="ambos">Ambos (PIX + Cartão)</option>
+                      <option value="pix">Apenas PIX</option>
+                      <option value="cartao">Apenas Cartão</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Limite de Pessoas <span className="text-brand-charcoal/30">(opcional)</span></label>

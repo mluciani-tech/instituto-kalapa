@@ -34,6 +34,15 @@ export default function Checkout() {
   const [metodoSelecionado, setMetodoSelecionado] = useState("pix");
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState("");
+  const [parcelasDisponiveis, setParcelasDisponiveis] = useState<{ qtd: number; valor: number; taxa?: number }[]>([]);
+
+  const formaPagamento = produto?.forma_pagamento_disponivel || "ambos";
+
+  const metodosFiltrados = metodosPagamento.filter((m) => {
+    if (formaPagamento === "pix") return m.id === "pix";
+    if (formaPagamento === "cartao") return m.id === "cartao";
+    return true;
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,6 +61,11 @@ export default function Checkout() {
           if (res.ok) {
             const data = await res.json();
             setProduto(data);
+
+            // Ajusta método padrão conforme configuração do produto
+            const forma = data.forma_pagamento_disponivel || "ambos";
+            if (forma === "pix") setMetodoSelecionado("pix");
+            else if (forma === "cartao") setMetodoSelecionado("cartao");
           }
         }
       } catch {
@@ -61,6 +75,27 @@ export default function Checkout() {
     };
     fetchData();
   }, []);
+
+  // Busca taxas de parcelamento da InfinitePay quando produto é carregado
+  useEffect(() => {
+    if (!produto || isGratuito) return;
+
+    const fetchParcelas = async () => {
+      try {
+        const res = await fetch(`/api/parcelas?produto_id=${produto.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.parcelas && data.parcelas.length > 0) {
+            setParcelasDisponiveis(data.parcelas);
+          }
+        }
+      } catch {
+        // Fallback: parcelas sem taxas explícitas
+      }
+    };
+
+    fetchParcelas();
+  }, [produto?.id]);
 
   const formatPhoneForInfinitePay = (phone: string): string | null => {
     const numbers = phone.replace(/\D/g, "");
@@ -330,7 +365,7 @@ export default function Checkout() {
                     </h3>
 
                     <div className="space-y-3 mb-8">
-                      {metodosPagamento.map((metodo) => (
+                      {metodosFiltrados.map((metodo) => (
                         <button
                           key={metodo.id}
                           onClick={() => setMetodoSelecionado(metodo.id)}

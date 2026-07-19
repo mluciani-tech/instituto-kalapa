@@ -51,7 +51,7 @@ export async function PUT(
   const updates: Record<string, unknown> = {};
   const allowedFields = [
     "slug", "nome", "descricao", "descricao_curta", "preco",
-    "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "categoria",
+    "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "categoria", "forma_pagamento_disponivel",
   ];
 
   for (const field of allowedFields) {

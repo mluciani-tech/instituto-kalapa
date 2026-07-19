@@ -14,6 +14,7 @@ export interface Produto {
   ordem?: number;
   vagas_maximas: number | null;
   categoria?: string | null;
+  forma_pagamento_disponivel?: string | null;
   created_at?: string;
 }
 

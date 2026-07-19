@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { slug, nome, descricao, descricao_curta, preco, imagem_url, beneficios, destaque, ativo, ordem, vagas_maximas } = body;
+  const { slug, nome, descricao, descricao_curta, preco, imagem_url, beneficios, destaque, ativo, ordem, vagas_maximas, categoria, forma_pagamento_disponivel } = body;
 
   if (!slug || !nome) {
     return NextResponse.json(
@@ -68,6 +68,8 @@ export async function POST(req: NextRequest) {
       ativo: ativo !== false,
       ordem: ordem || 0,
       vagas_maximas: vagas_maximas != null ? Number(vagas_maximas) : null,
+      categoria: categoria || null,
+      forma_pagamento_disponivel: forma_pagamento_disponivel || "ambos",
     })
     .select()
     .single();
