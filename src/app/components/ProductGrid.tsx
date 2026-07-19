@@ -29,7 +29,7 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
           const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
           const cat = normalize(categoria);
           produtosData = produtosData.filter(
-            (p) => normalize(p.categoria || "") === cat
+            (p) => normalize(p.categoria || "") === cat || normalize(p.slug || "") === cat
           );
         }
 
