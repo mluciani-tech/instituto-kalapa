@@ -36,7 +36,8 @@ export async function GET(req: NextRequest) {
       `, { count: "exact" });
 
     if (search) {
-      query = query.or(`cliente_nome.ilike.%${search}%,cliente_email.ilike.%${search}%,order_nsu.ilike.%${search}%`);
+      const safe = search.replace(/[(),\\]/g, "");
+      query = query.or(`cliente_nome.ilike.%${safe}%,cliente_email.ilike.%${safe}%,order_nsu.ilike.%${safe}%`);
     }
 
     const sortColumn = ALLOWED_SORT_PEDIDOS.includes(sortKey) ? sortKey : "created_at";

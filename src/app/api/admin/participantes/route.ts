@@ -33,7 +33,8 @@ export async function GET(req: NextRequest) {
       .select("*", { count: "exact" });
 
     if (search) {
-      query = query.or(`nome.ilike.%${search}%,email.ilike.%${search}%,telefone.ilike.%${search}%,turma_id.ilike.%${search}%`);
+      const safe = search.replace(/[(),\\]/g, "");
+      query = query.or(`nome.ilike.%${safe}%,email.ilike.%${safe}%,telefone.ilike.%${safe}%,turma_id.ilike.%${safe}%`);
     }
 
     const sortColumn = ALLOWED_SORT_PARTICIPANTES.includes(sortKey) ? sortKey : "created_at";
