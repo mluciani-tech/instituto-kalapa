@@ -93,9 +93,13 @@ export default function Header() {
             <img
               src="/logo-kalapa.png"
               alt=""
-              width={44}
-              height={44}
-              className="w-10 h-10 md:w-11 md:h-11 object-contain rounded-xl bg-white/85 backdrop-blur-md border border-white/60 shadow-sm p-1 transition-transform duration-300 group-hover:scale-105"
+              width={64}
+              height={64}
+              className={`w-14 h-14 md:w-16 md:h-16 object-contain rounded-xl p-1 transition-transform duration-300 group-hover:scale-105 ${
+                scrolled
+                  ? "bg-white/85 backdrop-blur-md border border-white/60 shadow-sm"
+                  : "bg-transparent"
+              }`}
             />
             <div className="leading-tight">
               <span className={`block font-bold text-base md:text-lg tracking-tight transition-colors ${textColor}`}>
