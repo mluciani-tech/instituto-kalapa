@@ -4,7 +4,7 @@ import { checkAdminAuth } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
-// PATCH: editar dados do cliente no pedido
+// PATCH: editar dados do cliente no pedido + sincronizar inscrição vinculada
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -24,16 +24,27 @@ export async function PATCH(
   const body = await req.json();
 
   const updates: Record<string, unknown> = {};
+  const inscSync: Record<string, unknown> = {};
   const fieldMap: Record<string, string> = {
     nome: "cliente_nome",
     email: "cliente_email",
     telefone: "cliente_telefone",
     status: "status",
   };
+  const inscFieldMap: Record<string, string> = {
+    nome: "nome",
+    email: "email",
+    telefone: "telefone",
+    status: "status",
+  };
 
   for (const [input, column] of Object.entries(fieldMap)) {
     if (body[input] !== undefined && typeof body[input] === "string" && body[input].trim()) {
-      updates[column] = body[input].trim();
+      const val = body[input].trim();
+      updates[column] = val;
+      if (inscFieldMap[input]) {
+        inscSync[inscFieldMap[input]] = val;
+      }
     }
   }
 
@@ -59,6 +70,18 @@ export async function PATCH(
       { error: "Erro ao atualizar pedido" },
       { status: 500 }
     );
+  }
+
+  // Sincronizar inscrição vinculada
+  if (Object.keys(inscSync).length > 0) {
+    const { error: syncError } = await supabaseAdmin!
+      .from("inscricoes")
+      .update(inscSync)
+      .eq("pedido_id", id);
+
+    if (syncError) {
+      console.warn("[admin/pedidos] Erro ao sincronizar inscrição:", syncError);
+    }
   }
 
   return NextResponse.json(data);
