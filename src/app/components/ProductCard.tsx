@@ -82,9 +82,14 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
             )}
 
             {produto.descricao && (
-              <p className="text-sm text-brand-charcoal/70 leading-relaxed mb-4 flex-1">
-                {produto.descricao}
-              </p>
+              <ul className="space-y-1 mb-4 flex-1">
+                {produto.descricao.split("\n").filter((l) => l.trim()).map((linha) => (
+                  <li key={linha} className="flex items-start gap-2 text-sm text-brand-charcoal/70">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta/50 mt-1.5 flex-shrink-0" />
+                    {linha}
+                  </li>
+                ))}
+              </ul>
             )}
 
             {/* Benefícios */}

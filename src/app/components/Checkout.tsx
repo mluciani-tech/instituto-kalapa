@@ -224,9 +224,14 @@ export default function Checkout() {
                     )}
                   </div>
                   {produto.descricao && (
-                    <p className="text-brand-charcoal/60 text-sm leading-relaxed">
-                      {produto.descricao}
-                    </p>
+                    <ul className="space-y-1 mt-2">
+                      {produto.descricao.split("\n").filter((l) => l.trim()).map((linha) => (
+                        <li key={linha} className="flex items-start gap-2 text-brand-charcoal/60 text-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta/50 mt-1.5 flex-shrink-0" />
+                          {linha}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
               </div>

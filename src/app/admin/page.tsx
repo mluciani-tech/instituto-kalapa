@@ -639,13 +639,15 @@ export default function AdminPage() {
                      />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Descrição</label>
+                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">
+                      Descrição (1 por linha)
+                    </label>
 <textarea
                        value={produtoForm.descricao}
                        onChange={(e) => setProdutoForm({ ...produtoForm, descricao: e.target.value })}
                        className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
-                       rows={3}
-                       placeholder="Descrição completa do produto..."
+                       rows={4}
+                       placeholder="Data: 25/07 (Constelação)&#10;Horário: 19h às 21h&#10;Local: Alameda Tangará, 500"
                      />
                   </div>
                   <div className="sm:col-span-2">
