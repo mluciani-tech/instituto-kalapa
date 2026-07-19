@@ -22,7 +22,7 @@ const metodosPagamento = [
   {
     id: "cartao",
     nome: "Cartão de Crédito",
-    descricao: "Até 12x sem juros",
+    descricao: "Até 3x sem juros",
     icone: <CreditCard className="w-6 h-6" />,
   },
 ];
@@ -295,9 +295,6 @@ export default function Checkout() {
                       <option value="1">1x de R$ {preco.toFixed(2).replace(".", ",")}</option>
                       <option value="2">2x de R$ {(preco / 2).toFixed(2).replace(".", ",")}</option>
                       <option value="3">3x de R$ {(preco / 3).toFixed(2).replace(".", ",")}</option>
-                      <option value="4">4x de R$ {(preco / 4).toFixed(2).replace(".", ",")}</option>
-                      <option value="6">6x de R$ {(preco / 6).toFixed(2).replace(".", ",")}</option>
-                      <option value="12">12x de R$ {(preco / 12).toFixed(2).replace(".", ",")}</option>
                     </select>
                   </div>
                 )}
