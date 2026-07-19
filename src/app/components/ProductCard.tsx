@@ -39,6 +39,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
         delay: index * 0.1,
         ease: [0.16, 1, 0.3, 1],
       }}
+      className="h-full"
     >
       <StarBorder
         color="#B8965A"

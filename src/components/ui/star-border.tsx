@@ -11,7 +11,7 @@ type StarBorderProps<T extends React.ElementType> = React.ComponentPropsWithoutR
   thickness?: number;
 };
 
-const StarBorder = <T extends React.ElementType = "button">({
+const StarBorder = <T extends React.ElementType = "div">({
   as,
   className = "",
   color = "white",

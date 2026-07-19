@@ -22,10 +22,11 @@ export default function ProductGrid() {
         const produtosData: Produto[] = await prodRes.json();
         setProdutos(produtosData);
 
-        // Fetch vagas for all products
-        if (produtosData.length > 0) {
+        // Fetch vagas only for products with vagas_maximas defined
+        const produtosComVagas = produtosData.filter((p) => p.vagas_maximas != null);
+        if (produtosComVagas.length > 0) {
           const vagasResults = await Promise.all(
-            produtosData.map((p) =>
+            produtosComVagas.map((p) =>
               fetch(`/api/vagas?produto_id=${p.id}`)
                 .then((r) => r.ok ? r.json() : null)
                 .catch(() => null)
@@ -33,7 +34,7 @@ export default function ProductGrid() {
           );
 
           const map: Record<string, VagasInfo> = {};
-          produtosData.forEach((p, i) => {
+          produtosComVagas.forEach((p, i) => {
             if (vagasResults[i]) {
               map[p.id] = vagasResults[i];
             }
@@ -78,7 +79,7 @@ export default function ProductGrid() {
           key={produto.id}
           produto={produto}
           index={index}
-          vagas={vagasMap[produto.id] || null}
+          vagas={produto.vagas_maximas != null ? vagasMap[produto.id] || null : null}
         />
       ))}
     </motion.div>
