@@ -136,29 +136,33 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
 
             {/* Preço + CTA */}
             <div className="mt-auto pt-4 border-t border-brand-charcoal/10">
-              <div className="flex items-end gap-1 mb-3">
-                <span className="text-3xl font-bold text-brand-charcoal tabular-nums">
-                  {precoFormatado}
-                </span>
-                {!isGratuito && <span className="text-sm text-brand-charcoal/45 mb-1">/ sessão</span>}
-              </div>
+              {!isGratuito && (
+                <div className="flex items-end gap-1 mb-3">
+                  <span className="text-3xl font-bold text-brand-charcoal tabular-nums">
+                    {precoFormatado}
+                  </span>
+                  <span className="text-sm text-brand-charcoal/45 mb-1">/ sessão</span>
+                </div>
+              )}
 
-              <button
-                onClick={handleEscolher}
-                disabled={!!vagasEsgotadas}
-                className={`w-full py-3 font-semibold rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
-                  vagasEsgotadas
-                    ? 'bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed'
-                    : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-lg shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
-                }`}
-              >
-                {vagasEsgotadas ? 'Turma lotada' : (
-                  <>
-                    Escolher
-                    <ArrowRight aria-hidden="true" className="w-4 h-4" />
-                  </>
-                )}
-              </button>
+              {!isGratuito && (
+                <button
+                  onClick={handleEscolher}
+                  disabled={!!vagasEsgotadas}
+                  className={`w-full py-3 font-semibold rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
+                    vagasEsgotadas
+                      ? 'bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed'
+                      : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-lg shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
+                  }`}
+                >
+                  {vagasEsgotadas ? 'Turma lotada' : (
+                    <>
+                      Escolher
+                      <ArrowRight aria-hidden="true" className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
