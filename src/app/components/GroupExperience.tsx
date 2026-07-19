@@ -60,7 +60,7 @@ export default function GroupExperience() {
             duration={0.8}
           />
           <p className="mt-6 text-lg text-brand-charcoal/60 max-w-2xl mx-auto leading-relaxed">
-            As sessões em grupo do INstituto Kalapa são conduzidas por
+            As vivências do INstituto Kalapa são conduzidas por
             profissionais experientes, em um ambiente cuidadosamente preparado
             para promover segurança, escuta ativa e evolução conjunta.
           </p>
