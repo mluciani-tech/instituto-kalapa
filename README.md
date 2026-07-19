@@ -29,11 +29,17 @@ Landing page de conversão para o Instituto Kalapa com venda de ingressos para s
   - Login com HMAC-SHA256 (cookie httpOnly, 24h expiry)
   - Edição de preço da sessão (com suporte a centavos: R$ 40,50)
   - Edição de vagas máximas por turma
-  - Listagem de participantes (cards mobile + tabela desktop)
+  - CRUD de produtos (criar, editar, desativar)
+  - Upload de imagens para Supabase Storage
+  - Tabela de pedidos com busca, sort e paginação
+  - Tabela de inscrições com busca, sort e paginação
+  - Edição de dados de contato (nome, email, WhatsApp) com sincronização pedido↔inscrição
   - Opção de limpar banco de dados
+- **Webhook seguro** com verificação de assinatura InfinitePay + captura de dados do cliente
+- **Preço server-side** — valor nunca exposto no frontend, validado no backend
 - **Notificação por e-mail** via Resend com formatação de moeda brasileira
 - **Responsivo** — mobile-first, touch targets ≥44px, safe areas, viewport-fit
-- **Acessibilidade** — `autocomplete`, `aria-live`, `role`, `prefers-reduced-motion`, `inputmode`
+- **Acessibilidade** — `autocomplete`, `aria-live`, `role`, `prefers-reduced-motion`, `inputmode`, `focus-visible`, `aria-label`
 
 ## Pré-requisitos
 
@@ -144,8 +150,8 @@ Todas as variáveis devem ser configuradas no **Settings → Environment Variabl
 
 ## Links
 
-- **Produção:** https://instituto-kalapa.vercel.app
-- **Painel Admin:** https://instituto-kalapa.vercel.app/admin
+- **Produção:** https://www.institutokalapa.com.br
+- **Painel Admin:** https://www.institutokalapa.com.br/admin
 - **GitHub:** https://github.com/mluciani-tech/instituto-kalapa
 
 ## Estrutura do Projeto
@@ -153,39 +159,49 @@ Todas as variáveis devem ser configuradas no **Settings → Environment Variabl
 ```
 src/
 ├── app/
-│   ├── admin/page.tsx                  # Painel administrativo
+│   ├── admin/page.tsx                     # Painel administrativo completo
 │   ├── api/
 │   │   ├── admin/
-│   │   │   ├── limpar/route.ts         # DELETE — limpa registros
-│   │   │   ├── login/route.ts          # POST — login admin
-│   │   │   ├── logout/route.ts         # POST — logout admin
-│   │   │   ├── participantes/route.ts  # GET — lista participantes
-│   │   │   └── verify/route.ts         # GET — verifica sessão
-│   │   ├── checkout/route.ts           # POST — cria link InfinitePay
-│   │   ├── config/route.ts             # GET/PUT — configurações dinâmicas
-│   │   ├── send-email/route.ts         # POST — salva inscrição + envia e-mail
-│   │   ├── vagas/route.ts              # GET — contagem de vagas
-│   │   └── webhook/route.ts            # POST — confirmação pagamento InfinitePay
+│   │   │   ├── limpar/route.ts            # DELETE — limpa registros
+│   │   │   ├── login/route.ts             # POST — login admin
+│   │   │   ├── logout/route.ts            # POST — logout admin
+│   │   │   ├── pedidos/route.ts           # GET — lista pedidos (busca + sort)
+│   │   │   ├── pedidos/[id]/route.ts      # PATCH — edita pedido + sincroniza inscrição
+│   │   │   ├── participantes/route.ts     # GET — lista inscrições (busca + sort)
+│   │   │   ├── participantes/[id]/route.ts # PATCH — edita inscrição + sincroniza pedido
+│   │   │   ├── produtos/route.ts          # GET/POST — CRUD produtos
+│   │   │   ├── produtos/[id]/route.ts     # PUT/DELETE — editar/desativar produto
+│   │   │   └── verify/route.ts            # GET — verifica sessão
+│   │   ├── checkout/route.ts              # POST — cria link InfinitePay (preço server-side)
+│   │   ├── config/route.ts                # GET/PUT — configurações dinâmicas
+│   │   ├── send-email/route.ts            # POST — salva inscrição + envia e-mail
+│   │   ├── upload/route.ts                # POST — upload imagem para Supabase Storage
+│   │   ├── vagas/route.ts                 # GET — contagem de vagas
+│   │   └── webhook/route.ts              # POST — confirmação pagamento (assinatura verificada)
 │   ├── checkout/
-│   │   ├── page.tsx                    # Página de checkout
-│   │   └── sucesso/page.tsx            # Pós-pagamento
+│   │   ├── page.tsx                       # Página de checkout
+│   │   └── sucesso/page.tsx               # Pós-pagamento
 │   ├── components/
-│   │   ├── Checkout.tsx                # Componente de pagamento
-│   │   ├── Footer.tsx                  # Rodapé
-│   │   ├── GroupExperience.tsx         # Benefícios do grupo
-│   │   ├── Hero.tsx                    # Seção de abertura
-│   │   ├── RegistrationForm.tsx        # Formulário + contador vagas
-│   │   └── VisualGallery.tsx           # Galeria de imagens
-│   ├── globals.css                     # Tema e estilos globais
-│   ├── layout.tsx                      # Layout raiz
-│   └── page.tsx                        # Landing page
+│   │   ├── Checkout.tsx                   # Componente de pagamento
+│   │   ├── Footer.tsx                     # Rodapé
+│   │   ├── GroupExperience.tsx            # Benefícios do grupo
+│   │   ├── Hero.tsx                       # Seção de abertura
+│   │   ├── ProductCard.tsx                # Card de produto
+│   │   ├── ProductGrid.tsx                # Grid de produtos
+│   │   ├── ProductHighlights.tsx          # Destaques do produto
+│   │   ├── RegistrationForm.tsx           # Formulário + contador vagas
+│   │   └── VisualGallery.tsx              # Galeria de imagens
+│   ├── globals.css                        # Tema e estilos globais
+│   ├── layout.tsx                         # Layout raiz
+│   └── page.tsx                           # Landing page
 ├── lib/
-│   ├── auth.ts                         # Autenticação HMAC admin
-│   └── supabase.ts                     # Clientes Supabase
+│   ├── admin-auth.ts                      # Autenticação HMAC admin
+│   ├── supabase.ts                        # Clientes Supabase
+│   └── types.ts                           # Tipos TypeScript
 ├── supabase/
-│   └── schema.sql                      # Schema completo do banco
-├── .env.example                        # Template de variáveis
-└── .env.local                          # Credenciais (não commitado)
+│   └── schema.sql                         # Schema completo do banco
+├── .env.example                           # Template de variáveis
+└── .env.local                             # Credenciais (não commitado)
 ```
 
 ## Cores do Tema
