@@ -28,25 +28,25 @@ function ContactIcons() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Instagram ${contatos.instagramLabel}`}
-        className="block rounded-full bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110 overflow-hidden"
+        className="block rounded-full bg-white shadow-sm hover:shadow-md transition-[box-shadow,transform] duration-300 hover:scale-110 overflow-hidden"
       >
-        <img src="/instagram-icon.jpeg" alt="" className="w-7 h-7 object-cover rounded-full" />
+        <img src="/instagram-icon.jpeg" alt="" width={28} height={28} className="w-7 h-7 object-cover rounded-full" />
       </a>
       <a
         href={`mailto:${contatos.email}`}
         aria-label={`E-mail ${contatos.email}`}
-        className="flex items-center justify-center w-7 h-7 rounded-full bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110"
+        className="flex items-center justify-center w-7 h-7 rounded-full bg-white shadow-sm hover:shadow-md transition-[box-shadow,transform] duration-300 hover:scale-110"
       >
-        <img src="/email-icon.png" alt="" className="w-4 h-4 object-contain" />
+        <img src="/email-icon.png" alt="" width={16} height={16} className="w-4 h-4 object-contain" />
       </a>
       <a
         href={contatos.whatsapp}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`WhatsApp ${contatos.whatsappLabel}`}
-        className="block rounded-lg bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110 overflow-hidden"
+        className="block rounded-lg bg-white shadow-sm hover:shadow-md transition-[box-shadow,transform] duration-300 hover:scale-110 overflow-hidden"
       >
-        <img src="/whatsapp-icon.jpeg" alt="" className="w-7 h-7 object-cover rounded-lg" />
+        <img src="/whatsapp-icon.jpeg" alt="" width={28} height={28} className="w-7 h-7 object-cover rounded-lg" />
       </a>
     </>
   );

@@ -25,7 +25,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
   const preco = produto.preco ?? 0;
   const isGratuito = preco <= 0;
   const precoFormatado = isGratuito
-    ? "Gratuito"
+    ? ""
     : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const vagasEsgotadas = vagas && vagas.restantes <= 0;
@@ -55,6 +55,8 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
               <img
                 src={produto.imagem_url}
                 alt={produto.nome}
+                width={400}
+                height={300}
                 loading="lazy"
                 decoding="async"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

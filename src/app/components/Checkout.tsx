@@ -415,11 +415,22 @@ export default function Checkout() {
                         </label>
                         <select
                           id="parcelamento"
-                          className="w-full bg-white text-brand-charcoal border border-brand-charcoal/10 rounded-lg px-4 py-3.5 text-sm focus:outline-none focus:border-brand-mint transition-colors appearance-none cursor-pointer"
+                          className="w-full bg-white text-brand-charcoal border border-brand-charcoal/10 rounded-lg px-4 py-3.5 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-mint focus-visible:border-brand-mint transition-colors appearance-none cursor-pointer"
                         >
-                          <option value="1">1x de R$ {preco.toFixed(2).replace(".", ",")}</option>
-                          <option value="2">2x de R$ {(preco / 2).toFixed(2).replace(".", ",")}</option>
-                          <option value="3">3x de R$ {(preco / 3).toFixed(2).replace(".", ",")}</option>
+                          {parcelasDisponiveis.length > 0 ? (
+                            parcelasDisponiveis.map((p) => (
+                              <option key={p.qtd} value={p.qtd}>
+                                {p.qtd}x de R$ {p.valor.toFixed(2).replace(".", ",")}
+                                {p.taxa && p.taxa > 0 ? ` (com juros de ${p.taxa}%)` : ""}
+                              </option>
+                            ))
+                          ) : (
+                            <>
+                              <option value="1">1x de R$ {preco.toFixed(2).replace(".", ",")}</option>
+                              <option value="2">2x de R$ {(preco / 2).toFixed(2).replace(".", ",")}</option>
+                              <option value="3">3x de R$ {(preco / 3).toFixed(2).replace(".", ",")}</option>
+                            </>
+                          )}
                         </select>
                       </div>
                     )}
