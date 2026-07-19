@@ -3,6 +3,7 @@ import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 import { checkAdminAuth } from "@/lib/admin-auth";
 
 const DEFAULT_PER_PAGE = 20;
+const ALLOWED_SORT_PARTICIPANTES = ["nome", "email", "telefone", "turma_id", "metodo_pagamento", "created_at"];
 
 export async function GET(req: NextRequest) {
   if (!checkAdminAuth(req)) {
@@ -20,14 +21,25 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
     const perPage = Math.min(100, Math.max(1, parseInt(searchParams.get("perPage") || String(DEFAULT_PER_PAGE)) || DEFAULT_PER_PAGE));
+    const search = searchParams.get("search")?.trim() || "";
+    const sortKey = searchParams.get("sort") || "created_at";
+    const sortDir = (searchParams.get("dir") || "desc").toLowerCase() === "asc" ? "asc" : "desc";
+
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
 
-    const { data, error, count } = await supabaseAdmin!
+    let query = supabaseAdmin!
       .from("inscricoes")
-      .select("*", { count: "exact" })
-      .order("created_at", { ascending: false })
-      .range(from, to);
+      .select("*", { count: "exact" });
+
+    if (search) {
+      query = query.or(`nome.ilike.%${search}%,email.ilike.%${search}%,telefone.ilike.%${search}%,turma_id.ilike.%${search}%`);
+    }
+
+    const sortColumn = ALLOWED_SORT_PARTICIPANTES.includes(sortKey) ? sortKey : "created_at";
+    query = query.order(sortColumn, { ascending: sortDir === "asc" }).range(from, to);
+
+    const { data, error, count } = await query;
 
     if (error) throw error;
 

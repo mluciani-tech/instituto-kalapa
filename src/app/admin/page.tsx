@@ -23,6 +23,38 @@ function formatDate(iso: string) {
   }).format(new Date(iso));
 }
 
+function SortableHeader({
+  children,
+  key: sortKey,
+  currentSort,
+  onSort,
+  className = "",
+}: {
+  children: React.ReactNode;
+  key: string;
+  currentSort: { key: string; dir: "asc" | "desc" };
+  onSort: (key: string) => void;
+  className?: string;
+}) {
+  const isActive = currentSort.key === sortKey;
+  const dir = isActive ? currentSort.dir : "desc";
+  return (
+    <button
+      onClick={() => onSort(sortKey)}
+      className={`flex items-center gap-1 text-left font-medium text-brand-charcoal/70 hover:text-brand-charcoal transition-colors ${className}`}
+      aria-sort={isActive ? (dir === "asc" ? "ascending" : "descending") : "none"}
+    >
+      {children}
+      {isActive && (
+        <span className="inline-flex" aria-hidden="true">
+          {dir === "asc" ? "▲" : "▼"}
+        </span>
+      )}
+      {!isActive && <span className="text-brand-charcoal/30" aria-hidden="true">⇅</span>}
+    </button>
+  );
+}
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -68,12 +100,16 @@ export default function AdminPage() {
   const [pedidosPage, setPedidosPage] = useState(1);
   const [pedidosTotalPages, setPedidosTotalPages] = useState(1);
   const [pedidosTotal, setPedidosTotal] = useState(0);
+  const [pedidosSearch, setPedidosSearch] = useState("");
+  const [pedidosSort, setPedidosSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "created_at", dir: "desc" });
 
   // Participantes
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [participantesPage, setParticipantesPage] = useState(1);
   const [participantesTotalPages, setParticipantesTotalPages] = useState(1);
   const [participantesTotal, setParticipantesTotal] = useState(0);
+  const [participantesSearch, setParticipantesSearch] = useState("");
+  const [participantesSort, setParticipantesSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "created_at", dir: "desc" });
   const [showConfirm, setShowConfirm] = useState(false);
   const [clearing, setClearing] = useState(false);
 
@@ -113,7 +149,13 @@ export default function AdminPage() {
   };
 
   const fetchPedidos = useCallback(async (page = pedidosPage) => {
-    const res = await fetch(`/api/admin/pedidos?page=${page}&perPage=20`);
+    const params = new URLSearchParams({ page: page.toString(), perPage: "20" });
+    if (pedidosSearch) params.set("search", pedidosSearch);
+    if (pedidosSort) {
+      params.set("sort", pedidosSort.key);
+      params.set("dir", pedidosSort.dir);
+    }
+    const res = await fetch(`/api/admin/pedidos?${params.toString()}`);
     if (res.ok) {
       const json: Paginated<Pedido> = await res.json();
       setPedidos(json.data);
@@ -121,10 +163,16 @@ export default function AdminPage() {
       setPedidosTotalPages(json.totalPages);
       setPedidosTotal(json.total);
     }
-  }, [pedidosPage]);
+  }, [pedidosPage, pedidosSearch, pedidosSort]);
 
   const fetchParticipantes = useCallback(async (page = participantesPage) => {
-    const res = await fetch(`/api/admin/participantes?page=${page}&perPage=20`);
+    const params = new URLSearchParams({ page: page.toString(), perPage: "20" });
+    if (participantesSearch) params.set("search", participantesSearch);
+    if (participantesSort) {
+      params.set("sort", participantesSort.key);
+      params.set("dir", participantesSort.dir);
+    }
+    const res = await fetch(`/api/admin/participantes?${params.toString()}`);
     if (res.ok) {
       const json: Paginated<Participante> = await res.json();
       setParticipantes(json.data);
@@ -132,7 +180,7 @@ export default function AdminPage() {
       setParticipantesTotalPages(json.totalPages);
       setParticipantesTotal(json.total);
     }
-  }, [participantesPage]);
+  }, [participantesPage, participantesSearch, participantesSort]);
 
   useEffect(() => { checkAuth(); }, [checkAuth]);
 
@@ -668,7 +716,19 @@ export default function AdminPage() {
         {/* Tab: Pedidos */}
         {activeTab === "pedidos" && (
           <div>
-            <h2 className="text-base font-semibold text-brand-charcoal mb-4">Pedidos</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-semibold text-brand-charcoal">Pedidos</h2>
+              <div className="w-full sm:w-64">
+                <input
+                  type="search"
+                  placeholder="Buscar por nome, e-mail, NSU…"
+                  value={pedidosSearch}
+                  onChange={(e) => { setPedidosSearch(e.target.value); setPedidosPage(1); fetchPedidos(1); }}
+                  className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                  aria-label="Buscar pedidos"
+                />
+              </div>
+            </div>
             {pedidos.length === 0 ? (
               <div className="bg-white rounded-xl border border-brand-beige p-8 text-center text-brand-charcoal/40 text-sm">
                 Nenhum pedido realizado.
@@ -709,11 +769,47 @@ export default function AdminPage() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-brand-beige/50 border-b border-brand-beige">
-                          <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Cliente</th>
+                          <th className="text-left px-4 py-3">
+                            <SortableHeader
+                              key="cliente_nome"
+                              currentSort={pedidosSort}
+                              onSort={(k) => { setPedidosSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchPedidos(1); }}
+                              className="px-4 py-3"
+                            >
+                              Cliente
+                            </SortableHeader>
+                          </th>
                           <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Produto</th>
-                          <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Valor</th>
-                          <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Status</th>
-                          <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Data</th>
+                          <th className="text-left px-4 py-3">
+                            <SortableHeader
+                              key="valor"
+                              currentSort={pedidosSort}
+                              onSort={(k) => { setPedidosSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchPedidos(1); }}
+                              className="px-4 py-3"
+                            >
+                              Valor
+                            </SortableHeader>
+                          </th>
+                          <th className="text-left px-4 py-3">
+                            <SortableHeader
+                              key="status"
+                              currentSort={pedidosSort}
+                              onSort={(k) => { setPedidosSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchPedidos(1); }}
+                              className="px-4 py-3"
+                            >
+                              Status
+                            </SortableHeader>
+                          </th>
+                          <th className="text-left px-4 py-3">
+                            <SortableHeader
+                              key="created_at"
+                              currentSort={pedidosSort}
+                              onSort={(k) => { setPedidosSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchPedidos(1); }}
+                              className="px-4 py-3"
+                            >
+                              Data
+                            </SortableHeader>
+                          </th>
                           <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Ações</th>
                         </tr>
                       </thead>
@@ -789,6 +885,19 @@ export default function AdminPage() {
         {/* Tab: Participantes */}
         {activeTab === "participantes" && (
           <>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-semibold text-brand-charcoal">Inscrições</h2>
+              <div className="w-full sm:w-64">
+                <input
+                  type="search"
+                  placeholder="Buscar por nome, e-mail, WhatsApp…"
+                  value={participantesSearch}
+                  onChange={(e) => { setParticipantesSearch(e.target.value); setParticipantesPage(1); fetchParticipantes(1); }}
+                  className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                  aria-label="Buscar inscrições"
+                />
+              </div>
+            </div>
             <div className="sm:hidden space-y-3">
               {participantes.length === 0 ? (
                 <div className="bg-white rounded-xl border border-brand-beige p-8 text-center text-brand-charcoal/40 text-sm">
@@ -821,12 +930,39 @@ export default function AdminPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-brand-beige/50 border-b border-brand-beige">
-                      <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Nome</th>
-                      <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">E-mail</th>
+                      <th className="text-left px-4 py-3">
+                        <SortableHeader
+                          key="nome"
+                          currentSort={participantesSort}
+                          onSort={(k) => { setParticipantesSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchParticipantes(1); }}
+                          className="px-4 py-3"
+                        >
+                          Nome
+                        </SortableHeader>
+                      </th>
+                      <th className="text-left px-4 py-3">
+                        <SortableHeader
+                          key="email"
+                          currentSort={participantesSort}
+                          onSort={(k) => { setParticipantesSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchParticipantes(1); }}
+                          className="px-4 py-3"
+                        >
+                          E-mail
+                        </SortableHeader>
+                      </th>
                       <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">WhatsApp</th>
                       <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70 hidden md:table-cell">Motivação</th>
                       <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70 hidden lg:table-cell">Pagamento</th>
-                      <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70 hidden sm:table-cell">Data</th>
+                      <th className="text-left px-4 py-3">
+                        <SortableHeader
+                          key="created_at"
+                          currentSort={participantesSort}
+                          onSort={(k) => { setParticipantesSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchParticipantes(1); }}
+                          className="px-4 py-3"
+                        >
+                          Data
+                        </SortableHeader>
+                      </th>
                       <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Ações</th>
                     </tr>
                   </thead>
