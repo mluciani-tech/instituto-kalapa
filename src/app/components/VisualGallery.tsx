@@ -56,7 +56,7 @@ export default function VisualGallery() {
             Galeria Visual
           </span>
           <SplitText
-            text="Cenários que acolhem antes mesmo de você chegar"
+            text="Não oferecemos respostas prontas. Criamos experiências que ampliam a consciência e revelam novas possibilidades de viver."
             tag="h2"
             className="text-3xl md:text-5xl font-bold text-brand-charcoal leading-tight max-w-3xl mx-auto"
             splitType="words"

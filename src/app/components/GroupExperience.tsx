@@ -17,7 +17,7 @@ export default function GroupExperience() {
     {
       titulo: "Sentimento de pertencimento",
       descricao:
-        "A terapia em grupo dissolve o isolamento. Ao ouvir outras perspectivas, você descobre que suas questões são compartilhadas — e que ninguém está sozinho nessa caminhada.",
+        "As vivências despertam o senso de pertencimento. Ao ouvir outras histórias e perspectivas, você percebe que muitas das suas dores, dúvidas e desafios também fazem parte da experiência humana. Descobre que não está sozinho — e que o encontro com o outro também é um encontro consigo mesmo.",
       icone: <Users className="w-6 h-6" />,
     },
     {
