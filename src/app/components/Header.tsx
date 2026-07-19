@@ -83,7 +83,7 @@ export default function Header() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex items-center justify-between h-24 md:h-28">
           {/* Logo + Nome */}
           <a
             href="/"
@@ -93,12 +93,12 @@ export default function Header() {
             <img
               src="/logo-kalapa.png"
               alt=""
-              width={64}
-              height={64}
-              className={`w-14 h-14 md:w-16 md:h-16 object-contain rounded-xl p-1 transition-transform duration-300 group-hover:scale-105 ${
+              width={96}
+              height={96}
+              className={`w-20 h-20 md:w-24 md:h-24 object-contain rounded-xl p-1 transition-transform duration-300 group-hover:scale-105 ${
                 scrolled
                   ? "bg-white/85 backdrop-blur-md border border-white/60 shadow-sm"
-                  : "bg-transparent"
+                  : "bg-transparent mix-blend-screen"
               }`}
             />
             <div className="leading-tight">
