@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 import { notifyPagamentoConfirmado, sendConfirmacaoCliente } from "@/lib/email";
 
@@ -32,12 +33,22 @@ function extractCustomer(body: Record<string, unknown>) {
 
 export async function POST(req: NextRequest) {
   try {
-    // Verificação de origem: o webhook_url que enviamos à InfinitePay
-    // contém ?secret=... — só quem tem esse segredo pode confirmar pagamentos.
+    const body = await req.json();
+
+    // Verificação de origem: token HMAC por order_nsu (não expõe o secret real na URL)
     if (WEBHOOK_SECRET) {
-      const secret = req.nextUrl.searchParams.get("secret");
-      if (secret !== WEBHOOK_SECRET) {
-        console.warn("[webhook] Secret inválido ou ausente — requisição rejeitada");
+      const token = req.nextUrl.searchParams.get("token");
+      const orderNsu = body.order_nsu;
+      if (!orderNsu || !token) {
+        console.warn("[webhook] Token ou order_nsu ausente — requisição rejeitada");
+        return NextResponse.json(
+          { success: false, message: "Não autorizado" },
+          { status: 401 }
+        );
+      }
+      const expected = crypto.createHmac("sha256", WEBHOOK_SECRET).update(orderNsu).digest("hex");
+      if (!crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expected))) {
+        console.warn("[webhook] Token HMAC inválido — requisição rejeitada");
         return NextResponse.json(
           { success: false, message: "Não autorizado" },
           { status: 401 }
@@ -46,8 +57,6 @@ export async function POST(req: NextRequest) {
     } else {
       console.warn("[webhook] WEBHOOK_SECRET não configurado — endpoint sem verificação de origem!");
     }
-
-    const body = await req.json();
 
     console.log("[webhook] Pagamento recebido:", body.order_nsu, body.transaction_nsu);
 

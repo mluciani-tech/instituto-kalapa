@@ -120,8 +120,12 @@ export async function POST(req: NextRequest) {
       },
     ];
 
-    const webhookUrl = WEBHOOK_SECRET
-      ? `${SITE_URL}/api/webhook?secret=${WEBHOOK_SECRET}`
+    const webhookToken = WEBHOOK_SECRET
+      ? crypto.createHmac("sha256", WEBHOOK_SECRET).update(orderNsu).digest("hex")
+      : "";
+
+    const webhookUrl = webhookToken
+      ? `${SITE_URL}/api/webhook?token=${webhookToken}`
       : `${SITE_URL}/api/webhook`;
 
     const payload: Record<string, unknown> = {

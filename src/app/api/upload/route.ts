@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { checkAdminAuth } from "@/lib/admin-auth";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -7,6 +8,10 @@ const BUCKET = "produtos";
 
 export async function POST(req: NextRequest) {
   try {
+    if (!checkAdminAuth(req)) {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
+
     if (!supabaseAdmin) {
       return NextResponse.json(
         { error: "Supabase não configurado" },
