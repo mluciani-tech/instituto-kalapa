@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Heart, Users, Sparkles, Clock, Quote } from "lucide-react";
+import SplitText from "@/components/ui/split-text";
+import GlareHover from "@/components/ui/glare-hover";
+import ShinyText from "@/components/ui/shiny-text";
 
 export default function GroupExperience() {
   const beneficios = [
@@ -31,27 +34,6 @@ export default function GroupExperience() {
     },
   ];
 
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: [0.16, 1, 0.3, 1] as const,
-      },
-    },
-  };
-
   return (
     <section id="experiencia" className="relative py-24 md:py-32 bg-brand-offwhite overflow-hidden">
       {/* Textura de fundo sutil */}
@@ -69,10 +51,14 @@ export default function GroupExperience() {
           <span className="inline-block px-4 py-1.5 rounded-full bg-brand-purple-light text-brand-purple-dark text-sm font-semibold tracking-wide mb-6">
             A Experiência do Grupo
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold text-brand-charcoal leading-tight max-w-3xl mx-auto">
-            A transformação que nasce do{" "}
-            <span className="text-gradient">encontro entre almas</span>
-          </h2>
+          <SplitText
+            text="A transformação que nasce do encontro entre almas"
+            tag="h2"
+            className="text-3xl md:text-5xl font-bold text-brand-charcoal leading-tight max-w-3xl mx-auto"
+            splitType="words"
+            delay={80}
+            duration={0.8}
+          />
           <p className="mt-6 text-lg text-brand-charcoal/60 max-w-2xl mx-auto leading-relaxed">
             As sessões em grupo do INstituto Kalapa são conduzidas por
             profissionais experientes, em um ambiente cuidadosamente preparado
@@ -81,33 +67,40 @@ export default function GroupExperience() {
         </motion.div>
 
         {/* Grid de benefícios */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid md:grid-cols-2 gap-8 md:gap-10 mb-16"
-        >
-          {beneficios.map((beneficio) => (
-            <motion.div
+        <div className="grid md:grid-cols-2 gap-8 md:gap-10 mb-16">
+          {beneficios.map((beneficio, index) => (
+            <GlareHover
               key={beneficio.titulo}
-              variants={cardVariants}
-              className="flex gap-5 p-6 md:p-8 rounded-2xl glass-card-light hover:bg-white/90 transition-all duration-300 group"
+              glareColor="rgba(184, 150, 90, 0.15)"
+              glareSize={400}
+              borderRadius={16}
             >
-              <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl bg-brand-purple-light text-brand-purple group-hover:bg-brand-purple group-hover:text-white transition-colors duration-300">
-                {beneficio.icone}
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-brand-charcoal mb-2">
-                  {beneficio.titulo}
-                </h3>
-                <p className="text-brand-charcoal/60 leading-relaxed">
-                  {beneficio.descricao}
-                </p>
-              </div>
-            </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{
+                  duration: 0.6,
+                  delay: index * 0.1,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className="flex gap-5 p-6 md:p-8 rounded-2xl glass-card-light hover:bg-white/90 transition-all duration-300 group"
+              >
+                <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl bg-brand-purple-light text-brand-purple group-hover:bg-brand-purple group-hover:text-white transition-colors duration-300">
+                  {beneficio.icone}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-brand-charcoal mb-2">
+                    {beneficio.titulo}
+                  </h3>
+                  <p className="text-brand-charcoal/60 leading-relaxed">
+                    {beneficio.descricao}
+                  </p>
+                </div>
+              </motion.div>
+            </GlareHover>
           ))}
-        </motion.div>
+        </div>
 
         {/* Citação / Destaque */}
         <motion.div
@@ -123,9 +116,13 @@ export default function GroupExperience() {
 
           <Quote className="w-10 h-10 mx-auto mb-6 opacity-30 text-brand-mint" />
           <p className="text-xl md:text-2xl font-light leading-relaxed max-w-3xl mx-auto mb-4 relative z-10">
-            &ldquo;A dor que você carrega não precisa ser silenciosa. No
-            grupo, ela encontra eco, acolhimento e, aos poucos, se transforma
-            em força.&rdquo;
+            <ShinyText
+              text="&ldquo;A dor que você carrega não precisa ser silenciosa. No grupo, ela encontra eco, acolhimento e, aos poucos, se transforma em força.&rdquo;"
+              color="rgba(255, 255, 255, 0.85)"
+              shineColor="rgba(184, 150, 90, 0.6)"
+              speed={4}
+              spread={90}
+            />
           </p>
           <p className="text-white/60 font-medium relative z-10">
             — Equipe INstituto Kalapa
