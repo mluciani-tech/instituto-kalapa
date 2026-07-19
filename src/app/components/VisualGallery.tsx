@@ -15,6 +15,7 @@ const fotos = [
   { src: "/foto8.jpg", alt: "Grupo do Instituto Kalapa", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto9.jpg", alt: "Sessão ao ar livre", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto_10.jpg", alt: "Acolhimento e conexão", className: "md:col-span-1 md:row-span-1" },
+  { src: "/foto11.jpg", alt: "Momento de vivência", className: "md:col-span-1 md:row-span-1" },
 ];
 
 export default function VisualGallery() {
