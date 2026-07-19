@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, ShieldCheck, HeartHandshake } from "lucide-react";
+import BlurText from "@/components/ui/blur-text";
 
 export default function Hero() {
   const containerVariants = {
@@ -22,7 +23,7 @@ export default function Hero() {
       y: 0,
       transition: {
         duration: 0.8,
-        ease: [0.16, 1, 0.3, 1] as const, // easeOutExpo
+        ease: [0.16, 1, 0.3, 1] as const,
       },
     },
   };
@@ -56,14 +57,17 @@ export default function Hero() {
           animate="visible"
           className="flex flex-col gap-8 md:gap-10"
         >
-          {/* Headline */}
-          <motion.h1
-            variants={itemVariants}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight text-white"
-          >
-            A dor pode marcar a sua história, mas ela{" "}
-            <span className="text-gradient-gold">não precisa definir</span> a sua vida
-          </motion.h1>
+          {/* Headline com BlurText */}
+          <motion.div variants={itemVariants}>
+            <BlurText
+              text="A dor pode marcar a sua história, mas ela não precisa definir a sua vida"
+              animateBy="words"
+              direction="bottom"
+              delay={100}
+              stepDuration={0.4}
+              className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight text-white"
+            />
+          </motion.div>
 
           {/* Subheadline */}
           <motion.p
