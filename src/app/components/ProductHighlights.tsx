@@ -18,11 +18,10 @@ export default function ProductHighlights() {
         const destaques = data.filter((p: Produto) => p.destaque);
         setProdutos(destaques);
 
-        // Fetch vagas for highlighted products with limit
-        const produtosComVagas = destaques.filter((p) => p.vagas_maximas != null);
-        if (produtosComVagas.length > 0) {
+        // Fetch vagas for all highlighted products
+        if (destaques.length > 0) {
           const vagasResults = await Promise.all(
-            produtosComVagas.map((p) =>
+            destaques.map((p) =>
               fetch(`/api/vagas?produto_id=${p.id}`)
                 .then((r) => r.ok ? r.json() : null)
                 .catch(() => null)
@@ -30,7 +29,7 @@ export default function ProductHighlights() {
           );
 
           const map: Record<string, VagasInfo> = {};
-          produtosComVagas.forEach((p, i) => {
+          destaques.forEach((p, i) => {
             if (vagasResults[i]) {
               map[p.id] = vagasResults[i];
             }
@@ -73,7 +72,7 @@ export default function ProductHighlights() {
               key={produto.id}
               produto={produto}
               index={index}
-              vagas={produto.vagas_maximas != null ? vagasMap[produto.id] || null : null}
+              vagas={vagasMap[produto.id] || null}
             />
           ))}
         </div>

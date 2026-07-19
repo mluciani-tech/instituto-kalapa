@@ -233,7 +233,7 @@ export default function Checkout() {
             </div>
 
             {/* Lado direito — Métodos de pagamento */}
-            <div className="glass-card rounded-2xl p-8 md:p-10 flex flex-col justify-between">
+            <div className="glass-card-light rounded-2xl p-8 md:p-10 flex flex-col justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-brand-charcoal mb-6">
                   Forma de pagamento
