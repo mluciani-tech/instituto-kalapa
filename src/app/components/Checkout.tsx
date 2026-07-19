@@ -88,6 +88,36 @@ export default function Checkout() {
     };
 
     try {
+      if (isGratuito) {
+        // Produto gratuito — não chama InfinitePay
+        const res = await fetch("/api/checkout-gratuito", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            produto_id: produto.id,
+            inscricao: {
+              ...payload,
+              metodoPagamento: "gratuito",
+              valor: 0,
+            },
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setErro(data.error || "Erro ao confirmar inscrição. Tente novamente.");
+          setProcessando(false);
+          return;
+        }
+
+        sessionStorage.removeItem("dados_inscricao");
+        sessionStorage.removeItem("produto_selecionado");
+        window.location.href = `/checkout/sucesso?order_nsu=${data.order_nsu}`;
+        return;
+      }
+
+      // Produto pago — fluxo InfinitePay
       // Preço e itens são montados no servidor a partir do produto_id —
       // o cliente envia apenas identificação e dados de contato
       const checkoutRes = await fetch("/api/checkout", {
