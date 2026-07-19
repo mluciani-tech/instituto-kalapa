@@ -13,6 +13,7 @@ export interface Produto {
   ativo?: boolean;
   ordem?: number;
   vagas_maximas: number | null;
+  categoria?: string | null;
   created_at?: string;
 }
 

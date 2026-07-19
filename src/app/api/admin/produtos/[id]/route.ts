@@ -51,7 +51,7 @@ export async function PUT(
   const updates: Record<string, unknown> = {};
   const allowedFields = [
     "slug", "nome", "descricao", "descricao_curta", "preco",
-    "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas",
+    "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "categoria",
   ];
 
   for (const field of allowedFields) {
@@ -96,8 +96,38 @@ export async function DELETE(
   }
 
   const { id } = await params;
+  const { searchParams } = new URL(req.url);
+  const permanent = searchParams.get("permanent") === "true";
 
-  // Soft delete: desativar produto
+  if (permanent) {
+    const { count } = await supabaseAdmin!
+      .from("pedidos")
+      .select("*", { count: "exact", head: true })
+      .eq("produto_id", id);
+
+    if (count && count > 0) {
+      return NextResponse.json(
+        { error: `Não é possível apagar: este produto tem ${count} pedido(s) vinculado(s).` },
+        { status: 409 }
+      );
+    }
+
+    const { error } = await supabaseAdmin!
+      .from("produtos")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("[admin/produtos] Erro ao apagar:", error);
+      return NextResponse.json(
+        { error: "Erro ao apagar produto" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true, permanent: true });
+  }
+
   const { error } = await supabaseAdmin!
     .from("produtos")
     .update({ ativo: false, updated_at: new Date().toISOString() })

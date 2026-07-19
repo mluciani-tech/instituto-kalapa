@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
@@ -18,7 +18,6 @@ export default function ProductHighlights() {
         const destaques = data.filter((p: Produto) => p.destaque);
         setProdutos(destaques);
 
-        // Fetch vagas only for products with vagas_maximas defined
         const produtosComVagas = destaques.filter((p) => p.vagas_maximas != null);
         if (produtosComVagas.length > 0) {
           const vagasResults = await Promise.all(
@@ -41,6 +40,16 @@ export default function ProductHighlights() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const grupos = useMemo(() => {
+    const map = new Map<string, Produto[]>();
+    for (const p of produtos) {
+      const cat = p.categoria || "__sem_categoria__";
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push(p);
+    }
+    return Array.from(map.entries());
+  }, [produtos]);
 
   if (loading) return null;
   if (produtos.length === 0) return null;
@@ -67,16 +76,27 @@ export default function ProductHighlights() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {produtos.slice(0, 3).map((produto, index) => (
-            <ProductCard
-              key={produto.id}
-              produto={produto}
-              index={index}
-              vagas={produto.vagas_maximas != null ? vagasMap[produto.id] || null : null}
-            />
-          ))}
-        </div>
+        {grupos.map(([categoria, itens], groupIndex) => (
+          <div key={categoria}>
+            {groupIndex > 0 && (
+              <div className="flex items-center gap-4 my-12">
+                <div className="flex-1 h-px bg-brand-charcoal/10" />
+                <div className="w-2 h-2 rounded-full bg-brand-terracotta/40" />
+                <div className="flex-1 h-px bg-brand-charcoal/10" />
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {itens.map((produto, index) => (
+                <ProductCard
+                  key={produto.id}
+                  produto={produto}
+                  index={index}
+                  vagas={produto.vagas_maximas != null ? vagasMap[produto.id] || null : null}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
 
         <motion.div
           initial={{ opacity: 0 }}

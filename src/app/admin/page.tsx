@@ -86,6 +86,7 @@ export default function AdminPage() {
     imagem_url: "",
     beneficios: "",
     vagas_maximas: "",
+    categoria: "",
     destaque: false,
     ativo: true,
     ordem: "0",
@@ -126,6 +127,10 @@ export default function AdminPage() {
   // Exclusão de pedidos
   const [pedidoParaExcluir, setPedidoParaExcluir] = useState<string | null>(null);
   const [excluindoPedido, setExcluindoPedido] = useState(false);
+
+  // Exclusão permanente de produtos
+  const [produtoParaApagar, setProdutoParaApagar] = useState<Produto | null>(null);
+  const [apagandoProduto, setApagandoProduto] = useState(false);
 
   const checkAuth = useCallback(async () => {
     const res = await fetch("/api/admin/verify");
@@ -240,7 +245,7 @@ export default function AdminPage() {
     setProdutoForm({
       slug: "", nome: "", descricao: "", descricao_curta: "",
       preco: "", imagem_url: "", beneficios: "", vagas_maximas: "",
-      destaque: false, ativo: true, ordem: "0",
+      categoria: "", destaque: false, ativo: true, ordem: "0",
     });
     setProdutoImagemFile(null);
     setProdutoEditando(null);
@@ -279,6 +284,7 @@ export default function AdminPage() {
       ...produtoForm,
       imagem_url: imagemUrl,
       vagas_maximas: produtoForm.vagas_maximas ? parseInt(produtoForm.vagas_maximas) : null,
+      categoria: produtoForm.categoria.trim() || null,
       preco: parseFloat(produtoForm.preco.replace(",", ".")) || 0,
       ordem: parseInt(produtoForm.ordem) || 0,
       beneficios: produtoForm.beneficios.split("\n").filter((b) => b.trim()),
@@ -319,6 +325,7 @@ export default function AdminPage() {
       imagem_url: p.imagem_url || "",
       beneficios: p.beneficios.join("\n"),
       vagas_maximas: p.vagas_maximas != null ? p.vagas_maximas.toString() : "",
+      categoria: p.categoria || "",
       destaque: p.destaque ?? false,
       ativo: p.ativo ?? true,
       ordem: (p.ordem ?? 0).toString(),
@@ -330,6 +337,32 @@ export default function AdminPage() {
   const handleDesativarProduto = async (id: string) => {
     await fetch(`/api/admin/produtos/${id}`, { method: "DELETE" });
     await fetchProdutos();
+  };
+
+  const handleReativarProduto = async (id: string) => {
+    await fetch(`/api/admin/produtos/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ativo: true }),
+    });
+    await fetchProdutos();
+  };
+
+  const handleApagarProduto = async () => {
+    if (!produtoParaApagar) return;
+    setApagandoProduto(true);
+    const res = await fetch(`/api/admin/produtos/${produtoParaApagar.id}?permanent=true`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      setProdutoParaApagar(null);
+      await fetchProdutos();
+    } else {
+      const data = await res.json();
+      setError(data.error || "Erro ao apagar produto");
+      setProdutoParaApagar(null);
+    }
+    setApagandoProduto(false);
   };
 
   // Clear
@@ -576,6 +609,16 @@ export default function AdminPage() {
                      />
                   </div>
                   <div>
+                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Categoria <span className="text-brand-charcoal/30">(opcional)</span></label>
+<input
+                       value={produtoForm.categoria}
+                       onChange={(e) => setProdutoForm({ ...produtoForm, categoria: e.target.value })}
+                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                       placeholder="Ex: atendimentos, vivencias"
+                     />
+                    <p className="text-xs text-brand-charcoal/30 mt-1">Agrupa produtos na página inicial.</p>
+                  </div>
+                  <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Limite de Pessoas <span className="text-brand-charcoal/30">(opcional)</span></label>
 <input
                        value={produtoForm.vagas_maximas}
@@ -707,7 +750,7 @@ export default function AdminPage() {
                         {p.destaque && <span className="text-xs bg-brand-terracotta/10 text-brand-terracotta px-1.5 py-0.5 rounded">Destaque</span>}
                       </div>
                       <p className="text-xs text-brand-charcoal/40 mt-0.5">
-                        {p.slug} · R$ {p.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} · Ordem: {p.ordem}{p.vagas_maximas != null ? ` · Limite: ${p.vagas_maximas} pessoas` : ""}
+                        {p.slug} · R$ {p.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} · Ordem: {p.ordem}{p.categoria ? ` · ${p.categoria}` : ""}{p.vagas_maximas != null ? ` · Limite: ${p.vagas_maximas} pessoas` : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
@@ -717,14 +760,27 @@ export default function AdminPage() {
                       >
                         Editar
                       </button>
-                      {p.ativo && (
+                      {p.ativo ? (
                         <button
                           onClick={() => handleDesativarProduto(p.id)}
                           className="px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
                           Desativar
                         </button>
+                      ) : (
+                        <button
+                          onClick={() => handleReativarProduto(p.id)}
+                          className="px-3 py-1.5 text-xs text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        >
+                          Reativar
+                        </button>
                       )}
+                      <button
+                        onClick={() => setProdutoParaApagar(p)}
+                        className="px-3 py-1.5 text-xs text-red-700 hover:bg-red-100 rounded-lg transition-colors font-semibold"
+                      >
+                        Apagar
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -1183,6 +1239,26 @@ export default function AdminPage() {
               </button>
               <button onClick={handleExcluirPedido} disabled={excluindoPedido} className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors">
                 {excluindoPedido ? "Excluindo..." : "Excluir permanentemente"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmação de exclusão permanente de produto */}
+      {produtoParaApagar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" style={{ overscrollBehavior: "contain" }} role="dialog" aria-modal="true" aria-label="Confirmar exclusão de produto" onKeyDown={(e) => { if (e.key === "Escape") setProdutoParaApagar(null); }}>
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-base font-semibold text-brand-charcoal mb-2">Apagar produto permanentemente?</h3>
+            <p className="text-sm text-brand-charcoal/60 mb-5">
+              O produto <strong>{produtoParaApagar.nome}</strong> será removido permanentemente do banco de dados. Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setProdutoParaApagar(null)} className="px-4 py-2 text-sm text-brand-charcoal/60 hover:text-brand-charcoal transition-colors">
+                Cancelar
+              </button>
+              <button onClick={handleApagarProduto} disabled={apagandoProduto} className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors">
+                {apagandoProduto ? "Apagando..." : "Sim, apagar"}
               </button>
             </div>
           </div>

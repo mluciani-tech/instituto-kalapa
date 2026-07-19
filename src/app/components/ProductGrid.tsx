@@ -6,7 +6,11 @@ import { Package } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
 import type { VagasInfo } from "@/lib/types";
 
-export default function ProductGrid() {
+interface ProductGridProps {
+  categoria?: string | null;
+}
+
+export default function ProductGrid({ categoria }: ProductGridProps) {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
   const [vagasMap, setVagasMap] = useState<Record<string, VagasInfo>>({});
@@ -19,10 +23,16 @@ export default function ProductGrid() {
           setLoading(false);
           return;
         }
-        const produtosData: Produto[] = await prodRes.json();
+        let produtosData: Produto[] = await prodRes.json();
+
+        if (categoria) {
+          produtosData = produtosData.filter(
+            (p) => p.categoria?.toLowerCase() === categoria.toLowerCase()
+          );
+        }
+
         setProdutos(produtosData);
 
-        // Fetch vagas only for products with vagas_maximas defined
         const produtosComVagas = produtosData.filter((p) => p.vagas_maximas != null);
         if (produtosComVagas.length > 0) {
           const vagasResults = await Promise.all(
@@ -47,7 +57,7 @@ export default function ProductGrid() {
       setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [categoria]);
 
   if (loading) {
     return (
