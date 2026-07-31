@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Check, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import StarBorder from "@/components/ui/star-border";
@@ -52,7 +53,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
           {/* Imagem */}
           <div className="relative h-48 overflow-hidden">
             {produto.imagem_url ? (
-              <img
+              <Image
                 src={produto.imagem_url}
                 alt={produto.nome}
                 width={400}

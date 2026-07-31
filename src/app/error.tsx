@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, AlertTriangle } from "lucide-react";
+import Link from "next/link";
 
 export default function Error({
   error,
@@ -26,13 +27,13 @@ export default function Error({
           >
             Tentar novamente
           </button>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 px-5 py-2.5 border border-brand-charcoal/20 text-brand-charcoal font-semibold rounded-xl hover:bg-brand-charcoal/5 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Início
-          </a>
+          </Link>
         </div>
       </div>
     </div>
