@@ -24,33 +24,33 @@ const contatos = {
 
 function ContactIcons() {
   return (
-    <>
+    <div className="flex items-center gap-2">
       <a
         href={contatos.instagram}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Instagram ${contatos.instagramLabel}`}
-        className="block rounded-full bg-white shadow-sm hover:shadow-md transition-[box-shadow,transform] duration-300 hover:scale-110 overflow-hidden"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 p-1 shadow-sm transition-[box-shadow,transform,background-color] duration-300 hover:scale-105 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-transparent overflow-hidden"
       >
-        <Image src="/instagram-icon.jpeg" alt="" width={28} height={28} className="w-7 h-7 object-cover rounded-full" />
+        <Image src="/instagram-icon.jpeg" alt="" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
       </a>
       <a
         href={`mailto:${contatos.email}`}
         aria-label={`E-mail ${contatos.email}`}
-        className="flex items-center justify-center w-7 h-7 rounded-full bg-white shadow-sm hover:shadow-md transition-[box-shadow,transform] duration-300 hover:scale-110"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 shadow-sm transition-[box-shadow,transform,background-color] duration-300 hover:scale-105 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
       >
-        <Image src="/email-icon.png" alt="" width={16} height={16} className="w-4 h-4 object-contain" />
+        <Image src="/email-icon.png" alt="" width={20} height={20} className="h-5 w-5 object-contain" />
       </a>
       <a
         href={contatos.whatsapp}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`WhatsApp ${contatos.whatsappLabel}`}
-        className="block rounded-lg bg-white shadow-sm hover:shadow-md transition-[box-shadow,transform] duration-300 hover:scale-110 overflow-hidden"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 p-1 shadow-sm transition-[box-shadow,transform,background-color] duration-300 hover:scale-105 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-transparent overflow-hidden"
       >
-        <Image src="/whatsapp-icon.jpeg" alt="" width={28} height={28} className="w-7 h-7 object-cover rounded-lg" />
+        <Image src="/whatsapp-icon.jpeg" alt="" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
       </a>
-    </>
+    </div>
   );
 }
 
@@ -80,45 +80,45 @@ export default function Header() {
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/85 backdrop-blur-md border-b border-brand-beige shadow-sm"
-          : "bg-transparent"
+          ? "border-b border-brand-beige/80 bg-white/90 shadow-sm backdrop-blur-xl"
+          : "border-b border-white/10 bg-brand-purple-deep/65 backdrop-blur-md"
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between h-24 md:h-28">
+        <div className="flex h-20 items-center justify-between gap-6 md:h-24">
           {/* Logo + Nome */}
           <Link
             href="/"
             aria-label="INstituto Kalapa — voltar para a página inicial"
-            className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta rounded-xl"
+            className="group flex min-w-0 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
           >
             <Image
               src="/logo-kalapa.png"
               alt=""
-              width={96}
-              height={96}
-              className="w-20 h-20 md:w-24 md:h-24 object-contain rounded-xl p-1 bg-white shadow-md transition-transform duration-300 group-hover:scale-105"
+              width={72}
+              height={72}
+              className="h-14 w-14 shrink-0 rounded-xl border border-white/80 bg-white p-1 object-contain shadow-md transition-transform duration-300 group-hover:scale-[1.03] md:h-16 md:w-16"
             />
-            <div className="leading-tight">
-              <span className={`block font-bold text-base md:text-lg tracking-tight transition-colors ${textColor}`}>
+            <div className="min-w-0 leading-tight">
+              <span className={`block truncate text-base font-semibold tracking-tight transition-colors md:text-lg ${textColor}`}>
                 INstituto Kalapa
               </span>
-              <span className={`hidden md:block text-[11px] transition-colors ${textMuted}`}>
+              <span className={`hidden truncate text-[11px] transition-colors md:block ${textMuted}`}>
                 {contatos.endereco}
               </span>
             </div>
           </Link>
 
           {/* Nav desktop */}
-          <nav aria-label="Navegação principal" className="hidden lg:flex items-center gap-1">
+          <nav aria-label="Navegação principal" className="hidden lg:flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                className={`rounded-full px-3.5 py-2 text-sm font-medium transition-[background-color,color] ${
                   scrolled
                     ? "text-brand-charcoal/70 hover:text-brand-purple hover:bg-brand-purple/5"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
+                    : "text-white/75 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 {link.label}
@@ -127,7 +127,7 @@ export default function Header() {
           </nav>
 
           {/* Contatos desktop */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center">
             <ContactIcons />
           </div>
 
@@ -136,7 +136,7 @@ export default function Header() {
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
             aria-expanded={menuOpen}
-            className={`lg:hidden p-2 rounded-lg transition-colors ${
+            className={`lg:hidden rounded-xl p-2.5 transition-colors ${
               scrolled ? "text-brand-charcoal hover:bg-brand-purple/5" : "text-white hover:bg-white/10"
             }`}
           >
@@ -147,7 +147,7 @@ export default function Header() {
 
       {/* Menu mobile */}
       {menuOpen && (
-        <div className="lg:hidden bg-white/95 backdrop-blur-md border-t border-brand-beige shadow-lg">
+        <div className="lg:hidden border-t border-brand-beige/80 bg-white/95 shadow-lg backdrop-blur-xl">
           <nav aria-label="Menu mobile" className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1">
             {navLinks.map((link) => (
               <Link

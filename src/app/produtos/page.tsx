@@ -8,6 +8,10 @@ export const metadata: Metadata = {
     "Conheça nossos serviços e encontre a experiência ideal para o seu momento de autoconhecimento.",
 };
 
+const nomesCategorias: Record<string, string> = {
+  vivencias: "Vivências",
+};
+
 export default async function ProdutosPage({
   searchParams,
 }: {
@@ -27,7 +31,8 @@ export default async function ProdutosPage({
           </span>
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 font-sans">
             {categoria
-              ? `${categoria.charAt(0).toUpperCase() + categoria.slice(1)}`
+              ? nomesCategorias[categoria.toLowerCase()] ||
+                `${categoria.charAt(0).toUpperCase() + categoria.slice(1)}`
               : "Escolha a experiência ideal para você"}
           </h1>
           <p className="text-white/60 text-lg max-w-2xl mx-auto">
