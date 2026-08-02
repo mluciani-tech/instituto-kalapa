@@ -33,7 +33,7 @@ const BlurText: React.FC<BlurTextProps> = ({
   stepDuration = 0.35,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as any });
+  const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as `${number}px` });
 
   const elements = useMemo(
     () => (animateBy === "words" ? text.split(" ") : text.split("")),
@@ -72,7 +72,7 @@ const BlurText: React.FC<BlurTextProps> = ({
 
   // Build keyframes array for motion
   const keyframes = useMemo(() => {
-    return [fromSnapshot, ...toSnapshots] as any[];
+    return [fromSnapshot, ...toSnapshots] as never[];
   }, [fromSnapshot, toSnapshots]);
 
   return (
@@ -86,7 +86,7 @@ const BlurText: React.FC<BlurTextProps> = ({
             duration: totalDuration,
             times,
             delay: (index * delay) / 1000,
-            ease: easing as any,
+            ease: easing as never,
           }}
           onAnimationComplete={
             index === elements.length - 1 ? onAnimationComplete : undefined

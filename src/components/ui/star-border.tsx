@@ -25,10 +25,10 @@ const StarBorder = <T extends React.ElementType = "div">({
   return (
     <Component
       className={`star-border-container ${className}`}
-      {...(rest as any)}
+      {...rest}
       style={{
         padding: `${thickness}px 0`,
-        ...(rest as any).style,
+        ...rest.style,
       }}
     >
       <div

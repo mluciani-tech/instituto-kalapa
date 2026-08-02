@@ -32,7 +32,8 @@ export async function GET(req: NextRequest) {
       .from("pedidos")
       .select(`
         *,
-        produtos (nome, slug)
+        produtos (nome, slug),
+        inscricoes!pedido_id (nome, telefone, motivacao)
       `, { count: "exact" });
 
     if (search) {
@@ -55,8 +56,23 @@ export async function GET(req: NextRequest) {
 
     const total = count || 0;
 
+    const normalizedData = (data || []).map((pedido) => {
+      const inscricao = Array.isArray(pedido.inscricoes) ? pedido.inscricoes[0] : pedido.inscricoes;
+      const pedidoNome = typeof pedido.cliente_nome === "string" ? pedido.cliente_nome.trim() : "";
+      const nomeInscricao = inscricao?.nome?.trim() || "";
+      const nome = nomeInscricao || (pedidoNome && !["participante", "n/a"].includes(pedidoNome.toLowerCase()) ? pedido.cliente_nome : "");
+
+      return {
+        ...pedido,
+        cliente_nome: nome || "Participante",
+        cliente_telefone: inscricao?.telefone || null,
+        motivacao: inscricao?.motivacao || null,
+        inscricoes: undefined,
+      };
+    });
+
     return NextResponse.json({
-      data,
+      data: normalizedData,
       total,
       page,
       perPage,

@@ -122,6 +122,7 @@ export default function AdminPage() {
     nome: string;
     email: string;
     telefone: string;
+    motivacao?: string;
   } | null>(null);
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
@@ -137,7 +138,6 @@ export default function AdminPage() {
     const res = await fetch("/api/admin/verify");
     if (res.ok) {
       setAuthed(true);
-      await Promise.all([fetchConfig(), fetchProdutos(), fetchPedidos(), fetchParticipantes()]);
     } else {
       setAuthed(false);
     }
@@ -193,6 +193,11 @@ export default function AdminPage() {
   }, [participantesPage, participantesSearch, participantesSort]);
 
   useEffect(() => { checkAuth(); }, [checkAuth]);
+  useEffect(() => {
+    if (authed) {
+      void Promise.all([fetchConfig(), fetchProdutos(), fetchPedidos(), fetchParticipantes()]);
+    }
+  }, [authed, fetchPedidos, fetchParticipantes]);
 
   // Auth handlers
   const handleLogin = async (e: React.FormEvent) => {
@@ -833,7 +838,9 @@ export default function AdminPage() {
                     <div key={ped.id} className="bg-white rounded-xl border border-brand-beige p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="font-medium text-brand-charcoal text-sm">{ped.cliente_nome}</p>
+                          <p className="font-medium text-brand-charcoal text-sm">
+                            {ped.cliente_nome}{ped.cliente_telefone ? ` · ${ped.cliente_telefone}` : ""}
+                          </p>
                           <p className="text-xs text-brand-charcoal/40">{ped.produtos?.nome || "—"}</p>
                         </div>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
@@ -846,6 +853,7 @@ export default function AdminPage() {
                       </div>
                       <div className="space-y-1 text-xs text-brand-charcoal/60">
                         <p>{ped.cliente_email}</p>
+                        {ped.motivacao && <p className="text-brand-charcoal/50 line-clamp-2">&ldquo;{ped.motivacao}&rdquo;</p>}
                         <p className="font-semibold text-brand-charcoal">
                           R$ {ped.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </p>
@@ -890,6 +898,7 @@ export default function AdminPage() {
                               Valor
                             </SortableHeader>
                           </th>
+                          <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Motivação</th>
                           <th className="text-left px-4 py-3">
                             <SortableHeader
                               key="status"
@@ -917,13 +926,16 @@ export default function AdminPage() {
                         {pedidos.map((ped) => (
                           <tr key={ped.id} className="border-b border-brand-beige/50 hover:bg-brand-beige/30 transition-colors">
                             <td className="px-4 py-3">
-                              <span className="font-medium text-brand-charcoal">{ped.cliente_nome}</span>
+                              <span className="font-medium text-brand-charcoal">
+                                {ped.cliente_nome}{ped.cliente_telefone ? ` · ${ped.cliente_telefone}` : ""}
+                              </span>
                               <span className="text-xs text-brand-charcoal/40 block">{ped.cliente_email}</span>
                             </td>
                             <td className="px-4 py-3 text-brand-charcoal/70">{ped.produtos?.nome || "—"}</td>
                             <td className="px-4 py-3 font-semibold text-brand-charcoal">
                               R$ {ped.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                             </td>
+                            <td className="px-4 py-3 text-brand-charcoal/60 text-xs max-w-[180px] truncate">{ped.motivacao || "—"}</td>
                             <td className="px-4 py-3">
                               <span className={`text-xs px-2 py-0.5 rounded-full ${
                                 ped.status === "pago" ? "bg-green-100 text-green-700" :
@@ -1019,10 +1031,14 @@ export default function AdminPage() {
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <p className="font-medium text-brand-charcoal text-sm">{p.nome}</p>
-                        <p className="text-xs text-brand-charcoal/40">{p.turma_id}</p>
+                        <p className="text-xs text-brand-charcoal/40">{p.turma_id} · {p.produto || "—"}</p>
                       </div>
-                      <span className="text-xs bg-brand-beige px-2 py-0.5 rounded-full text-brand-charcoal/70">
-                        {p.metodo_pagamento?.toUpperCase() || "—"}
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        p.status === "pago" ? "bg-green-100 text-green-700" :
+                        p.status === "pendente" ? "bg-yellow-100 text-yellow-700" :
+                        "bg-gray-100 text-gray-600"
+                      }`}>
+                        {p.status}
                       </span>
                     </div>
                     <div className="space-y-1 text-xs text-brand-charcoal/60">
@@ -1061,8 +1077,19 @@ export default function AdminPage() {
                         </SortableHeader>
                       </th>
                       <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">WhatsApp</th>
+                      <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">Produto</th>
                       <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70 hidden md:table-cell">Motivação</th>
                       <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70 hidden lg:table-cell">Pagamento</th>
+                      <th className="text-left px-4 py-3">
+                        <SortableHeader
+                          key="status"
+                          currentSort={participantesSort}
+                          onSort={(k) => { setParticipantesSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchParticipantes(1); }}
+                          className="px-4 py-3"
+                        >
+                          Status
+                        </SortableHeader>
+                      </th>
                       <th className="text-left px-4 py-3">
                         <SortableHeader
                           key="created_at"
@@ -1079,7 +1106,7 @@ export default function AdminPage() {
                   <tbody>
                     {participantes.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="text-center py-12 text-brand-charcoal/40">
+                        <td colSpan={9} className="text-center py-12 text-brand-charcoal/40">
                           Nenhum participante cadastrado.
                         </td>
                       </tr>
@@ -1092,12 +1119,22 @@ export default function AdminPage() {
                           </td>
                           <td className="px-4 py-3 text-brand-charcoal/70">{p.email}</td>
                           <td className="px-4 py-3 text-brand-charcoal/70 font-mono text-xs">{p.telefone}</td>
+                          <td className="px-4 py-3 text-brand-charcoal/70 text-xs">{p.produto || "—"}</td>
                           <td className="px-4 py-3 text-brand-charcoal/60 text-xs max-w-[200px] truncate hidden md:table-cell">
                             {p.motivacao || "—"}
                           </td>
                           <td className="px-4 py-3 hidden lg:table-cell">
                             <span className="text-xs bg-brand-beige px-2 py-0.5 rounded-full text-brand-charcoal/70">
                               {p.metodo_pagamento?.toUpperCase() || "—"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              p.status === "pago" ? "bg-green-100 text-green-700" :
+                              p.status === "pendente" ? "bg-yellow-100 text-yellow-700" :
+                              "bg-gray-100 text-gray-600"
+                            }`}>
+                              {p.status}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-brand-charcoal/50 text-xs hidden sm:table-cell">{formatDate(p.created_at)}</td>

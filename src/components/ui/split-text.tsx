@@ -32,7 +32,7 @@ const SplitText: React.FC<SplitTextProps> = ({
   onLetterAnimationComplete,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as any });
+  const isInView = useInView(ref, { once: true, amount: threshold, margin: rootMargin as `${number}px` });
 
   const elements = useMemo(() => {
     if (splitType === "words" || splitType === "lines") {
@@ -53,7 +53,7 @@ const SplitText: React.FC<SplitTextProps> = ({
           transition={{
             duration,
             delay: (index * delay) / 1000,
-            ease: ease as any,
+            ease: ease as never,
           }}
           onAnimationComplete={
             index === elements.length - 1 ? onLetterAnimationComplete : undefined

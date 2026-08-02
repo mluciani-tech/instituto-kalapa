@@ -38,8 +38,10 @@ export interface Pedido {
   capture_method: string | null;
   receipt_url: string | null;
   transaction_nsu?: string | null;
+  motivacao?: string | null;
   created_at: string;
   produtos?: { nome: string; slug: string } | null;
+  inscricoes?: { nome: string | null; telefone: string | null; motivacao: string | null } | null;
 }
 
 export interface Participante {
@@ -51,6 +53,8 @@ export interface Participante {
   motivacao: string | null;
   metodo_pagamento: string | null;
   valor: number;
+  produto?: string;
   status: string;
   created_at: string;
+  pedidos?: { cliente_nome: string | null; cliente_telefone: string | null; status: string | null; produtos?: { nome: string } | null } | null;
 }

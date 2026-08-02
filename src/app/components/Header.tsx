@@ -66,10 +66,6 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
   // Header não aparece no admin (que tem cabeçalho próprio)
   if (pathname.startsWith("/admin")) return null;
 

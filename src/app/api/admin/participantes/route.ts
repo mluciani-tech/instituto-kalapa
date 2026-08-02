@@ -30,7 +30,10 @@ export async function GET(req: NextRequest) {
 
     let query = supabaseAdmin!
       .from("inscricoes")
-      .select("*", { count: "exact" });
+      .select(`
+        *,
+        pedidos!pedido_id (cliente_nome, cliente_telefone, status, produtos (nome))
+      `, { count: "exact" });
 
     if (search) {
       const safe = search.replace(/[(),\\]/g, "");
@@ -46,8 +49,28 @@ export async function GET(req: NextRequest) {
 
     const total = count || 0;
 
+    const normalizedData = (data || []).map((inscricao) => {
+      const pedido = Array.isArray(inscricao.pedidos) ? inscricao.pedidos[0] : inscricao.pedidos;
+      const inscricaoNome = typeof inscricao.nome === "string" ? inscricao.nome.trim() : "";
+      const pedidoNome = pedido?.cliente_nome?.trim() || "";
+      const nome = (inscricaoNome && !["participante", "n/a"].includes(inscricaoNome.toLowerCase())
+        ? inscricao.nome
+        : pedidoNome || inscricao.nome || "Participante");
+      const telefone = inscricao.telefone?.trim() || pedido?.cliente_telefone?.trim() || "";
+      const produtoNome = pedido?.produtos?.nome || "";
+      const statusPedido = pedido?.status || inscricao.status || "";
+      return {
+        ...inscricao,
+        nome,
+        telefone,
+        produto: produtoNome,
+        status: statusPedido,
+        pedidos: undefined,
+      };
+    });
+
     return NextResponse.json({
-      data,
+      data: normalizedData,
       total,
       page,
       perPage,
