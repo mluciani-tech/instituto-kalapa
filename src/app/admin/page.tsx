@@ -927,7 +927,19 @@ export default function AdminPage() {
                           <tr key={ped.id} className="border-b border-brand-beige/50 hover:bg-brand-beige/30 transition-colors">
                             <td className="px-4 py-3">
                               <span className="font-medium text-brand-charcoal">
-                                {ped.cliente_nome}{ped.cliente_telefone ? ` · ${ped.cliente_telefone}` : ""}
+                                {ped.cliente_nome}{ped.cliente_telefone ? (
+                                  <>
+                                    {" · "}
+                                    <a
+                                      href={`https://wa.me/${ped.cliente_telefone.replace(/\D/g, "").replace(/^0+/, "").replace(/^(55)?/, "55")}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-brand-purple hover:underline"
+                                    >
+                                      {ped.cliente_telefone}
+                                    </a>
+                                  </>
+                                ) : ""}
                               </span>
                               <span className="text-xs text-brand-charcoal/40 block">{ped.cliente_email}</span>
                             </td>
@@ -1043,7 +1055,16 @@ export default function AdminPage() {
                     </div>
                     <div className="space-y-1 text-xs text-brand-charcoal/60">
                       <p className="truncate">{p.email}</p>
-                      <p className="font-mono">{p.telefone}</p>
+                      {p.telefone ? (
+                        <a
+                          href={`https://wa.me/${p.telefone.replace(/\D/g, "").replace(/^0+/, "").replace(/^(55)?/, "55")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-brand-purple hover:underline"
+                        >
+                          {p.telefone}
+                        </a>
+                      ) : <p className="font-mono">—</p>}
                       {p.motivacao && <p className="text-brand-charcoal/50 line-clamp-2 mt-1">&ldquo;{p.motivacao}&rdquo;</p>}
                       <p className="text-brand-charcoal/40 pt-1">{formatDate(p.created_at)}</p>
                     </div>
@@ -1118,7 +1139,18 @@ export default function AdminPage() {
                             <span className="text-xs text-brand-charcoal/40 block">{p.turma_id}</span>
                           </td>
                           <td className="px-4 py-3 text-brand-charcoal/70">{p.email}</td>
-                          <td className="px-4 py-3 text-brand-charcoal/70 font-mono text-xs">{p.telefone}</td>
+                          <td className="px-4 py-3 font-mono text-xs">
+                            {p.telefone ? (
+                              <a
+                                href={`https://wa.me/${p.telefone.replace(/\D/g, "").replace(/^0+/, "").replace(/^(55)?/, "55")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-brand-purple hover:underline"
+                              >
+                                {p.telefone}
+                              </a>
+                            ) : "—"}
+                          </td>
                           <td className="px-4 py-3 text-brand-charcoal/70 text-xs">{p.produto || "—"}</td>
                           <td className="px-4 py-3 text-brand-charcoal/60 text-xs max-w-[200px] truncate hidden md:table-cell">
                             {p.motivacao || "—"}
