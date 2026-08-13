@@ -22,7 +22,7 @@ const metodosPagamento = [
   {
     id: "cartao",
     nome: "Cartão de Crédito",
-    descricao: "Até 3x sem juros",
+    descricao: "1x à vista",
     icone: <CreditCard className="w-6 h-6" />,
   },
 ];
@@ -34,7 +34,6 @@ export default function Checkout() {
   const [metodoSelecionado, setMetodoSelecionado] = useState("pix");
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState("");
-  const [parcelasDisponiveis, setParcelasDisponiveis] = useState<{ qtd: number; valor: number; taxa?: number }[]>([]);
 
   const formaPagamento = produto?.forma_pagamento_disponivel || "ambos";
 
@@ -75,27 +74,6 @@ export default function Checkout() {
     };
     fetchData();
   }, []);
-
-  // Busca taxas de parcelamento da InfinitePay quando produto é carregado
-  useEffect(() => {
-    if (!produto || isGratuito) return;
-
-    const fetchParcelas = async () => {
-      try {
-        const res = await fetch(`/api/parcelas?produto_id=${produto.id}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.parcelas && data.parcelas.length > 0) {
-            setParcelasDisponiveis(data.parcelas);
-          }
-        }
-      } catch {
-        // Fallback: parcelas sem taxas explícitas
-      }
-    };
-
-    fetchParcelas();
-  }, [produto?.id]);
 
   const formatPhoneForInfinitePay = (phone: string): string | null => {
     const numbers = phone.replace(/\D/g, "");
@@ -407,31 +385,13 @@ export default function Checkout() {
 
                     {metodoSelecionado === "cartao" && (
                       <div className="mb-6 p-4 rounded-xl bg-brand-charcoal/5 border border-brand-charcoal/10">
-                        <label
-                          htmlFor="parcelamento"
-                          className="text-brand-charcoal/60 text-sm block mb-2"
-                        >
+                        <span className="text-brand-charcoal/60 text-sm block mb-2">
                           Parcelamento
-                        </label>
-                        <select
-                          id="parcelamento"
-                          className="w-full bg-white text-brand-charcoal border border-brand-charcoal/10 rounded-lg px-4 py-3.5 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-mint focus-visible:border-brand-mint transition-colors appearance-none cursor-pointer"
-                        >
-                          {parcelasDisponiveis.length > 0 ? (
-                            parcelasDisponiveis.map((p) => (
-                              <option key={p.qtd} value={p.qtd}>
-                                {p.qtd}x de R$ {p.valor.toFixed(2).replace(".", ",")}
-                                {p.taxa && p.taxa > 0 ? ` (com juros de ${p.taxa}%)` : ""}
-                              </option>
-                            ))
-                          ) : (
-                            <>
-                              <option value="1">1x de R$ {preco.toFixed(2).replace(".", ",")}</option>
-                              <option value="2">2x de R$ {(preco / 2).toFixed(2).replace(".", ",")}</option>
-                              <option value="3">3x de R$ {(preco / 3).toFixed(2).replace(".", ",")}</option>
-                            </>
-                          )}
-                        </select>
+                        </span>
+                        <span className="block text-brand-charcoal font-medium">
+                          1x de R$ {preco.toFixed(2).replace(".", ",")}
+                          <span className="text-brand-charcoal/50 font-normal"> (à vista)</span>
+                        </span>
                       </div>
                     )}
                   </div>
