@@ -30,6 +30,7 @@ const metodosPagamento = [
 export default function Checkout() {
   const [produto, setProduto] = useState<Produto | null>(null);
   const [dadosInscricao, setDadosInscricao] = useState<DadosInscricao | null>(null);
+  const [form, setForm] = useState({ nome: "", email: "", telefone: "", motivacao: "" });
   const [loading, setLoading] = useState(true);
   const [metodoSelecionado, setMetodoSelecionado] = useState("pix");
   const [processando, setProcessando] = useState(false);
@@ -53,7 +54,11 @@ export default function Checkout() {
           ? sessionStorage.getItem("produto_selecionado")
           : null;
 
-        if (sessionData) setDadosInscricao(JSON.parse(sessionData));
+        if (sessionData) {
+          const parsed = JSON.parse(sessionData);
+          setDadosInscricao(parsed);
+          setForm({ nome: parsed.nome || "", email: parsed.email || "", telefone: parsed.telefone || "", motivacao: parsed.motivacao || "" });
+        }
 
         if (produtoId) {
           const res = await fetch(`/api/produtos/${produtoId}`);
@@ -90,14 +95,26 @@ export default function Checkout() {
       return;
     }
 
+    const nomeTrim = form.nome.trim();
+    const telefoneTrim = form.telefone.trim();
+
+    if (!nomeTrim) {
+      setErro("Informe seu nome para continuar.");
+      return;
+    }
+    if (telefoneTrim.replace(/\D/g, "").length < 10) {
+      setErro("Informe um WhatsApp válido com DDD (ex: 11912345678).");
+      return;
+    }
+
     setProcessando(true);
     setErro("");
 
-    const payload = dadosInscricao || {
-      nome: "Participante",
-      email: "contato@institutokalapa.com.br",
-      telefone: "Não informado",
-      motivacao: "Acesso direto ao checkout",
+    const payload: DadosInscricao = {
+      nome: nomeTrim,
+      email: form.email.trim() || "contato@institutokalapa.com.br",
+      telefone: telefoneTrim,
+      motivacao: form.motivacao.trim() || "Acesso direto ao checkout",
     };
 
     try {
@@ -124,7 +141,7 @@ export default function Checkout() {
           return;
         }
 
-        sessionStorage.removeItem("dados_inscricao");
+        sessionStorage.setItem("dados_inscricao", JSON.stringify(payload));
         sessionStorage.removeItem("produto_selecionado");
         window.location.href = `/checkout/sucesso?order_nsu=${data.order_nsu}`;
         return;
@@ -160,8 +177,8 @@ export default function Checkout() {
         return;
       }
 
-      // 2. Limpar sessionStorage e redirecionar
-      sessionStorage.removeItem("dados_inscricao");
+      // 2. Salvar dados e redirecionar
+      sessionStorage.setItem("dados_inscricao", JSON.stringify(payload));
       sessionStorage.removeItem("produto_selecionado");
       window.location.href = checkoutData.url;
     } catch (error) {
@@ -293,16 +310,61 @@ export default function Checkout() {
             <div className="glass-card-light rounded-2xl p-8 md:p-10 flex flex-col justify-between">
               {isGratuito ? (
                 /* Produto gratuito — sem pagamento */
-                <div className="flex flex-col items-center justify-center text-center py-8">
-                  <CheckCircle2 className="w-16 h-16 text-brand-mint mb-4" />
-                  <h3 className="text-lg font-semibold text-brand-charcoal mb-2">
-                    Inscrição gratuita
-                  </h3>
-                  <p className="text-brand-charcoal/50 text-sm mb-8 max-w-xs">
-                    Confirme seus dados para garantir sua vaga.
-                  </p>
+                <div className="flex flex-col justify-center text-center py-8">
+                  <div className="text-center">
+                    <CheckCircle2 className="w-16 h-16 text-brand-mint mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-brand-charcoal mb-2">
+                      Inscrição gratuita
+                    </h3>
+                    <p className="text-brand-charcoal/50 text-sm mb-8 max-w-xs mx-auto">
+                      Confirme seus dados para garantir sua vaga.
+                    </p>
+                  </div>
 
-                  <div>
+                  <div className="text-left">
+                    <div className="space-y-4 mb-6">
+                      <div>
+                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Nome completo *</label>
+                        <input
+                          type="text"
+                          value={form.nome}
+                          onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                          placeholder="Seu nome"
+                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">WhatsApp *</label>
+                        <input
+                          type="tel"
+                          value={form.telefone}
+                          onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+                          placeholder="(11) 91234-5678"
+                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">E-mail (opcional)</label>
+                        <input
+                          type="email"
+                          value={form.email}
+                          onChange={(e) => setForm({ ...form, email: e.target.value })}
+                          placeholder="voce@email.com"
+                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Motivação (opcional)</label>
+                        <textarea
+                          value={form.motivacao}
+                          onChange={(e) => setForm({ ...form, motivacao: e.target.value })}
+                          placeholder="O que te motiva a participar?"
+                          rows={2}
+                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none resize-none"
+                        />
+                      </div>
+                    </div>
+
                     {erro && (
                       <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
                         {erro}
@@ -326,18 +388,59 @@ export default function Checkout() {
                         </>
                       )}
                     </button>
-
-                    {dadosInscricao && (
-                      <p className="text-brand-charcoal/40 text-center text-[10px] mt-3">
-                        Inscrição de: {dadosInscricao.nome} ({dadosInscricao.email})
-                      </p>
-                    )}
                   </div>
                 </div>
               ) : (
                 /* Produto pago — fluxo normal */
                 <>
                   <div>
+                    <h3 className="text-lg font-semibold text-brand-charcoal mb-4">
+                      Seus dados
+                    </h3>
+
+                    <div className="space-y-4 mb-6">
+                      <div>
+                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Nome completo *</label>
+                        <input
+                          type="text"
+                          value={form.nome}
+                          onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                          placeholder="Seu nome"
+                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">WhatsApp *</label>
+                        <input
+                          type="tel"
+                          value={form.telefone}
+                          onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+                          placeholder="(11) 91234-5678"
+                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">E-mail (opcional)</label>
+                        <input
+                          type="email"
+                          value={form.email}
+                          onChange={(e) => setForm({ ...form, email: e.target.value })}
+                          placeholder="voce@email.com"
+                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Motivação (opcional)</label>
+                        <textarea
+                          value={form.motivacao}
+                          onChange={(e) => setForm({ ...form, motivacao: e.target.value })}
+                          placeholder="O que te motiva a participar?"
+                          rows={2}
+                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none resize-none"
+                        />
+                      </div>
+                    </div>
+
                     <h3 className="text-lg font-semibold text-brand-charcoal mb-6">
                       Forma de pagamento
                     </h3>
@@ -421,9 +524,9 @@ export default function Checkout() {
                       )}
                     </button>
 
-                    {dadosInscricao && (
+                    {form.nome && (
                       <p className="text-brand-charcoal/40 text-center text-[10px] mt-2">
-                        Compra de: {dadosInscricao.nome} ({dadosInscricao.email})
+                        Compra de: {form.nome}
                       </p>
                     )}
 
