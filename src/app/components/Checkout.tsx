@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { QrCode, CreditCard, ShieldCheck, Check, ExternalLink, Package, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Check, ExternalLink, Package, ArrowLeft, CheckCircle2 } from "lucide-react";
 import type { Produto } from "@/lib/types";
 
 interface DadosInscricao {
@@ -12,37 +12,25 @@ interface DadosInscricao {
   motivacao: string;
 }
 
-const metodosPagamento = [
-  {
-    id: "pix",
-    nome: "Pix",
-    descricao: "Aprovação instantânea",
-    icone: <QrCode className="w-6 h-6" />,
-  },
-  {
-    id: "cartao",
-    nome: "Cartão de Crédito",
-    descricao: "1x à vista",
-    icone: <CreditCard className="w-6 h-6" />,
-  },
-];
+const getMetodoPadrao = (forma?: string): "pix" | "cartao" => {
+  if (forma === "cartao") return "cartao";
+  return "pix";
+};
 
 export default function Checkout() {
   const [produto, setProduto] = useState<Produto | null>(null);
   const [dadosInscricao, setDadosInscricao] = useState<DadosInscricao | null>(null);
   const [form, setForm] = useState({ nome: "", email: "", telefone: "", motivacao: "" });
   const [loading, setLoading] = useState(true);
-  const [metodoSelecionado, setMetodoSelecionado] = useState("pix");
+  const [metodoSelecionado, setMetodoSelecionado] = useState<"pix" | "cartao">("pix");
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState("");
 
   const formaPagamento = produto?.forma_pagamento_disponivel || "ambos";
 
-  const metodosFiltrados = metodosPagamento.filter((m) => {
-    if (formaPagamento === "pix") return m.id === "pix";
-    if (formaPagamento === "cartao") return m.id === "cartao";
-    return true;
-  });
+  useEffect(() => {
+    setMetodoSelecionado(getMetodoPadrao(formaPagamento));
+  }, [formaPagamento]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,11 +53,6 @@ export default function Checkout() {
           if (res.ok) {
             const data = await res.json();
             setProduto(data);
-
-            // Ajusta método padrão conforme configuração do produto
-            const forma = data.forma_pagamento_disponivel || "ambos";
-            if (forma === "pix") setMetodoSelecionado("pix");
-            else if (forma === "cartao") setMetodoSelecionado("cartao");
           }
         }
       } catch {
@@ -441,65 +424,6 @@ export default function Checkout() {
                       </div>
                     </div>
 
-                    <h3 className="text-lg font-semibold text-brand-charcoal mb-6">
-                      Forma de pagamento
-                    </h3>
-
-                    <div className="space-y-3 mb-8">
-                      {metodosFiltrados.map((metodo) => (
-                        <button
-                          key={metodo.id}
-                          onClick={() => setMetodoSelecionado(metodo.id)}
-                          className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
-                            metodoSelecionado === metodo.id
-                              ? "border-brand-mint bg-brand-mint/10"
-                              : "border-brand-charcoal/10 hover:border-brand-charcoal/20 hover:bg-brand-charcoal/5"
-                          }`}
-                        >
-                          <div
-                            className={`${
-                              metodoSelecionado === metodo.id
-                                ? "text-brand-mint"
-                                : "text-brand-charcoal/40"
-                            }`}
-                          >
-                            {metodo.icone}
-                          </div>
-                          <div className="text-left">
-                            <div className="text-brand-charcoal font-medium">{metodo.nome}</div>
-                            <div className="text-brand-charcoal/50 text-sm">{metodo.descricao}</div>
-                          </div>
-                          <div className="ml-auto">
-                            <div
-                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                metodoSelecionado === metodo.id
-                                  ? "border-brand-mint"
-                                  : "border-brand-charcoal/20"
-                              }`}
-                            >
-                              {metodoSelecionado === metodo.id && (
-                                <div className="w-2.5 h-2.5 rounded-full bg-brand-mint" />
-                              )}
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    {metodoSelecionado === "cartao" && (
-                      <div className="mb-6 p-4 rounded-xl bg-brand-charcoal/5 border border-brand-charcoal/10">
-                        <span className="text-brand-charcoal/60 text-sm block mb-2">
-                          Parcelamento
-                        </span>
-                        <span className="block text-brand-charcoal font-medium">
-                          1x de R$ {preco.toFixed(2).replace(".", ",")}
-                          <span className="text-brand-charcoal/50 font-normal"> (à vista)</span>
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
                     {erro && (
                       <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
                         {erro}
@@ -518,7 +442,7 @@ export default function Checkout() {
                         </>
                       ) : (
                         <>
-                          Pagar com InfinitePay
+                          Pagar
                           <ExternalLink className="w-4 h-4" />
                         </>
                       )}
