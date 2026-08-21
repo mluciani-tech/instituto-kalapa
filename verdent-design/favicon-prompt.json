@@ -1,0 +1,37 @@
+{
+  "image": {
+    "purpose": "Favicon e apple-touch-icon do Instituto Kalapa",
+    "subject": "lotus meditation symbol",
+    "details": [
+      "Single centered lotus/meditation symbol",
+      "Small golden orb accent above the central petal",
+      "Symmetrical, balanced composition",
+      "Soft navy blue petals with subtle inner glow",
+      "Generous padding around the icon (safe area for 16x16)",
+      "Crisp clean edges optimized for small sizes",
+      "No text, no watermark, no border, no background frame"
+    ],
+    "style": {
+      "type": "minimalist logo glyph",
+      "palette": ["#0E2A4A", "#C9A24A", "#FFFFFF"],
+      "background": "transparent",
+      "rendering": "vector-like flat with subtle gradient",
+      "mood": "premium, calm, therapeutic"
+    },
+    "sizes": [
+      { "width": 1024, "height": 1024, "format": "PNG", "background": "transparent" }
+    ],
+    "constraints": [
+      "Transparent background",
+      "Do not add any text or letterforms",
+      "Do not add any extra icons, decorations, or shadows beyond subtle inner glow",
+      "Preserve symmetry around the vertical axis",
+      "Safe area: keep at least 10% padding on all sides",
+      "Output must look readable at 16x16 and 32x32"
+    ]
+  },
+  "prompts": {
+    "en": "Minimalist lotus meditation symbol, centered, with a small golden orb accent above the central petal, symmetrical, soft navy blue petals with subtle inner glow, generous padding around the icon, transparent background, crisp edges optimized for small sizes (16x16 and 32x32), no text, no border, high contrast on both light and dark browser tabs.",
+    "pt_br": "Símbolo minimalista de lótus meditativo, centralizado, com um pequeno orbe dourado acima da pétala central, simétrico, pétalas em azul-marinho suave com leve brilho interno, bastante espaço de respiro ao redor do ícone, fundo transparente, bordas nítidas otimizadas para tamanhos pequenos (16x16 e 32x32), sem texto, sem borda, alto contraste em abas claras e escuras."
+  }
+}
