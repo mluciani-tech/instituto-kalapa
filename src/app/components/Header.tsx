@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Mail, MessageCircle } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -24,31 +24,35 @@ const contatos = {
 
 function ContactIcons() {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       <a
         href={contatos.instagram}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Instagram ${contatos.instagramLabel}`}
-        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 p-1 shadow-sm transition-[box-shadow,transform,background-color] duration-300 hover:scale-105 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-transparent overflow-hidden"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-sm transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
       >
-        <Image src="/instagram-icon.jpeg" alt="" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+        </svg>
       </a>
       <a
         href={`mailto:${contatos.email}`}
         aria-label={`E-mail ${contatos.email}`}
-        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 shadow-sm transition-[box-shadow,transform,background-color] duration-300 hover:scale-105 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-sm transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
       >
-        <Image src="/email-icon.png" alt="" width={20} height={20} className="h-5 w-5 object-contain" />
+        <Mail className="w-5 h-5" />
       </a>
       <a
         href={contatos.whatsapp}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`WhatsApp ${contatos.whatsappLabel}`}
-        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 p-1 shadow-sm transition-[box-shadow,transform,background-color] duration-300 hover:scale-105 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-transparent overflow-hidden"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-sm transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
       >
-        <Image src="/whatsapp-icon.jpeg" alt="" width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
+        <MessageCircle className="w-5 h-5" />
       </a>
     </div>
   );
@@ -150,7 +154,7 @@ export default function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="px-3 py-3 text-sm font-medium text-brand-charcoal/80 hover:text-brand-purple hover:bg-brand-purple/5 rounded-lg transition-colors"
+                className="px-4 py-3.5 text-base font-medium text-brand-charcoal/80 hover:text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors"
               >
                 {link.label}
               </Link>

@@ -28,29 +28,24 @@ function SortableHeader({
   key: sortKey,
   currentSort,
   onSort,
-  className = "",
 }: {
   children: React.ReactNode;
   key: string;
   currentSort: { key: string; dir: "asc" | "desc" };
   onSort: (key: string) => void;
-  className?: string;
 }) {
   const isActive = currentSort.key === sortKey;
   const dir = isActive ? currentSort.dir : "desc";
   return (
     <button
       onClick={() => onSort(sortKey)}
-      className={`flex items-center gap-1 text-left font-medium text-brand-charcoal/70 hover:text-brand-charcoal transition-colors ${className}`}
+      className="flex items-center gap-1.5 w-full text-left font-medium text-brand-charcoal/70 hover:text-brand-charcoal transition-colors group"
       aria-sort={isActive ? (dir === "asc" ? "ascending" : "descending") : "none"}
     >
-      {children}
-      {isActive && (
-        <span className="inline-flex" aria-hidden="true">
-          {dir === "asc" ? "▲" : "▼"}
-        </span>
-      )}
-      {!isActive && <span className="text-brand-charcoal/30" aria-hidden="true">⇅</span>}
+      <span>{children}</span>
+      <span className="text-brand-charcoal/40 group-hover:text-brand-charcoal/70 transition-colors" aria-hidden="true">
+        {isActive ? (dir === "asc" ? "▲" : "▼") : "⇅"}
+      </span>
     </button>
   );
 }
@@ -882,7 +877,6 @@ export default function AdminPage() {
                               key="cliente_nome"
                               currentSort={pedidosSort}
                               onSort={(k) => { setPedidosSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchPedidos(1); }}
-                              className="px-4 py-3"
                             >
                               Cliente
                             </SortableHeader>
@@ -893,7 +887,6 @@ export default function AdminPage() {
                               key="valor"
                               currentSort={pedidosSort}
                               onSort={(k) => { setPedidosSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchPedidos(1); }}
-                              className="px-4 py-3"
                             >
                               Valor
                             </SortableHeader>
@@ -904,7 +897,6 @@ export default function AdminPage() {
                               key="status"
                               currentSort={pedidosSort}
                               onSort={(k) => { setPedidosSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchPedidos(1); }}
-                              className="px-4 py-3"
                             >
                               Status
                             </SortableHeader>
@@ -914,7 +906,6 @@ export default function AdminPage() {
                               key="created_at"
                               currentSort={pedidosSort}
                               onSort={(k) => { setPedidosSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchPedidos(1); }}
-                              className="px-4 py-3"
                             >
                               Data
                             </SortableHeader>
@@ -1082,7 +1073,6 @@ export default function AdminPage() {
                           key="nome"
                           currentSort={participantesSort}
                           onSort={(k) => { setParticipantesSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchParticipantes(1); }}
-                          className="px-4 py-3"
                         >
                           Nome
                         </SortableHeader>
@@ -1092,7 +1082,6 @@ export default function AdminPage() {
                           key="email"
                           currentSort={participantesSort}
                           onSort={(k) => { setParticipantesSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchParticipantes(1); }}
-                          className="px-4 py-3"
                         >
                           E-mail
                         </SortableHeader>
@@ -1106,7 +1095,6 @@ export default function AdminPage() {
                           key="status"
                           currentSort={participantesSort}
                           onSort={(k) => { setParticipantesSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchParticipantes(1); }}
-                          className="px-4 py-3"
                         >
                           Status
                         </SortableHeader>
@@ -1116,7 +1104,6 @@ export default function AdminPage() {
                           key="created_at"
                           currentSort={participantesSort}
                           onSort={(k) => { setParticipantesSort(s => s.key === k ? { key: k, dir: s.dir === "asc" ? "desc" : "asc" } : { key: k, dir: "asc" }); fetchParticipantes(1); }}
-                          className="px-4 py-3"
                         >
                           Data
                         </SortableHeader>

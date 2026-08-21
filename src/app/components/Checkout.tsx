@@ -181,17 +181,33 @@ export default function Checkout() {
 
   if (!produto) {
     return (
-      <div className="min-h-screen bg-brand-charcoal flex items-center justify-center text-white">
-        <div className="text-center">
+      <div className="min-h-screen bg-brand-charcoal flex items-center justify-center text-white px-4">
+        <div className="text-center max-w-md mx-auto">
           <Package className="w-16 h-16 text-white/30 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Nenhum produto selecionado</h2>
-          <p className="text-white/50 mb-6">Volte ao catálogo e escolha um serviço.</p>
+          <h2 className="text-2xl font-semibold mb-2">Nenhum produto selecionado</h2>
+          <p className="text-white/50 mb-8">
+            Parece que você acessou a página de checkout diretamente ou sua sessão expirou. Escolha uma de nossas vivências ou atendimentos para continuar.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+            <a
+              href="/produtos?categoria=vivencias"
+              className="w-full sm:w-auto px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all"
+            >
+              Ver Vivências
+            </a>
+            <a
+              href="/produtos?categoria=atendimentos"
+              className="w-full sm:w-auto px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all"
+            >
+              Ver Atendimentos
+            </a>
+          </div>
           <a
             href="/produtos"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all shadow-lg"
           >
             <ArrowLeft className="w-4 h-4" />
-            Ver catálogo
+            Explorar catálogo completo
           </a>
         </div>
       </div>
