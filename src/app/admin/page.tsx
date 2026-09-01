@@ -350,6 +350,40 @@ export default function AdminPage() {
     await fetchProdutos();
   };
 
+  const handleClonarProduto = async (p: Produto) => {
+    setSalvandoProduto(true);
+    setProdutoSucesso("");
+    const payload = {
+      slug: p.slug,
+      nome: `${p.nome} (Cópia)`,
+      descricao: p.descricao || "",
+      descricao_curta: p.descricao_curta || "",
+      preco: p.preco ?? 0,
+      imagem_url: p.imagem_url || "",
+      beneficios: p.beneficios,
+      vagas_maximas: p.vagas_maximas,
+      categoria: p.categoria || null,
+      forma_pagamento_disponivel: p.forma_pagamento_disponivel || "ambos",
+      destaque: p.destaque ?? false,
+      ativo: false,
+      ordem: p.ordem ?? 0,
+    };
+    const res = await fetch("/api/admin/produtos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      setProdutoSucesso("Produto clonado com sucesso!");
+      await fetchProdutos();
+      setTimeout(() => setProdutoSucesso(""), 3000);
+    } else {
+      const data = await res.json();
+      setError(data.error || "Erro ao clonar produto");
+    }
+    setSalvandoProduto(false);
+  };
+
   const handleApagarProduto = async () => {
     if (!produtoParaApagar) return;
     setApagandoProduto(true);
@@ -775,6 +809,13 @@ export default function AdminPage() {
                         className="px-3 py-1.5 text-xs text-brand-purple hover:bg-brand-purple/10 rounded-lg transition-colors"
                       >
                         Editar
+                      </button>
+                      <button
+                        onClick={() => handleClonarProduto(p)}
+                        disabled={salvandoProduto}
+                        className="px-3 py-1.5 text-xs text-brand-charcoal/60 hover:bg-brand-beige/50 rounded-lg transition-colors"
+                      >
+                        Clonar
                       </button>
                       {p.ativo ? (
                         <button
