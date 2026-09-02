@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, Mail, MessageCircle } from "lucide-react";
+import { Menu, X, Mail, MessageCircle, LayoutGrid } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -20,6 +20,8 @@ const contatos = {
   email: "contato@institutokalapa.com.br",
   whatsapp: "https://wa.me/5511917452732",
   whatsappLabel: "(11) 91745-2732",
+  erp: "https://espaco-serena-clinica.web.app/?return_url=https%3A%2F%2Fwww.institutokalapa.com.br&redirect_url=https%3A%2F%2Fwww.institutokalapa.com.br",
+  erpLabel: "Sistema Espaço Serena (ERP)",
 };
 
 function ContactIcons() {
@@ -30,6 +32,7 @@ function ContactIcons() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Instagram ${contatos.instagramLabel}`}
+        title={`Instagram ${contatos.instagramLabel}`}
         className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-sm transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -41,6 +44,7 @@ function ContactIcons() {
       <a
         href={`mailto:${contatos.email}`}
         aria-label={`E-mail ${contatos.email}`}
+        title={`E-mail ${contatos.email}`}
         className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-sm transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
       >
         <Mail className="w-5 h-5" />
@@ -50,9 +54,20 @@ function ContactIcons() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`WhatsApp ${contatos.whatsappLabel}`}
+        title={`WhatsApp ${contatos.whatsappLabel}`}
         className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-sm transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
       >
         <MessageCircle className="w-5 h-5" />
+      </a>
+      <a
+        href={contatos.erp}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={contatos.erpLabel}
+        title={contatos.erpLabel}
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-sm transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
+      >
+        <LayoutGrid className="w-5 h-5" />
       </a>
     </div>
   );
