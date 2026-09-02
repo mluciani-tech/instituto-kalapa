@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, ShieldCheck, HeartHandshake, LayoutGrid } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck, HeartHandshake } from "lucide-react";
 import BlurText from "@/components/ui/blur-text";
 
 export default function Hero() {
@@ -87,7 +87,7 @@ export default function Hero() {
           </motion.p>
 
           {/* CTA */}
-          <motion.div variants={itemVariants} className="flex flex-wrap gap-4">
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
             <a
               href="/produtos?categoria=vivencias"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-[background-color,box-shadow,transform] duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep group"
@@ -106,17 +106,6 @@ export default function Hero() {
               className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-[background-color,border-color] duration-300 glass-card hover:bg-white/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
             >
               Calendário
-            </a>
-            <a
-              href="https://espaco-serena-clinica.web.app/?return_url=https%3A%2F%2Fwww.institutokalapa.com.br&redirect_url=https%3A%2F%2Fwww.institutokalapa.com.br"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Sistema Espaço Serena (ERP)"
-              title="Sistema Espaço Serena (ERP)"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-[background-color,border-color] duration-300 glass-card hover:bg-white/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
-            >
-              <LayoutGrid className="w-5 h-5 text-brand-terracotta" />
-              Sistema Serena (ERP)
             </a>
             <a
               href="#experiencia"
