@@ -100,6 +100,7 @@ export interface Usuario {
   uf: string;
   ativo: boolean;
   total_pedidos?: number;
+  produtos_comprados?: { nome: string; quantidade: number }[];
   created_at: string;
   updated_at?: string;
 }

@@ -41,17 +41,45 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Erro ao buscar usuários" }, { status: 500 });
     }
 
-    // Contar pedidos para cada usuário retornado
+    // Buscar pedidos e produtos comprados por cada usuário (por usuario_id ou por e-mail)
     const usuariosComContagem = await Promise.all(
       (usuarios || []).map(async (u) => {
-        const { count: totalPedidos } = await supabaseAdmin!
+        const { data: pedidosUsuario } = await supabaseAdmin!
           .from("pedidos")
-          .select("id", { count: "exact", head: true })
-          .eq("usuario_id", u.id);
+          .select("id, status, valor, itens, produtos(nome)")
+          .or(`usuario_id.eq.${u.id},cliente_email.eq.${u.email}`);
+
+        const produtosMap = new Map<string, number>();
+        let totalPedidos = 0;
+
+        if (pedidosUsuario && pedidosUsuario.length > 0) {
+          totalPedidos = pedidosUsuario.length;
+          for (const ped of pedidosUsuario) {
+            if (Array.isArray(ped.itens) && ped.itens.length > 0) {
+              for (const item of ped.itens) {
+                const nome = item.nome || "Produto";
+                const qtd = Number(item.quantidade) || 1;
+                produtosMap.set(nome, (produtosMap.get(nome) || 0) + qtd);
+              }
+            } else {
+              const prodObj = (ped as any).produtos;
+              const prodNome = Array.isArray(prodObj) ? prodObj[0]?.nome : prodObj?.nome;
+              if (prodNome) {
+                produtosMap.set(prodNome, (produtosMap.get(prodNome) || 0) + 1);
+              }
+            }
+
+          }
+        }
+
+        const produtosComprados = Array.from(produtosMap.entries()).map(
+          ([nome, quantidade]) => ({ nome, quantidade })
+        );
 
         return {
           ...u,
-          total_pedidos: totalPedidos || 0,
+          total_pedidos: totalPedidos,
+          produtos_comprados: produtosComprados,
         };
       })
     );

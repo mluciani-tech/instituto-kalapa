@@ -29,18 +29,42 @@ export async function GET(
     return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
   }
 
-  // Buscar pedidos do usuário
+  // Buscar pedidos do usuário (por usuario_id ou pelo e-mail cadastrado)
   const { data: pedidos } = await supabaseAdmin!
     .from("pedidos")
     .select("id, order_nsu, valor, status, metodo_pagamento, itens, created_at, receipt_url, produtos(nome)")
-    .eq("usuario_id", id)
+    .or(`usuario_id.eq.${id},cliente_email.eq.${usuario.email}`)
     .order("created_at", { ascending: false });
+
+  // Consolidar produtos comprados
+  const produtosMap = new Map<string, number>();
+  for (const ped of (pedidos || [])) {
+    if (Array.isArray(ped.itens) && ped.itens.length > 0) {
+      for (const item of ped.itens) {
+        const nome = item.nome || "Produto";
+        const qtd = Number(item.quantidade) || 1;
+        produtosMap.set(nome, (produtosMap.get(nome) || 0) + qtd);
+      }
+    } else {
+      const prodObj = (ped as any).produtos;
+      const prodNome = Array.isArray(prodObj) ? prodObj[0]?.nome : prodObj?.nome;
+      if (prodNome) {
+        produtosMap.set(prodNome, (produtosMap.get(prodNome) || 0) + 1);
+      }
+    }
+  }
+
+  const produtosComprados = Array.from(produtosMap.entries()).map(
+    ([nome, quantidade]) => ({ nome, quantidade })
+  );
 
   return NextResponse.json({
     usuario,
     pedidos: pedidos || [],
+    produtos_comprados: produtosComprados,
   });
 }
+
 
 export async function PATCH(
   req: NextRequest,

@@ -40,6 +40,16 @@ function ContactIcons() {
   return (
     <div className="flex items-center gap-2">
       <a
+        href={contatos.erp}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={contatos.erpLabel}
+        title={contatos.erpLabel}
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta"
+      >
+        <LayoutGrid className="w-4 h-4" />
+      </a>
+      <a
         href={contatos.instagram}
         target="_blank"
         rel="noopener noreferrer"
@@ -206,14 +216,10 @@ export default function Header() {
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     aria-label="Menu do usuário"
-                    className={`flex items-center gap-2 px-3 h-10 rounded-xl transition-all duration-200 cursor-pointer ${
-                      scrolled
-                        ? "border border-brand-beige bg-white text-brand-charcoal hover:bg-brand-beige/60 shadow-xs"
-                        : "border border-white/20 bg-black/40 hover:bg-black/60 text-white"
-                    }`}
+                    className="flex h-10 items-center gap-2 px-3.5 rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta cursor-pointer"
                   >
-                    <UserIcon className="w-4 h-4 text-brand-terracotta" />
-                    <span className="text-xs font-semibold max-w-[100px] truncate">
+                    <UserIcon className="w-4 h-4 text-brand-charcoal" />
+                    <span className="text-xs font-semibold max-w-[100px] truncate text-brand-charcoal">
                       Olá, {primeiroNome}
                     </span>
                   </button>
@@ -221,13 +227,9 @@ export default function Header() {
                   <Link
                     href="/login"
                     aria-label="Entrar na conta"
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 ${
-                      scrolled
-                        ? "border border-brand-beige bg-white text-brand-charcoal hover:bg-brand-beige/60 shadow-xs"
-                        : "border border-white/20 bg-black/40 hover:bg-black/60 text-white"
-                    }`}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta cursor-pointer"
                   >
-                    <UserIcon className="w-4 h-4" />
+                    <UserIcon className="w-4 h-4 text-brand-charcoal" />
                   </Link>
                 )}
 
@@ -261,15 +263,11 @@ export default function Header() {
               <button
                 onClick={openDrawer}
                 aria-label={`Abrir carrinho com ${totalItems} itens`}
-                className={`relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 cursor-pointer ${
-                  scrolled
-                    ? "border border-brand-beige bg-white text-brand-charcoal hover:bg-brand-beige/60 shadow-xs"
-                    : "border border-white/20 bg-black/40 hover:bg-black/60 text-white"
-                }`}
+                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta cursor-pointer"
               >
-                <ShoppingCart className="w-4 h-4" />
+                <ShoppingCart className="w-4 h-4 text-brand-charcoal" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-terracotta text-[10px] font-bold text-white shadow-md shadow-brand-terracotta/40">
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 min-w-4 items-center justify-center rounded-full bg-brand-terracotta text-[10px] font-bold text-white shadow-xs">
                     {totalItems}
                   </span>
                 )}

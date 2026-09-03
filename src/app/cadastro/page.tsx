@@ -282,7 +282,7 @@ export default function CadastroPage() {
                 <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/10">
                   <MapPin className="w-4 h-4 text-brand-terracotta" />
                   <h2 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta">
-                    Endereço de Entrega
+                    Endereço
                   </h2>
                 </div>
 

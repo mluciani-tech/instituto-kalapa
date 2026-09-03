@@ -400,7 +400,7 @@ export default function Checkout() {
                   <div className="p-4 bg-white/[0.04] border border-white/10 rounded-xl">
                     <div className="flex items-center gap-2 text-xs font-semibold text-white/70 mb-2">
                       <MapPin className="w-4 h-4 text-brand-terracotta" />
-                      Endereço de Entrega
+                      Endereço
                     </div>
                     <p className="text-xs text-white/90">
                       {usuario.rua}, {usuario.numero} {usuario.complemento ? `(${usuario.complemento})` : ""}

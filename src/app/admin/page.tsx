@@ -151,7 +151,7 @@ export default function AdminPage() {
   const [usuariosTotalPages, setUsuariosTotalPages] = useState(1);
   const [usuariosTotal, setUsuariosTotal] = useState(0);
   const [usuariosSearch, setUsuariosSearch] = useState("");
-  const [usuarioDetalhes, setUsuarioDetalhes] = useState<{ usuario: Usuario; pedidos: any[] } | null>(null);
+  const [usuarioDetalhes, setUsuarioDetalhes] = useState<{ usuario: Usuario; pedidos: any[]; produtos_comprados?: any[] } | null>(null);
   const [carregandoDetalhes, setCarregandoDetalhes] = useState(false);
   const [usuarioParaReset, setUsuarioParaReset] = useState<Usuario | null>(null);
   const [novaSenhaInput, setNovaSenhaInput] = useState("");
@@ -1574,6 +1574,7 @@ export default function AdminPage() {
                       <th className="px-4 py-3">Contato</th>
                       <th className="px-4 py-3">Cidade / UF</th>
                       <th className="px-4 py-3 text-center">Pedidos</th>
+                      <th className="px-4 py-3">Produtos Comprados</th>
                       <th className="px-4 py-3">Cadastro</th>
                       <th className="px-4 py-3 text-right">Ações</th>
                     </tr>
@@ -1581,7 +1582,7 @@ export default function AdminPage() {
                   <tbody className="divide-y divide-brand-beige">
                     {usuarios.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-brand-charcoal/50 text-sm">
+                        <td colSpan={7} className="px-4 py-8 text-center text-brand-charcoal/50 text-sm">
                           Nenhum usuário encontrado.
                         </td>
                       </tr>
@@ -1604,6 +1605,24 @@ export default function AdminPage() {
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-brand-beige text-brand-charcoal">
                               {u.total_pedidos || 0}
                             </span>
+                          </td>
+                          <td className="px-4 py-3 text-xs">
+                            {u.produtos_comprados && u.produtos_comprados.length > 0 ? (
+                              <div className="flex flex-col gap-1 max-w-[220px]">
+                                {u.produtos_comprados.map((prod: any, i: number) => (
+                                  <span
+                                    key={i}
+                                    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-brand-beige text-brand-charcoal text-[11px] font-medium truncate"
+                                    title={`${prod.quantidade}× ${prod.nome}`}
+                                  >
+                                    <span className="font-bold text-brand-purple">{prod.quantidade}×</span>
+                                    <span className="truncate">{prod.nome}</span>
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-brand-charcoal/40 italic">Nenhum</span>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-xs text-brand-charcoal/50">
                             {formatDate(u.created_at)}
@@ -1932,12 +1951,33 @@ export default function AdminPage() {
               </div>
 
               <div className="bg-brand-beige-light p-3.5 rounded-lg space-y-1.5">
-                <h4 className="font-semibold text-brand-charcoal uppercase tracking-wider text-[11px] text-brand-purple">Endereço de Entrega Completo</h4>
+                <h4 className="font-semibold text-brand-charcoal uppercase tracking-wider text-[11px] text-brand-purple">Endereço Completo</h4>
                 <p><strong>Logradouro:</strong> {usuarioDetalhes.usuario.rua}, {usuarioDetalhes.usuario.numero}</p>
                 {usuarioDetalhes.usuario.complemento && <p><strong>Complemento:</strong> {usuarioDetalhes.usuario.complemento}</p>}
                 <p><strong>Bairro:</strong> {usuarioDetalhes.usuario.bairro}</p>
                 <p><strong>Cidade/UF:</strong> {usuarioDetalhes.usuario.cidade} - {usuarioDetalhes.usuario.uf}</p>
                 <p><strong>CEP:</strong> {usuarioDetalhes.usuario.cep}</p>
+              </div>
+
+              <div className="bg-brand-beige-light p-3.5 rounded-lg space-y-1.5">
+                <h4 className="font-semibold text-brand-charcoal uppercase tracking-wider text-[11px] text-brand-purple">
+                  Produtos Comprados ({usuarioDetalhes.produtos_comprados?.length || 0})
+                </h4>
+                {usuarioDetalhes.produtos_comprados && usuarioDetalhes.produtos_comprados.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {usuarioDetalhes.produtos_comprados.map((p: any, i: number) => (
+                      <span
+                        key={i}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-brand-beige text-brand-charcoal text-xs shadow-xs"
+                      >
+                        <span className="font-bold text-brand-purple">{p.quantidade}×</span>
+                        <span>{p.nome}</span>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-brand-charcoal/50 italic py-1">Nenhum produto adquirido ainda.</p>
+                )}
               </div>
 
               <div>
@@ -1952,7 +1992,9 @@ export default function AdminPage() {
                       <div key={ped.id} className="p-2.5 border border-brand-beige rounded-lg flex items-center justify-between">
                         <div>
                           <p className="font-semibold text-brand-charcoal">
-                            {ped.produtos?.nome || "Pedido E-commerce"}
+                            {Array.isArray(ped.itens) && ped.itens.length > 0
+                              ? ped.itens.map((it: any) => `${it.nome} (${it.quantidade}×)`).join(", ")
+                              : ped.produtos?.nome || "Pedido E-commerce"}
                           </p>
                           <p className="text-[10px] text-brand-charcoal/50 font-mono">
                             {formatDate(ped.created_at)} — {ped.order_nsu}
@@ -1960,7 +2002,7 @@ export default function AdminPage() {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-brand-purple">R$ {Number(ped.valor).toFixed(2)}</p>
-                          <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${ped.status === "pago" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                          <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${ped.status === "pago" ? "bg-brand-mint/20 text-brand-mint-dark" : "bg-brand-terracotta/20 text-brand-terracotta-dark"}`}>
                             {ped.status}
                           </span>
                         </div>
