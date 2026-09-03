@@ -3,94 +3,106 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, CheckCircle2, User, MapPin } from "lucide-react";
+import Footer from "../components/Footer";
+
+function maskCPF(value: string) {
+  return value
+    .replace(/\D/g, "")
+    .slice(0, 11)
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+}
+
+function maskPhone(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 10) {
+    return digits
+      .replace(/(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{4})(\d)/, "$1-$2");
+  }
+  return digits
+    .replace(/(\d{2})(\d)/, "($1) $2")
+    .replace(/(\d{5})(\d)/, "$1-$2");
+}
+
+function maskCEP(value: string) {
+  return value
+    .replace(/\D/g, "")
+    .slice(0, 8)
+    .replace(/(\d{5})(\d)/, "$1-$2");
+}
 
 const UFS = [
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
-  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
-  "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG",
+  "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"
 ];
-
-function maskCpf(val: string) {
-  const v = val.replace(/\D/g, "").slice(0, 11);
-  if (v.length <= 3) return v;
-  if (v.length <= 6) return `${v.slice(0, 3)}.${v.slice(3)}`;
-  if (v.length <= 9) return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
-  return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6, 9)}-${v.slice(9)}`;
-}
-
-function maskPhone(val: string) {
-  const v = val.replace(/\D/g, "").slice(0, 11);
-  if (v.length <= 2) return v ? `(${v}` : "";
-  if (v.length <= 6) return `(${v.slice(0, 2)}) ${v.slice(2)}`;
-  if (v.length <= 10) return `(${v.slice(0, 2)}) ${v.slice(2, 6)}-${v.slice(6)}`;
-  return `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
-}
-
-function maskCep(val: string) {
-  const v = val.replace(/\D/g, "").slice(0, 8);
-  if (v.length <= 5) return v;
-  return `${v.slice(0, 5)}-${v.slice(5)}`;
-}
 
 export default function CadastroPage() {
   const router = useRouter();
 
-  // Dados de acesso
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [senha, setSenha] = useState("");
-  const [confirmarSenha, setConfirmarSenha] = useState("");
-
-  // Endereço de entrega
-  const [cep, setCep] = useState("");
-  const [rua, setRua] = useState("");
-  const [numero, setNumero] = useState("");
-  const [complemento, setComplemento] = useState("");
-  const [bairro, setBairro] = useState("");
-  const [cidade, setCidade] = useState("");
-  const [uf, setUf] = useState("");
+  const [form, setForm] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    cpf: "",
+    senha: "",
+    confirmarSenha: "",
+    cep: "",
+    rua: "",
+    numero: "",
+    complemento: "",
+    bairro: "",
+    cidade: "",
+    uf: "SP",
+  });
 
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState(false);
 
-  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = maskCep(e.target.value);
-    setCep(formatted);
+  const handleCepBlur = async () => {
+    const rawCep = form.cep.replace(/\D/g, "");
+    if (rawCep.length !== 8) return;
 
-    const clean = formatted.replace(/\D/g, "");
-    if (clean.length === 8) {
-      setBuscandoCep(true);
-      try {
-        const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
-        const data = await res.json();
-        if (!data.erro) {
-          if (data.logradouro) setRua(data.logradouro);
-          if (data.bairro) setBairro(data.bairro);
-          if (data.localidade) setCidade(data.localidade);
-          if (data.uf) setUf(data.uf.toUpperCase());
-        }
-      } catch {
-        // Ignora falha de busca automática
+    setBuscandoCep(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
+      const data = await res.json();
+      if (!data.erro) {
+        setForm((prev) => ({
+          ...prev,
+          rua: data.logradouro || prev.rua,
+          bairro: data.bairro || prev.bairro,
+          cidade: data.localidade || prev.cidade,
+          uf: data.uf || prev.uf,
+        }));
       }
-      setBuscandoCep(false);
+    } catch {
+      // ignore
     }
+    setBuscandoCep(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro("");
 
-    if (senha !== confirmarSenha) {
-      setErro("As senhas digitadas não coincidem.");
+    if (form.senha.length < 8) {
+      setErro("A senha deve ter no mínimo 8 caracteres.");
       return;
     }
 
-    if (senha.length < 8) {
-      setErro("A senha deve ter no mínimo 8 caracteres.");
+    if (form.senha !== form.confirmarSenha) {
+      setErro("As senhas não conferem.");
+      return;
+    }
+
+    const cleanCpf = form.cpf.replace(/\D/g, "");
+    if (cleanCpf.length !== 11) {
+      setErro("CPF incompleto ou inválido.");
       return;
     }
 
@@ -100,21 +112,7 @@ export default function CadastroPage() {
       const res = await fetch("/api/auth/cadastro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome,
-          email,
-          telefone,
-          cpf,
-          senha,
-          confirmarSenha,
-          cep,
-          rua,
-          numero,
-          complemento,
-          bairro,
-          cidade,
-          uf,
-        }),
+        body: JSON.stringify(form),
       });
 
       const data = await res.json();
@@ -125,282 +123,305 @@ export default function CadastroPage() {
         return;
       }
 
-      const params = new URLSearchParams(window.location.search);
-      const redirect = params.get("redirect") || "/conta/pedidos";
-      router.push(redirect);
-      router.refresh();
+      setSucesso(true);
+      setTimeout(() => {
+        router.push("/conta/pedidos");
+      }, 1500);
     } catch {
-      setErro("Erro de conexão com o servidor. Tente novamente.");
+      setErro("Falha de conexão com o servidor.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0F1217] text-white py-12 px-4 flex flex-col items-center justify-center">
-      <div className="w-full max-w-2xl mb-6">
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-2 text-xs font-medium text-white/50 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Já tem conta? Fazer login
-        </Link>
-      </div>
+    <div className="min-h-screen bg-brand-charcoal relative flex flex-col justify-between font-sans">
+      {/* Background Cinematográfico Kalapa */}
+      <div className="absolute inset-0 cinematic-gradient opacity-95 pointer-events-none" />
+      <div className="absolute inset-0 cinematic-overlay opacity-60 pointer-events-none" />
 
-      <div className="w-full max-w-2xl bg-[#161B22] border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl">
-        {erro && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-            {erro}
-          </div>
-        )}
+      <div className="relative z-10 flex-1 flex items-center justify-center px-4 py-28 md:py-36">
+        <div className="w-full max-w-2xl">
+          {/* Voltar */}
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 text-xs font-medium text-white/50 hover:text-white transition-colors mb-6"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar para o Login
+          </Link>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* SEÇÃO 1: DADOS DE ACESSO */}
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#A78BFA] mb-4">
-              Dados de acesso
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-medium text-white/70 block mb-1.5">
-                  Nome completo *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  placeholder="Seu nome completo"
-                  className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    E-mail (login) *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="seu@email.com"
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    Telefone / WhatsApp *
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={telefone}
-                    onChange={(e) => setTelefone(maskPhone(e.target.value))}
-                    placeholder="(11) 99999-9999"
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-white/70 block mb-1.5">
-                  CPF *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={cpf}
-                  onChange={(e) => setCpf(maskCpf(e.target.value))}
-                  placeholder="000.000.000-00"
-                  className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    Senha *
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    placeholder="Mínimo de 8 caracteres"
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-                  />
-                  <span className="text-[10px] text-white/40 mt-1 block">
-                    Mínimo de 8 caracteres
-                  </span>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    Confirmar senha *
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    value={confirmarSenha}
-                    onChange={(e) => setConfirmarSenha(e.target.value)}
-                    placeholder="Repita a senha"
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-                  />
-                </div>
-              </div>
+          {/* Card Principal de Cadastro */}
+          <div className="glass-card rounded-2xl p-7 md:p-10 border border-white/10 shadow-2xl">
+            <div className="text-center mb-8">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-terracotta/15 text-brand-terracotta text-xs font-semibold tracking-wide mb-3 border border-brand-terracotta/25">
+                ✦ Novo Cadastro
+              </span>
+              <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                Crie sua conta no INstituto Kalapa
+              </h1>
+              <p className="text-xs md:text-sm text-white/50 mt-1">
+                Seus dados cadastrais serão reutilizados automaticamente em todas as suas compras
+              </p>
             </div>
-          </div>
 
-          {/* SEÇÃO 2: ENDEREÇO DE ENTREGA */}
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#A78BFA] mb-4">
-              Endereço de entrega
-            </h2>
+            {erro && (
+              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{erro}</span>
+              </div>
+            )}
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-                <div className="md:col-span-2">
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    CEP *
-                  </label>
-                  <div className="relative">
+            {sucesso && (
+              <div className="mb-6 p-4 rounded-xl bg-brand-mint/20 border border-brand-mint/30 text-brand-mint text-xs flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>Cadastro realizado com sucesso! Conectando...</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* SEÇÃO 1: DADOS DE ACESSO */}
+              <div>
+                <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/10">
+                  <User className="w-4 h-4 text-brand-terracotta" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta">
+                    Dados de Acesso
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      Nome completo *
+                    </label>
                     <input
                       type="text"
                       required
-                      value={cep}
-                      onChange={handleCepChange}
-                      placeholder="00000-000"
-                      className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED]"
+                      value={form.nome}
+                      onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                      placeholder="Ex: Maria da Silva"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all"
                     />
-                    {buscandoCep && (
-                      <Loader2 className="w-4 h-4 animate-spin text-[#A78BFA] absolute right-3 top-3.5" />
-                    )}
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      E-mail (login) *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      placeholder="seu@email.com"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      Telefone / WhatsApp *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={form.telefone}
+                      onChange={(e) => setForm({ ...form, telefone: maskPhone(e.target.value) })}
+                      placeholder="(11) 99999-9999"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      CPF *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.cpf}
+                      onChange={(e) => setForm({ ...form, cpf: maskCPF(e.target.value) })}
+                      placeholder="000.000.000-00"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      Senha * (mínimo 8 caracteres)
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={8}
+                      value={form.senha}
+                      onChange={(e) => setForm({ ...form, senha: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      Confirmar senha *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={8}
+                      value={form.confirmarSenha}
+                      onChange={(e) => setForm({ ...form, confirmarSenha: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all"
+                    />
                   </div>
                 </div>
+              </div>
 
-                <div className="md:col-span-3">
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    Rua / Avenida *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={rua}
-                    onChange={(e) => setRua(e.target.value)}
-                    placeholder="Nome da rua"
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED]"
-                  />
+              {/* SEÇÃO 2: ENDEREÇO DE ENTREGA */}
+              <div>
+                <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/10">
+                  <MapPin className="w-4 h-4 text-brand-terracotta" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta">
+                    Endereço de Entrega
+                  </h2>
                 </div>
 
-                <div className="md:col-span-1">
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    Número *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={numero}
-                    onChange={(e) => setNumero(e.target.value)}
-                    placeholder="123"
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED]"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      CEP * {buscandoCep && <span className="text-brand-terracotta text-[10px]">(Buscando...)</span>}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.cep}
+                      onBlur={handleCepBlur}
+                      onChange={(e) => setForm({ ...form, cep: maskCEP(e.target.value) })}
+                      placeholder="00000-000"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all font-mono"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      Rua / Avenida *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.rua}
+                      onChange={(e) => setForm({ ...form, rua: e.target.value })}
+                      placeholder="Ex: Av. Paulista"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      Número *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.numero}
+                      onChange={(e) => setForm({ ...form, numero: e.target.value })}
+                      placeholder="123"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      Complemento (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={form.complemento}
+                      onChange={(e) => setForm({ ...form, complemento: e.target.value })}
+                      placeholder="Apto 42, Bloco B"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      Bairro *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.bairro}
+                      onChange={(e) => setForm({ ...form, bairro: e.target.value })}
+                      placeholder="Bela Vista"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      Cidade *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.cidade}
+                      onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+                      placeholder="São Paulo"
+                      className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-medium text-white/70 block mb-1">
+                      UF *
+                    </label>
+                    <select
+                      value={form.uf}
+                      onChange={(e) => setForm({ ...form, uf: e.target.value })}
+                      className="w-full bg-brand-purple-deep border border-white/15 focus:border-brand-terracotta rounded-xl px-3 py-2.5 text-sm text-white outline-none transition-all"
+                    >
+                      {UFS.map((uf) => (
+                        <option key={uf} value={uf} className="bg-brand-purple-deep text-white">
+                          {uf}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-                <div className="md:col-span-2">
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    Complemento
-                  </label>
-                  <input
-                    type="text"
-                    value={complemento}
-                    onChange={(e) => setComplemento(e.target.value)}
-                    placeholder="Apto, bloco..."
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED]"
-                  />
-                </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 px-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-brand-terracotta/25 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Criando conta...
+                  </>
+                ) : (
+                  "Cadastrar e Continuar"
+                )}
+              </button>
+            </form>
 
-                <div className="md:col-span-2">
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    Bairro *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={bairro}
-                    onChange={(e) => setBairro(e.target.value)}
-                    placeholder="Bairro"
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED]"
-                  />
-                </div>
-
-                <div className="md:col-span-1">
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    Cidade *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={cidade}
-                    onChange={(e) => setCidade(e.target.value)}
-                    placeholder="Cidade"
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED]"
-                  />
-                </div>
-
-                <div className="md:col-span-1">
-                  <label className="text-xs font-medium text-white/70 block mb-1.5">
-                    UF *
-                  </label>
-                  <select
-                    required
-                    value={uf}
-                    onChange={(e) => setUf(e.target.value)}
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-[#7C3AED]"
-                  >
-                    <option value="">—</option>
-                    {UFS.map((u) => (
-                      <option key={u} value={u} className="bg-[#161B22] text-white">
-                        {u}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+            <div className="mt-6 pt-5 border-t border-white/10 text-center">
+              <p className="text-xs text-white/60">
+                Já possui uma conta?{" "}
+                <Link
+                  href="/login"
+                  className="text-brand-terracotta hover:underline font-semibold transition-colors"
+                >
+                  Faça login
+                </Link>
+              </p>
             </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-50 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-purple-900/30 cursor-pointer flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Criando conta...
-              </>
-            ) : (
-              "Cadastrar e Continuar"
-            )}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-xs text-white/50">
-          Já tem uma conta?{" "}
-          <Link
-            href="/login"
-            className="text-[#A78BFA] hover:text-[#C4B5FD] font-medium transition-colors ml-1"
-          >
-            Faça login
-          </Link>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldCheck,
-  Check,
   ExternalLink,
   Package,
   ArrowLeft,
@@ -77,7 +75,6 @@ export default function Checkout() {
     fetchData();
   }, []);
 
-  // Determinar se estamos comprando pelo carrinho ou por produto único
   const isCartCheckout = cartItems.length > 0;
   const subtotal = isCartCheckout
     ? cartSubtotal
@@ -85,7 +82,6 @@ export default function Checkout() {
 
   const valorDesconto = cupomAplicado?.desconto || 0;
   const totalFinal = Math.max(0, subtotal - valorDesconto);
-  const isGratuito = totalFinal <= 0 && !isCartCheckout && (produto?.preco ?? 0) <= 0;
 
   // Aplicar cupom de desconto (opcional)
   const handleAplicarCupom = async (e: React.FormEvent) => {
@@ -134,7 +130,6 @@ export default function Checkout() {
       return;
     }
 
-    // Se NÃO estiver logado, valida os dados mínimos do visitante
     if (!usuario) {
       if (!guestForm.nome.trim()) {
         setErro("Informe seu nome ou faça login para continuar.");
@@ -163,7 +158,6 @@ export default function Checkout() {
         bodyPayload.produto_id = produto.id;
       }
 
-      // Se visitante não logado
       if (!usuario) {
         bodyPayload.customer = {
           name: guestForm.nome.trim(),
@@ -186,7 +180,6 @@ export default function Checkout() {
         return;
       }
 
-      // Limpar itens e redirecionar
       if (isCartCheckout) clearCart();
       sessionStorage.removeItem("produto_selecionado");
       window.location.href = checkoutData.url;
@@ -199,24 +192,26 @@ export default function Checkout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center text-white">
-        <div className="w-10 h-10 border-4 border-[#7C3AED] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-brand-charcoal relative flex items-center justify-center text-white">
+        <div className="absolute inset-0 cinematic-gradient" />
+        <div className="w-10 h-10 border-4 border-brand-terracotta border-t-transparent rounded-full animate-spin relative z-10" />
       </div>
     );
   }
 
   if (!isCartCheckout && !produto) {
     return (
-      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center text-white px-4">
-        <div className="text-center max-w-md mx-auto">
+      <div className="min-h-screen bg-brand-charcoal relative flex items-center justify-center text-white px-4">
+        <div className="absolute inset-0 cinematic-gradient" />
+        <div className="relative z-10 text-center max-w-md mx-auto glass-card rounded-2xl p-8 border border-white/10">
           <Package className="w-14 h-14 text-white/30 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Nenhum produto selecionado</h2>
-          <p className="text-white/50 text-sm mb-6">
+          <h2 className="text-xl font-bold mb-2">Nenhum produto selecionado</h2>
+          <p className="text-white/50 text-xs mb-6">
             Seu carrinho está vazio e nenhum produto foi selecionado para compra.
           </p>
           <Link
             href="/produtos"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-medium text-sm rounded-xl transition-all shadow-lg"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-brand-terracotta/25"
           >
             <ArrowLeft className="w-4 h-4" />
             Explorar catálogo completo
@@ -227,33 +222,37 @@ export default function Checkout() {
   }
 
   return (
-    <section className="relative min-h-screen py-24 bg-[#0D1117] text-white flex items-center justify-center">
+    <section className="relative min-h-screen py-24 md:py-32 bg-brand-charcoal text-white flex items-center justify-center font-sans">
+      {/* Background Cinematográfico Kalapa */}
+      <div className="absolute inset-0 cinematic-gradient opacity-95 pointer-events-none" />
+      <div className="absolute inset-0 cinematic-overlay opacity-60 pointer-events-none" />
+
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4 md:px-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-purple-500/10 text-[#A78BFA] text-xs font-semibold tracking-wide mb-3 border border-purple-500/20">
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brand-terracotta/15 text-brand-terracotta text-xs font-semibold tracking-wide mb-3 border border-brand-terracotta/25">
             <ShieldCheck className="w-4 h-4" />
             Checkout Seguro InfinitePay
           </span>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">
+          <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
             Finalizar Pedido
           </h1>
           <p className="mt-1 text-white/50 text-xs md:text-sm">
-            Seus dados são transmitidos com criptografia de ponta a ponta.
+            Seus dados são protegidos com criptografia de ponta a ponta
           </p>
         </div>
 
         <div className="grid md:grid-cols-12 gap-8">
           {/* LADO ESQUERDO: RESUMO DOS PRODUTOS & VALORES (7 cols) */}
-          <div className="md:col-span-7 bg-[#161B22] border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-xl">
+          <div className="md:col-span-7 glass-card border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-2xl">
             <div>
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-white/80">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta">
                   {isCartCheckout ? `Itens do Carrinho (${cartItems.length})` : "Produto Selecionado"}
                 </h2>
                 <Link
                   href="/produtos"
-                  className="text-xs text-[#A78BFA] hover:text-[#C4B5FD] transition-colors"
+                  className="text-xs text-white/50 hover:text-white transition-colors"
                 >
                   + Adicionar mais
                 </Link>
@@ -265,7 +264,7 @@ export default function Checkout() {
                   cartItems.map((item) => (
                     <div
                       key={item.produto_id}
-                      className="p-3 bg-[#0D1117] border border-white/10 rounded-xl flex items-center justify-between gap-3"
+                      className="p-3 bg-white/[0.04] border border-white/10 rounded-xl flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {item.imagem_url ? (
@@ -283,7 +282,7 @@ export default function Checkout() {
                         </div>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-xs font-bold text-[#A78BFA]">
+                        <p className="text-xs font-bold text-brand-terracotta">
                           R$ {(item.preco * item.quantidade).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                         </p>
                       </div>
@@ -291,12 +290,12 @@ export default function Checkout() {
                   ))
                 ) : (
                   produto && (
-                    <div className="p-4 bg-[#0D1117] border border-white/10 rounded-xl">
+                    <div className="p-4 bg-white/[0.04] border border-white/10 rounded-xl">
                       <h3 className="text-base font-bold text-white mb-1">{produto.nome}</h3>
                       {produto.descricao_curta && (
                         <p className="text-xs text-white/60 mb-3">{produto.descricao_curta}</p>
                       )}
-                      <p className="text-lg font-bold text-[#A78BFA]">
+                      <p className="text-lg font-bold text-brand-terracotta">
                         R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </p>
                     </div>
@@ -307,23 +306,23 @@ export default function Checkout() {
               {/* CAMPO DE CUPOM OPCIONAL */}
               <div className="mt-6 pt-4 border-t border-white/10">
                 <label className="text-xs font-medium text-white/70 block mb-2 flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-[#A78BFA]" />
+                  <Tag className="w-3.5 h-3.5 text-brand-terracotta" />
                   Possui cupom de desconto? (Opcional)
                 </label>
 
                 {cupomAplicado ? (
-                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+                  <div className="p-3 rounded-xl bg-brand-mint/20 border border-brand-mint/30 flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-bold text-emerald-400 font-mono">
+                      <span className="text-xs font-bold text-brand-mint font-mono">
                         {cupomAplicado.codigo}
                       </span>
-                      <span className="text-xs text-emerald-400/80 ml-2">
+                      <span className="text-xs text-brand-mint/90 ml-2">
                         - R$ {valorDesconto.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} aplicado!
                       </span>
                     </div>
                     <button
                       onClick={handleRemoverCupom}
-                      className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors"
+                      className="text-xs text-red-300 hover:text-red-200 font-medium transition-colors cursor-pointer"
                     >
                       Remover
                     </button>
@@ -335,12 +334,12 @@ export default function Checkout() {
                       value={cupomInput}
                       onChange={(e) => setCupomInput(e.target.value.toUpperCase())}
                       placeholder="Código do cupom"
-                      className="flex-1 bg-[#0D1117] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white uppercase font-mono placeholder-white/25 focus:outline-none focus:border-[#7C3AED]"
+                      className="flex-1 bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-3.5 py-2.5 text-xs text-white uppercase font-mono placeholder-white/25 outline-none"
                     />
                     <button
                       type="submit"
                       disabled={validandoCupom || !cupomInput.trim()}
-                      className="px-4 py-2.5 bg-white/10 hover:bg-white/15 disabled:opacity-40 text-xs font-medium text-white rounded-xl transition-colors cursor-pointer"
+                      className="px-4 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark disabled:opacity-40 text-xs font-semibold text-white rounded-xl transition-colors cursor-pointer"
                     >
                       {validandoCupom ? "Validando..." : "Aplicar"}
                     </button>
@@ -363,14 +362,14 @@ export default function Checkout() {
                 <span>R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
               </div>
               {valorDesconto > 0 && (
-                <div className="flex justify-between text-xs text-emerald-400 font-medium">
+                <div className="flex justify-between text-xs text-brand-mint font-medium">
                   <span>Desconto cupom</span>
                   <span>- R$ {valorDesconto.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
               <div className="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
                 <span>Total a pagar</span>
-                <span className="text-[#A78BFA]">
+                <span className="text-brand-terracotta font-bold text-lg">
                   R$ {totalFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                 </span>
               </div>
@@ -378,17 +377,17 @@ export default function Checkout() {
           </div>
 
           {/* LADO DIREITO: DADOS DO CLIENTE & BOTÃO DE PAGAMENTO (5 cols) */}
-          <div className="md:col-span-5 bg-[#161B22] border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-xl">
+          <div className="md:col-span-5 glass-card border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-2xl">
             <div>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-white/80 pb-4 mb-4 border-b border-white/10">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta pb-4 mb-4 border-b border-white/10">
                 Identificação do Pagamento
               </h2>
 
-              {/* SE USUÁRIO LOGADO: ZERO PREENCHIMENTO MANUAL (Requisito 1) */}
+              {/* SE USUÁRIO LOGADO: ZERO PREENCHIMENTO MANUAL */}
               {usuario ? (
                 <div className="space-y-3">
-                  <div className="p-4 bg-[#0D1117] border border-purple-500/20 rounded-xl">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-[#A78BFA] mb-2">
+                  <div className="p-4 bg-white/[0.04] border border-brand-terracotta/30 rounded-xl">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-brand-terracotta mb-2">
                       <User className="w-4 h-4" />
                       Conta Conectada
                     </div>
@@ -398,9 +397,9 @@ export default function Checkout() {
                     <p className="text-xs text-white/40 font-mono mt-1">CPF: {usuario.cpf}</p>
                   </div>
 
-                  <div className="p-4 bg-[#0D1117] border border-white/10 rounded-xl">
+                  <div className="p-4 bg-white/[0.04] border border-white/10 rounded-xl">
                     <div className="flex items-center gap-2 text-xs font-semibold text-white/70 mb-2">
-                      <MapPin className="w-4 h-4 text-[#A78BFA]" />
+                      <MapPin className="w-4 h-4 text-brand-terracotta" />
                       Endereço de Entrega
                     </div>
                     <p className="text-xs text-white/90">
@@ -412,21 +411,21 @@ export default function Checkout() {
                     <p className="text-xs text-white/40 font-mono">CEP: {usuario.cep}</p>
                   </div>
 
-                  <p className="text-[11px] text-emerald-400 flex items-center gap-1.5 pt-1">
+                  <p className="text-[11px] text-brand-mint flex items-center gap-1.5 pt-1">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                    Seus dados serão repassados automaticamente à InfinitePay sem necessidade de redigitação.
+                    Seus dados serão repassados automaticamente à InfinitePay sem necessidade de digitação.
                   </p>
                 </div>
               ) : (
                 /* SE VISITANTE NÃO LOGADO: CONVITE DE LOGIN OU DADOS RÁPIDOS */
                 <div className="space-y-4">
-                  <div className="p-3.5 bg-[#0D1117] border border-[#7C3AED]/30 rounded-xl text-center">
+                  <div className="p-3.5 bg-white/[0.04] border border-brand-terracotta/30 rounded-xl text-center">
                     <p className="text-xs text-white/80 font-medium mb-2">
                       Já é cliente cadastrado?
                     </p>
                     <Link
                       href="/login?redirect=/checkout"
-                      className="inline-flex items-center justify-center gap-2 w-full py-2 bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 border border-[#7C3AED]/40 text-[#A78BFA] text-xs font-semibold rounded-lg transition-colors"
+                      className="inline-flex items-center justify-center gap-2 w-full py-2 bg-brand-terracotta/20 hover:bg-brand-terracotta/30 border border-brand-terracotta/40 text-brand-terracotta text-xs font-semibold rounded-xl transition-colors"
                     >
                       <LogIn className="w-3.5 h-3.5" />
                       Entrar para finalizar em 1 clique
@@ -434,7 +433,7 @@ export default function Checkout() {
                   </div>
 
                   <div className="relative text-center my-2">
-                    <span className="text-[10px] uppercase tracking-wider text-white/40 bg-[#161B22] px-2 relative z-10">
+                    <span className="text-[10px] uppercase tracking-wider text-white/40 bg-brand-purple-deep px-2 relative z-10">
                       Ou compre como visitante
                     </span>
                     <div className="absolute inset-x-0 top-2 border-t border-white/10" />
@@ -449,7 +448,7 @@ export default function Checkout() {
                         value={guestForm.nome}
                         onChange={(e) => setGuestForm({ ...guestForm, nome: e.target.value })}
                         placeholder="Seu nome"
-                        className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#7C3AED]"
+                        className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-3.5 py-2.5 text-xs text-white outline-none"
                       />
                     </div>
                     <div>
@@ -460,7 +459,7 @@ export default function Checkout() {
                         value={guestForm.telefone}
                         onChange={(e) => setGuestForm({ ...guestForm, telefone: e.target.value })}
                         placeholder="(11) 99999-9999"
-                        className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#7C3AED]"
+                        className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-3.5 py-2.5 text-xs text-white outline-none"
                       />
                     </div>
                     <div>
@@ -470,7 +469,7 @@ export default function Checkout() {
                         value={guestForm.email}
                         onChange={(e) => setGuestForm({ ...guestForm, email: e.target.value })}
                         placeholder="seu@email.com"
-                        className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#7C3AED]"
+                        className="w-full bg-white/5 border border-white/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-3.5 py-2.5 text-xs text-white outline-none"
                       />
                     </div>
                   </div>
@@ -480,7 +479,7 @@ export default function Checkout() {
 
             <div className="pt-6">
               {erro && (
-                <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs">
                   {erro}
                 </div>
               )}
@@ -488,7 +487,7 @@ export default function Checkout() {
               <button
                 onClick={handleFinalizarPagamento}
                 disabled={processando}
-                className="w-full py-4 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-50 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-purple-900/40 cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark disabled:opacity-50 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-brand-terracotta/25 cursor-pointer flex items-center justify-center gap-2"
               >
                 {processando ? (
                   <>
@@ -503,9 +502,9 @@ export default function Checkout() {
                 )}
               </button>
 
-              <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-white/40 text-center">
-                <ShieldCheck className="w-4 h-4 text-[#A78BFA]" />
-                <span>Processamento seguro pela InfinitePay</span>
+              <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-white/50 text-center">
+                <ShieldCheck className="w-4 h-4 text-brand-mint" />
+                <span>Processamento oficial e seguro pela InfinitePay</span>
               </div>
             </div>
           </div>

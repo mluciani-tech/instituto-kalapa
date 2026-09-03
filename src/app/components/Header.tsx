@@ -206,10 +206,14 @@ export default function Header() {
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     aria-label="Menu do usuário"
-                    className="flex items-center gap-2 px-3 h-10 rounded-xl border border-white/20 bg-black/40 hover:bg-black/60 text-white transition-all duration-200"
+                    className={`flex items-center gap-2 px-3 h-10 rounded-xl transition-all duration-200 cursor-pointer ${
+                      scrolled
+                        ? "border border-brand-beige bg-white text-brand-charcoal hover:bg-brand-beige/60 shadow-xs"
+                        : "border border-white/20 bg-black/40 hover:bg-black/60 text-white"
+                    }`}
                   >
-                    <UserIcon className="w-4 h-4 text-white" />
-                    <span className="text-xs font-medium max-w-[100px] truncate">
+                    <UserIcon className="w-4 h-4 text-brand-terracotta" />
+                    <span className="text-xs font-semibold max-w-[100px] truncate">
                       Olá, {primeiroNome}
                     </span>
                   </button>
@@ -217,17 +221,21 @@ export default function Header() {
                   <Link
                     href="/login"
                     aria-label="Entrar na conta"
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-black/40 hover:bg-black/60 text-white transition-all duration-200"
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 ${
+                      scrolled
+                        ? "border border-brand-beige bg-white text-brand-charcoal hover:bg-brand-beige/60 shadow-xs"
+                        : "border border-white/20 bg-black/40 hover:bg-black/60 text-white"
+                    }`}
                   >
-                    <UserIcon className="w-4 h-4 text-white" />
+                    <UserIcon className="w-4 h-4" />
                   </Link>
                 )}
 
                 {/* Dropdown menu do usuário logado */}
                 {usuario && userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-52 rounded-xl bg-[#161B22] border border-white/10 shadow-2xl py-2 z-50 text-white">
+                  <div className="absolute right-0 mt-2 w-52 rounded-xl bg-brand-purple-deep border border-white/10 shadow-2xl py-2 z-50 text-white font-sans">
                     <div className="px-4 py-2 border-b border-white/10">
-                      <p className="text-xs font-semibold text-white truncate">{usuario.nome}</p>
+                      <p className="text-xs font-bold text-white truncate">{usuario.nome}</p>
                       <p className="text-[11px] text-white/50 truncate">{usuario.email}</p>
                     </div>
                     <Link
@@ -235,12 +243,12 @@ export default function Header() {
                       onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-white/80 hover:text-white hover:bg-white/5 transition-colors"
                     >
-                      <Package className="w-4 h-4 text-[#A78BFA]" />
+                      <Package className="w-4 h-4 text-brand-terracotta" />
                       Meus pedidos
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-400 hover:bg-white/5 transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-400 hover:bg-white/5 transition-colors text-left cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
                       Sair da conta
@@ -253,11 +261,15 @@ export default function Header() {
               <button
                 onClick={openDrawer}
                 aria-label={`Abrir carrinho com ${totalItems} itens`}
-                className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-black/40 hover:bg-black/60 text-white transition-all duration-200"
+                className={`relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 cursor-pointer ${
+                  scrolled
+                    ? "border border-brand-beige bg-white text-brand-charcoal hover:bg-brand-beige/60 shadow-xs"
+                    : "border border-white/20 bg-black/40 hover:bg-black/60 text-white"
+                }`}
               >
-                <ShoppingCart className="w-4 h-4 text-white" />
+                <ShoppingCart className="w-4 h-4" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-[10px] font-bold text-white shadow-md">
+                  <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-terracotta text-[10px] font-bold text-white shadow-md shadow-brand-terracotta/40">
                     {totalItems}
                   </span>
                 )}
