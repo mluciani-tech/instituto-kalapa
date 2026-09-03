@@ -125,3 +125,46 @@ export async function sendConfirmacaoCliente(params: {
 
   await sendEmail(email, "Sua vaga está garantida — INstituto Kalapa", html);
 }
+
+/** E-mail de Recuperação de Senha para o CLIENTE */
+export async function sendPasswordResetEmail(params: {
+  nome: string;
+  email: string;
+  resetLink: string;
+}): Promise<void> {
+  const { nome, email, resetLink } = params;
+
+  const html = `
+    <div style="${baseStyles}">
+      <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #1A3C4D; font-size: 24px; margin: 0;">INstituto Kalapa</h1>
+        <p style="color: #7D8C6E; font-size: 14px; margin-top: 4px;">Recuperação de Senha</p>
+      </div>
+      <div style="background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;">
+        <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6; margin-top: 0;">
+          Olá, <strong>${nome}</strong>!
+        </p>
+        <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6;">
+          Recebemos uma solicitação para redefinir a senha da sua conta no INstituto Kalapa.
+        </p>
+        <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6;">
+          Para criar uma nova senha, clique no botão seguro abaixo. Este link expira em 1 hora:
+        </p>
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${resetLink}" style="background-color: #6D28D9; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; display: inline-block;">
+            Redefinir Minha Senha
+          </a>
+        </div>
+        <p style="color: #888888; font-size: 13px; line-height: 1.5;">
+          Se você não solicitou a alteração da sua senha, desconsidere este e-mail com segurança. Sua senha atual permanecerá inalterada.
+        </p>
+      </div>
+      <p style="text-align: center; color: #7D8C6E; font-size: 12px; margin-top: 32px;">
+        INstituto Kalapa — Transformação Comportamental
+      </p>
+    </div>
+  `;
+
+  await sendEmail(email, "Redefinição de Senha — INstituto Kalapa", html);
+}
+

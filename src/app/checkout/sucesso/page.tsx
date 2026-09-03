@@ -179,7 +179,24 @@ function SucessoContent() {
               : "Assim que o pagamento for confirmado, você receberá um e-mail e nossa equipe entrará em contato."}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+          {/* Card Acompanhar Pedido */}
+          <div className="mt-6 p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 text-center">
+            <p className="text-sm font-semibold text-white mb-1">
+              Deseja acompanhar o andamento do seu pedido?
+            </p>
+            <p className="text-xs text-white/60 mb-4">
+              Você pode visualizar o status em tempo real e comprovante na sua área do cliente.
+            </p>
+            <button
+              onClick={() => router.push("/conta/pedidos")}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-purple-900/40 cursor-pointer"
+            >
+              Acompanhar meu pedido
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
             {pago && (receiptUrl || pedido?.receipt_url) && (
               <a
                 href={receiptUrl || pedido?.receipt_url || "#"}
@@ -192,12 +209,12 @@ function SucessoContent() {
             )}
             <button
               onClick={() => router.push("/")}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-sm font-medium rounded-xl transition-all duration-200"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/15 text-white text-sm font-medium rounded-xl transition-all duration-200"
             >
               Voltar para Home
-              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
+
         </motion.div>
       </div>
     </section>

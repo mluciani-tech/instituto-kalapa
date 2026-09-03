@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/context/CartContext";
 import StarBorder from "@/components/ui/star-border";
 import type { Produto, VagasInfo } from "@/lib/types";
 
@@ -17,6 +18,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ produto, index = 0, vagas }: ProductCardProps) {
   const router = useRouter();
+  const { addItem } = useCart();
 
   const handleEscolher = () => {
     sessionStorage.setItem("produto_selecionado", produto.id);
@@ -149,22 +151,44 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
               )}
 
               {!isGratuito && (
-                <button
-                  onClick={handleEscolher}
-                  disabled={!!vagasEsgotadas}
-                  className={`w-full py-3 font-semibold rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
-                    vagasEsgotadas
-                      ? 'bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed'
-                      : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-lg shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
-                  }`}
-                >
-                  {vagasEsgotadas ? 'Turma lotada' : (
-                    <>
-                      Escolher
-                      <ArrowRight aria-hidden="true" className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      addItem({
+                        id: produto.id,
+                        slug: produto.slug,
+                        nome: produto.nome,
+                        preco: produto.preco,
+                        imagem_url: produto.imagem_url,
+                        categoria: produto.categoria,
+                      })
+                    }
+                    disabled={!!vagasEsgotadas}
+                    className="flex-1 py-3 px-3 font-medium text-xs md:text-sm rounded-xl border border-brand-purple/20 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
+                    title="Adicionar ao carrinho"
+                  >
+                    <ShoppingCart aria-hidden="true" className="w-4 h-4" />
+                    Carrinho
+                  </button>
+
+                  <button
+                    onClick={handleEscolher}
+                    disabled={!!vagasEsgotadas}
+                    className={`flex-1 py-3 px-4 font-semibold text-xs md:text-sm rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
+                      vagasEsgotadas
+                        ? 'bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed'
+                        : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
+                    }`}
+                  >
+                    {vagasEsgotadas ? 'Turma lotada' : (
+                      <>
+                        Comprar
+                        <ArrowRight aria-hidden="true" className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
               )}
             </div>
           </div>

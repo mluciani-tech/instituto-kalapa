@@ -2,51 +2,65 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, Check, ExternalLink, Package, ArrowLeft, CheckCircle2 } from "lucide-react";
-import type { Produto } from "@/lib/types";
-
-interface DadosInscricao {
-  nome: string;
-  email: string;
-  telefone: string;
-  motivacao: string;
-}
-
-const getMetodoPadrao = (forma?: string): "pix" | "cartao" => {
-  if (forma === "cartao") return "cartao";
-  return "pix";
-};
+import {
+  ShieldCheck,
+  Check,
+  ExternalLink,
+  Package,
+  ArrowLeft,
+  CheckCircle2,
+  Tag,
+  User,
+  MapPin,
+  LogIn,
+  AlertCircle,
+} from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { useCart } from "@/context/CartContext";
+import type { Produto, Usuario } from "@/lib/types";
 
 export default function Checkout() {
+  const { items: cartItems, clearCart, subtotal: cartSubtotal } = useCart();
   const [produto, setProduto] = useState<Produto | null>(null);
-  const [dadosInscricao, setDadosInscricao] = useState<DadosInscricao | null>(null);
-  const [form, setForm] = useState({ nome: "", email: "", telefone: "", motivacao: "" });
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
-  const [metodoSelecionado, setMetodoSelecionado] = useState<"pix" | "cartao">("pix");
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState("");
 
-  const formaPagamento = produto?.forma_pagamento_disponivel || "ambos";
+  // Formulário para visitante (se não estiver logado)
+  const [guestForm, setGuestForm] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+  });
 
-  useEffect(() => {
-    setMetodoSelecionado(getMetodoPadrao(formaPagamento));
-  }, [formaPagamento]);
+  // Cupom de desconto opcional
+  const [cupomInput, setCupomInput] = useState("");
+  const [validandoCupom, setValidandoCupom] = useState(false);
+  const [cupomErro, setCupomErro] = useState("");
+  const [cupomAplicado, setCupomAplicado] = useState<{
+    codigo: string;
+    desconto: number;
+    totalComDesconto: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const sessionData = typeof window !== "undefined"
-          ? sessionStorage.getItem("dados_inscricao")
-          : null;
+        // 1. Verificar se usuário está logado
+        const authRes = await fetch("/api/auth/me");
+        if (authRes.ok) {
+          const authData = await authRes.json();
+          if (authData.authenticated && authData.usuario) {
+            setUsuario(authData.usuario);
+          }
+        }
+
+        // 2. Se não houver itens no carrinho, buscar produto individual da sessão
         const produtoId = typeof window !== "undefined"
           ? sessionStorage.getItem("produto_selecionado")
           : null;
-
-        if (sessionData) {
-          const parsed = JSON.parse(sessionData);
-          setDadosInscricao(parsed);
-          setForm({ nome: parsed.nome || "", email: parsed.email || "", telefone: parsed.telefone || "", motivacao: parsed.motivacao || "" });
-        }
 
         if (produtoId) {
           const res = await fetch(`/api/produtos/${produtoId}`);
@@ -56,439 +70,446 @@ export default function Checkout() {
           }
         }
       } catch {
-        // Use defaults
+        // ignore
       }
       setLoading(false);
     };
     fetchData();
   }, []);
 
-  const formatPhoneForInfinitePay = (phone: string): string | null => {
-    const numbers = phone.replace(/\D/g, "");
-    if (numbers.length < 10) return null;
-    if (numbers.startsWith("55")) {
-      return `+${numbers}`;
+  // Determinar se estamos comprando pelo carrinho ou por produto único
+  const isCartCheckout = cartItems.length > 0;
+  const subtotal = isCartCheckout
+    ? cartSubtotal
+    : (produto?.preco ?? 0);
+
+  const valorDesconto = cupomAplicado?.desconto || 0;
+  const totalFinal = Math.max(0, subtotal - valorDesconto);
+  const isGratuito = totalFinal <= 0 && !isCartCheckout && (produto?.preco ?? 0) <= 0;
+
+  // Aplicar cupom de desconto (opcional)
+  const handleAplicarCupom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cupomInput.trim()) return;
+    setCupomErro("");
+    setValidandoCupom(true);
+
+    try {
+      const res = await fetch("/api/cupons/validar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          codigo: cupomInput.trim(),
+          subtotal,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.valid) {
+        setCupomAplicado({
+          codigo: data.cupom.codigo,
+          desconto: data.desconto,
+          totalComDesconto: data.totalComDesconto,
+        });
+        setCupomInput("");
+      } else {
+        setCupomErro(data.error || "Cupom inválido ou expirado.");
+      }
+    } catch {
+      setCupomErro("Erro ao validar cupom.");
     }
-    return `+55${numbers}`;
+    setValidandoCupom(false);
   };
 
+  const handleRemoverCupom = () => {
+    setCupomAplicado(null);
+    setCupomErro("");
+  };
+
+  // Finalizar pagamento
   const handleFinalizarPagamento = async () => {
-    if (!produto) {
-      setErro("Nenhum produto selecionado. Volte ao catálogo.");
+    if (!isCartCheckout && !produto) {
+      setErro("Nenhum produto selecionado. Escolha um produto no catálogo.");
       return;
     }
 
-    const nomeTrim = form.nome.trim();
-    const telefoneTrim = form.telefone.trim();
-
-    if (!nomeTrim) {
-      setErro("Informe seu nome para continuar.");
-      return;
-    }
-    if (telefoneTrim.replace(/\D/g, "").length < 10) {
-      setErro("Informe um WhatsApp válido com DDD (ex: 11912345678).");
-      return;
+    // Se NÃO estiver logado, valida os dados mínimos do visitante
+    if (!usuario) {
+      if (!guestForm.nome.trim()) {
+        setErro("Informe seu nome ou faça login para continuar.");
+        return;
+      }
+      if (guestForm.telefone.replace(/\D/g, "").length < 10) {
+        setErro("Informe um telefone com DDD válido.");
+        return;
+      }
     }
 
     setProcessando(true);
     setErro("");
 
-    const payload: DadosInscricao = {
-      nome: nomeTrim,
-      email: form.email.trim() || "contato@institutokalapa.com.br",
-      telefone: telefoneTrim,
-      motivacao: form.motivacao.trim() || "Acesso direto ao checkout",
-    };
-
     try {
-      if (isGratuito) {
-        // Produto gratuito — não chama InfinitePay
-        const res = await fetch("/api/checkout-gratuito", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            produto_id: produto.id,
-            inscricao: {
-              ...payload,
-              metodoPagamento: "gratuito",
-              valor: 0,
-            },
-          }),
-        });
+      const bodyPayload: Record<string, unknown> = {
+        cupom_codigo: cupomAplicado?.codigo || null,
+      };
 
-        const data = await res.json();
-
-        if (!res.ok) {
-          setErro(data.error || "Erro ao confirmar inscrição. Tente novamente.");
-          setProcessando(false);
-          return;
-        }
-
-        sessionStorage.setItem("dados_inscricao", JSON.stringify(payload));
-        sessionStorage.removeItem("produto_selecionado");
-        window.location.href = `/checkout/sucesso?order_nsu=${data.order_nsu}`;
-        return;
+      if (isCartCheckout) {
+        bodyPayload.itens = cartItems.map((i) => ({
+          produto_id: i.produto_id,
+          quantidade: i.quantidade,
+        }));
+      } else if (produto) {
+        bodyPayload.produto_id = produto.id;
       }
 
-      // Produto pago — fluxo InfinitePay
-      // Preço e itens são montados no servidor a partir do produto_id —
-      // o cliente envia apenas identificação e dados de contato
+      // Se visitante não logado
+      if (!usuario) {
+        bodyPayload.customer = {
+          name: guestForm.nome.trim(),
+          email: guestForm.email.trim() || "contato@institutokalapa.com.br",
+          phone_number: guestForm.telefone.trim(),
+        };
+      }
+
       const checkoutRes = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          produto_id: produto.id,
-          customer: (() => {
-            const phone = formatPhoneForInfinitePay(payload.telefone);
-            const c: Record<string, string> = { name: payload.nome, email: payload.email };
-            if (phone) c.phone_number = phone;
-            return c;
-          })(),
-          inscricao: {
-            ...payload,
-            metodoPagamento: metodoSelecionado,
-            valor: produto.preco,
-          },
-        }),
+        body: JSON.stringify(bodyPayload),
       });
 
       const checkoutData = await checkoutRes.json();
 
       if (!checkoutRes.ok || !checkoutData.url) {
-        setErro(checkoutData.error || "Erro ao criar link de pagamento. Tente novamente.");
+        setErro(checkoutData.error || "Erro ao gerar link de pagamento.");
         setProcessando(false);
         return;
       }
 
-      // 2. Salvar dados e redirecionar
-      sessionStorage.setItem("dados_inscricao", JSON.stringify(payload));
+      // Limpar itens e redirecionar
+      if (isCartCheckout) clearCart();
       sessionStorage.removeItem("produto_selecionado");
       window.location.href = checkoutData.url;
     } catch (error) {
       console.error("Erro no checkout:", error);
-      setErro("Erro de conexão. Tente novamente.");
+      setErro("Falha de conexão. Tente novamente.");
       setProcessando(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-brand-charcoal flex items-center justify-center text-white">
-        <div className="w-12 h-12 border-4 border-brand-mint border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center text-white">
+        <div className="w-10 h-10 border-4 border-[#7C3AED] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  if (!produto) {
+  if (!isCartCheckout && !produto) {
     return (
-      <div className="min-h-screen bg-brand-charcoal flex items-center justify-center text-white px-4">
+      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center text-white px-4">
         <div className="text-center max-w-md mx-auto">
-          <Package className="w-16 h-16 text-white/30 mx-auto mb-4" />
+          <Package className="w-14 h-14 text-white/30 mx-auto mb-4" />
           <h2 className="text-2xl font-semibold mb-2">Nenhum produto selecionado</h2>
-          <p className="text-white/50 mb-8">
-            Parece que você acessou a página de checkout diretamente ou sua sessão expirou. Escolha uma de nossas vivências ou atendimentos para continuar.
+          <p className="text-white/50 text-sm mb-6">
+            Seu carrinho está vazio e nenhum produto foi selecionado para compra.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
-            <a
-              href="/produtos?categoria=vivencias"
-              className="w-full sm:w-auto px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all"
-            >
-              Ver Vivências
-            </a>
-            <a
-              href="/produtos?categoria=atendimentos"
-              className="w-full sm:w-auto px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-xl transition-all"
-            >
-              Ver Atendimentos
-            </a>
-          </div>
-          <a
+          <Link
             href="/produtos"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all shadow-lg"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-medium text-sm rounded-xl transition-all shadow-lg"
           >
             <ArrowLeft className="w-4 h-4" />
             Explorar catálogo completo
-          </a>
+          </Link>
         </div>
       </div>
     );
   }
 
-  const preco = produto.preco ?? 0;
-  const isGratuito = preco <= 0;
-
   return (
-    <section className="relative min-h-screen py-20 bg-brand-charcoal overflow-hidden flex items-center justify-center">
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-charcoal via-brand-purple-deep/30 to-brand-charcoal" />
-      <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_30%_50%,#B8965A_1px,transparent_1px)] bg-[length:30px_30px]" />
-
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 md:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-10"
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-terracotta/20 text-brand-terracotta text-sm font-semibold tracking-wide mb-4">
+    <section className="relative min-h-screen py-24 bg-[#0D1117] text-white flex items-center justify-center">
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 md:px-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-purple-500/10 text-[#A78BFA] text-xs font-semibold tracking-wide mb-3 border border-purple-500/20">
             <ShieldCheck className="w-4 h-4" />
-            Pagamento Seguro
+            Checkout Seguro InfinitePay
           </span>
-          <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight max-w-2xl mx-auto font-sans">
-            Finalizar compra
-          </h2>
-          <p className="mt-3 text-white/50 text-base max-w-xl mx-auto">
-            Processamento rápido e seguro via InfinitePay.
+          <h1 className="text-2xl md:text-3xl font-bold text-white">
+            Finalizar Pedido
+          </h1>
+          <p className="mt-1 text-white/50 text-xs md:text-sm">
+            Seus dados são transmitidos com criptografia de ponta a ponta.
           </p>
-        </motion.div>
+        </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key="active-checkout"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="grid md:grid-cols-2 gap-8"
-          >
-            {/* Lado esquerdo — Detalhes do produto */}
-            <div className="flex flex-col justify-between glass-card-light rounded-2xl p-8 md:p-10">
-              <div>
-                <div className="mb-6">
-                  <span className="text-brand-mint text-sm font-semibold tracking-wider uppercase flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-mint animate-pulse" />
-                    {dadosInscricao ? `Compra de ${dadosInscricao.nome}` : "Produto selecionado"}
-                  </span>
-                  <h3 className="text-2xl md:text-3xl font-bold text-brand-charcoal mt-2 font-sans">
-                    {produto.nome}
-                  </h3>
-                  {produto.descricao_curta && (
-                    <p className="text-brand-charcoal/60 mt-2 leading-relaxed">
-                      {produto.descricao_curta}
-                    </p>
-                  )}
-                </div>
-
-                <div className="border-t border-brand-charcoal/10 pt-6">
-                  <div className="flex items-baseline gap-2 mb-4">
-                    {isGratuito ? (
-                      <span className="text-5xl md:text-6xl font-bold text-brand-mint">
-                        Gratuito
-                      </span>
-                    ) : (
-                      <>
-                        <span className="text-5xl md:text-6xl font-bold text-brand-charcoal">
-                          R$ {preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                        </span>
-                        <span className="text-brand-charcoal/45 text-lg">/ sessão</span>
-                      </>
-                    )}
-                  </div>
-                  {produto.descricao && (
-                    <ul className="space-y-1 mt-2">
-                      {produto.descricao.split("\n").filter((l) => l.trim()).map((linha) => (
-                        <li key={linha} className="flex items-start gap-2 text-brand-charcoal/60 text-sm">
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta/50 mt-1.5 flex-shrink-0" />
-                          {linha}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+        <div className="grid md:grid-cols-12 gap-8">
+          {/* LADO ESQUERDO: RESUMO DOS PRODUTOS & VALORES (7 cols) */}
+          <div className="md:col-span-7 bg-[#161B22] border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-xl">
+            <div>
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-white/80">
+                  {isCartCheckout ? `Itens do Carrinho (${cartItems.length})` : "Produto Selecionado"}
+                </h2>
+                <Link
+                  href="/produtos"
+                  className="text-xs text-[#A78BFA] hover:text-[#C4B5FD] transition-colors"
+                >
+                  + Adicionar mais
+                </Link>
               </div>
 
-              <ul className="mt-8 space-y-3">
-                {produto.beneficios.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-brand-charcoal/70 text-sm">
-                    <Check className="w-4 h-4 text-brand-mint flex-shrink-0 mt-0.5" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Lado direito — Métodos de pagamento ou confirmação gratuita */}
-            <div className="glass-card-light rounded-2xl p-8 md:p-10 flex flex-col justify-between">
-              {isGratuito ? (
-                /* Produto gratuito — sem pagamento */
-                <div className="flex flex-col justify-center text-center py-8">
-                  <div className="text-center">
-                    <CheckCircle2 className="w-16 h-16 text-brand-mint mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-brand-charcoal mb-2">
-                      Inscrição gratuita
-                    </h3>
-                    <p className="text-brand-charcoal/50 text-sm mb-8 max-w-xs mx-auto">
-                      Confirme seus dados para garantir sua vaga.
-                    </p>
-                  </div>
-
-                  <div className="text-left">
-                    <div className="space-y-4 mb-6">
-                      <div>
-                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Nome completo *</label>
-                        <input
-                          type="text"
-                          value={form.nome}
-                          onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                          placeholder="Seu nome"
-                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
-                        />
+              {/* Lista de itens */}
+              <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                {isCartCheckout ? (
+                  cartItems.map((item) => (
+                    <div
+                      key={item.produto_id}
+                      className="p-3 bg-[#0D1117] border border-white/10 rounded-xl flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {item.imagem_url ? (
+                          <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-white/10">
+                            <Image src={item.imagem_url} alt={item.nome} fill className="object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 text-white/30">
+                            <Package className="w-5 h-5" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-white truncate">{item.nome}</p>
+                          <p className="text-[11px] text-white/50">Qtd: {item.quantidade}</p>
+                        </div>
                       </div>
-                      <div>
-                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">WhatsApp *</label>
-                        <input
-                          type="tel"
-                          value={form.telefone}
-                          onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-                          placeholder="(11) 91234-5678"
-                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">E-mail (opcional)</label>
-                        <input
-                          type="email"
-                          value={form.email}
-                          onChange={(e) => setForm({ ...form, email: e.target.value })}
-                          placeholder="voce@email.com"
-                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Motivação (opcional)</label>
-                        <textarea
-                          value={form.motivacao}
-                          onChange={(e) => setForm({ ...form, motivacao: e.target.value })}
-                          placeholder="O que te motiva a participar?"
-                          rows={2}
-                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none resize-none"
-                        />
+                      <div className="text-right shrink-0">
+                        <p className="text-xs font-bold text-[#A78BFA]">
+                          R$ {(item.preco * item.quantidade).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        </p>
                       </div>
                     </div>
-
-                    {erro && (
-                      <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
-                        {erro}
-                      </div>
-                    )}
-
-                    <button
-                      onClick={handleFinalizarPagamento}
-                      disabled={processando}
-                      className="w-full py-4 bg-brand-mint hover:bg-brand-mint-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-mint/25 hover:shadow-brand-mint/40 cursor-pointer disabled:opacity-50 text-sm md:text-base flex items-center justify-center gap-2"
-                    >
-                      {processando ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Confirmando...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle2 className="w-5 h-5" />
-                          Confirmar inscrição
-                        </>
+                  ))
+                ) : (
+                  produto && (
+                    <div className="p-4 bg-[#0D1117] border border-white/10 rounded-xl">
+                      <h3 className="text-base font-bold text-white mb-1">{produto.nome}</h3>
+                      {produto.descricao_curta && (
+                        <p className="text-xs text-white/60 mb-3">{produto.descricao_curta}</p>
                       )}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* Produto pago — fluxo normal */
-                <>
-                  <div>
-                    <h3 className="text-lg font-semibold text-brand-charcoal mb-4">
-                      Seus dados
-                    </h3>
-
-                    <div className="space-y-4 mb-6">
-                      <div>
-                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Nome completo *</label>
-                        <input
-                          type="text"
-                          value={form.nome}
-                          onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                          placeholder="Seu nome"
-                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">WhatsApp *</label>
-                        <input
-                          type="tel"
-                          value={form.telefone}
-                          onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-                          placeholder="(11) 91234-5678"
-                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">E-mail (opcional)</label>
-                        <input
-                          type="email"
-                          value={form.email}
-                          onChange={(e) => setForm({ ...form, email: e.target.value })}
-                          placeholder="voce@email.com"
-                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Motivação (opcional)</label>
-                        <textarea
-                          value={form.motivacao}
-                          onChange={(e) => setForm({ ...form, motivacao: e.target.value })}
-                          placeholder="O que te motiva a participar?"
-                          rows={2}
-                          className="w-full border border-brand-charcoal/15 rounded-lg px-3 py-2 text-sm focus-visible:border-brand-mint focus-visible:ring-2 focus-visible:ring-brand-mint/30 outline-none resize-none"
-                        />
-                      </div>
-                    </div>
-
-                    {erro && (
-                      <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
-                        {erro}
-                      </div>
-                    )}
-
-                    <button
-                      onClick={handleFinalizarPagamento}
-                      disabled={processando}
-                      className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-brand-terracotta/25 hover:shadow-brand-terracotta/40 cursor-pointer disabled:opacity-50 text-sm md:text-base flex items-center justify-center gap-2"
-                    >
-                      {processando ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Redirecionando para pagamento...
-                        </>
-                      ) : (
-                        <>
-                          Pagar
-                          <ExternalLink className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-
-                    {form.nome && (
-                      <p className="text-brand-charcoal/40 text-center text-[10px] mt-2">
-                        Compra de: {form.nome}
+                      <p className="text-lg font-bold text-[#A78BFA]">
+                        R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </p>
-                    )}
+                    </div>
+                  )
+                )}
+              </div>
 
-                    <div className="mt-6 pt-6 border-t border-brand-charcoal/10 flex items-center justify-center gap-3">
-                      <ShieldCheck className="w-5 h-5 text-brand-charcoal/30" />
-                      <span className="text-brand-charcoal/40 text-sm tracking-wide">
-                        Processamento seguro por{" "}
-                        <strong className="text-brand-charcoal/60">InfinitePay</strong>
+              {/* CAMPO DE CUPOM OPCIONAL */}
+              <div className="mt-6 pt-4 border-t border-white/10">
+                <label className="text-xs font-medium text-white/70 block mb-2 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-[#A78BFA]" />
+                  Possui cupom de desconto? (Opcional)
+                </label>
+
+                {cupomAplicado ? (
+                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-emerald-400 font-mono">
+                        {cupomAplicado.codigo}
+                      </span>
+                      <span className="text-xs text-emerald-400/80 ml-2">
+                        - R$ {valorDesconto.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} aplicado!
                       </span>
                     </div>
+                    <button
+                      onClick={handleRemoverCupom}
+                      className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleAplicarCupom} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={cupomInput}
+                      onChange={(e) => setCupomInput(e.target.value.toUpperCase())}
+                      placeholder="Código do cupom"
+                      className="flex-1 bg-[#0D1117] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white uppercase font-mono placeholder-white/25 focus:outline-none focus:border-[#7C3AED]"
+                    />
+                    <button
+                      type="submit"
+                      disabled={validandoCupom || !cupomInput.trim()}
+                      className="px-4 py-2.5 bg-white/10 hover:bg-white/15 disabled:opacity-40 text-xs font-medium text-white rounded-xl transition-colors cursor-pointer"
+                    >
+                      {validandoCupom ? "Validando..." : "Aplicar"}
+                    </button>
+                  </form>
+                )}
 
-                    <div className="mt-6 flex items-center justify-center gap-6 text-brand-charcoal/30 text-xs">
-                      <span>SSL Criptografado</span>
-                      <span>Dados Protegidos</span>
-                      <span>LGPD</span>
+                {cupomErro && (
+                  <p className="text-[11px] text-red-400 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {cupomErro}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Totalizador */}
+            <div className="mt-6 pt-4 border-t border-white/10 space-y-1.5">
+              <div className="flex justify-between text-xs text-white/60">
+                <span>Subtotal</span>
+                <span>R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+              </div>
+              {valorDesconto > 0 && (
+                <div className="flex justify-between text-xs text-emerald-400 font-medium">
+                  <span>Desconto cupom</span>
+                  <span>- R$ {valorDesconto.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
+                <span>Total a pagar</span>
+                <span className="text-[#A78BFA]">
+                  R$ {totalFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* LADO DIREITO: DADOS DO CLIENTE & BOTÃO DE PAGAMENTO (5 cols) */}
+          <div className="md:col-span-5 bg-[#161B22] border border-white/10 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-xl">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-white/80 pb-4 mb-4 border-b border-white/10">
+                Identificação do Pagamento
+              </h2>
+
+              {/* SE USUÁRIO LOGADO: ZERO PREENCHIMENTO MANUAL (Requisito 1) */}
+              {usuario ? (
+                <div className="space-y-3">
+                  <div className="p-4 bg-[#0D1117] border border-purple-500/20 rounded-xl">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-[#A78BFA] mb-2">
+                      <User className="w-4 h-4" />
+                      Conta Conectada
+                    </div>
+                    <p className="text-sm font-bold text-white">{usuario.nome}</p>
+                    <p className="text-xs text-white/60">{usuario.email}</p>
+                    <p className="text-xs text-white/60">Tel: {usuario.telefone}</p>
+                    <p className="text-xs text-white/40 font-mono mt-1">CPF: {usuario.cpf}</p>
+                  </div>
+
+                  <div className="p-4 bg-[#0D1117] border border-white/10 rounded-xl">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-white/70 mb-2">
+                      <MapPin className="w-4 h-4 text-[#A78BFA]" />
+                      Endereço de Entrega
+                    </div>
+                    <p className="text-xs text-white/90">
+                      {usuario.rua}, {usuario.numero} {usuario.complemento ? `(${usuario.complemento})` : ""}
+                    </p>
+                    <p className="text-xs text-white/60">
+                      {usuario.bairro} — {usuario.cidade}/{usuario.uf}
+                    </p>
+                    <p className="text-xs text-white/40 font-mono">CEP: {usuario.cep}</p>
+                  </div>
+
+                  <p className="text-[11px] text-emerald-400 flex items-center gap-1.5 pt-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    Seus dados serão repassados automaticamente à InfinitePay sem necessidade de redigitação.
+                  </p>
+                </div>
+              ) : (
+                /* SE VISITANTE NÃO LOGADO: CONVITE DE LOGIN OU DADOS RÁPIDOS */
+                <div className="space-y-4">
+                  <div className="p-3.5 bg-[#0D1117] border border-[#7C3AED]/30 rounded-xl text-center">
+                    <p className="text-xs text-white/80 font-medium mb-2">
+                      Já é cliente cadastrado?
+                    </p>
+                    <Link
+                      href="/login?redirect=/checkout"
+                      className="inline-flex items-center justify-center gap-2 w-full py-2 bg-[#7C3AED]/20 hover:bg-[#7C3AED]/30 border border-[#7C3AED]/40 text-[#A78BFA] text-xs font-semibold rounded-lg transition-colors"
+                    >
+                      <LogIn className="w-3.5 h-3.5" />
+                      Entrar para finalizar em 1 clique
+                    </Link>
+                  </div>
+
+                  <div className="relative text-center my-2">
+                    <span className="text-[10px] uppercase tracking-wider text-white/40 bg-[#161B22] px-2 relative z-10">
+                      Ou compre como visitante
+                    </span>
+                    <div className="absolute inset-x-0 top-2 border-t border-white/10" />
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-medium text-white/70 block mb-1">Nome completo *</label>
+                      <input
+                        type="text"
+                        required
+                        value={guestForm.nome}
+                        onChange={(e) => setGuestForm({ ...guestForm, nome: e.target.value })}
+                        placeholder="Seu nome"
+                        className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#7C3AED]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-white/70 block mb-1">Telefone / WhatsApp *</label>
+                      <input
+                        type="tel"
+                        required
+                        value={guestForm.telefone}
+                        onChange={(e) => setGuestForm({ ...guestForm, telefone: e.target.value })}
+                        placeholder="(11) 99999-9999"
+                        className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#7C3AED]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-white/70 block mb-1">E-mail</label>
+                      <input
+                        type="email"
+                        value={guestForm.email}
+                        onChange={(e) => setGuestForm({ ...guestForm, email: e.target.value })}
+                        placeholder="seu@email.com"
+                        className="w-full bg-[#0D1117] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#7C3AED]"
+                      />
                     </div>
                   </div>
-                </>
+                </div>
               )}
             </div>
-          </motion.div>
-        </AnimatePresence>
+
+            <div className="pt-6">
+              {erro && (
+                <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                  {erro}
+                </div>
+              )}
+
+              <button
+                onClick={handleFinalizarPagamento}
+                disabled={processando}
+                className="w-full py-4 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-50 text-white font-semibold text-sm rounded-xl transition-all shadow-lg shadow-purple-900/40 cursor-pointer flex items-center justify-center gap-2"
+              >
+                {processando ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Gerando pagamento InfinitePay...
+                  </>
+                ) : (
+                  <>
+                    Pagar R$ {totalFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    <ExternalLink className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+
+              <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-white/40 text-center">
+                <ShieldCheck className="w-4 h-4 text-[#A78BFA]" />
+                <span>Processamento seguro pela InfinitePay</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

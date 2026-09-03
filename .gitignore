@@ -8,3 +8,6 @@ tsconfig.tsbuildinfo
 .vercel
 .DS_Store
 public/uploads/
+.gemini/
+.impeccable/
+.opencode/

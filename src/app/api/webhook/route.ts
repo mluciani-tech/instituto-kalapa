@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     // 1. Buscar pedido pelo order_nsu
     const { data: pedido, error: pedidoError } = await supabaseAdmin!
       .from("pedidos")
-      .select("id, status, cliente_nome, cliente_email, cliente_telefone, produtos(nome)")
+      .select("id, status, cliente_nome, cliente_email, cliente_telefone, usuario_id, cupom_id, valor_desconto, produtos(nome)")
       .eq("order_nsu", order_nsu)
       .single();
 
@@ -128,6 +128,32 @@ export async function POST(req: NextRequest) {
     }
 
     await supabaseAdmin!.from("pedidos").update(pedidoUpdate).eq("id", pedido.id);
+
+    // 2.1 Registrar baixa no cupom se houver
+    if (pedido.cupom_id) {
+      try {
+        const { data: cupomAtual } = await supabaseAdmin!
+          .from("cupons")
+          .select("quantidade_utilizada")
+          .eq("id", pedido.cupom_id)
+          .single();
+
+        const qtdAtual = cupomAtual?.quantidade_utilizada || 0;
+        await supabaseAdmin!
+          .from("cupons")
+          .update({ quantidade_utilizada: qtdAtual + 1, updated_at: new Date().toISOString() })
+          .eq("id", pedido.cupom_id);
+
+        await supabaseAdmin!.from("cupons_usos").insert({
+          cupom_id: pedido.cupom_id,
+          pedido_id: pedido.id,
+          usuario_id: pedido.usuario_id || null,
+          valor_desconto: pedido.valor_desconto || 0,
+        });
+      } catch (cupomErr) {
+        console.error("[webhook] Erro ao registrar baixa do cupom:", cupomErr);
+      }
+    }
 
     console.log("[webhook] Pedido atualizado:", pedido.id);
 

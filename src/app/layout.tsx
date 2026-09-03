@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "./components/Header";
+import CartDrawer from "./components/CartDrawer";
+import { CartProvider } from "@/context/CartContext";
 import { MotionConfig } from "framer-motion";
 
 export const metadata: Metadata = {
@@ -79,8 +81,11 @@ export default function RootLayout({
             href="https://fonts.gstatic.com"
             crossOrigin="anonymous"
           />
-          <Header />
-          {children}
+          <CartProvider>
+            <Header />
+            <CartDrawer />
+            {children}
+          </CartProvider>
         </MotionConfig>
         <script
           type="application/ld+json"
