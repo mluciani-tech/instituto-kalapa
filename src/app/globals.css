@@ -161,3 +161,44 @@ body {
   border-radius: 20px;
   padding: 16px 26px;
 }
+
+/* ==========================================================================
+   Estilos de Impressão e Exportação PDF (@media print)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm;
+  }
+
+  /* Oculta tudo na tela */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Exibe exclusivamente o container do relatório */
+  #relatorio-impressao,
+  #relatorio-impressao * {
+    visibility: visible !important;
+  }
+
+  #relatorio-impressao {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+  }
+}
+

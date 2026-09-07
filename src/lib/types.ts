@@ -76,10 +76,12 @@ export interface Participante {
   nome: string;
   email: string;
   telefone: string;
+  cpf?: string | null;
   motivacao: string | null;
   metodo_pagamento: string | null;
   valor: number;
   produto?: string;
+  produto_id?: string | null;
   status: string;
   created_at: string;
   pedidos?: { cliente_nome: string | null; cliente_telefone: string | null; status: string | null; produtos?: { nome: string } | null } | null;

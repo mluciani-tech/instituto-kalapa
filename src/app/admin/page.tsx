@@ -23,6 +23,15 @@ function formatDate(iso: string) {
   }).format(new Date(iso));
 }
 
+function formatCPF(cpf?: string | null) {
+  if (!cpf) return "—";
+  const cleaned = cpf.replace(/\D/g, "");
+  if (cleaned.length === 11) {
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  }
+  return cpf;
+}
+
 function SortableHeader({
   children,
   key: sortKey,
@@ -106,9 +115,17 @@ export default function AdminPage() {
   const [participantesTotalPages, setParticipantesTotalPages] = useState(1);
   const [participantesTotal, setParticipantesTotal] = useState(0);
   const [participantesSearch, setParticipantesSearch] = useState("");
+  const [participantesProdutoFiltro, setParticipantesProdutoFiltro] = useState("");
   const [participantesSort, setParticipantesSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "created_at", dir: "desc" });
   const [showConfirm, setShowConfirm] = useState(false);
   const [clearing, setClearing] = useState(false);
+
+  // Relatório de Convidados para Casa 52
+  const [showRelatorioModal, setShowRelatorioModal] = useState(false);
+  const [relatorioProdutoId, setRelatorioProdutoId] = useState("");
+  const [relatorioApenasPagos, setRelatorioApenasPagos] = useState(true);
+  const [relatorioCarregando, setRelatorioCarregando] = useState(false);
+  const [relatorioParticipantes, setRelatorioParticipantes] = useState<Participante[]>([]);
 
   // Edição de contato (pedido ou participante)
   const [editando, setEditando] = useState<{
@@ -201,12 +218,15 @@ export default function AdminPage() {
     }
   }, [pedidosPage, pedidosSearch, pedidosSort]);
 
-  const fetchParticipantes = useCallback(async (page = participantesPage) => {
+  const fetchParticipantes = useCallback(async (page = participantesPage, prodFiltro = participantesProdutoFiltro) => {
     const params = new URLSearchParams({ page: page.toString(), perPage: "20" });
     if (participantesSearch) params.set("search", participantesSearch);
     if (participantesSort) {
       params.set("sort", participantesSort.key);
       params.set("dir", participantesSort.dir);
+    }
+    if (prodFiltro) {
+      params.set("produtoId", prodFiltro);
     }
     const res = await fetch(`/api/admin/participantes?${params.toString()}`);
     if (res.ok) {
@@ -216,7 +236,37 @@ export default function AdminPage() {
       setParticipantesTotalPages(json.totalPages);
       setParticipantesTotal(json.total);
     }
-  }, [participantesPage, participantesSearch, participantesSort]);
+  }, [participantesPage, participantesSearch, participantesSort, participantesProdutoFiltro]);
+
+  const carregarRelatorio = useCallback(async (prodId: string, apenasPagos: boolean) => {
+    setRelatorioCarregando(true);
+    try {
+      const params = new URLSearchParams({
+        all: "true",
+        sort: "nome",
+        dir: "asc",
+      });
+      if (prodId) params.set("produtoId", prodId);
+      if (apenasPagos) params.set("status", "confirmados");
+
+      const res = await fetch(`/api/admin/participantes?${params.toString()}`);
+      if (res.ok) {
+        const json = await res.json();
+        setRelatorioParticipantes(json.data || []);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar dados do relatório:", err);
+    } finally {
+      setRelatorioCarregando(false);
+    }
+  }, []);
+
+  const handleAbrirRelatorio = () => {
+    const prodIdInicial = participantesProdutoFiltro || (produtos.length > 0 ? produtos[0].id : "");
+    setRelatorioProdutoId(prodIdInicial);
+    setShowRelatorioModal(true);
+    void carregarRelatorio(prodIdInicial, relatorioApenasPagos);
+  };
 
   const fetchCupons = useCallback(async () => {
     const res = await fetch("/api/admin/cupons");
@@ -1192,17 +1242,58 @@ export default function AdminPage() {
         {/* Tab: Participantes */}
         {activeTab === "participantes" && (
           <>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-brand-charcoal">Inscrições</h2>
-              <div className="w-full sm:w-64">
-                <input
-                  type="search"
-                  placeholder="Buscar por nome, e-mail, WhatsApp…"
-                  value={participantesSearch}
-                  onChange={(e) => { setParticipantesSearch(e.target.value); setParticipantesPage(1); fetchParticipantes(1); }}
-                  className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
-                  aria-label="Buscar inscrições"
-                />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-base font-semibold text-brand-charcoal">Inscrições</h2>
+                <span className="text-xs bg-brand-beige px-2 py-0.5 rounded-full text-brand-charcoal/70">
+                  {participantesTotal} {participantesTotal === 1 ? "inscrição" : "inscrições"}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Filtro por Produto */}
+                <select
+                  value={participantesProdutoFiltro}
+                  onChange={(e) => {
+                    const novoFiltro = e.target.value;
+                    setParticipantesProdutoFiltro(novoFiltro);
+                    setParticipantesPage(1);
+                    void fetchParticipantes(1, novoFiltro);
+                  }}
+                  className="px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30 max-w-[200px] truncate"
+                  aria-label="Filtrar por produto"
+                >
+                  <option value="">Todos os produtos</option>
+                  {produtos.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nome}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Campo de Busca */}
+                <div className="w-full sm:w-56">
+                  <input
+                    type="search"
+                    placeholder="Buscar por nome, e-mail…"
+                    value={participantesSearch}
+                    onChange={(e) => { setParticipantesSearch(e.target.value); setParticipantesPage(1); fetchParticipantes(1); }}
+                    className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                    aria-label="Buscar inscrições"
+                  />
+                </div>
+
+                {/* Botão Gerar Relatório / Lista de Convidados */}
+                <button
+                  type="button"
+                  onClick={handleAbrirRelatorio}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-brand-purple text-white rounded-lg text-sm font-medium hover:bg-brand-purple/90 transition-colors shadow-xs cursor-pointer"
+                  title="Gerar lista de convidados para impressão ou PDF"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  <span>Lista de Convidados (PDF)</span>
+                </button>
               </div>
             </div>
             <div className="sm:hidden space-y-3">
@@ -1216,7 +1307,8 @@ export default function AdminPage() {
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <p className="font-medium text-brand-charcoal text-sm">{p.nome}</p>
-                        <p className="text-xs text-brand-charcoal/40">{p.turma_id} · {p.produto || "—"}</p>
+                        <p className="text-xs font-mono text-brand-charcoal/70">CPF: {formatCPF(p.cpf)}</p>
+                        <p className="text-xs text-brand-charcoal/40 mt-0.5">{p.turma_id} · {p.produto || "—"}</p>
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         p.status === "pago" ? "bg-green-100 text-green-700" :
@@ -1259,6 +1351,7 @@ export default function AdminPage() {
                           Nome
                         </SortableHeader>
                       </th>
+                      <th className="text-left px-4 py-3 font-medium text-brand-charcoal/70">CPF</th>
                       <th className="text-left px-4 py-3">
                         <SortableHeader
                           key="email"
@@ -1296,7 +1389,7 @@ export default function AdminPage() {
                   <tbody>
                     {participantes.length === 0 ? (
                       <tr>
-                        <td colSpan={9} className="text-center py-12 text-brand-charcoal/40">
+                        <td colSpan={10} className="text-center py-12 text-brand-charcoal/40">
                           Nenhum participante cadastrado.
                         </td>
                       </tr>
@@ -1306,6 +1399,9 @@ export default function AdminPage() {
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="font-medium text-brand-charcoal">{p.nome}</span>
                             <span className="text-xs text-brand-charcoal/40 block">{p.turma_id}</span>
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-brand-charcoal/80 whitespace-nowrap">
+                            {formatCPF(p.cpf)}
                           </td>
                           <td className="px-4 py-3 text-brand-charcoal/70">{p.email}</td>
                           <td className="px-4 py-3 font-mono text-xs">
@@ -2096,6 +2192,192 @@ export default function AdminPage() {
               >
                 {excluindoUsuario ? "Excluindo..." : "Sim, excluir usuário"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal / Visualização de Relatório - Lista de Convidados Casa 52 */}
+      {showRelatorioModal && (
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 print:p-0 print:bg-white print:static print:inset-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Lista de convidados para Casa 52"
+          onKeyDown={(e) => { if (e.key === "Escape") setShowRelatorioModal(false); }}
+        >
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-brand-beige overflow-hidden print:border-none print:shadow-none print:max-w-none print:max-h-none print:w-full print:rounded-none">
+            {/* Barra de Ações do Modal (oculta na impressão) */}
+            <div className="no-print p-4 border-b border-brand-beige bg-brand-beige-light/70 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xl">📄</span>
+                <div>
+                  <h3 className="text-sm font-bold text-brand-charcoal">Lista de Convidados · Casa 52</h3>
+                  <p className="text-xs text-brand-charcoal/60">Controle de entrada e recepção dos participantes</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Selecionar Produto dentro do modal */}
+                <select
+                  value={relatorioProdutoId}
+                  onChange={(e) => {
+                    const newId = e.target.value;
+                    setRelatorioProdutoId(newId);
+                    void carregarRelatorio(newId, relatorioApenasPagos);
+                  }}
+                  className="px-2.5 py-1.5 border border-brand-beige rounded-lg text-xs bg-white font-medium text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30 max-w-[180px] truncate"
+                  aria-label="Filtrar por produto no relatório"
+                >
+                  <option value="">Todos os produtos</option>
+                  {produtos.map((prod) => (
+                    <option key={prod.id} value={prod.id}>
+                      {prod.nome}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Toggle Apenas Pagos */}
+                <label className="flex items-center gap-1.5 text-xs text-brand-charcoal cursor-pointer bg-white px-2.5 py-1.5 rounded-lg border border-brand-beige select-none">
+                  <input
+                    type="checkbox"
+                    checked={relatorioApenasPagos}
+                    onChange={(e) => {
+                      const novoVal = e.target.checked;
+                      setRelatorioApenasPagos(novoVal);
+                      void carregarRelatorio(relatorioProdutoId, novoVal);
+                    }}
+                    className="rounded text-brand-purple focus:ring-brand-purple"
+                  />
+                  <span>Apenas confirmados</span>
+                </label>
+
+                {/* Botão Imprimir / Salvar em PDF */}
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  disabled={relatorioCarregando || relatorioParticipantes.length === 0}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-brand-purple text-white rounded-lg text-xs font-semibold hover:bg-brand-purple/90 transition-colors disabled:opacity-50 shadow-xs cursor-pointer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  <span>Imprimir / PDF</span>
+                </button>
+
+                {/* Fechar */}
+                <button
+                  type="button"
+                  onClick={() => setShowRelatorioModal(false)}
+                  className="px-3 py-1.5 border border-brand-beige hover:bg-brand-beige/30 rounded-lg text-xs font-medium text-brand-charcoal transition-colors cursor-pointer"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+
+            {/* Visualização da Folha / Conteúdo Impresso */}
+            <div className="overflow-y-auto p-6 print:p-0 print:overflow-visible flex-1 bg-neutral-100/60 print:bg-white">
+              <div
+                id="relatorio-impressao"
+                className="bg-white text-black p-8 rounded-xl shadow-xs border border-gray-200 print:shadow-none print:border-none print:p-0 max-w-3xl mx-auto print:max-w-none print:w-full"
+              >
+                {/* Cabeçalho Oficial Conforme Requisitos */}
+                <div className="border-b-2 border-black pb-4 mb-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h1 className="text-2xl font-bold tracking-tight text-black uppercase">
+                        Lista de convidados para Casa 52
+                      </h1>
+                      <p className="text-xs text-gray-600 mt-0.5 font-medium">
+                        Instituto Kalapa · Controle de Acesso e Recepção
+                      </p>
+                    </div>
+                    <div className="text-right text-xs text-gray-500 font-mono">
+                      <p>Emissão: {new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                    </div>
+                  </div>
+
+                  {/* Metadados / Informações do Relatório */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 pt-3 border-t border-gray-300 text-xs">
+                    <div>
+                      <span className="text-gray-500 block">Produto / Evento:</span>
+                      <strong className="text-sm font-semibold text-black">
+                        {produtos.find((p) => p.id === relatorioProdutoId)?.nome || "Todos os produtos"}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 block">Critério de Status:</span>
+                      <span className="font-medium text-black">
+                        {relatorioApenasPagos ? "Pagamento Confirmado" : "Todos os Status"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 block">Total de Convidados:</span>
+                      <span className="font-bold text-sm text-black">
+                        {relatorioParticipantes.length} {relatorioParticipantes.length === 1 ? "pessoa" : "pessoas"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tabela de Convidados com Nome e Sobrenome + CPF */}
+                {relatorioCarregando ? (
+                  <div className="text-center py-12 text-gray-400 text-sm">Carregando convidados...</div>
+                ) : relatorioParticipantes.length === 0 ? (
+                  <div className="text-center py-12 text-gray-400 text-sm border border-dashed border-gray-300 rounded-lg">
+                    Nenhum participante encontrado para este filtro.
+                  </div>
+                ) : (
+                  <div className="border border-black overflow-hidden">
+                    <table className="w-full text-xs text-left border-collapse">
+                      <thead>
+                        <tr className="bg-gray-100 border-b border-black text-black">
+                          <th className="py-2 px-2 w-10 text-center font-bold border-r border-black">#</th>
+                          <th className="py-2 px-3 font-bold border-r border-black">Nome e Sobrenome</th>
+                          <th className="py-2 px-3 w-36 font-bold border-r border-black">CPF</th>
+                          <th className="py-2 px-2 w-24 text-center font-bold border-r border-black">Status</th>
+                          <th className="py-2 px-3 w-44 text-center font-bold">Assinatura / Entrada</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-300">
+                        {relatorioParticipantes.map((part, idx) => (
+                          <tr key={part.id} className="hover:bg-gray-50 print:hover:bg-transparent">
+                            <td className="py-2 px-2 text-center text-gray-500 font-mono border-r border-gray-300">
+                              {String(idx + 1).padStart(2, "0")}
+                            </td>
+                            <td className="py-2 px-3 font-semibold text-black border-r border-gray-300">
+                              {part.nome}
+                              {part.email && (
+                                <span className="block text-[10px] font-normal text-gray-500 print:hidden">{part.email}</span>
+                              )}
+                            </td>
+                            <td className="py-2 px-3 font-mono text-black whitespace-nowrap border-r border-gray-300">
+                              {formatCPF(part.cpf)}
+                            </td>
+                            <td className="py-2 px-2 text-center border-r border-gray-300">
+                              <span className="inline-block text-[10px] uppercase font-bold text-gray-700">
+                                {part.status}
+                              </span>
+                            </td>
+                            <td className="py-2 px-3 text-center border-gray-300">
+                              <div className="h-6 flex items-end justify-center">
+                                <span className="w-full border-b border-gray-400 block border-dotted"></span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Rodapé da folha impressa */}
+                <div className="mt-6 pt-3 border-t border-gray-300 flex justify-between items-center text-[10px] text-gray-500">
+                  <span>Casa 52 · Instituto Kalapa</span>
+                  <span>Lista oficial de convidados para entrada</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
