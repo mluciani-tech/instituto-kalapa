@@ -2289,34 +2289,19 @@ export default function AdminPage() {
                       <h1 className="text-2xl font-bold tracking-tight text-black uppercase">
                         Lista de convidados para Casa 52
                       </h1>
-                      <p className="text-xs text-gray-600 mt-0.5 font-medium">
-                        Instituto Kalapa · Controle de Acesso e Recepção
-                      </p>
                     </div>
                     <div className="text-right text-xs text-gray-500 font-mono">
                       <p>Emissão: {new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
                     </div>
                   </div>
 
-                  {/* Metadados / Informações do Relatório */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 pt-3 border-t border-gray-300 text-xs">
+                  {/* Total de Convidados */}
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-300 text-xs">
                     <div>
-                      <span className="text-gray-500 block">Produto / Evento:</span>
-                      <strong className="text-sm font-semibold text-black">
-                        {produtos.find((p) => p.id === relatorioProdutoId)?.nome || "Todos os produtos"}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block">Critério de Status:</span>
-                      <span className="font-medium text-black">
-                        {relatorioApenasPagos ? "Pagamento Confirmado" : "Todos os Status"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block">Total de Convidados:</span>
-                      <span className="font-bold text-sm text-black">
+                      <span className="text-gray-500">Total de Convidados: </span>
+                      <strong className="font-bold text-sm text-black">
                         {relatorioParticipantes.length} {relatorioParticipantes.length === 1 ? "pessoa" : "pessoas"}
-                      </span>
+                      </strong>
                     </div>
                   </div>
                 </div>
@@ -2333,36 +2318,27 @@ export default function AdminPage() {
                     <table className="w-full text-xs text-left border-collapse">
                       <thead>
                         <tr className="bg-gray-100 border-b border-black text-black">
-                          <th className="py-2 px-2 w-10 text-center font-bold border-r border-black">#</th>
-                          <th className="py-2 px-3 font-bold border-r border-black">Nome e Sobrenome</th>
-                          <th className="py-2 px-3 w-36 font-bold border-r border-black">CPF</th>
-                          <th className="py-2 px-2 w-24 text-center font-bold border-r border-black">Status</th>
-                          <th className="py-2 px-3 w-44 text-center font-bold">Assinatura / Entrada</th>
+                          <th className="py-2.5 px-2 w-12 text-center font-bold border-r border-black">#</th>
+                          <th className="py-2.5 px-3 font-bold border-r border-black">Nome e Sobrenome</th>
+                          <th className="py-2.5 px-3 w-44 font-bold border-r border-black">CPF</th>
+                          <th className="py-2.5 px-3 w-64 text-center font-bold">Observação</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-300">
                         {relatorioParticipantes.map((part, idx) => (
                           <tr key={part.id} className="hover:bg-gray-50 print:hover:bg-transparent">
-                            <td className="py-2 px-2 text-center text-gray-500 font-mono border-r border-gray-300">
+                            <td className="py-2.5 px-2 text-center text-gray-500 font-mono border-r border-gray-300">
                               {String(idx + 1).padStart(2, "0")}
                             </td>
-                            <td className="py-2 px-3 font-semibold text-black border-r border-gray-300">
+                            <td className="py-2.5 px-3 font-semibold text-black border-r border-gray-300">
                               {part.nome}
-                              {part.email && (
-                                <span className="block text-[10px] font-normal text-gray-500 print:hidden">{part.email}</span>
-                              )}
                             </td>
-                            <td className="py-2 px-3 font-mono text-black whitespace-nowrap border-r border-gray-300">
+                            <td className="py-2.5 px-3 font-mono text-black whitespace-nowrap border-r border-gray-300">
                               {formatCPF(part.cpf)}
                             </td>
-                            <td className="py-2 px-2 text-center border-r border-gray-300">
-                              <span className="inline-block text-[10px] uppercase font-bold text-gray-700">
-                                {part.status}
-                              </span>
-                            </td>
-                            <td className="py-2 px-3 text-center border-gray-300">
+                            <td className="py-2.5 px-3 border-gray-300">
                               <div className="h-6 flex items-end justify-center">
-                                <span className="w-full border-b border-gray-400 block border-dotted"></span>
+                                <span className="w-full border-b border-gray-300 block"></span>
                               </div>
                             </td>
                           </tr>
@@ -2374,7 +2350,7 @@ export default function AdminPage() {
 
                 {/* Rodapé da folha impressa */}
                 <div className="mt-6 pt-3 border-t border-gray-300 flex justify-between items-center text-[10px] text-gray-500">
-                  <span>Casa 52 · Instituto Kalapa</span>
+                  <span>Casa 52</span>
                   <span>Lista oficial de convidados para entrada</span>
                 </div>
               </div>
