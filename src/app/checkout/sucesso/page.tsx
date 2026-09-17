@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, Sparkles, Package, Clock, AlertCircle } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 interface PedidoPublico {
   order_nsu: string;
@@ -21,8 +22,20 @@ interface PedidoPublico {
 function SucessoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { clearCart } = useCart();
   const [pedido, setPedido] = useState<PedidoPublico | null>(null);
   const [naoEncontrado, setNaoEncontrado] = useState(false);
+
+  // Garantir que o carrinho esteja sempre limpo ao chegar na tela de sucesso
+  useEffect(() => {
+    clearCart();
+    try {
+      localStorage.removeItem("kalapa_cart_items_v1");
+      sessionStorage.removeItem("produto_selecionado");
+    } catch {
+      // ignore
+    }
+  }, [clearCart]);
 
   const receiptUrl = searchParams.get("receipt_url");
   const orderNsu = searchParams.get("order_nsu");

@@ -50,11 +50,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
     try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+      if (items.length === 0) {
+        localStorage.removeItem(CART_STORAGE_KEY);
+      } else {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+      }
     } catch {
       // ignore
     }
   }, [items, mounted]);
+
+  // Sincronizar abas via evento storage da window
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === CART_STORAGE_KEY) {
+        try {
+          if (e.newValue) {
+            setItems(JSON.parse(e.newValue));
+          } else {
+            setItems([]);
+          }
+        } catch {
+          setItems([]);
+        }
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   const addItem = (
     produto: {
@@ -111,6 +134,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => {
     setItems([]);
+    try {
+      localStorage.removeItem(CART_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
   };
 
   const totalItems = items.reduce((sum, item) => sum + item.quantidade, 0);

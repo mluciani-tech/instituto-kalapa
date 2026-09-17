@@ -180,8 +180,13 @@ export default function Checkout() {
         return;
       }
 
-      if (isCartCheckout) clearCart();
-      sessionStorage.removeItem("produto_selecionado");
+      clearCart();
+      try {
+        localStorage.removeItem("kalapa_cart_items_v1");
+        sessionStorage.removeItem("produto_selecionado");
+      } catch {
+        // ignore
+      }
       window.location.href = checkoutData.url;
     } catch (error) {
       console.error("Erro no checkout:", error);
