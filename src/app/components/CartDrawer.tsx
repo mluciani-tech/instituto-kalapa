@@ -33,16 +33,16 @@ export default function CartDrawer() {
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-brand-terracotta" />
               <h2 className="text-base font-semibold text-white tracking-tight">
-                Seu Carrinho
+                Sua Reserva
               </h2>
               <span className="text-xs bg-brand-terracotta/20 text-brand-terracotta border border-brand-terracotta/30 px-2 py-0.5 rounded-full font-medium">
-                {totalItems} {totalItems === 1 ? "item" : "itens"}
+                {totalItems} {totalItems === 1 ? "vivência" : "vivências"}
               </span>
             </div>
             <button
               onClick={closeDrawer}
-              aria-label="Fechar carrinho"
-              className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
+              aria-label="Fechar reserva"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -56,10 +56,10 @@ export default function CartDrawer() {
                   <ShoppingBag className="w-8 h-8" />
                 </div>
                 <p className="text-sm font-semibold text-white/90 mb-1">
-                  Seu carrinho está vazio
+                  Nenhuma vivência selecionada
                 </p>
                 <p className="text-xs text-white/50 max-w-xs mb-6">
-                  Explore nossas vivências e atendimentos para adicionar ao seu carrinho.
+                  Explore nossas vivências e atendimentos para reservar sua vaga.
                 </p>
                 <Link
                   href="/produtos"
@@ -73,7 +73,7 @@ export default function CartDrawer() {
               items.map((item) => (
                 <div
                   key={item.produto_id}
-                  className="p-3.5 bg-white/[0.04] border border-white/10 rounded-xl flex gap-3.5 items-center"
+                  className="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center gap-3"
                 >
                   {item.imagem_url ? (
                     <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-white/10">
@@ -98,34 +98,34 @@ export default function CartDrawer() {
                       R$ {item.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </p>
 
-                    {/* Quantity controls */}
+                    {/* Quantity controls with accessible 44px touch targets */}
                     <div className="flex items-center gap-2 mt-2">
                       <div className="flex items-center border border-white/15 rounded-lg bg-white/5 overflow-hidden">
                         <button
                           onClick={() => updateQuantity(item.produto_id, item.quantidade - 1)}
-                          className="p-1 hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
+                          className="min-w-[40px] min-h-[40px] flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
                           aria-label="Diminuir quantidade"
                         >
-                          <Minus className="w-3 h-3" />
+                          <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="px-2 text-xs font-semibold text-white min-w-[20px] text-center">
+                        <span className="px-2 text-xs font-semibold text-white min-w-[24px] text-center">
                           {item.quantidade}
                         </span>
                         <button
                           onClick={() => updateQuantity(item.produto_id, item.quantidade + 1)}
-                          className="p-1 hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
+                          className="min-w-[40px] min-h-[40px] flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
                           aria-label="Aumentar quantidade"
                         >
-                          <Plus className="w-3 h-3" />
+                          <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
 
                       <button
                         onClick={() => removeItem(item.produto_id)}
-                        className="p-1 text-white/30 hover:text-red-400 transition-colors ml-auto cursor-pointer"
+                        className="min-w-[40px] min-h-[40px] flex items-center justify-center text-white/30 hover:text-red-400 transition-colors ml-auto cursor-pointer"
                         aria-label="Remover item"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>

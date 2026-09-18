@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { MessageCircle } from "lucide-react";
 import ProductGrid from "../components/ProductGrid";
 import Footer from "../components/Footer";
 
@@ -44,6 +45,27 @@ export default async function ProdutosPage({
 
       <section className="max-w-6xl mx-auto px-6 py-16">
         <ProductGrid categoria={categoria || null} />
+
+        {/* Reassurance WhatsApp Callout */}
+        <div className="mt-16 max-w-2xl mx-auto p-5 rounded-2xl bg-white border border-brand-terracotta/20 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div>
+            <p className="text-sm font-semibold text-brand-charcoal">
+              Dúvidas sobre qual vivência escolher?
+            </p>
+            <p className="text-xs text-brand-charcoal/65 mt-0.5">
+              Converse conosco no WhatsApp para um acolhimento prévio e orientação.
+            </p>
+          </div>
+          <a
+            href="https://wa.me/5511917452732?text=Ol%C3%A1!%20Gostaria%20de%20tirar%20algumas%20d%C3%BAvidas%20sobre%20as%20viv%C3%AAncias%20do%20Instituto%20Kalapa."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 px-4 py-2.5 rounded-xl bg-brand-purple/10 hover:bg-brand-purple/20 text-brand-purple text-xs font-semibold transition-colors flex items-center gap-2"
+          >
+            <MessageCircle className="w-4 h-4 text-brand-mint" />
+            Conversar no WhatsApp
+          </a>
+        </div>
       </section>
 
       <Footer />

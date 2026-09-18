@@ -307,7 +307,7 @@ export default function Header() {
               <Link
                 href="/conta/pedidos"
                 onClick={() => setMenuOpen(false)}
-                className="px-4 py-3 text-sm font-medium text-[#7C3AED] hover:bg-purple-50 rounded-xl transition-colors flex items-center gap-2"
+                className="px-4 py-3 text-sm font-medium text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors flex items-center gap-2"
               >
                 <Package className="w-4 h-4" />
                 Meus pedidos ({usuario.nome.split(" ")[0]})
@@ -316,7 +316,7 @@ export default function Header() {
               <Link
                 href="/login"
                 onClick={() => setMenuOpen(false)}
-                className="px-4 py-3 text-sm font-medium text-[#7C3AED] hover:bg-purple-50 rounded-xl transition-colors flex items-center gap-2"
+                className="px-4 py-3 text-sm font-medium text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors flex items-center gap-2"
               >
                 <UserIcon className="w-4 h-4" />
                 Entrar na conta

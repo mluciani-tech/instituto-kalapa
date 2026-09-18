@@ -2,10 +2,9 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Check, ArrowRight, ShoppingCart } from "lucide-react";
+import { Check, ArrowRight, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import StarBorder from "@/components/ui/star-border";
 import type { Produto, VagasInfo } from "@/lib/types";
 
 export type { Produto };
@@ -18,9 +17,19 @@ interface ProductCardProps {
 
 export default function ProductCard({ produto, index = 0, vagas }: ProductCardProps) {
   const router = useRouter();
-  const { addItem } = useCart();
+  const { addItem, clearCart } = useCart();
 
   const handleEscolher = () => {
+    // Sincroniza o produto escolhido limpando itens anteriores e inserindo o produto direto
+    clearCart();
+    addItem({
+      id: produto.id,
+      slug: produto.slug,
+      nome: produto.nome,
+      preco: produto.preco,
+      imagem_url: produto.imagem_url,
+      categoria: produto.categoria,
+    }, 1);
     sessionStorage.setItem("produto_selecionado", produto.id);
     router.push("/checkout");
   };
@@ -45,13 +54,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
       }}
       className="h-full"
     >
-      <StarBorder
-        color="#B8965A"
-        speed="8s"
-        thickness={2}
-        className="w-full h-full"
-      >
-        <div className="group relative overflow-hidden flex flex-col bg-white rounded-2xl">
+      <div className="group relative h-full overflow-hidden flex flex-col bg-white rounded-2xl border border-brand-terracotta/25 hover:border-brand-terracotta/60 shadow-xs hover:shadow-lg transition-all duration-300">
           {/* Imagem */}
           <div className="relative h-48 overflow-hidden">
             {produto.imagem_url ? (
@@ -166,10 +169,10 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                     }
                     disabled={!!vagasEsgotadas}
                     className="flex-1 py-3 px-3 font-medium text-xs md:text-sm rounded-xl border border-brand-purple/20 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
-                    title="Adicionar ao carrinho"
+                    title="Adicionar à sua lista de reserva"
                   >
-                    <ShoppingCart aria-hidden="true" className="w-4 h-4" />
-                    Carrinho
+                    <ShoppingBag aria-hidden="true" className="w-4 h-4" />
+                    Reservar
                   </button>
 
                   <button
@@ -183,7 +186,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                   >
                     {vagasEsgotadas ? 'Turma lotada' : (
                       <>
-                        Comprar
+                        Garantir Vaga
                         <ArrowRight aria-hidden="true" className="w-4 h-4" />
                       </>
                     )}
@@ -193,7 +196,6 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
             </div>
           </div>
         </div>
-      </StarBorder>
     </motion.div>
   );
 }
