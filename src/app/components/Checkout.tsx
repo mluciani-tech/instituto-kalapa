@@ -509,7 +509,9 @@ export default function Checkout() {
               {/* Reassurance WhatsApp callout */}
               <div className="mt-4 pt-3 border-t border-brand-charcoal/10 text-center">
                 <a
-                  href="https://wa.me/5511917452732?text=Ol%C3%A1!%20Estou%20no%20checkout%20do%20Instituto%20Kalapa%20e%20gostaria%20de%20tirar%20uma%20d%C3%BAvida%20sobre%20as%20viv%C3%AAncias."
+                  href={`https://wa.me/5511917452732?text=${encodeURIComponent(
+                    `Olá! Estou no checkout reservando a vivência "${isCartCheckout ? (cartItems[0]?.nome || "Vivência Kalapa") : (produto?.nome || "Vivência Kalapa")}" e gostaria de tirar uma dúvida.`
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-brand-purple hover:text-brand-purple-dark font-medium transition-colors inline-flex items-center gap-1.5"

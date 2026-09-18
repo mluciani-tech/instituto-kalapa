@@ -11,9 +11,9 @@ import {
   MessageCircle,
   LayoutGrid,
   User as UserIcon,
-  ShoppingCart,
+  ShoppingBag,
   LogOut,
-  Package,
+  Calendar,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import type { Usuario } from "@/lib/types";
@@ -245,8 +245,8 @@ export default function Header() {
                       onClick={() => setUserMenuOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-white/80 hover:text-white hover:bg-white/5 transition-colors"
                     >
-                      <Package className="w-4 h-4 text-brand-terracotta" />
-                      Meus pedidos
+                      <Calendar className="w-4 h-4 text-brand-terracotta" />
+                      Minhas Vivências
                     </Link>
                     <button
                       onClick={handleLogout}
@@ -259,13 +259,13 @@ export default function Header() {
                 )}
               </div>
 
-              {/* Botão Carrinho de Compras */}
+              {/* Botão de Reserva */}
               <button
                 onClick={openDrawer}
-                aria-label={`Abrir carrinho com ${totalItems} itens`}
+                aria-label={`Ver minha reserva com ${totalItems} vivências`}
                 className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta cursor-pointer"
               >
-                <ShoppingCart className="w-4 h-4 text-brand-charcoal" />
+                <ShoppingBag className="w-4 h-4 text-brand-charcoal" />
                 {totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 min-w-4 items-center justify-center rounded-full bg-brand-terracotta text-[10px] font-bold text-white shadow-xs">
                     {totalItems}
@@ -309,8 +309,8 @@ export default function Header() {
                 onClick={() => setMenuOpen(false)}
                 className="px-4 py-3 text-sm font-medium text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors flex items-center gap-2"
               >
-                <Package className="w-4 h-4" />
-                Meus pedidos ({usuario.nome.split(" ")[0]})
+                <Calendar className="w-4 h-4" />
+                Minhas Vivências ({usuario.nome.split(" ")[0]})
               </Link>
             ) : (
               <Link

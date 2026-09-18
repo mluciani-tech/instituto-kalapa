@@ -17,7 +17,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ produto, index = 0, vagas }: ProductCardProps) {
   const router = useRouter();
-  const { addItem, clearCart } = useCart();
+  const { addItem, clearCart, openDrawer } = useCart();
 
   const handleEscolher = () => {
     // Sincroniza o produto escolhido limpando itens anteriores e inserindo o produto direto
@@ -157,7 +157,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     type="button"
-                    onClick={() =>
+                    onClick={() => {
                       addItem({
                         id: produto.id,
                         slug: produto.slug,
@@ -165,8 +165,9 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                         preco: produto.preco,
                         imagem_url: produto.imagem_url,
                         categoria: produto.categoria,
-                      })
-                    }
+                      });
+                      openDrawer();
+                    }}
                     disabled={!!vagasEsgotadas}
                     className="flex-1 py-3 px-3 font-medium text-xs md:text-sm rounded-xl border border-brand-purple/20 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
                     title="Adicionar à sua lista de reserva"

@@ -149,7 +149,7 @@ export default function CartDrawer() {
                 onClick={closeDrawer}
                 className="w-full py-3.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-brand-terracotta/25 flex items-center justify-center gap-2"
               >
-                <span>Finalizar Pedido</span>
+                <span>Confirmar Reserva</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
