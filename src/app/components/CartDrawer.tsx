@@ -98,22 +98,22 @@ export default function CartDrawer() {
                       R$ {item.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </p>
 
-                    {/* Quantity controls with accessible 44px touch targets */}
+                    {/* Quantity controls with accessible min 44x44px touch targets */}
                     <div className="flex items-center gap-2 mt-2">
                       <div className="flex items-center border border-white/15 rounded-lg bg-white/5 overflow-hidden">
                         <button
                           onClick={() => updateQuantity(item.produto_id, item.quantidade - 1)}
-                          className="min-w-[40px] min-h-[40px] flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
+                          className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
                           aria-label="Diminuir quantidade"
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="px-2 text-xs font-semibold text-white min-w-[24px] text-center">
+                        <span className="px-2 text-xs font-semibold text-white min-w-[24px] text-center select-none">
                           {item.quantidade}
                         </span>
                         <button
                           onClick={() => updateQuantity(item.produto_id, item.quantidade + 1)}
-                          className="min-w-[40px] min-h-[40px] flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
+                          className="min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
                           aria-label="Aumentar quantidade"
                         >
                           <Plus className="w-3.5 h-3.5" />
@@ -122,7 +122,7 @@ export default function CartDrawer() {
 
                       <button
                         onClick={() => removeItem(item.produto_id)}
-                        className="min-w-[40px] min-h-[40px] flex items-center justify-center text-white/30 hover:text-red-400 transition-colors ml-auto cursor-pointer"
+                        className="min-w-[44px] min-h-[44px] flex items-center justify-center text-white/40 hover:text-red-400 transition-colors ml-auto cursor-pointer"
                         aria-label="Remover item"
                       >
                         <Trash2 className="w-4 h-4" />

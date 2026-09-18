@@ -54,7 +54,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
       }}
       className="h-full"
     >
-      <div className="group relative h-full overflow-hidden flex flex-col bg-white rounded-2xl border border-brand-terracotta/25 hover:border-brand-terracotta/60 shadow-xs hover:shadow-lg transition-all duration-300">
+      <div className="group relative h-full overflow-hidden flex flex-col bg-white rounded-2xl border border-[#B8965A]/30 hover:border-[#B8965A]/80 shadow-[0_4px_20px_-4px_rgba(184,150,90,0.12)] hover:shadow-[0_8px_30px_-4px_rgba(184,150,90,0.22)] transition-all duration-300">
           {/* Imagem */}
           <div className="relative h-48 overflow-hidden">
             {produto.imagem_url ? (
