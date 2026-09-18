@@ -20,6 +20,7 @@ import type { Usuario } from "@/lib/types";
 
 const navLinks = [
   { href: "/", label: "Home" },
+  { href: "/#sobre", label: "A Facilitadora" },
   { href: "/produtos?categoria=vivencias", label: "Vivências" },
   { href: "/produtos?categoria=atendimentos", label: "Atendimentos" },
   { href: "/produtos?categoria=calendario", label: "Calendário" },
