@@ -54,6 +54,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const parseIntegerSafely = (val: unknown): number | null => {
+    if (val === null || val === undefined || val === "") return null;
+    if (typeof val === "number") return isNaN(val) ? null : Math.round(val);
+    if (typeof val === "string") {
+      const match = val.trim().match(/^(\d+)/);
+      return match ? parseInt(match[1], 10) : null;
+    }
+    return null;
+  };
+
   const { data, error } = await supabaseAdmin!
     .from("produtos")
     .insert({
@@ -67,8 +77,8 @@ export async function POST(req: NextRequest) {
       destaque: destaque || false,
       ativo: ativo !== false,
       ordem: ordem || 0,
-      vagas_maximas: vagas_maximas != null && vagas_maximas !== "" ? Number(vagas_maximas) : null,
-      vagas_ocupadas_manual: vagas_ocupadas_manual !== undefined && vagas_ocupadas_manual !== null && vagas_ocupadas_manual !== "" ? Number(vagas_ocupadas_manual) : null,
+      vagas_maximas: parseIntegerSafely(vagas_maximas),
+      vagas_ocupadas_manual: parseIntegerSafely(vagas_ocupadas_manual),
       categoria: categoria || null,
       forma_pagamento_disponivel: forma_pagamento_disponivel || "ambos",
     })

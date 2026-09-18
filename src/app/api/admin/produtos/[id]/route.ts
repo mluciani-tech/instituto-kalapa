@@ -60,18 +60,22 @@ export async function PUT(
     }
   }
 
+  const parseIntegerSafely = (val: unknown): number | null => {
+    if (val === null || val === undefined || val === "") return null;
+    if (typeof val === "number") return isNaN(val) ? null : Math.round(val);
+    if (typeof val === "string") {
+      const match = val.trim().match(/^(\d+)/);
+      return match ? parseInt(match[1], 10) : null;
+    }
+    return null;
+  };
+
   if (updates.vagas_maximas !== undefined) {
-    updates.vagas_maximas =
-      updates.vagas_maximas === "" || updates.vagas_maximas === null
-        ? null
-        : Number(updates.vagas_maximas);
+    updates.vagas_maximas = parseIntegerSafely(updates.vagas_maximas);
   }
 
   if (updates.vagas_ocupadas_manual !== undefined) {
-    updates.vagas_ocupadas_manual =
-      updates.vagas_ocupadas_manual === "" || updates.vagas_ocupadas_manual === null
-        ? null
-        : Number(updates.vagas_ocupadas_manual);
+    updates.vagas_ocupadas_manual = parseIntegerSafely(updates.vagas_ocupadas_manual);
   }
 
   if (updates.slug && typeof updates.slug === "string") {

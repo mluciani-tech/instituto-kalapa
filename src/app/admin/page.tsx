@@ -474,13 +474,17 @@ export default function AdminPage() {
       setUploadingImagem(false);
     }
     
+    const parseVagas = (val: string) => {
+      if (!val) return null;
+      const match = val.trim().match(/^(\d+)/);
+      return match ? parseInt(match[1], 10) : null;
+    };
+
     const payload = {
       ...produtoForm,
       imagem_url: imagemUrl,
-      vagas_maximas: produtoForm.vagas_maximas ? parseInt(produtoForm.vagas_maximas) : null,
-      vagas_ocupadas_manual: produtoForm.vagas_ocupadas_manual !== "" && produtoForm.vagas_ocupadas_manual != null
-        ? parseInt(produtoForm.vagas_ocupadas_manual)
-        : null,
+      vagas_maximas: parseVagas(produtoForm.vagas_maximas),
+      vagas_ocupadas_manual: parseVagas(produtoForm.vagas_ocupadas_manual),
       categoria: produtoForm.categoria.trim() || null,
       preco: parseFloat(produtoForm.preco.replace(",", ".")) || 0,
       ordem: parseInt(produtoForm.ordem) || 0,
@@ -551,7 +555,8 @@ export default function AdminPage() {
     if (!ajustandoContador) return;
     setSalvandoContador(true);
     const { produto, valor } = ajustandoContador;
-    const vagas_ocupadas_manual = valor.trim() === "" ? null : parseInt(valor);
+    const match = valor.trim().match(/^(\d+)/);
+    const vagas_ocupadas_manual = match ? parseInt(match[1], 10) : null;
     try {
       const res = await fetch(`/api/admin/produtos/${produto.id}`, {
         method: "PUT",
