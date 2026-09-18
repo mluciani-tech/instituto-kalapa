@@ -51,13 +51,27 @@ export async function PUT(
   const updates: Record<string, unknown> = {};
   const allowedFields = [
     "slug", "nome", "descricao", "descricao_curta", "preco",
-    "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "categoria", "forma_pagamento_disponivel",
+    "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "vagas_ocupadas_manual", "categoria", "forma_pagamento_disponivel",
   ];
 
   for (const field of allowedFields) {
     if (body[field] !== undefined) {
       updates[field] = body[field];
     }
+  }
+
+  if (updates.vagas_maximas !== undefined) {
+    updates.vagas_maximas =
+      updates.vagas_maximas === "" || updates.vagas_maximas === null
+        ? null
+        : Number(updates.vagas_maximas);
+  }
+
+  if (updates.vagas_ocupadas_manual !== undefined) {
+    updates.vagas_ocupadas_manual =
+      updates.vagas_ocupadas_manual === "" || updates.vagas_ocupadas_manual === null
+        ? null
+        : Number(updates.vagas_ocupadas_manual);
   }
 
   if (updates.slug && typeof updates.slug === "string") {

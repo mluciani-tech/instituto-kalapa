@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
-import { getTurmaAtual, getVagasMaximas, countInscricoesPagas } from "@/lib/vagas";
+import { getTurmaAtual, getVagasInfo } from "@/lib/vagas";
 
 export const dynamic = "force-dynamic";
 
@@ -41,12 +41,9 @@ export async function POST(req: NextRequest) {
 
     // 2. Verificar vagas
     if (produto.vagas_maximas != null) {
-      const [maximas, preenchidas] = await Promise.all([
-        getVagasMaximas(produto.id),
-        countInscricoesPagas(produto.id),
-      ]);
+      const vagasInfo = await getVagasInfo(produto.id);
 
-      if (preenchidas >= maximas) {
+      if (vagasInfo.restantes <= 0) {
         return NextResponse.json(
           { error: "Turma lotada. Entre em contato para a próxima turma." },
           { status: 409 }

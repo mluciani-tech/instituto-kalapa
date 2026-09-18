@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
-import { getTurmaAtual, getVagasMaximas, countInscricoesPagas } from "@/lib/vagas";
+import { getTurmaAtual, getVagasInfo } from "@/lib/vagas";
 import { getClienteFromRequest } from "@/lib/cliente-auth";
 import type { PedidoItem, EnderecoEntrega } from "@/lib/types";
 
@@ -101,12 +101,9 @@ export async function POST(req: NextRequest) {
     // 2. Verificar vagas de vivências no servidor (fecha race condition)
     for (const item of itensProcessados) {
       if (item.vagasMaximas != null) {
-        const [maximas, preenchidas] = await Promise.all([
-          getVagasMaximas(item.produto_id),
-          countInscricoesPagas(item.produto_id),
-        ]);
+        const vagasInfo = await getVagasInfo(item.produto_id);
 
-        if (preenchidas >= maximas) {
+        if (vagasInfo.restantes <= 0) {
           return NextResponse.json(
             { error: `Vagas esgotadas para "${item.nome}".` },
             { status: 409 }

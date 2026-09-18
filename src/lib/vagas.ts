@@ -83,3 +83,93 @@ export async function countInscricoesPagas(produtoId?: string | null): Promise<n
   }
   return count || 0;
 }
+
+export interface VagasCalculadas {
+  preenchidas: number;
+  maximas: number;
+  restantes: number;
+  turma: string;
+  manual: boolean;
+  reais: number;
+}
+
+/**
+ * Retorna as informações consolidadas de vagas para um produto.
+ * Se o produto tiver `vagas_ocupadas_manual` definido pelo Admin,
+ * utiliza esse valor para exibição e validações. Caso contrário,
+ * utiliza a contagem real de inscrições pagas no banco de dados.
+ */
+export async function getVagasInfo(produtoId?: string | null): Promise<VagasCalculadas> {
+  const turmaAtual = await getTurmaAtual();
+  if (!isAdminConfigured()) {
+    return {
+      preenchidas: 0,
+      maximas: VAGAS_PADRAO,
+      restantes: VAGAS_PADRAO,
+      turma: turmaAtual,
+      manual: false,
+      reais: 0,
+    };
+  }
+
+  try {
+    let maximas = VAGAS_PADRAO;
+    let manualOcupadas: number | null = null;
+
+    if (produtoId) {
+      const { data: produto, error } = await supabaseAdmin!
+        .from("produtos")
+        .select("vagas_maximas, vagas_ocupadas_manual")
+        .eq("id", produtoId)
+        .single();
+
+      if (!error && produto) {
+        if (produto.vagas_maximas != null && produto.vagas_maximas > 0) {
+          maximas = produto.vagas_maximas;
+        } else {
+          const { data: config } = await supabaseAdmin!
+            .from("configuracoes")
+            .select("valor")
+            .eq("chave", "vagas_maximas")
+            .single();
+          if (config?.valor) maximas = Number(config.valor);
+        }
+
+        if (produto.vagas_ocupadas_manual != null && produto.vagas_ocupadas_manual >= 0) {
+          manualOcupadas = produto.vagas_ocupadas_manual;
+        }
+      }
+    } else {
+      const { data: config } = await supabaseAdmin!
+        .from("configuracoes")
+        .select("valor")
+        .eq("chave", "vagas_maximas")
+        .single();
+      if (config?.valor) maximas = Number(config.valor);
+    }
+
+    const reais = await countInscricoesPagas(produtoId);
+    const isManual = manualOcupadas !== null;
+    const preenchidas = isManual ? manualOcupadas : reais;
+    const restantes = Math.max(maximas - preenchidas, 0);
+
+    return {
+      preenchidas,
+      maximas,
+      restantes,
+      turma: turmaAtual,
+      manual: isManual,
+      reais,
+    };
+  } catch (err) {
+    console.error("[vagas] Erro em getVagasInfo:", err);
+    return {
+      preenchidas: 0,
+      maximas: VAGAS_PADRAO,
+      restantes: VAGAS_PADRAO,
+      turma: turmaAtual,
+      manual: false,
+      reais: 0,
+    };
+  }
+}

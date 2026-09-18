@@ -125,7 +125,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                     className={`h-full rounded-full transition-[width] duration-500 ${
                       vagasEsgotadas ? 'bg-red-400' : vagasQuaseEsgotadas ? 'bg-brand-terracotta' : 'bg-brand-mint'
                     }`}
-                    style={{ width: `${(vagas.preenchidas / vagas.maximas) * 100}%` }}
+                    style={{ width: `${Math.min(Math.max((vagas.preenchidas / (vagas.maximas || 1)) * 100, 0), 100)}%` }}
                   />
                 </div>
                 <p className={`text-xs mt-1 ${vagasEsgotadas ? 'text-red-500 font-semibold' : vagasQuaseEsgotadas ? 'text-brand-terracotta font-semibold' : 'text-brand-charcoal/45'}`}>

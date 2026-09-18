@@ -90,6 +90,7 @@ export default function AdminPage() {
     imagem_url: "",
     beneficios: "",
     vagas_maximas: "",
+    vagas_ocupadas_manual: "",
     categoria: "",
     forma_pagamento_disponivel: "ambos",
     destaque: false,
@@ -100,6 +101,8 @@ export default function AdminPage() {
   const [uploadingImagem, setUploadingImagem] = useState(false);
   const [salvandoProduto, setSalvandoProduto] = useState(false);
   const [produtoSucesso, setProdutoSucesso] = useState("");
+  const [ajustandoContador, setAjustandoContador] = useState<{ produto: Produto; valor: string } | null>(null);
+  const [salvandoContador, setSalvandoContador] = useState(false);
 
   // Pedidos
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -435,6 +438,7 @@ export default function AdminPage() {
     setProdutoForm({
       slug: "", nome: "", descricao: "", descricao_curta: "",
       preco: "", imagem_url: "", beneficios: "", vagas_maximas: "",
+      vagas_ocupadas_manual: "",
       categoria: "", forma_pagamento_disponivel: "ambos", destaque: false, ativo: true, ordem: "0",
     });
     setProdutoImagemFile(null);
@@ -474,6 +478,9 @@ export default function AdminPage() {
       ...produtoForm,
       imagem_url: imagemUrl,
       vagas_maximas: produtoForm.vagas_maximas ? parseInt(produtoForm.vagas_maximas) : null,
+      vagas_ocupadas_manual: produtoForm.vagas_ocupadas_manual !== "" && produtoForm.vagas_ocupadas_manual != null
+        ? parseInt(produtoForm.vagas_ocupadas_manual)
+        : null,
       categoria: produtoForm.categoria.trim() || null,
       preco: parseFloat(produtoForm.preco.replace(",", ".")) || 0,
       ordem: parseInt(produtoForm.ordem) || 0,
@@ -515,6 +522,7 @@ export default function AdminPage() {
       imagem_url: p.imagem_url || "",
       beneficios: p.beneficios.join("\n"),
       vagas_maximas: p.vagas_maximas != null ? p.vagas_maximas.toString() : "",
+      vagas_ocupadas_manual: p.vagas_ocupadas_manual != null ? p.vagas_ocupadas_manual.toString() : "",
       categoria: p.categoria || "",
       forma_pagamento_disponivel: p.forma_pagamento_disponivel || "ambos",
       destaque: p.destaque ?? false,
@@ -539,6 +547,32 @@ export default function AdminPage() {
     await fetchProdutos();
   };
 
+  const handleSalvarContadorRapido = async () => {
+    if (!ajustandoContador) return;
+    setSalvandoContador(true);
+    const { produto, valor } = ajustandoContador;
+    const vagas_ocupadas_manual = valor.trim() === "" ? null : parseInt(valor);
+    try {
+      const res = await fetch(`/api/admin/produtos/${produto.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vagas_ocupadas_manual }),
+      });
+      if (res.ok) {
+        setProdutoSucesso(`Contador de "${produto.nome}" atualizado!`);
+        setAjustandoContador(null);
+        await fetchProdutos();
+        setTimeout(() => setProdutoSucesso(""), 3000);
+      } else {
+        const data = await res.json();
+        setError(data.error || "Erro ao atualizar contador");
+      }
+    } catch {
+      setError("Erro ao conectar com o servidor");
+    }
+    setSalvandoContador(false);
+  };
+
   const handleClonarProduto = async (p: Produto) => {
     setSalvandoProduto(true);
     setProdutoSucesso("");
@@ -551,6 +585,7 @@ export default function AdminPage() {
       imagem_url: p.imagem_url || "",
       beneficios: p.beneficios,
       vagas_maximas: p.vagas_maximas,
+      vagas_ocupadas_manual: p.vagas_ocupadas_manual,
       categoria: p.categoria || null,
       forma_pagamento_disponivel: p.forma_pagamento_disponivel || "ambos",
       destaque: p.destaque ?? false,
@@ -868,6 +903,19 @@ export default function AdminPage() {
                      />
                     <p className="text-xs text-brand-charcoal/30 mt-1">Deixe em branco se não houver limite de vagas.</p>
                   </div>
+                  <div>
+                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">
+                      Vagas Preenchidas / Contador <span className="text-brand-charcoal/30">(opcional)</span>
+                    </label>
+<input
+                       value={produtoForm.vagas_ocupadas_manual}
+                       onChange={(e) => setProdutoForm({ ...produtoForm, vagas_ocupadas_manual: e.target.value })}
+                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                       placeholder="Ex: 12"
+                       inputMode="numeric"
+                     />
+                    <p className="text-xs text-brand-charcoal/30 mt-1">Deixe em branco para contagem automática via inscrições pagas.</p>
+                  </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Descrição Curta</label>
 <input
@@ -991,10 +1039,19 @@ export default function AdminPage() {
                         {p.destaque && <span className="text-xs bg-brand-terracotta/10 text-brand-terracotta px-1.5 py-0.5 rounded">Destaque</span>}
                       </div>
                       <p className="text-xs text-brand-charcoal/40 mt-0.5">
-                        {p.slug}{p.preco != null && p.preco > 0 ? ` · R$ ${(p.preco ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : ""} · Ordem: {p.ordem}{p.categoria ? ` · ${p.categoria}` : ""}{p.vagas_maximas != null ? ` · Limite: ${p.vagas_maximas} pessoas` : ""}
+                        {p.slug}{p.preco != null && p.preco > 0 ? ` · R$ ${(p.preco ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : ""} · Ordem: {p.ordem}{p.categoria ? ` · ${p.categoria}` : ""}{p.vagas_maximas != null ? ` · Limite: ${p.vagas_maximas} pessoas` : ""}{p.vagas_maximas != null ? (p.vagas_ocupadas_manual != null ? ` · Contador: ${p.vagas_ocupadas_manual}/${p.vagas_maximas} (Manual)` : ` · Contador: Auto`) : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
+                      {p.vagas_maximas != null && (
+                        <button
+                          onClick={() => setAjustandoContador({ produto: p, valor: p.vagas_ocupadas_manual != null ? p.vagas_ocupadas_manual.toString() : "" })}
+                          className="px-3 py-1.5 text-xs text-brand-terracotta hover:bg-brand-terracotta/10 rounded-lg transition-colors font-medium cursor-pointer"
+                          title="Ajustar contador de vagas na página"
+                        >
+                          Ajustar Contador
+                        </button>
+                      )}
                       <button
                         onClick={() => handleEditarProduto(p)}
                         className="px-3 py-1.5 text-xs text-brand-purple hover:bg-brand-purple/10 rounded-lg transition-colors"
@@ -2166,6 +2223,89 @@ export default function AdminPage() {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Ajustar Contador Manual de Vagas */}
+      {ajustandoContador && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          style={{ overscrollBehavior: "contain" }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Ajustar contador de vagas"
+          onKeyDown={(e) => { if (e.key === "Escape") setAjustandoContador(null); }}
+        >
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl border border-brand-beige">
+            <h3 className="text-base font-semibold text-brand-charcoal mb-1">
+              Ajustar Contador de Vagas
+            </h3>
+            <p className="text-xs text-brand-charcoal/60 mb-4">
+              {ajustandoContador.produto.nome}
+            </p>
+
+            <div className="bg-brand-beige/20 p-3 rounded-lg text-xs text-brand-charcoal/70 mb-4 space-y-1">
+              <div className="flex justify-between">
+                <span>Limite da turma:</span>
+                <strong>{ajustandoContador.produto.vagas_maximas ?? "—"} pessoas</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>Status atual:</span>
+                <span className="font-medium text-brand-purple">
+                  {ajustandoContador.produto.vagas_ocupadas_manual != null
+                    ? `${ajustandoContador.produto.vagas_ocupadas_manual} preenchidas (Manual)`
+                    : "Automático (via inscrições)"}
+                </span>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-xs font-medium text-brand-charcoal/80 mb-1">
+                Vagas Preenchidas na Página
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={ajustandoContador.valor}
+                onChange={(e) =>
+                  setAjustandoContador({ ...ajustandoContador, valor: e.target.value })
+                }
+                placeholder="Deixe vazio para automático"
+                className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                autoFocus
+              />
+              <p className="text-[11px] text-brand-charcoal/50 mt-1.5 leading-normal">
+                Digite quantas vagas devem aparecer como ocupadas. Se deixar em branco, o sistema volta a contar as inscrições pagas reais.
+              </p>
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setAjustandoContador(null)}
+                className="px-3.5 py-2 text-xs text-brand-charcoal/60 hover:text-brand-charcoal transition-colors rounded-lg"
+              >
+                Cancelar
+              </button>
+              {ajustandoContador.valor !== "" && (
+                <button
+                  type="button"
+                  onClick={() => setAjustandoContador({ ...ajustandoContador, valor: "" })}
+                  className="px-3.5 py-2 text-xs text-brand-charcoal/70 hover:bg-brand-beige/50 border border-brand-beige transition-colors rounded-lg"
+                >
+                  Limpar (Automático)
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleSalvarContadorRapido}
+                disabled={salvandoContador}
+                className="px-4 py-2 text-xs bg-brand-purple text-white rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors font-medium shadow-xs"
+              >
+                {salvandoContador ? "Salvando..." : "Salvar"}
+              </button>
+            </div>
           </div>
         </div>
       )}

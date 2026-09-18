@@ -13,6 +13,7 @@ export interface Produto {
   ativo?: boolean;
   ordem?: number;
   vagas_maximas: number | null;
+  vagas_ocupadas_manual?: number | null;
   categoria?: string | null;
   forma_pagamento_disponivel?: string | null;
   created_at?: string;
@@ -23,6 +24,8 @@ export interface VagasInfo {
   maximas: number;
   restantes: number;
   turma?: string;
+  manual?: boolean;
+  reais?: number;
 }
 
 export interface PedidoItem {
