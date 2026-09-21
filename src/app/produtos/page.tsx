@@ -11,6 +11,8 @@ export const metadata: Metadata = {
 
 const nomesCategorias: Record<string, string> = {
   vivencias: "Vivências",
+  atendimentos: "Atendimentos",
+  calendario: "Calendário",
 };
 
 export default async function ProdutosPage({

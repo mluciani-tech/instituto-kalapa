@@ -28,8 +28,8 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const url = `${origin}/produtos/${produto.id}`;
     const shareData = {
-      title: `${produto.nome} — Instituto Kalapa`,
-      text: produto.descricao_curta || produto.descricao || `Conheça a vivência ${produto.nome} no Instituto Kalapa!`,
+      title: `${produto.nome} — INstituto Kalapa`,
+      text: produto.descricao_curta || produto.descricao || `Conheça a vivência ${produto.nome} no INstituto Kalapa!`,
       url,
     };
 

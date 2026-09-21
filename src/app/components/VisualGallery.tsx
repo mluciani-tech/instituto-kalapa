@@ -5,14 +5,14 @@ import { motion } from "framer-motion";
 
 const fotos = [
   { src: "/foto1.jpg", alt: "Apoio mútuo — mãos em gesto de acolhimento", className: "md:col-span-1 md:row-span-1" },
-  { src: "/foto2.jpg", alt: "Espaço terapêutico do Instituto Kalapa", className: "md:col-span-1 md:row-span-1" },
+  { src: "/foto2.jpg", alt: "Espaço terapêutico do INstituto Kalapa", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto3.jpg", alt: "Vivência em grupo ao ar livre", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto4.jpg", alt: "Momento de introspecção com velas", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto5.jpg", alt: "Trabalho com crianças", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto6.jpg", alt: "Rodas de conversa e autoconhecimento", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto6a.jpg", alt: "Vivência ao ar livre", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto7.jpg", alt: "Vivência noturna em grupo", className: "md:col-span-1 md:row-span-1" },
-  { src: "/foto8.jpg", alt: "Grupo do Instituto Kalapa", className: "md:col-span-1 md:row-span-1" },
+  { src: "/foto8.jpg", alt: "Grupo do INstituto Kalapa", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto9.jpg", alt: "Sessão ao ar livre", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto_10.jpg", alt: "Acolhimento e conexão", className: "md:col-span-1 md:row-span-1" },
   { src: "/foto11.jpg", alt: "Momento de vivência", className: "md:col-span-1 md:row-span-1" },

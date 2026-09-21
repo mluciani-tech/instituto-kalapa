@@ -46,18 +46,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!produto) {
     return {
-      title: "Produto não encontrado — Instituto Kalapa",
+      title: "Produto não encontrado — INstituto Kalapa",
       description: "A vivência procurada não foi encontrada.",
     };
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://instituto-kalapa.vercel.app";
   const pageUrl = `${siteUrl}/produtos/${produto.slug}`;
-  const title = `${produto.nome} — Instituto Kalapa`;
+  const title = `${produto.nome} — INstituto Kalapa`;
   const description =
     produto.descricao_curta ||
     produto.descricao?.slice(0, 160) ||
-    "Vivência terapêutica em grupo no Instituto Kalapa. Acolhimento e transformação.";
+    "Vivência terapêutica em grupo no INstituto Kalapa. Acolhimento e transformação.";
   const imageUrl = produto.imagem_url || `${siteUrl}/logo-kalapa.png`;
 
   return {
@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: pageUrl,
       type: "website",
       locale: "pt_BR",
-      siteName: "Instituto Kalapa",
+      siteName: "INstituto Kalapa",
       images: [
         {
           url: imageUrl,

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Package } from "lucide-react";
+import { Package, ArrowLeft, MessageCircle, Sparkles } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
 import type { VagasInfo } from "@/lib/types";
 
@@ -72,9 +73,48 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
 
   if (produtos.length === 0) {
     return (
-      <div className="text-center py-20">
-        <Package aria-hidden="true" className="w-12 h-12 text-brand-charcoal/25 mx-auto mb-4" />
-        <p className="text-brand-charcoal/45 text-lg">Nenhum produto disponível no momento.</p>
+      <div className="text-center py-16 px-4 max-w-lg mx-auto bg-white rounded-3xl border border-brand-charcoal/10 shadow-sm">
+        <div className="w-16 h-16 rounded-2xl bg-brand-purple/10 text-brand-purple flex items-center justify-center mx-auto mb-4 border border-brand-purple/20">
+          <Sparkles className="w-8 h-8" />
+        </div>
+
+        <h3 className="text-xl font-bold text-brand-charcoal mb-2 font-sans">
+          {categoria
+            ? `Nenhuma vivência encontrada em "${categoria}"`
+            : "Novas turmas em preparação"}
+        </h3>
+
+        <p className="text-brand-charcoal/65 text-sm mb-6 leading-relaxed">
+          {categoria
+            ? "No momento não temos turmas com inscrições abertas nesta categoria ou o calendário está sendo atualizado. Explore todas as vivências ativas ou consulte nossa facilitadora."
+            : "Nossos grupos são reduzidos e abertos periodicamente. Entre em contato conosco para conhecer a programação e reservar sua vaga antecipadamente."}
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          {categoria && (
+            <Link
+              href="/produtos"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-bold transition-all shadow-md shadow-brand-terracotta/20 cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Ver todos os serviços
+            </Link>
+          )}
+
+          <a
+            href={`https://wa.me/5511917452732?text=${encodeURIComponent(
+              categoria
+                ? `Olá! Gostaria de saber quando abrem novas turmas para a categoria "${categoria}" no INstituto Kalapa.`
+                : "Olá! Gostaria de informações sobre as próximas turmas e vivências no INstituto Kalapa."
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-brand-purple/25 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple text-xs font-bold transition-all cursor-pointer"
+          >
+            <MessageCircle className="w-4 h-4 text-brand-mint" />
+            Falar no WhatsApp
+          </a>
+        </div>
       </div>
     );
   }

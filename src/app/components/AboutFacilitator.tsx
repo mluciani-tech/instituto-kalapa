@@ -31,7 +31,7 @@ const FAQ_PADRAO: FAQItem[] = [
       "Nossos grupos contam com no máximo 15 participantes por encontro. Essa limitação garante que cada pessoa seja verdadeiramente ouvida, acolhida e acompanhada com cuidado individualizado e respeito ao seu processo.",
   },
   {
-    pergunta: "Qual é a política de sigilo do Instituto Kalapa?",
+    pergunta: "Qual é a política de sigilo do INstituto Kalapa?",
     resposta:
       "O sigilo é nosso pilar ético inegociável. Tudo o que é compartilhado, vivenciado e revelado nos encontros permanece estritamente dentro do círculo do grupo, criando um solo seguro e confiável.",
   },
@@ -128,7 +128,7 @@ export default function AboutFacilitator() {
             Presença, Cuidado e Acolhimento
           </h2>
           <p className="mt-4 text-brand-charcoal/65 text-base md:text-lg max-w-2xl mx-auto font-light leading-relaxed">
-            Conheça quem cuida do seu espaço seguro no Instituto Kalapa e a
+            Conheça quem cuida do seu espaço seguro no INstituto Kalapa e a
             atmosfera criada para o seu processo de transformação.
           </p>
         </motion.div>
@@ -245,7 +245,7 @@ export default function AboutFacilitator() {
               >
                 <Image
                   src={src}
-                  alt={`Espaço Instituto Kalapa - Foto ${index + 1}`}
+                  alt={`Espaço INstituto Kalapa - Foto ${index + 1}`}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, 33vw"

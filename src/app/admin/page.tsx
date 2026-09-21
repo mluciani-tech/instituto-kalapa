@@ -25,7 +25,7 @@ const FAQ_PADRAO_ADMIN = [
       "Nossos grupos contam com no máximo 15 participantes por encontro. Essa limitação garante que cada pessoa seja verdadeiramente ouvida, acolhida e acompanhada com cuidado individualizado e respeito ao seu processo.",
   },
   {
-    pergunta: "Qual é a política de sigilo do Instituto Kalapa?",
+    pergunta: "Qual é a política de sigilo do INstituto Kalapa?",
     resposta:
       "O sigilo é nosso pilar ético inegociável. Tudo o que é compartilhado, vivenciado e revelado nos encontros permanece estritamente dentro do círculo do grupo, criando um solo seguro e confiável.",
   },

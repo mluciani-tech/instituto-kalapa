@@ -42,6 +42,7 @@ export default function Checkout() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
   const [processando, setProcessando] = useState(false);
+  const [redirecionando, setRedirecionando] = useState(false);
   const [erro, setErro] = useState("");
 
   // Formulário para acompanhantes / participantes extras quando quantidade >= 2
@@ -260,6 +261,7 @@ export default function Checkout() {
         return;
       }
 
+      setRedirecionando(true);
       clearCart();
       try {
         localStorage.removeItem("kalapa_cart_items_v1");
@@ -267,11 +269,16 @@ export default function Checkout() {
       } catch {
         // ignore
       }
-      window.location.href = checkoutData.url;
+
+      // Breve pausa para o usuário assimilar o aviso de segurança e transição bancária
+      setTimeout(() => {
+        window.location.href = checkoutData.url;
+      }, 1000);
     } catch (error) {
       console.error("Erro no checkout:", error);
       setErro("Falha de conexão. Tente novamente.");
       setProcessando(false);
+      setRedirecionando(false);
     }
   };
 
@@ -699,6 +706,51 @@ export default function Checkout() {
           </div>
         </div>
       </div>
+      {/* Modal de Transição Suave para o Gateway InfinitePay */}
+      {(processando || redirecionando) && (
+        <div className="fixed inset-0 z-50 bg-brand-charcoal/80 backdrop-blur-sm flex items-center justify-center p-4 transition-all duration-300">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-brand-terracotta/20 relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Barra de progresso animada no topo */}
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-brand-charcoal/10 overflow-hidden">
+              <div className="h-full bg-brand-terracotta animate-pulse w-full" />
+            </div>
+
+            {/* Ícone de segurança */}
+            <div className="w-16 h-16 rounded-2xl bg-brand-terracotta/10 border border-brand-terracotta/25 text-brand-terracotta flex items-center justify-center mx-auto mb-5 shadow-xs">
+              <ShieldCheck className="w-8 h-8 animate-pulse" />
+            </div>
+
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple text-xs font-bold tracking-wide mb-3">
+              ✦ Ambiente Bancário Criptografado
+            </span>
+
+            <h3 className="text-xl font-bold text-brand-charcoal tracking-tight">
+              {redirecionando
+                ? "Conectando ao InfinitePay"
+                : "Preparando sua Reserva..."}
+            </h3>
+
+            <p className="mt-2 text-xs sm:text-sm text-brand-charcoal/70 leading-relaxed">
+              {redirecionando
+                ? "Você está sendo direcionado com segurança para a plataforma oficial da InfinitePay para concluir o pagamento via Pix ou Cartão."
+                : "Estamos registrando os dados da sua vivência com sigilo e preparando seu link oficial de pagamento."}
+            </p>
+
+            <div className="my-6 p-3.5 rounded-xl bg-brand-offwhite border border-brand-charcoal/10 flex items-center justify-center gap-3">
+              <div className="w-5 h-5 border-2 border-brand-terracotta border-t-transparent rounded-full animate-spin shrink-0" />
+              <span className="text-xs font-semibold text-brand-charcoal/80">
+                Por favor, não feche nem recarregue esta página...
+              </span>
+            </div>
+
+            <div className="flex items-center justify-center gap-2 text-[11px] text-brand-charcoal/50">
+              <span className="font-semibold text-brand-charcoal/70">INstituto Kalapa</span>
+              <span>•</span>
+              <span>Checkout Oficial InfinitePay</span>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

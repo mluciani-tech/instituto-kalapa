@@ -40,8 +40,8 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
   const handleCompartilhar = async () => {
     const shareUrl = window.location.href;
     const shareData = {
-      title: `${produto.nome} — Instituto Kalapa`,
-      text: produto.descricao_curta || produto.descricao || `Conheça a vivência ${produto.nome} no Instituto Kalapa!`,
+      title: `${produto.nome} — INstituto Kalapa`,
+      text: produto.descricao_curta || produto.descricao || `Conheça a vivência ${produto.nome} no INstituto Kalapa!`,
       url: shareUrl,
     };
 
@@ -150,7 +150,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
             </div>
             <a
               href={`https://wa.me/5511917452732?text=${encodeURIComponent(
-                `Olá! Gostaria de mais informações sobre "${produto.nome}" no Instituto Kalapa.`
+                `Olá! Gostaria de mais informações sobre "${produto.nome}" no INstituto Kalapa.`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
