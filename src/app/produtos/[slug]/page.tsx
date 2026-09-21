@@ -12,30 +12,32 @@ interface PageProps {
 
 async function getProdutoBySlug(slug: string): Promise<Produto | null> {
   if (!isAdminConfigured()) {
-    // Se o supabaseAdmin não estiver configurado, tenta a API pública interna ou retorna null
     return null;
   }
 
-  const { data, error } = await supabaseAdmin!
-    .from("produtos")
-    .select("*")
-    .eq("slug", slug)
-    .eq("ativo", true)
-    .single();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
 
-  if (error || !data) {
-    // Tenta buscar por ID caso o usuário passe o UUID
+  if (isUuid) {
     const { data: byId } = await supabaseAdmin!
       .from("produtos")
       .select("*")
       .eq("id", slug)
       .eq("ativo", true)
-      .single();
+      .maybeSingle();
 
-    return byId || null;
+    if (byId) return byId;
   }
 
-  return data;
+  const { data: bySlug } = await supabaseAdmin!
+    .from("produtos")
+    .select("*")
+    .eq("slug", slug)
+    .eq("ativo", true)
+    .order("ordem", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  return bySlug || null;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

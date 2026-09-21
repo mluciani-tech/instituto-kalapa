@@ -26,7 +26,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
     e.stopPropagation();
     e.preventDefault();
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const url = `${origin}/produtos/${produto.slug || produto.id}`;
+    const url = `${origin}/produtos/${produto.id}`;
     const shareData = {
       title: `${produto.nome} — Instituto Kalapa`,
       text: produto.descricao_curta || produto.descricao || `Conheça a vivência ${produto.nome} no Instituto Kalapa!`,
@@ -92,7 +92,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
       <div className="group relative h-full overflow-hidden flex flex-col bg-white rounded-2xl border border-[#B8965A]/30 hover:border-[#B8965A]/80 shadow-[0_4px_20px_-4px_rgba(184,150,90,0.12)] hover:shadow-[0_8px_30px_-4px_rgba(184,150,90,0.22)] transition-all duration-300">
           {/* Imagem */}
           <div className="relative h-48 overflow-hidden">
-            <Link href={`/produtos/${produto.slug || produto.id}`} className="block w-full h-full">
+            <Link href={`/produtos/${produto.id}`} className="block w-full h-full">
               {produto.imagem_url ? (
                 <Image
                   src={produto.imagem_url}
@@ -139,7 +139,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
           <div className="flex flex-col flex-1 p-6">
             <h3 className="text-xl font-bold text-brand-charcoal mb-2 font-sans">
               <Link
-                href={`/produtos/${produto.slug || produto.id}`}
+                href={`/produtos/${produto.id}`}
                 className="hover:text-brand-purple transition-colors"
               >
                 {produto.nome}
