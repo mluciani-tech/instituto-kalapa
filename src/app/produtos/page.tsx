@@ -59,7 +59,7 @@ export default async function ProdutosPage({
             </p>
           </div>
           <a
-            href="https://wa.me/5511917452732?text=Ol%C3%A1!%20Gostaria%20de%20tirar%20algumas%20d%C3%BAvidas%20sobre%20as%20viv%C3%AAncias%20do%20Instituto%20Kalapa."
+            href="https://wa.me/5511917452732?text=Ol%C3%A1!%20Gostaria%20de%20tirar%20algumas%20d%C3%BAvidas%20sobre%20as%20viv%C3%AAncias%20do%20INstituto%20Kalapa."
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 px-4 py-2.5 rounded-xl bg-brand-purple/10 hover:bg-brand-purple/20 text-brand-purple text-xs font-semibold transition-colors flex items-center gap-2"
