@@ -48,6 +48,10 @@ export async function PATCH(
     }
   }
 
+  if (body.beneficiarios !== undefined && Array.isArray(body.beneficiarios)) {
+    updates.beneficiarios = body.beneficiarios;
+  }
+
   if (Object.keys(updates).length === 0) {
     return NextResponse.json(
       { error: "Nenhum campo válido para atualizar" },

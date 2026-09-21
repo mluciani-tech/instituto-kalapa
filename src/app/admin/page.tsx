@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Fragment } from "react";
 import type { Produto, Pedido, Participante, Cupom, Usuario } from "@/lib/types";
 
 type Paginated<T> = {
@@ -154,6 +154,7 @@ export default function AdminPage() {
   const [pedidosTotal, setPedidosTotal] = useState(0);
   const [pedidosSearch, setPedidosSearch] = useState("");
   const [pedidosSort, setPedidosSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "created_at", dir: "desc" });
+  const [pedidoExpandidoId, setPedidoExpandidoId] = useState<string | null>(null);
 
   // Participantes
   const [participantes, setParticipantes] = useState<Participante[]>([]);
@@ -1582,6 +1583,18 @@ export default function AdminPage() {
                             {ped.cliente_nome}{ped.cliente_telefone ? ` · ${ped.cliente_telefone}` : ""}
                           </p>
                           <p className="text-xs text-brand-charcoal/40">{ped.produtos?.nome || "—"}</p>
+                          {Array.isArray(ped.beneficiarios) && ped.beneficiarios.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setPedidoExpandidoId(pedidoExpandidoId === ped.id ? null : ped.id)}
+                              className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20 transition-colors"
+                            >
+                              <span>👥 +{ped.beneficiarios.length} acompanhante{ped.beneficiarios.length > 1 ? "s" : ""}</span>
+                              <span className="text-[9px] opacity-70">
+                                {pedidoExpandidoId === ped.id ? "▲" : "▼"}
+                              </span>
+                            </button>
+                          )}
                         </div>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           ped.status === "pago" ? "bg-green-100 text-green-700" :
@@ -1591,6 +1604,30 @@ export default function AdminPage() {
                           {ped.status}
                         </span>
                       </div>
+
+                      {/* Lista de Acompanhantes expandida no mobile */}
+                      {Array.isArray(ped.beneficiarios) && ped.beneficiarios.length > 0 && pedidoExpandidoId === ped.id && (
+                        <div className="mb-3 p-3 bg-brand-offwhite rounded-xl border border-brand-beige space-y-2 text-xs">
+                          <p className="font-bold text-brand-purple uppercase tracking-wider text-[10px]">
+                            Participantes Adicionais ({ped.beneficiarios.length})
+                          </p>
+                          {ped.beneficiarios.map((ben, bIdx) => (
+                            <div key={bIdx} className="pb-2 border-b border-brand-beige/70 last:border-0 last:pb-0">
+                              <p className="font-semibold text-brand-charcoal">{ben.nome}</p>
+                              <p className="text-brand-charcoal/60">{ben.email}</p>
+                              <a
+                                href={`https://wa.me/${ben.telefone.replace(/\D/g, "").replace(/^0+/, "").replace(/^(55)?/, "55")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-brand-purple font-medium hover:underline inline-block mt-0.5"
+                              >
+                                WhatsApp: {ben.telefone}
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       <div className="space-y-1 text-xs text-brand-charcoal/60">
                         <p>{ped.cliente_email}</p>
                         {ped.motivacao && <p className="text-brand-charcoal/50 line-clamp-2">&ldquo;{ped.motivacao}&rdquo;</p>}
@@ -1660,65 +1697,119 @@ export default function AdminPage() {
                       </thead>
                       <tbody>
                         {pedidos.map((ped) => (
-                          <tr key={ped.id} className="border-b border-brand-beige/50 hover:bg-brand-beige/30 transition-colors">
-                            <td className="px-4 py-3">
-                              <span className="font-medium text-brand-charcoal">
-                                {ped.cliente_nome}{ped.cliente_telefone ? (
-                                  <>
-                                    {" · "}
-                                    <a
-                                      href={`https://wa.me/${ped.cliente_telefone.replace(/\D/g, "").replace(/^0+/, "").replace(/^(55)?/, "55")}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-brand-purple hover:underline"
-                                    >
-                                      {ped.cliente_telefone}
-                                    </a>
-                                  </>
-                                ) : ""}
-                              </span>
-                              <span className="text-xs text-brand-charcoal/40 block">{ped.cliente_email}</span>
-                            </td>
-                            <td className="px-4 py-3 text-brand-charcoal/70">{ped.produtos?.nome || "—"}</td>
-                            <td className="px-4 py-3 font-semibold text-brand-charcoal">
-                              R$ {ped.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                            </td>
-                            <td className="px-4 py-3 text-brand-charcoal/60 text-xs max-w-[180px] truncate">{ped.motivacao || "—"}</td>
-                            <td className="px-4 py-3">
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                ped.status === "pago" ? "bg-green-100 text-green-700" :
-                                ped.status === "pendente" ? "bg-yellow-100 text-yellow-700" :
-                                "bg-gray-100 text-gray-600"
-                              }`}>
-                                {ped.status}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-brand-charcoal/50 text-xs">{formatDate(ped.created_at)}</td>
-                            <td className="px-4 py-3">
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => setEditando({
-                                    tipo: "pedido",
-                                    id: ped.id,
-                                    nome: ped.cliente_nome,
-                                    email: ped.cliente_email,
-                                    telefone: ped.cliente_telefone || "",
-                                  })}
-                                  className="px-3 py-1.5 text-xs text-brand-charcoal/70 hover:bg-brand-beige rounded-lg border border-brand-beige transition-colors"
-                                >
-                                  Editar
-                                </button>
-                                {ped.status === "pendente" && (
+                          <Fragment key={ped.id}>
+                            <tr className="border-b border-brand-beige/50 hover:bg-brand-beige/30 transition-colors">
+                              <td className="px-4 py-3">
+                                <span className="font-medium text-brand-charcoal">
+                                  {ped.cliente_nome}{ped.cliente_telefone ? (
+                                    <>
+                                      {" · "}
+                                      <a
+                                        href={`https://wa.me/${ped.cliente_telefone.replace(/\D/g, "").replace(/^0+/, "").replace(/^(55)?/, "55")}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-brand-purple hover:underline"
+                                      >
+                                        {ped.cliente_telefone}
+                                      </a>
+                                    </>
+                                  ) : ""}
+                                </span>
+                                <span className="text-xs text-brand-charcoal/40 block">{ped.cliente_email}</span>
+
+                                {/* Badge de acompanhantes */}
+                                {Array.isArray(ped.beneficiarios) && ped.beneficiarios.length > 0 && (
                                   <button
-                                    onClick={() => setPedidoParaExcluir(ped.id)}
-                                    className="px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
+                                    type="button"
+                                    onClick={() => setPedidoExpandidoId(pedidoExpandidoId === ped.id ? null : ped.id)}
+                                    className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20 transition-colors cursor-pointer"
+                                    title="Clique para ver os dados dos acompanhantes"
                                   >
-                                    Excluir
+                                    <span>👥 +{ped.beneficiarios.length} acompanhante{ped.beneficiarios.length > 1 ? "s" : ""}</span>
+                                    <span className="text-[9px] opacity-70">
+                                      {pedidoExpandidoId === ped.id ? "▲" : "▼"}
+                                    </span>
                                   </button>
                                 )}
-                              </div>
-                            </td>
-                          </tr>
+                              </td>
+                              <td className="px-4 py-3 text-brand-charcoal/70">{ped.produtos?.nome || "—"}</td>
+                              <td className="px-4 py-3 font-semibold text-brand-charcoal">
+                                R$ {ped.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                              </td>
+                              <td className="px-4 py-3 text-brand-charcoal/60 text-xs max-w-[180px] truncate">{ped.motivacao || "—"}</td>
+                              <td className="px-4 py-3">
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                  ped.status === "pago" ? "bg-green-100 text-green-700" :
+                                  ped.status === "pendente" ? "bg-yellow-100 text-yellow-700" :
+                                  "bg-gray-100 text-gray-600"
+                                }`}>
+                                  {ped.status}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-brand-charcoal/50 text-xs">{formatDate(ped.created_at)}</td>
+                              <td className="px-4 py-3">
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => setEditando({
+                                      tipo: "pedido",
+                                      id: ped.id,
+                                      nome: ped.cliente_nome,
+                                      email: ped.cliente_email,
+                                      telefone: ped.cliente_telefone || "",
+                                    })}
+                                    className="px-3 py-1.5 text-xs text-brand-charcoal/70 hover:bg-brand-beige rounded-lg border border-brand-beige transition-colors"
+                                  >
+                                    Editar
+                                  </button>
+                                  {ped.status === "pendente" && (
+                                    <button
+                                      onClick={() => setPedidoParaExcluir(ped.id)}
+                                      className="px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
+                                    >
+                                      Excluir
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+
+                            {/* Linha expandida de participantes adicionais */}
+                            {Array.isArray(ped.beneficiarios) && ped.beneficiarios.length > 0 && pedidoExpandidoId === ped.id && (
+                              <tr className="bg-brand-purple/5 border-b border-brand-beige">
+                                <td colSpan={7} className="px-6 py-4">
+                                  <div className="bg-white rounded-xl p-4 border border-brand-purple/20 shadow-xs">
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-brand-purple mb-2 flex items-center gap-1.5">
+                                      <span>👥 Participantes Adicionais vinculados a este pedido ({ped.beneficiarios.length})</span>
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                      {ped.beneficiarios.map((ben, bIdx) => (
+                                        <div key={bIdx} className="p-3 rounded-lg bg-brand-offwhite border border-brand-beige/80 text-xs">
+                                          <div className="flex items-center justify-between mb-1">
+                                            <span className="font-bold text-brand-charcoal">{ben.nome}</span>
+                                            <span className="text-[10px] bg-brand-purple/10 text-brand-purple px-1.5 py-0.5 rounded font-medium">
+                                              Acompanhante {bIdx + 1}
+                                            </span>
+                                          </div>
+                                          <p className="text-brand-charcoal/60 truncate">{ben.email}</p>
+                                          <div className="mt-1.5 pt-1.5 border-t border-brand-beige flex items-center justify-between">
+                                            <span className="text-brand-charcoal/50 text-[11px]">WhatsApp:</span>
+                                            <a
+                                              href={`https://wa.me/${ben.telefone.replace(/\D/g, "").replace(/^0+/, "").replace(/^(55)?/, "55")}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-brand-purple font-semibold hover:underline"
+                                            >
+                                              {ben.telefone}
+                                            </a>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
                         ))}
                       </tbody>
                     </table>

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { produto_id, itens: cartItens, customer: customerBody, inscricao, cupom_codigo } = body;
+    const { produto_id, itens: cartItens, customer: customerBody, inscricao, cupom_codigo, beneficiarios } = body;
 
     // Verificar se o cliente está logado via cookie HttpOnly
     const clienteLogado = await getClienteFromRequest(req);
@@ -198,6 +198,7 @@ export async function POST(req: NextRequest) {
         cliente_cpf: clienteCpf,
         endereco_entrega: enderecoEntrega,
         itens: pedidoItensData,
+        beneficiarios: Array.isArray(beneficiarios) ? beneficiarios : [],
         valor: valorFinal,
         valor_desconto: valorDesconto > 0 ? valorDesconto : 0,
         cupom_id: cupomId,

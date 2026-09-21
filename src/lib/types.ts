@@ -46,6 +46,14 @@ export interface EnderecoEntrega {
   uf: string;
 }
 
+export interface BeneficiarioPedido {
+  produto_id: string;
+  produto_nome?: string;
+  nome: string;
+  email: string;
+  telefone: string;
+}
+
 export interface Pedido {
   id: string;
   order_nsu: string;
@@ -57,6 +65,7 @@ export interface Pedido {
   cliente_cpf?: string | null;
   endereco_entrega?: EnderecoEntrega | null;
   itens?: PedidoItem[] | null;
+  beneficiarios?: BeneficiarioPedido[] | null;
   valor: number;
   valor_desconto?: number | null;
   cupom_id?: string | null;

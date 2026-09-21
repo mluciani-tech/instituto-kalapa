@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Check, ArrowRight, ShoppingBag } from "lucide-react";
+import Link from "next/link";
+import { Check, ArrowRight, ShoppingBag, Share2, CheckCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
@@ -18,6 +20,38 @@ interface ProductCardProps {
 export default function ProductCard({ produto, index = 0, vagas }: ProductCardProps) {
   const router = useRouter();
   const { addItem, clearCart, openDrawer } = useCart();
+  const [copiado, setCopiado] = useState(false);
+
+  const handleCompartilhar = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const url = `${origin}/produtos/${produto.slug || produto.id}`;
+    const shareData = {
+      title: `${produto.nome} — Instituto Kalapa`,
+      text: produto.descricao_curta || produto.descricao || `Conheça a vivência ${produto.nome} no Instituto Kalapa!`,
+      url,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2500);
+    } catch {
+      // fallback
+    }
+  };
 
   const handleEscolher = () => {
     // Sincroniza o produto escolhido limpando itens anteriores e inserindo o produto direto
@@ -45,6 +79,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
 
   return (
     <motion.div
+      id={`produto-${produto.slug || produto.id}`}
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
@@ -52,37 +87,63 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
         delay: index * 0.1,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="h-full"
+      className="h-full scroll-mt-28"
     >
       <div className="group relative h-full overflow-hidden flex flex-col bg-white rounded-2xl border border-[#B8965A]/30 hover:border-[#B8965A]/80 shadow-[0_4px_20px_-4px_rgba(184,150,90,0.12)] hover:shadow-[0_8px_30px_-4px_rgba(184,150,90,0.22)] transition-all duration-300">
           {/* Imagem */}
           <div className="relative h-48 overflow-hidden">
-            {produto.imagem_url ? (
-              <Image
-                src={produto.imagem_url}
-                alt={produto.nome}
-                width={400}
-                height={300}
-                loading="lazy"
-                decoding="async"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-brand-purple/20 to-brand-terracotta/20 flex items-center justify-center">
-                <span className="text-4xl">✦</span>
-              </div>
-            )}
+            <Link href={`/produtos/${produto.slug || produto.id}`} className="block w-full h-full">
+              {produto.imagem_url ? (
+                <Image
+                  src={produto.imagem_url}
+                  alt={produto.nome}
+                  width={400}
+                  height={300}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-brand-purple/20 to-brand-terracotta/20 flex items-center justify-center">
+                  <span className="text-4xl">✦</span>
+                </div>
+              )}
+            </Link>
+
+            {/* Destaque Tag */}
             {produto.destaque && (
-              <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-brand-terracotta text-white text-xs font-semibold tracking-wide">
+              <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-brand-terracotta text-white text-xs font-semibold tracking-wide shadow-xs">
                 Destaque
               </div>
             )}
+
+            {/* Botão de Compartilhar */}
+            <button
+              onClick={handleCompartilhar}
+              aria-label={`Compartilhar ${produto.nome}`}
+              title={copiado ? "Link copiado para a área de transferência!" : "Compartilhar com um amigo"}
+              className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 hover:bg-white text-brand-charcoal/80 hover:text-brand-purple shadow-sm transition-all duration-200 cursor-pointer flex items-center gap-1.5 backdrop-blur-xs"
+            >
+              {copiado ? (
+                <>
+                  <CheckCheck className="w-4 h-4 text-brand-mint" />
+                  <span className="text-[11px] font-bold text-brand-mint pr-1">Copiado!</span>
+                </>
+              ) : (
+                <Share2 className="w-4 h-4" />
+              )}
+            </button>
           </div>
 
           {/* Conteúdo */}
           <div className="flex flex-col flex-1 p-6">
             <h3 className="text-xl font-bold text-brand-charcoal mb-2 font-sans">
-              {produto.nome}
+              <Link
+                href={`/produtos/${produto.slug || produto.id}`}
+                className="hover:text-brand-purple transition-colors"
+              >
+                {produto.nome}
+              </Link>
             </h3>
 
             {produto.descricao_curta && (

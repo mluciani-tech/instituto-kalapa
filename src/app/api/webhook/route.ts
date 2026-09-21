@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     // 1. Buscar pedido pelo order_nsu
     const { data: pedido, error: pedidoError } = await supabaseAdmin!
       .from("pedidos")
-      .select("id, status, cliente_nome, cliente_email, cliente_telefone, usuario_id, cupom_id, valor_desconto, produtos(nome)")
+      .select("id, status, cliente_nome, cliente_email, cliente_telefone, usuario_id, cupom_id, valor_desconto, beneficiarios, produtos(nome)")
       .eq("order_nsu", order_nsu)
       .single();
 
@@ -198,6 +198,43 @@ export async function POST(req: NextRequest) {
 
       await supabaseAdmin!.from("inscricoes").update(inscricaoUpdate).eq("id", inscricao.id);
       console.log("[webhook] Inscrição atualizada:", inscricao.id);
+    }
+
+    // 3.1 Criar inscrições vinculadas para participantes/acompanhantes adicionais
+    if (Array.isArray(pedido.beneficiarios) && pedido.beneficiarios.length > 0) {
+      try {
+        const { getTurmaAtual } = await import("@/lib/vagas");
+        const turmaAtual = await getTurmaAtual();
+
+        for (const ben of pedido.beneficiarios as Array<{ nome?: string; email?: string; telefone?: string; produto_nome?: string }>) {
+          if (ben && ben.nome && ben.telefone) {
+            const { data: jaExiste } = await supabaseAdmin!
+              .from("inscricoes")
+              .select("id")
+              .eq("pedido_id", pedido.id)
+              .eq("nome", ben.nome)
+              .limit(1);
+
+            if (!jaExiste || jaExiste.length === 0) {
+              await supabaseAdmin!.from("inscricoes").insert({
+                turma_id: turmaAtual,
+                order_nsu: order_nsu,
+                pedido_id: pedido.id,
+                nome: ben.nome,
+                email: ben.email || "N/A",
+                telefone: ben.telefone,
+                motivacao: `Convidado de ${pedido.cliente_nome}`,
+                metodo_pagamento: metodoPagamento,
+                valor: 0,
+                status: "pago",
+              });
+              console.log("[webhook] Inscrição de acompanhante criada:", ben.nome);
+            }
+          }
+        }
+      } catch (errInscricoes) {
+        console.error("[webhook] Erro ao registrar inscrições de acompanhantes:", errInscricoes);
+      }
     }
 
     // 4. Enviar e-mails (notificação interna + confirmação ao cliente)

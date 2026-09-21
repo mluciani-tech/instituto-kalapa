@@ -128,6 +128,13 @@ export default function CartDrawer() {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
+
+                    {item.quantidade >= 2 && (
+                      <p className="text-[11px] text-brand-terracotta/90 mt-2 flex items-center gap-1.5 font-medium bg-brand-terracotta/10 px-2 py-1 rounded-md border border-brand-terracotta/20">
+                        <span>👥</span>
+                        <span>{item.quantidade - 1} acompanhante{item.quantidade - 1 > 1 ? "s" : ""} · dados solicitados no checkout</span>
+                      </p>
+                    )}
                   </div>
                 </div>
               ))

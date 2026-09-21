@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Tag,
   User,
+  Users,
   MapPin,
   LogIn,
   AlertCircle,
@@ -16,7 +17,24 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
-import type { Produto, Usuario } from "@/lib/types";
+import type { Produto, Usuario, BeneficiarioPedido } from "@/lib/types";
+
+interface AcompanhanteItem {
+  key: string;
+  produto_id: string;
+  produto_nome: string;
+  indice: number;
+  nome: string;
+  email: string;
+  telefone: string;
+}
+
+function formatPhone(val: string): string {
+  const digits = val.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
 
 export default function Checkout() {
   const { items: cartItems, clearCart, subtotal: cartSubtotal } = useCart();
@@ -25,6 +43,9 @@ export default function Checkout() {
   const [loading, setLoading] = useState(true);
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState("");
+
+  // Formulário para acompanhantes / participantes extras quando quantidade >= 2
+  const [acompanhantes, setAcompanhantes] = useState<AcompanhanteItem[]>([]);
 
   // Formulário para visitante (se não estiver logado)
   const [guestForm, setGuestForm] = useState({
@@ -76,6 +97,39 @@ export default function Checkout() {
   }, []);
 
   const isCartCheckout = cartItems.length > 0;
+
+  // Sincronizar participantes extras quando quantidade >= 2
+  useEffect(() => {
+    const necessarios: AcompanhanteItem[] = [];
+
+    if (isCartCheckout) {
+      for (const item of cartItems) {
+        if (item.quantidade >= 2) {
+          const extras = item.quantidade - 1;
+          for (let i = 0; i < extras; i++) {
+            const key = `${item.produto_id}-${i}`;
+            const existente = acompanhantes.find((a) => a.key === key);
+            necessarios.push({
+              key,
+              produto_id: item.produto_id,
+              produto_nome: item.nome,
+              indice: i + 1,
+              nome: existente?.nome || "",
+              email: existente?.email || "",
+              telefone: existente?.telefone || "",
+            });
+          }
+        }
+      }
+    }
+
+    const currentKeys = acompanhantes.map((a) => a.key).join(",");
+    const nextKeys = necessarios.map((a) => a.key).join(",");
+    if (currentKeys !== nextKeys) {
+      setAcompanhantes(necessarios);
+    }
+  }, [cartItems, isCartCheckout]);
+
   const subtotal = isCartCheckout
     ? cartSubtotal
     : (produto?.preco ?? 0);
@@ -141,6 +195,22 @@ export default function Checkout() {
       }
     }
 
+    // Validar dados dos acompanhantes quando há mais de 1 vaga
+    for (const ac of acompanhantes) {
+      if (!ac.nome.trim()) {
+        setErro(`Informe o nome completo do Participante adicional ${ac.indice} (${ac.produto_nome}).`);
+        return;
+      }
+      if (ac.telefone.replace(/\D/g, "").length < 10) {
+        setErro(`Informe um WhatsApp/telefone com DDD para o Participante ${ac.indice} (${ac.produto_nome}).`);
+        return;
+      }
+      if (!ac.email.trim() || !ac.email.includes("@")) {
+        setErro(`Informe um e-mail válido para o Participante ${ac.indice} (${ac.produto_nome}).`);
+        return;
+      }
+    }
+
     setProcessando(true);
     setErro("");
 
@@ -156,6 +226,16 @@ export default function Checkout() {
         }));
       } else if (produto) {
         bodyPayload.produto_id = produto.id;
+      }
+
+      if (acompanhantes.length > 0) {
+        bodyPayload.beneficiarios = acompanhantes.map((ac) => ({
+          produto_id: ac.produto_id,
+          produto_nome: ac.produto_nome,
+          nome: ac.nome.trim(),
+          email: ac.email.trim(),
+          telefone: ac.telefone.trim(),
+        }));
       }
 
       if (!usuario) {
@@ -301,6 +381,102 @@ export default function Checkout() {
                   )
                 )}
               </div>
+
+              {/* PARTICIPANTES ADICIONAIS QUANDO HOUVER COMPRA MÚLTIPLA */}
+              {acompanhantes.length > 0 && (
+                <div className="mt-6 pt-5 border-t border-brand-charcoal/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-7 h-7 rounded-full bg-brand-terracotta/15 flex items-center justify-center text-brand-terracotta shrink-0">
+                      <Users className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta">
+                        Dados dos Participantes Adicionais ({acompanhantes.length})
+                      </h3>
+                      <p className="text-[11px] text-brand-charcoal/60">
+                        Você selecionou mais de uma vaga. Preencha os dados de quem irá participar:
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {acompanhantes.map((ac) => (
+                      <div
+                        key={ac.key}
+                        className="p-3.5 bg-brand-offwhite rounded-xl border border-brand-charcoal/10 space-y-2.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-brand-charcoal">
+                            Participante {ac.indice} — {ac.produto_nome}
+                          </span>
+                          <span className="text-[10px] bg-brand-purple/10 text-brand-purple px-2 py-0.5 rounded-full font-medium">
+                            Vaga Acompanhante
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                          <div>
+                            <label className="text-[11px] font-medium text-brand-charcoal/75 block mb-1">
+                              Nome Completo *
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={ac.nome}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setAcompanhantes((prev) =>
+                                  prev.map((item) => (item.key === ac.key ? { ...item, nome: val } : item))
+                                );
+                              }}
+                              placeholder="Nome do participante"
+                              className="w-full bg-white border border-brand-charcoal/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-lg px-3 py-2 text-xs text-brand-charcoal outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[11px] font-medium text-brand-charcoal/75 block mb-1">
+                              WhatsApp / Telefone *
+                            </label>
+                            <input
+                              type="tel"
+                              required
+                              value={ac.telefone}
+                              onChange={(e) => {
+                                const val = formatPhone(e.target.value);
+                                setAcompanhantes((prev) =>
+                                  prev.map((item) => (item.key === ac.key ? { ...item, telefone: val } : item))
+                                );
+                              }}
+                              placeholder="(11) 99999-9999"
+                              className="w-full bg-white border border-brand-charcoal/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-lg px-3 py-2 text-xs text-brand-charcoal outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[11px] font-medium text-brand-charcoal/75 block mb-1">
+                              E-mail *
+                            </label>
+                            <input
+                              type="email"
+                              required
+                              value={ac.email}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setAcompanhantes((prev) =>
+                                  prev.map((item) => (item.key === ac.key ? { ...item, email: val } : item))
+                                );
+                              }}
+                              placeholder="email@exemplo.com"
+                              className="w-full bg-white border border-brand-charcoal/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-lg px-3 py-2 text-xs text-brand-charcoal outline-none"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* CAMPO DE CUPOM OPCIONAL */}
               <div className="mt-6 pt-4 border-t border-brand-charcoal/10">

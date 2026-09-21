@@ -36,6 +36,24 @@ export default function ProductHighlights() {
           });
           setVagasMap(map);
         }
+
+        // Se houver query param ou hash apontando para um produto, rola até ele
+        setTimeout(() => {
+          if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const targetSlug = params.get("produto") || window.location.hash.replace("#produto-", "");
+            if (targetSlug) {
+              const el = document.getElementById(`produto-${targetSlug}`);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.classList.add("ring-4", "ring-brand-purple/40", "rounded-2xl", "transition-all");
+                setTimeout(() => {
+                  el.classList.remove("ring-4", "ring-brand-purple/40");
+                }, 3000);
+              }
+            }
+          }
+        }, 300);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
