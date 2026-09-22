@@ -151,6 +151,13 @@ export default function Header() {
     }
   };
 
+  const handleHomeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   // Header não aparece no admin
   if (pathname.startsWith("/admin")) return null;
 
@@ -171,6 +178,7 @@ export default function Header() {
           {/* Logo + Nome */}
           <Link
             href="/"
+            onClick={handleHomeClick}
             aria-label="INstituto Kalapa — voltar para a página inicial"
             className="group flex shrink-0 items-center gap-2.5 sm:gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
           >
@@ -193,19 +201,23 @@ export default function Header() {
 
           {/* Nav desktop */}
           <nav aria-label="Navegação principal" className="hidden lg:flex items-center gap-0.5 xl:gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1 shrink-0">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`whitespace-nowrap rounded-full px-2.5 xl:px-3.5 py-1.5 xl:py-2 text-xs xl:text-sm font-medium transition-[background-color,color] ${
-                  scrolled
-                    ? "text-brand-charcoal/70 hover:text-brand-purple hover:bg-brand-purple/5"
-                    : "text-white/75 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isHome = link.href === "/";
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={isHome ? handleHomeClick : undefined}
+                  className={`whitespace-nowrap rounded-full px-2.5 xl:px-3.5 py-1.5 xl:py-2 text-xs xl:text-sm font-medium transition-[background-color,color] ${
+                    scrolled
+                      ? "text-brand-charcoal/70 hover:text-brand-purple hover:bg-brand-purple/5"
+                      : "text-white/75 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Right side: Contatos + E-commerce Buttons (User & Cart) */}
@@ -299,16 +311,25 @@ export default function Header() {
       {menuOpen && (
         <div className="lg:hidden border-t border-brand-beige/80 bg-white/95 shadow-lg backdrop-blur-xl">
           <nav aria-label="Menu mobile" className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className="px-4 py-3 text-sm font-medium text-brand-charcoal/80 hover:text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isHome = link.href === "/";
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={(e) => {
+                    setMenuOpen(false);
+                    if (isHome && pathname === "/") {
+                      e.preventDefault();
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                  }}
+                  className="px-4 py-3 text-sm font-medium text-brand-charcoal/80 hover:text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors"
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             {usuario ? (
               <Link
                 href="/conta/pedidos"
