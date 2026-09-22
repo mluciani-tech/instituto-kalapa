@@ -38,16 +38,18 @@ const contatos = {
   erpLabel: "Sistema Espaço Serena (ERP)",
 };
 
-function ContactIcons() {
+function ContactIcons({ showAll = false }: { showAll?: boolean }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 xl:gap-2">
       <a
         href={contatos.erp}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={contatos.erpLabel}
         title={contatos.erpLabel}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta"
+        className={`${
+          showAll ? "flex" : "hidden xl:flex"
+        } h-9 w-9 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta`}
       >
         <LayoutGrid className="w-4 h-4" />
       </a>
@@ -57,7 +59,7 @@ function ContactIcons() {
         rel="noopener noreferrer"
         aria-label={`Instagram ${contatos.instagramLabel}`}
         title={`Instagram ${contatos.instagramLabel}`}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta"
+        className="flex h-9 w-9 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
           <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
@@ -69,7 +71,9 @@ function ContactIcons() {
         href={`mailto:${contatos.email}`}
         aria-label={`E-mail ${contatos.email}`}
         title={`E-mail ${contatos.email}`}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta"
+        className={`${
+          showAll ? "flex" : "hidden xl:flex"
+        } h-9 w-9 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta`}
       >
         <Mail className="w-4 h-4" />
       </a>
@@ -79,7 +83,7 @@ function ContactIcons() {
         rel="noopener noreferrer"
         aria-label={`WhatsApp ${contatos.whatsappLabel}`}
         title={`WhatsApp ${contatos.whatsappLabel}`}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta"
+        className="flex h-9 w-9 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta"
       >
         <MessageCircle className="w-4 h-4" />
       </a>
@@ -162,13 +166,13 @@ export default function Header() {
           : "border-b border-white/10 bg-brand-purple-deep/65 backdrop-blur-md"
       }`}
     >
-      <div className="max-w-6xl mx-auto px-4 md:px-6">
-        <div className="flex h-20 items-center justify-between gap-4 md:h-24">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="flex h-20 items-center justify-between gap-3 xl:gap-4 md:h-24">
           {/* Logo + Nome */}
           <Link
             href="/"
             aria-label="INstituto Kalapa — voltar para a página inicial"
-            className="group flex min-w-0 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
+            className="group flex shrink-0 items-center gap-2.5 sm:gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
           >
             <Image
               src="/logo-kalapa.png"
@@ -177,23 +181,23 @@ export default function Header() {
               height={72}
               className="h-12 w-12 shrink-0 rounded-xl border border-white/80 bg-white p-1 object-contain shadow-md transition-transform duration-300 group-hover:scale-[1.03] md:h-14 md:w-14"
             />
-            <div className="min-w-0 leading-tight">
-              <span className={`block truncate text-base font-semibold tracking-tight transition-colors md:text-lg ${textColor}`}>
+            <div className="shrink-0 leading-tight">
+              <span className={`block whitespace-nowrap text-base font-semibold tracking-tight transition-colors md:text-lg ${textColor}`}>
                 INstituto Kalapa
               </span>
-              <span className={`hidden truncate text-[11px] transition-colors md:block ${textMuted}`}>
+              <span className={`hidden whitespace-nowrap text-[11px] transition-colors xl:block ${textMuted}`}>
                 {contatos.endereco}
               </span>
             </div>
           </Link>
 
           {/* Nav desktop */}
-          <nav aria-label="Navegação principal" className="hidden lg:flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+          <nav aria-label="Navegação principal" className="hidden lg:flex items-center gap-0.5 xl:gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1 shrink-0">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-full px-3.5 py-2 text-sm font-medium transition-[background-color,color] ${
+                className={`whitespace-nowrap rounded-full px-2.5 xl:px-3.5 py-1.5 xl:py-2 text-xs xl:text-sm font-medium transition-[background-color,color] ${
                   scrolled
                     ? "text-brand-charcoal/70 hover:text-brand-purple hover:bg-brand-purple/5"
                     : "text-white/75 hover:bg-white/10 hover:text-white"
@@ -205,8 +209,8 @@ export default function Header() {
           </nav>
 
           {/* Right side: Contatos + E-commerce Buttons (User & Cart) */}
-          <div className="flex items-center gap-2.5">
-            <div className="hidden md:flex items-center">
+          <div className="flex items-center gap-2 xl:gap-2.5 shrink-0">
+            <div className="hidden md:flex items-center shrink-0">
               <ContactIcons />
             </div>
 
@@ -325,7 +329,7 @@ export default function Header() {
               </Link>
             )}
             <div className="mt-3 pt-3 border-t border-brand-beige flex items-center gap-4 px-3">
-              <ContactIcons />
+              <ContactIcons showAll />
               <span className="text-[11px] text-brand-charcoal/40 ml-auto">
                 {contatos.endereco}
               </span>

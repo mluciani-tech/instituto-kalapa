@@ -103,7 +103,7 @@ export default function ProductHighlights() {
                 <div className="flex-1 h-px bg-brand-charcoal/10" />
               </div>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
               {itens.map((produto, index) => (
                 <ProductCard
                   key={produto.id}

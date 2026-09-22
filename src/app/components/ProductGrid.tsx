@@ -124,7 +124,7 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start"
     >
       {produtos.map((produto, index) => (
         <ProductCard

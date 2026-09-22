@@ -87,9 +87,9 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
         delay: index * 0.1,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="h-full scroll-mt-28"
+      className="scroll-mt-28"
     >
-      <div className="group relative h-full overflow-hidden flex flex-col bg-white rounded-2xl border border-[#B8965A]/30 hover:border-[#B8965A]/80 shadow-[0_4px_20px_-4px_rgba(184,150,90,0.12)] hover:shadow-[0_8px_30px_-4px_rgba(184,150,90,0.22)] transition-all duration-300">
+      <div className="group relative overflow-hidden flex flex-col bg-white rounded-2xl border border-[#B8965A]/30 hover:border-[#B8965A]/80 shadow-[0_4px_20px_-4px_rgba(184,150,90,0.12)] hover:shadow-[0_8px_30px_-4px_rgba(184,150,90,0.22)] transition-all duration-300">
           {/* Imagem */}
           <div className="relative h-48 overflow-hidden">
             <Link href={`/produtos/${produto.id}`} className="block w-full h-full">
@@ -136,7 +136,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
           </div>
 
           {/* Conteúdo */}
-          <div className="flex flex-col flex-1 p-6">
+          <div className="flex flex-col p-6">
             <h3 className="text-xl font-bold text-brand-charcoal mb-2 font-sans">
               <Link
                 href={`/produtos/${produto.id}`}
@@ -151,7 +151,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
             )}
 
             {produto.descricao && (
-              <ul className="space-y-1 mb-4 flex-1">
+              <ul className="space-y-1 mb-4">
                 {produto.descricao.split("\n").filter((l) => l.trim()).map((linha) => (
                   <li key={linha} className="flex items-start gap-2 text-sm text-brand-charcoal/70">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta/50 mt-1.5 flex-shrink-0" />
@@ -204,7 +204,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
             )}
 
             {/* Preço + CTA */}
-            <div className="mt-auto pt-4 border-t border-brand-charcoal/10">
+            <div className="pt-4 border-t border-brand-charcoal/10">
               {!isGratuito && (
                 <div className="flex items-end gap-1 mb-3">
                   <span className="text-3xl font-bold text-brand-charcoal tabular-nums">
