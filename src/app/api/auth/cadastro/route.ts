@@ -126,6 +126,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Vincular retroativamente pedidos e inscrições anteriores deste e-mail que estavam sem usuario_id
+    try {
+      if (emailNorm !== "contato@institutokalapa.com.br") {
+        await supabaseAdmin!
+          .from("pedidos")
+          .update({ usuario_id: novoUsuario.id })
+          .ilike("cliente_email", emailNorm)
+          .is("usuario_id", null);
+
+        await supabaseAdmin!
+          .from("inscricoes")
+          .update({ usuario_id: novoUsuario.id })
+          .ilike("email", emailNorm)
+          .is("usuario_id", null);
+      }
+    } catch (linkErr) {
+      console.warn("[auth/cadastro] Erro ao vincular pedidos anteriores:", linkErr);
+    }
+
     // Gera token de sessão e seta cookie
     const token = createClienteSessionToken(novoUsuario.id, novoUsuario.email);
     const response = NextResponse.json({

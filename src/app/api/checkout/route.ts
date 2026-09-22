@@ -29,10 +29,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { produto_id, itens: cartItens, customer: customerBody, inscricao, cupom_codigo, beneficiarios } = body;
+    const { produto_id, itens: cartItens, inscricao, cupom_codigo, beneficiarios } = body;
 
-    // Verificar se o cliente está logado via cookie HttpOnly
+    // 0. Exigir autenticação obrigatória (Opção 1 — Somente usuários cadastrados concluem compra)
     const clienteLogado = await getClienteFromRequest(req);
+    if (!clienteLogado) {
+      return NextResponse.json(
+        { error: "É necessário entrar na sua conta ou cadastrar-se para concluir a compra." },
+        { status: 401 }
+      );
+    }
 
     // 1. Determinar lista de itens do pedido
     const itensProcessados: {
@@ -153,26 +159,21 @@ export async function POST(req: NextRequest) {
     const valorFinal = Math.max(0, subtotal - valorDesconto);
     const precoFinalCentavos = Math.round(valorFinal * 100);
 
-    // 5. Consolidar dados do cliente (prioriza conta do usuário autenticado)
-    let clienteNome = clienteLogado?.nome || customerBody?.name || inscricao?.nome || "Participante";
-    let clienteEmail = clienteLogado?.email || customerBody?.email || inscricao?.email || "N/A";
-    let clienteTelefone = clienteLogado?.telefone || customerBody?.phone_number || inscricao?.telefone || null;
-    let clienteCpf = clienteLogado?.cpf || customerBody?.document || customerBody?.cpf || null;
+    // 5. Consolidar dados do cliente a partir do usuário autenticado (garante integridade total)
+    const clienteNome = clienteLogado.nome.trim();
+    const clienteEmail = clienteLogado.email.trim().toLowerCase();
+    const clienteTelefone = clienteLogado.telefone?.trim() || null;
+    const clienteCpf = clienteLogado.cpf?.replace(/\D/g, "") || null;
 
-    let enderecoEntrega: EnderecoEntrega | null = null;
-    if (clienteLogado) {
-      enderecoEntrega = {
-        cep: clienteLogado.cep,
-        rua: clienteLogado.rua,
-        numero: clienteLogado.numero,
-        complemento: clienteLogado.complemento,
-        bairro: clienteLogado.bairro,
-        cidade: clienteLogado.cidade,
-        uf: clienteLogado.uf,
-      };
-    } else if (customerBody?.address) {
-      enderecoEntrega = customerBody.address;
-    }
+    const enderecoEntrega: EnderecoEntrega = {
+      cep: clienteLogado.cep,
+      rua: clienteLogado.rua,
+      numero: clienteLogado.numero,
+      complemento: clienteLogado.complemento || null,
+      bairro: clienteLogado.bairro,
+      cidade: clienteLogado.cidade,
+      uf: clienteLogado.uf,
+    };
 
     const orderNsu = `kalapa-${crypto.randomUUID()}`;
     const turmaAtual = await getTurmaAtual();
@@ -185,13 +186,13 @@ export async function POST(req: NextRequest) {
       imagem_url: item.imagem_url || null,
     }));
 
-    // 6. Criar pedido no banco
+    // 6. Criar pedido no banco com usuario_id garantido
     const { data: pedido, error: pedidoError } = await supabaseAdmin!
       .from("pedidos")
       .insert({
         order_nsu: orderNsu,
         produto_id: itensProcessados[0]?.produto_id || null,
-        usuario_id: clienteLogado?.id || null,
+        usuario_id: clienteLogado.id,
         cliente_nome: clienteNome,
         cliente_email: clienteEmail,
         cliente_telefone: clienteTelefone,
@@ -222,9 +223,11 @@ export async function POST(req: NextRequest) {
         turma_id: turmaAtual,
         order_nsu: orderNsu,
         pedido_id: pedido.id,
+        usuario_id: clienteLogado.id,
         nome: clienteNome,
         email: clienteEmail,
         telefone: clienteTelefone || "Não informado",
+        cpf: clienteCpf,
         motivacao: inscricao?.motivacao || "Compra via E-commerce",
         metodo_pagamento: inscricao?.metodoPagamento || "infinitepay",
         valor: valorFinal,

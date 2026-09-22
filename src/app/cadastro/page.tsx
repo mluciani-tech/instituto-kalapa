@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, AlertCircle, CheckCircle2, User, MapPin } from "lucide-react";
@@ -62,6 +62,15 @@ export default function CadastroPage() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState(false);
+  const [redirectPath, setRedirectPath] = useState("/conta/pedidos");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const r = searchParams.get("redirect");
+      if (r) setRedirectPath(r);
+    }
+  }, []);
 
   const handleCepBlur = async () => {
     const rawCep = form.cep.replace(/\D/g, "");
@@ -125,8 +134,8 @@ export default function CadastroPage() {
 
       setSucesso(true);
       setTimeout(() => {
-        router.push("/conta/pedidos");
-      }, 1500);
+        router.push(redirectPath);
+      }, 1200);
     } catch {
       setErro("Falha de conexão com o servidor.");
       setLoading(false);
@@ -143,7 +152,7 @@ export default function CadastroPage() {
         <div className="w-full max-w-2xl">
           {/* Voltar */}
           <Link
-            href="/login"
+            href={redirectPath && redirectPath !== "/conta/pedidos" ? `/login?redirect=${encodeURIComponent(redirectPath)}` : "/login"}
             className="inline-flex items-center gap-2 text-xs font-medium text-white/50 hover:text-white transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -410,7 +419,7 @@ export default function CadastroPage() {
               <p className="text-xs text-white/60">
                 Já possui uma conta?{" "}
                 <Link
-                  href="/login"
+                  href={redirectPath && redirectPath !== "/conta/pedidos" ? `/login?redirect=${encodeURIComponent(redirectPath)}` : "/login"}
                   className="text-brand-terracotta hover:underline font-semibold transition-colors"
                 >
                   Faça login

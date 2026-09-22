@@ -44,10 +44,17 @@ export async function GET(req: NextRequest) {
     // Buscar pedidos e produtos comprados por cada usuário (por usuario_id ou por e-mail)
     const usuariosComContagem = await Promise.all(
       (usuarios || []).map(async (u) => {
-        const { data: pedidosUsuario } = await supabaseAdmin!
+        let queryPedidos = supabaseAdmin!
           .from("pedidos")
-          .select("id, status, valor, itens, produtos(nome)")
-          .or(`usuario_id.eq.${u.id},cliente_email.eq.${u.email}`);
+          .select("id, status, valor, itens, produtos(nome)");
+
+        if (u.email.toLowerCase() === "contato@institutokalapa.com.br") {
+          queryPedidos = queryPedidos.eq("usuario_id", u.id);
+        } else {
+          queryPedidos = queryPedidos.or(`usuario_id.eq.${u.id},cliente_email.ilike.${u.email}`);
+        }
+
+        const { data: pedidosUsuario } = await queryPedidos;
 
         const produtosMap = new Map<string, number>();
         let totalPedidos = 0;

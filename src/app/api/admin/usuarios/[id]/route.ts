@@ -30,11 +30,17 @@ export async function GET(
   }
 
   // Buscar pedidos do usuário (por usuario_id ou pelo e-mail cadastrado)
-  const { data: pedidos } = await supabaseAdmin!
+  let queryPedidos = supabaseAdmin!
     .from("pedidos")
-    .select("id, order_nsu, valor, status, metodo_pagamento, itens, created_at, receipt_url, produtos(nome)")
-    .or(`usuario_id.eq.${id},cliente_email.eq.${usuario.email}`)
-    .order("created_at", { ascending: false });
+    .select("id, order_nsu, valor, status, metodo_pagamento, itens, created_at, receipt_url, produtos(nome)");
+
+  if (usuario.email.toLowerCase() === "contato@institutokalapa.com.br") {
+    queryPedidos = queryPedidos.eq("usuario_id", id);
+  } else {
+    queryPedidos = queryPedidos.or(`usuario_id.eq.${id},cliente_email.ilike.${usuario.email}`);
+  }
+
+  const { data: pedidos } = await queryPedidos.order("created_at", { ascending: false });
 
   // Consolidar produtos comprados
   const produtosMap = new Map<string, number>();

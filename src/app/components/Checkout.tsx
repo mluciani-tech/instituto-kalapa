@@ -48,13 +48,6 @@ export default function Checkout() {
   // Formulário para acompanhantes / participantes extras quando quantidade >= 2
   const [acompanhantes, setAcompanhantes] = useState<AcompanhanteItem[]>([]);
 
-  // Formulário para visitante (se não estiver logado)
-  const [guestForm, setGuestForm] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-  });
-
   // Cupom de desconto opcional
   const [cupomInput, setCupomInput] = useState("");
   const [validandoCupom, setValidandoCupom] = useState(false);
@@ -186,14 +179,8 @@ export default function Checkout() {
     }
 
     if (!usuario) {
-      if (!guestForm.nome.trim()) {
-        setErro("Informe seu nome ou faça login para continuar.");
-        return;
-      }
-      if (guestForm.telefone.replace(/\D/g, "").length < 10) {
-        setErro("Informe um telefone com DDD válido.");
-        return;
-      }
+      setErro("Para sua segurança e emissão dos ingressos, faça login ou cadastre-se para continuar.");
+      return;
     }
 
     // Validar dados dos acompanhantes quando há mais de 1 vaga
@@ -237,14 +224,6 @@ export default function Checkout() {
           email: ac.email.trim(),
           telefone: ac.telefone.trim(),
         }));
-      }
-
-      if (!usuario) {
-        bodyPayload.customer = {
-          name: guestForm.nome.trim(),
-          email: guestForm.email.trim() || "contato@institutokalapa.com.br",
-          phone_number: guestForm.telefone.trim(),
-        };
       }
 
       const checkoutRes = await fetch("/api/checkout", {
@@ -569,9 +548,14 @@ export default function Checkout() {
               {usuario ? (
                 <div className="space-y-3">
                   <div className="p-4 bg-brand-offwhite border border-brand-terracotta/30 rounded-xl">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-brand-terracotta mb-2">
-                      <User className="w-4 h-4" />
-                      Conta Conectada
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-brand-terracotta">
+                        <User className="w-4 h-4" />
+                        Conta Conectada
+                      </div>
+                      <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
+                        Autenticado
+                      </span>
                     </div>
                     <p className="text-sm font-bold text-brand-charcoal">{usuario.nome}</p>
                     <p className="text-xs text-brand-charcoal/70">{usuario.email}</p>
@@ -582,7 +566,7 @@ export default function Checkout() {
                   <div className="p-4 bg-brand-offwhite border border-brand-charcoal/10 rounded-xl">
                     <div className="flex items-center gap-2 text-xs font-semibold text-brand-charcoal/80 mb-2">
                       <MapPin className="w-4 h-4 text-brand-terracotta" />
-                      Endereço
+                      Endereço de Cadastro
                     </div>
                     <p className="text-xs text-brand-charcoal/90">
                       {usuario.rua}, {usuario.numero} {usuario.complemento ? `(${usuario.complemento})` : ""}
@@ -593,67 +577,56 @@ export default function Checkout() {
                     <p className="text-xs text-brand-charcoal/45 font-mono">CEP: {usuario.cep}</p>
                   </div>
 
-                  <p className="text-[11px] text-brand-mint-dark flex items-center gap-1.5 pt-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-brand-mint" />
-                    Seus dados serão repassados com segurança à InfinitePay.
-                  </p>
+                  <div className="p-3 bg-brand-mint/10 border border-brand-mint/20 rounded-xl text-[11px] text-brand-mint-dark flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-brand-mint mt-0.5" />
+                    <span>
+                      Zero retrabalho: Seus dados estão salvos e serão preenchidos de forma automática na InfinitePay.
+                    </span>
+                  </div>
                 </div>
               ) : (
-                /* SE VISITANTE NÃO LOGADO: CONVITE DE LOGIN OU DADOS RÁPIDOS */
+                /* SE VISITANTE NÃO LOGADO: IDENTIFICAÇÃO OBRIGATÓRIA */
                 <div className="space-y-4">
-                  <div className="p-3.5 bg-brand-purple/5 border border-brand-purple/15 rounded-xl text-center">
-                    <p className="text-xs text-brand-charcoal/80 font-medium mb-2">
-                      Já é cliente cadastrado?
-                    </p>
-                    <Link
-                      href="/login?redirect=/checkout"
-                      className="inline-flex items-center justify-center gap-2 w-full py-2 bg-brand-purple/10 hover:bg-brand-purple/20 border border-brand-purple/25 text-brand-purple text-xs font-semibold rounded-xl transition-colors"
-                    >
-                      <LogIn className="w-3.5 h-3.5" />
-                      Entrar para finalizar em 1 clique
-                    </Link>
-                  </div>
-
-                  <div className="relative text-center my-2">
-                    <span className="text-[10px] uppercase tracking-wider text-brand-charcoal/50 bg-white px-2 relative z-10">
-                      Ou preencha para continuar
+                  <div className="p-5 bg-brand-purple/5 border border-brand-purple/20 rounded-2xl text-center space-y-3">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple text-xs font-semibold">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      Identificação Obrigatória
                     </span>
-                    <div className="absolute inset-x-0 top-2 border-t border-brand-charcoal/10" />
+                    <h3 className="text-sm font-bold text-brand-charcoal">
+                      Conecte-se para finalizar sua compra
+                    </h3>
+                    <p className="text-xs text-brand-charcoal/70 leading-relaxed">
+                      Para emitir seus ingressos com segurança e vincular suas vivências ao seu perfil, é necessário entrar na sua conta ou criar um cadastro rápido.
+                    </p>
+
+                    <div className="space-y-2 pt-2">
+                      <Link
+                        href="/login?redirect=/checkout"
+                        className="inline-flex items-center justify-center gap-2 w-full py-3 bg-brand-purple hover:bg-brand-purple-dark text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-brand-purple/20 cursor-pointer"
+                      >
+                        <LogIn className="w-4 h-4" />
+                        Já tenho conta — Fazer Login
+                      </Link>
+
+                      <Link
+                        href="/cadastro?redirect=/checkout"
+                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-brand-purple/30 hover:border-brand-purple text-brand-purple text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                      >
+                        <User className="w-4 h-4" />
+                        Criar cadastro novo (1 minuto)
+                      </Link>
+                    </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-xs font-medium text-brand-charcoal/80 block mb-1">Nome completo *</label>
-                      <input
-                        type="text"
-                        required
-                        value={guestForm.nome}
-                        onChange={(e) => setGuestForm({ ...guestForm, nome: e.target.value })}
-                        placeholder="Seu nome"
-                        className="w-full bg-brand-offwhite border border-brand-charcoal/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-3.5 py-2.5 text-xs text-brand-charcoal outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-brand-charcoal/80 block mb-1">Telefone / WhatsApp *</label>
-                      <input
-                        type="tel"
-                        required
-                        value={guestForm.telefone}
-                        onChange={(e) => setGuestForm({ ...guestForm, telefone: e.target.value })}
-                        placeholder="(11) 99999-9999"
-                        className="w-full bg-brand-offwhite border border-brand-charcoal/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-3.5 py-2.5 text-xs text-brand-charcoal outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-brand-charcoal/80 block mb-1">E-mail</label>
-                      <input
-                        type="email"
-                        value={guestForm.email}
-                        onChange={(e) => setGuestForm({ ...guestForm, email: e.target.value })}
-                        placeholder="seu@email.com"
-                        className="w-full bg-brand-offwhite border border-brand-charcoal/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-3.5 py-2.5 text-xs text-brand-charcoal outline-none"
-                      />
-                    </div>
+                  <div className="p-3 bg-brand-offwhite rounded-xl border border-brand-charcoal/10 space-y-1.5 text-[11px] text-brand-charcoal/65">
+                    <p className="flex items-center gap-1.5 font-medium text-brand-charcoal/80">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-brand-terracotta shrink-0" />
+                      Seus itens continuam salvos no carrinho
+                    </p>
+                    <p className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-brand-mint shrink-0" />
+                      Cadastre uma única vez e nunca mais redigite seus dados
+                    </p>
                   </div>
                 </div>
               )}
@@ -666,23 +639,33 @@ export default function Checkout() {
                 </div>
               )}
 
-              <button
-                onClick={handleFinalizarPagamento}
-                disabled={processando}
-                className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark disabled:opacity-50 text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-brand-terracotta/25 cursor-pointer flex items-center justify-center gap-2"
-              >
-                {processando ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Gerando pagamento InfinitePay...
-                  </>
-                ) : (
-                  <>
-                    Pagar R$ {totalFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    <ExternalLink className="w-4 h-4" />
-                  </>
-                )}
-              </button>
+              {usuario ? (
+                <button
+                  onClick={handleFinalizarPagamento}
+                  disabled={processando}
+                  className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark disabled:opacity-50 text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-brand-terracotta/25 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {processando ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Gerando pagamento InfinitePay...
+                    </>
+                  ) : (
+                    <>
+                      Pagar R$ {totalFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      <ExternalLink className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              ) : (
+                <Link
+                  href="/login?redirect=/checkout"
+                  className="w-full py-4 bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-brand-purple/25 cursor-pointer flex items-center justify-center gap-2 text-center"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Entrar para Pagar R$ {totalFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </Link>
+              )}
 
               <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-brand-charcoal/60 text-center">
                 <ShieldCheck className="w-4 h-4 text-brand-mint" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, ArrowLeft, Loader2, AlertCircle, CheckCircle2, ShieldCheck } from "lucide-react";
@@ -12,6 +12,15 @@ export default function LoginPage() {
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
+  const [redirectPath, setRedirectPath] = useState("/conta/pedidos");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const r = searchParams.get("redirect");
+      if (r) setRedirectPath(r);
+    }
+  }, []);
 
   // Modal Esqueci minha senha
   const [modalEsqueci, setModalEsqueci] = useState(false);
@@ -40,10 +49,8 @@ export default function LoginPage() {
         return;
       }
 
-      // Redireciona para o checkout se veio de lá, ou para a conta
-      const searchParams = new URLSearchParams(window.location.search);
-      const redirect = searchParams.get("redirect") || "/conta/pedidos";
-      router.push(redirect);
+      // Redireciona para o destino (ex: /checkout) ou para a conta
+      router.push(redirectPath);
       router.refresh();
     } catch {
       setErro("Erro ao tentar conectar. Tente novamente.");
@@ -183,7 +190,7 @@ export default function LoginPage() {
               <p className="text-xs text-white/60">
                 Ainda não tem conta?{" "}
                 <Link
-                  href="/cadastro"
+                  href={redirectPath && redirectPath !== "/conta/pedidos" ? `/cadastro?redirect=${encodeURIComponent(redirectPath)}` : "/cadastro"}
                   className="text-brand-terracotta hover:underline font-semibold transition-colors"
                 >
                   Cadastre-se
