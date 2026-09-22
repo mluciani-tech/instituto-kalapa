@@ -117,6 +117,8 @@ export default function AdminPage() {
   const [faqItens, setFaqItens] = useState<{ pergunta: string; resposta: string }[]>([]);
   const [fotoFacilitadoraFile, setFotoFacilitadoraFile] = useState<File | null>(null);
   const [uploadingFotoFacilitadora, setUploadingFotoFacilitadora] = useState(false);
+  const [uploadingFotosEspaco, setUploadingFotosEspaco] = useState(false);
+  const [novaFotoEspacoUrl, setNovaFotoEspacoUrl] = useState("");
   const [salvandoSobre, setSalvandoSobre] = useState(false);
   const [sobreSucesso, setSobreSucesso] = useState("");
 
@@ -791,6 +793,60 @@ export default function AdminPage() {
     }
   };
 
+  const handleUploadFotosEspaco = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+    setUploadingFotosEspaco(true);
+    setError("");
+
+    const fileArray = Array.from(files);
+    const novasUrls: string[] = [];
+
+    try {
+      for (const file of fileArray) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.url) {
+            novasUrls.push(json.url);
+          }
+        } else {
+          const json = await res.json();
+          throw new Error(json.error || `Erro ao enviar ${file.name}`);
+        }
+      }
+
+      if (novasUrls.length > 0) {
+        setEspacoFotos((prev) => [...prev, ...novasUrls]);
+        setSobreSucesso(
+          novasUrls.length === 1
+            ? "Foto do espaço enviada com sucesso!"
+            : `${novasUrls.length} fotos do espaço enviadas com sucesso!`
+        );
+        setTimeout(() => setSobreSucesso(""), 4000);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erro ao enviar fotos do espaço";
+      setError(msg);
+    } finally {
+      setUploadingFotosEspaco(false);
+    }
+  };
+
+  const handleRemoverFotoEspaco = (indexToRemove: number) => {
+    setEspacoFotos((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleAdicionarFotoEspacoUrl = () => {
+    if (!novaFotoEspacoUrl.trim()) return;
+    setEspacoFotos((prev) => [...prev, novaFotoEspacoUrl.trim()]);
+    setNovaFotoEspacoUrl("");
+  };
+
   const handleSalvarSobre = async (e: React.FormEvent) => {
     e.preventDefault();
     setSalvandoSobre(true);
@@ -1141,22 +1197,107 @@ export default function AdminPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-brand-charcoal/80 uppercase tracking-wider mb-1.5">
-                      Fotos do Espaço (URLs separadas por vírgula)
+                    <label className="block text-xs font-semibold text-brand-charcoal/80 uppercase tracking-wider mb-2">
+                      Fotos do Espaço ({espacoFotos.length})
                     </label>
-                    <input
-                      type="text"
-                      value={espacoFotos.join(", ")}
-                      onChange={(e) =>
-                        setEspacoFotos(
-                          e.target.value
-                            .split(",")
-                            .map((s) => s.trim())
-                            .filter(Boolean)
-                        )
-                      }
-                      className="w-full px-3.5 py-2.5 border border-brand-beige rounded-lg text-xs focus-visible:ring-2 focus-visible:ring-brand-purple/30 text-brand-charcoal"
-                    />
+
+                    {/* Grade de Miniaturas com botão de remover */}
+                    {espacoFotos.length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-3">
+                        {espacoFotos.map((fotoUrl, idx) => (
+                          <div
+                            key={`${fotoUrl}-${idx}`}
+                            className="group relative aspect-video rounded-lg overflow-hidden border border-brand-beige bg-brand-beige-light/30 shadow-xs"
+                          >
+                            <img
+                              src={fotoUrl}
+                              alt={`Espaço ${idx + 1}`}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoverFotoEspaco(idx)}
+                              className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-red-600 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 cursor-pointer shadow-xs"
+                              title="Remover foto"
+                              aria-label={`Remover foto ${idx + 1}`}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                              </svg>
+                            </button>
+                            <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/50 text-[10px] text-white rounded font-mono">
+                              #{idx + 1}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Botão de upload no mesmo padrão do produto */}
+                    <div className="space-y-2">
+                      <label
+                        className={`flex items-center justify-center gap-2 px-4 py-4 border-2 border-dashed rounded-lg transition-colors cursor-pointer ${
+                          uploadingFotosEspaco
+                            ? "border-brand-purple/50 bg-brand-purple/5 cursor-not-allowed"
+                            : "border-brand-beige hover:border-brand-purple/50 hover:bg-brand-purple/5"
+                        }`}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          disabled={uploadingFotosEspaco}
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              void handleUploadFotosEspaco(e.target.files);
+                              e.target.value = "";
+                            }
+                          }}
+                        />
+                        {uploadingFotosEspaco ? (
+                          <div className="flex items-center gap-2 text-sm text-brand-purple">
+                            <div className="w-4 h-4 border-2 border-brand-purple border-t-transparent rounded-full animate-spin" />
+                            <span>Enviando fotos para o servidor...</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col sm:flex-row items-center gap-2 text-sm text-brand-charcoal/60 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-brand-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="font-medium text-brand-purple">Clique para selecionar foto(s)</span>
+                            <span className="text-xs text-brand-charcoal/40 hidden sm:inline">(seleção múltipla permitida)</span>
+                          </div>
+                        )}
+                      </label>
+                      <p className="text-xs text-brand-charcoal/40">JPEG, PNG, WebP ou GIF. Máximo 5MB por foto.</p>
+
+                      {/* Opção secundária: Adicionar por URL */}
+                      <div className="pt-2 flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={novaFotoEspacoUrl}
+                          onChange={(e) => setNovaFotoEspacoUrl(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAdicionarFotoEspacoUrl();
+                            }
+                          }}
+                          placeholder="Ou cole uma URL / caminho de imagem (ex: /foto7.jpg)"
+                          className="flex-1 text-xs px-3 py-2 border border-brand-beige rounded-lg focus-visible:ring-2 focus-visible:ring-brand-purple/30 text-brand-charcoal"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAdicionarFotoEspacoUrl}
+                          disabled={!novaFotoEspacoUrl.trim()}
+                          className="px-3 py-2 text-xs font-medium text-brand-purple bg-brand-purple/10 hover:bg-brand-purple/20 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+                        >
+                          + Adicionar URL
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

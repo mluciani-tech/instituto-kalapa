@@ -23,6 +23,7 @@ const navLinks = [
   { href: "/#sobre", label: "A Facilitadora" },
   { href: "/produtos?categoria=vivencias", label: "Vivências" },
   { href: "/produtos?categoria=atendimentos", label: "Atendimentos" },
+  { href: "/produtos/empreendedorismo", label: "Empreendedorismo" },
   { href: "/produtos?categoria=calendario", label: "Calendário" },
 ];
 
