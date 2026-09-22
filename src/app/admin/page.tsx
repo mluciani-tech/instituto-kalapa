@@ -148,6 +148,8 @@ export default function AdminPage() {
   const [produtoSucesso, setProdutoSucesso] = useState("");
   const [ajustandoContador, setAjustandoContador] = useState<{ produto: Produto; valor: string } | null>(null);
   const [salvandoContador, setSalvandoContador] = useState(false);
+  const [produtosStatusFiltro, setProdutosStatusFiltro] = useState<"todos" | "ativos" | "inativos">("todos");
+  const [produtosSearch, setProdutosSearch] = useState("");
 
   // Pedidos
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -155,6 +157,8 @@ export default function AdminPage() {
   const [pedidosTotalPages, setPedidosTotalPages] = useState(1);
   const [pedidosTotal, setPedidosTotal] = useState(0);
   const [pedidosSearch, setPedidosSearch] = useState("");
+  const [pedidosProdutoStatusFiltro, setPedidosProdutoStatusFiltro] = useState<"todos" | "ativos" | "inativos">("todos");
+  const [pedidosProdutoFiltro, setPedidosProdutoFiltro] = useState("");
   const [pedidosSort, setPedidosSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "created_at", dir: "desc" });
   const [pedidoExpandidoId, setPedidoExpandidoId] = useState<string | null>(null);
 
@@ -164,6 +168,7 @@ export default function AdminPage() {
   const [participantesTotalPages, setParticipantesTotalPages] = useState(1);
   const [participantesTotal, setParticipantesTotal] = useState(0);
   const [participantesSearch, setParticipantesSearch] = useState("");
+  const [participantesProdutoStatusFiltro, setParticipantesProdutoStatusFiltro] = useState<"todos" | "ativos" | "inativos">("todos");
   const [participantesProdutoFiltro, setParticipantesProdutoFiltro] = useState("");
   const [participantesSort, setParticipantesSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "created_at", dir: "desc" });
   const [showConfirm, setShowConfirm] = useState(false);
@@ -281,65 +286,94 @@ export default function AdminPage() {
     if (res.ok) setProdutos(await res.json());
   };
 
-  const fetchPedidos = useCallback(async (page = pedidosPage) => {
-    const params = new URLSearchParams({ page: page.toString(), perPage: "20" });
-    if (pedidosSearch) params.set("search", pedidosSearch);
-    if (pedidosSort) {
-      params.set("sort", pedidosSort.key);
-      params.set("dir", pedidosSort.dir);
-    }
-    const res = await fetch(`/api/admin/pedidos?${params.toString()}`);
-    if (res.ok) {
-      const json: Paginated<Pedido> = await res.json();
-      setPedidos(json.data);
-      setPedidosPage(json.page);
-      setPedidosTotalPages(json.totalPages);
-      setPedidosTotal(json.total);
-    }
-  }, [pedidosPage, pedidosSearch, pedidosSort]);
+  const fetchPedidos = useCallback(
+    async (
+      page = pedidosPage,
+      prodStatus = pedidosProdutoStatusFiltro,
+      prodId = pedidosProdutoFiltro
+    ) => {
+      const params = new URLSearchParams({ page: page.toString(), perPage: "20" });
+      if (pedidosSearch) params.set("search", pedidosSearch);
+      if (pedidosSort) {
+        params.set("sort", pedidosSort.key);
+        params.set("dir", pedidosSort.dir);
+      }
+      if (prodStatus && prodStatus !== "todos") {
+        params.set("produtoStatus", prodStatus);
+      }
+      if (prodId && prodId !== "todos") {
+        params.set("produtoId", prodId);
+      }
+      const res = await fetch(`/api/admin/pedidos?${params.toString()}`);
+      if (res.ok) {
+        const json: Paginated<Pedido> = await res.json();
+        setPedidos(json.data);
+        setPedidosPage(json.page);
+        setPedidosTotalPages(json.totalPages);
+        setPedidosTotal(json.total);
+      }
+    },
+    [pedidosPage, pedidosSearch, pedidosSort, pedidosProdutoStatusFiltro, pedidosProdutoFiltro]
+  );
 
-  const fetchParticipantes = useCallback(async (page = participantesPage, prodFiltro = participantesProdutoFiltro) => {
-    const params = new URLSearchParams({ page: page.toString(), perPage: "20" });
-    if (participantesSearch) params.set("search", participantesSearch);
-    if (participantesSort) {
-      params.set("sort", participantesSort.key);
-      params.set("dir", participantesSort.dir);
-    }
-    if (prodFiltro) {
-      params.set("produtoId", prodFiltro);
-    }
-    const res = await fetch(`/api/admin/participantes?${params.toString()}`);
-    if (res.ok) {
-      const json: Paginated<Participante> = await res.json();
-      setParticipantes(json.data);
-      setParticipantesPage(json.page);
-      setParticipantesTotalPages(json.totalPages);
-      setParticipantesTotal(json.total);
-    }
-  }, [participantesPage, participantesSearch, participantesSort, participantesProdutoFiltro]);
-
-  const carregarRelatorio = useCallback(async (prodId: string, apenasPagos: boolean) => {
-    setRelatorioCarregando(true);
-    try {
-      const params = new URLSearchParams({
-        all: "true",
-        sort: "nome",
-        dir: "asc",
-      });
-      if (prodId) params.set("produtoId", prodId);
-      if (apenasPagos) params.set("status", "confirmados");
-
+  const fetchParticipantes = useCallback(
+    async (
+      page = participantesPage,
+      prodFiltro = participantesProdutoFiltro,
+      prodStatus = participantesProdutoStatusFiltro
+    ) => {
+      const params = new URLSearchParams({ page: page.toString(), perPage: "20" });
+      if (participantesSearch) params.set("search", participantesSearch);
+      if (participantesSort) {
+        params.set("sort", participantesSort.key);
+        params.set("dir", participantesSort.dir);
+      }
+      if (prodFiltro && prodFiltro !== "todos") {
+        params.set("produtoId", prodFiltro);
+      }
+      if (prodStatus && prodStatus !== "todos") {
+        params.set("produtoStatus", prodStatus);
+      }
       const res = await fetch(`/api/admin/participantes?${params.toString()}`);
       if (res.ok) {
-        const json = await res.json();
-        setRelatorioParticipantes(json.data || []);
+        const json: Paginated<Participante> = await res.json();
+        setParticipantes(json.data);
+        setParticipantesPage(json.page);
+        setParticipantesTotalPages(json.totalPages);
+        setParticipantesTotal(json.total);
       }
-    } catch (err) {
-      console.error("Erro ao carregar dados do relatório:", err);
-    } finally {
-      setRelatorioCarregando(false);
-    }
-  }, []);
+    },
+    [participantesPage, participantesSearch, participantesSort, participantesProdutoFiltro, participantesProdutoStatusFiltro]
+  );
+
+  const carregarRelatorio = useCallback(
+    async (prodId: string, apenasPagos: boolean) => {
+      setRelatorioCarregando(true);
+      try {
+        const params = new URLSearchParams({
+          all: "true",
+          sort: "nome",
+          dir: "asc",
+        });
+        if (prodId && prodId !== "todos") params.set("produtoId", prodId);
+        if (apenasPagos) params.set("status", "confirmados");
+        if (participantesProdutoStatusFiltro && participantesProdutoStatusFiltro !== "todos") {
+          params.set("produtoStatus", participantesProdutoStatusFiltro);
+        }
+
+        const res = await fetch(`/api/admin/participantes?${params.toString()}`);
+        if (res.ok) {
+          const json = await res.json();
+          setRelatorioParticipantes(json.data || []);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados do relatório:", err);
+      } finally {
+        setRelatorioCarregando(false);
+      }
+    },
+    [participantesProdutoStatusFiltro]
+  );
 
   const handleAbrirRelatorio = () => {
     const prodIdInicial = participantesProdutoFiltro || (produtos.length > 0 ? produtos[0].id : "");
@@ -948,12 +982,38 @@ export default function AdminPage() {
     );
   }
 
+  // Listas filtradas e derivadas
+  const produtosFiltrados = produtos.filter((p) => {
+    if (produtosStatusFiltro === "ativos" && !p.ativo) return false;
+    if (produtosStatusFiltro === "inativos" && p.ativo) return false;
+    if (produtosSearch.trim()) {
+      const q = produtosSearch.trim().toLowerCase();
+      const matchNome = (p.nome || "").toLowerCase().includes(q);
+      const matchSlug = (p.slug || "").toLowerCase().includes(q);
+      const matchCat = (p.categoria || "").toLowerCase().includes(q);
+      if (!matchNome && !matchSlug && !matchCat) return false;
+    }
+    return true;
+  });
+
+  const produtosParaPedidos = produtos.filter((p) => {
+    if (pedidosProdutoStatusFiltro === "ativos") return p.ativo;
+    if (pedidosProdutoStatusFiltro === "inativos") return !p.ativo;
+    return true;
+  });
+
+  const produtosParaInscricoes = produtos.filter((p) => {
+    if (participantesProdutoStatusFiltro === "ativos") return p.ativo;
+    if (participantesProdutoStatusFiltro === "inativos") return !p.ativo;
+    return true;
+  });
+
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "config", label: "Configurações" },
     { id: "sobre", label: "Sobre & FAQ" },
     { id: "produtos", label: "Produtos", count: produtos.length },
-    { id: "pedidos", label: "Pedidos", count: pedidos.length },
-    { id: "participantes", label: "Inscrições", count: participantes.length },
+    { id: "pedidos", label: "Pedidos", count: pedidosTotal || pedidos.length },
+    { id: "participantes", label: "Inscrições", count: participantesTotal || participantes.length },
     { id: "cupons", label: "Cupons", count: cupons.length },
     { id: "usuarios", label: "Usuários", count: usuariosTotal },
   ];
@@ -1409,14 +1469,47 @@ export default function AdminPage() {
         {/* Tab: Produtos */}
         {activeTab === "produtos" && (
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-brand-charcoal">Produtos</h2>
-              <button
-                onClick={() => { resetProdutoForm(); setShowProdutoForm(true); }}
-                className="px-4 py-2 bg-brand-purple text-white text-sm font-medium rounded-lg hover:bg-brand-purple-dark transition-colors"
-              >
-                + Novo Produto
-              </button>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-base font-semibold text-brand-charcoal">Produtos</h2>
+                <span className="text-xs bg-brand-beige px-2 py-0.5 rounded-full text-brand-charcoal/70">
+                  {produtosFiltrados.length === produtos.length
+                    ? `${produtos.length} ${produtos.length === 1 ? "produto" : "produtos"}`
+                    : `Exibindo ${produtosFiltrados.length} de ${produtos.length}`}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Filtro Status do Produto */}
+                <select
+                  value={produtosStatusFiltro}
+                  onChange={(e) => setProdutosStatusFiltro(e.target.value as "todos" | "ativos" | "inativos")}
+                  className="px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                  aria-label="Filtrar status dos produtos"
+                >
+                  <option value="todos">Status: Todos</option>
+                  <option value="ativos">Produtos Ativos</option>
+                  <option value="inativos">Produtos Inativos</option>
+                </select>
+
+                {/* Campo de Busca */}
+                <div className="w-full sm:w-56">
+                  <input
+                    type="search"
+                    placeholder="Buscar por nome, slug…"
+                    value={produtosSearch}
+                    onChange={(e) => setProdutosSearch(e.target.value)}
+                    className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                    aria-label="Buscar produtos"
+                  />
+                </div>
+
+                <button
+                  onClick={() => { resetProdutoForm(); setShowProdutoForm(true); }}
+                  className="px-4 py-2 bg-brand-purple text-white text-sm font-medium rounded-lg hover:bg-brand-purple-dark transition-colors whitespace-nowrap"
+                >
+                  + Novo Produto
+                </button>
+              </div>
             </div>
 
             {produtoSucesso && (
@@ -1626,9 +1719,13 @@ export default function AdminPage() {
               <div className="bg-white rounded-xl border border-brand-beige p-8 text-center text-brand-charcoal/40 text-sm">
                 Nenhum produto cadastrado.
               </div>
+            ) : produtosFiltrados.length === 0 ? (
+              <div className="bg-white rounded-xl border border-brand-beige p-8 text-center text-brand-charcoal/40 text-sm">
+                Nenhum produto encontrado com os filtros aplicados.
+              </div>
             ) : (
               <div className="space-y-3">
-                {produtos.map((p) => (
+                {produtosFiltrados.map((p) => (
                   <div key={p.id} className="bg-white rounded-xl border border-brand-beige p-4 flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -1695,17 +1792,71 @@ export default function AdminPage() {
         {/* Tab: Pedidos */}
         {activeTab === "pedidos" && (
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-brand-charcoal">Pedidos</h2>
-              <div className="w-full sm:w-64">
-                <input
-                  type="search"
-                  placeholder="Buscar por nome, e-mail, NSU…"
-                  value={pedidosSearch}
-                  onChange={(e) => { setPedidosSearch(e.target.value); setPedidosPage(1); fetchPedidos(1); }}
-                  className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
-                  aria-label="Buscar pedidos"
-                />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-base font-semibold text-brand-charcoal">Pedidos</h2>
+                <span className="text-xs bg-brand-beige px-2 py-0.5 rounded-full text-brand-charcoal/70">
+                  {pedidosTotal} {pedidosTotal === 1 ? "pedido" : "pedidos"}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Filtro Status do Produto */}
+                <select
+                  value={pedidosProdutoStatusFiltro}
+                  onChange={(e) => {
+                    const novoStatus = e.target.value as "todos" | "ativos" | "inativos";
+                    setPedidosProdutoStatusFiltro(novoStatus);
+                    let novoProdFiltro = pedidosProdutoFiltro;
+                    if (novoProdFiltro) {
+                      const prod = produtos.find((p) => p.id === novoProdFiltro);
+                      if (novoStatus === "ativos" && !prod?.ativo) novoProdFiltro = "";
+                      if (novoStatus === "inativos" && prod?.ativo) novoProdFiltro = "";
+                    }
+                    if (novoProdFiltro !== pedidosProdutoFiltro) {
+                      setPedidosProdutoFiltro(novoProdFiltro);
+                    }
+                    setPedidosPage(1);
+                    void fetchPedidos(1, novoStatus, novoProdFiltro);
+                  }}
+                  className="px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                  aria-label="Filtrar status dos produtos em pedidos"
+                >
+                  <option value="todos">Status: Todos</option>
+                  <option value="ativos">Produtos Ativos</option>
+                  <option value="inativos">Produtos Inativos</option>
+                </select>
+
+                {/* Filtro por Produto Específico */}
+                <select
+                  value={pedidosProdutoFiltro}
+                  onChange={(e) => {
+                    const novoFiltro = e.target.value;
+                    setPedidosProdutoFiltro(novoFiltro);
+                    setPedidosPage(1);
+                    void fetchPedidos(1, pedidosProdutoStatusFiltro, novoFiltro);
+                  }}
+                  className="px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30 max-w-[200px] truncate"
+                  aria-label="Filtrar por produto"
+                >
+                  <option value="">Todos os produtos</option>
+                  {produtosParaPedidos.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nome}{!p.ativo ? " (Inativo)" : ""}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Campo de Busca */}
+                <div className="w-full sm:w-56">
+                  <input
+                    type="search"
+                    placeholder="Buscar por nome, e-mail, NSU…"
+                    value={pedidosSearch}
+                    onChange={(e) => { setPedidosSearch(e.target.value); setPedidosPage(1); fetchPedidos(1); }}
+                    className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                    aria-label="Buscar pedidos"
+                  />
+                </div>
               </div>
             </div>
             {pedidos.length === 0 ? (
@@ -1723,7 +1874,12 @@ export default function AdminPage() {
                           <p className="font-medium text-brand-charcoal text-sm">
                             {ped.cliente_nome}{ped.cliente_telefone ? ` · ${ped.cliente_telefone}` : ""}
                           </p>
-                          <p className="text-xs text-brand-charcoal/40">{ped.produtos?.nome || "—"}</p>
+                          <p className="text-xs text-brand-charcoal/40 flex items-center gap-1">
+                            <span>{ped.produtos?.nome || "—"}</span>
+                            {ped.produtos && ped.produtos.ativo === false && (
+                              <span className="text-[10px] bg-red-100 text-red-600 px-1 py-0.2 rounded font-normal">Inativo</span>
+                            )}
+                          </p>
                           {Array.isArray(ped.beneficiarios) && ped.beneficiarios.length > 0 && (
                             <button
                               type="button"
@@ -1873,7 +2029,14 @@ export default function AdminPage() {
                                   </button>
                                 )}
                               </td>
-                              <td className="px-4 py-3 text-brand-charcoal/70">{ped.produtos?.nome || "—"}</td>
+                              <td className="px-4 py-3 text-brand-charcoal/70">
+                                <div className="flex items-center gap-1">
+                                 <span>{ped.produtos?.nome || "—"}</span>
+                                 {ped.produtos && ped.produtos.ativo === false && (
+                                   <span className="text-[10px] bg-red-100 text-red-600 px-1 py-0.2 rounded font-normal">Inativo</span>
+                                 )}
+                                </div>
+                              </td>
                               <td className="px-4 py-3 font-semibold text-brand-charcoal">
                                 R$ {ped.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                               </td>
@@ -1995,6 +2158,32 @@ export default function AdminPage() {
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                {/* Filtro Status do Produto */}
+                <select
+                  value={participantesProdutoStatusFiltro}
+                  onChange={(e) => {
+                    const novoStatus = e.target.value as "todos" | "ativos" | "inativos";
+                    setParticipantesProdutoStatusFiltro(novoStatus);
+                    let novoProdFiltro = participantesProdutoFiltro;
+                    if (novoProdFiltro) {
+                      const prod = produtos.find((p) => p.id === novoProdFiltro);
+                      if (novoStatus === "ativos" && !prod?.ativo) novoProdFiltro = "";
+                      if (novoStatus === "inativos" && prod?.ativo) novoProdFiltro = "";
+                    }
+                    if (novoProdFiltro !== participantesProdutoFiltro) {
+                      setParticipantesProdutoFiltro(novoProdFiltro);
+                    }
+                    setParticipantesPage(1);
+                    void fetchParticipantes(1, novoProdFiltro, novoStatus);
+                  }}
+                  className="px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                  aria-label="Filtrar status dos produtos em inscrições"
+                >
+                  <option value="todos">Status: Todos</option>
+                  <option value="ativos">Produtos Ativos</option>
+                  <option value="inativos">Produtos Inativos</option>
+                </select>
+
                 {/* Filtro por Produto */}
                 <select
                   value={participantesProdutoFiltro}
@@ -2002,15 +2191,15 @@ export default function AdminPage() {
                     const novoFiltro = e.target.value;
                     setParticipantesProdutoFiltro(novoFiltro);
                     setParticipantesPage(1);
-                    void fetchParticipantes(1, novoFiltro);
+                    void fetchParticipantes(1, novoFiltro, participantesProdutoStatusFiltro);
                   }}
                   className="px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30 max-w-[200px] truncate"
                   aria-label="Filtrar por produto"
                 >
                   <option value="">Todos os produtos</option>
-                  {produtos.map((p) => (
+                  {produtosParaInscricoes.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.nome}
+                      {p.nome}{!p.ativo ? " (Inativo)" : ""}
                     </option>
                   ))}
                 </select>
@@ -2053,7 +2242,12 @@ export default function AdminPage() {
                       <div>
                         <p className="font-medium text-brand-charcoal text-sm">{p.nome}</p>
                         <p className="text-xs font-mono text-brand-charcoal/70">CPF: {formatCPF(p.cpf)}</p>
-                        <p className="text-xs text-brand-charcoal/40 mt-0.5">{p.turma_id} · {p.produto || "—"}</p>
+                        <p className="text-xs text-brand-charcoal/40 mt-0.5 flex items-center gap-1">
+                          <span>{p.turma_id} · {p.produto || "—"}</span>
+                          {p.produto_ativo === false && (
+                            <span className="text-[10px] bg-red-100 text-red-600 px-1 py-0.2 rounded font-normal">Inativo</span>
+                          )}
+                        </p>
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         p.status === "pago" ? "bg-green-100 text-green-700" :
@@ -2161,7 +2355,14 @@ export default function AdminPage() {
                               </a>
                             ) : "—"}
                           </td>
-                          <td className="px-4 py-3 text-brand-charcoal/70 text-xs">{p.produto || "—"}</td>
+                          <td className="px-4 py-3 text-brand-charcoal/70 text-xs">
+                            <div className="flex items-center gap-1">
+                              <span>{p.produto || "—"}</span>
+                              {p.produto_ativo === false && (
+                                <span className="text-[10px] bg-red-100 text-red-600 px-1 py-0.2 rounded font-normal">Inativo</span>
+                              )}
+                            </div>
+                          </td>
                           <td className="px-4 py-3 text-brand-charcoal/60 text-xs max-w-[200px] truncate hidden md:table-cell">
                             {p.motivacao || "—"}
                           </td>

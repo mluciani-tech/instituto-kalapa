@@ -24,7 +24,7 @@ interface InscricaoRow {
     usuario_id?: string | null;
     status?: string | null;
     produto_id?: string | null;
-    produtos?: { id?: string; nome?: string } | { id?: string; nome?: string }[] | null;
+    produtos?: { id?: string; nome?: string; ativo?: boolean } | { id?: string; nome?: string; ativo?: boolean }[] | null;
   } | {
     id: string;
     cliente_nome?: string | null;
@@ -34,7 +34,7 @@ interface InscricaoRow {
     usuario_id?: string | null;
     status?: string | null;
     produto_id?: string | null;
-    produtos?: { id?: string; nome?: string } | { id?: string; nome?: string }[] | null;
+    produtos?: { id?: string; nome?: string; ativo?: boolean } | { id?: string; nome?: string; ativo?: boolean }[] | null;
   }[] | null;
 }
 
@@ -61,13 +61,29 @@ export async function GET(req: NextRequest) {
     const sortKey = searchParams.get("sort") || "created_at";
     const sortDir = (searchParams.get("dir") || "desc").toLowerCase() === "asc" ? "asc" : "desc";
     const produtoId = searchParams.get("produtoId")?.trim() || "";
+    const produtoStatus = searchParams.get("produtoStatus")?.trim().toLowerCase() || "";
     const statusParam = searchParams.get("status")?.trim() || "";
     const isAll = searchParams.get("all") === "true";
 
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
 
-    const joinPrefix = produtoId && produtoId !== "todos" ? "pedidos!inner!pedido_id" : "pedidos!pedido_id";
+    let filtrarPorIds: string[] | null = null;
+    if (produtoStatus === "ativo" || produtoStatus === "ativos" || produtoStatus === "inativo" || produtoStatus === "inativos") {
+      const apenasAtivos = produtoStatus.startsWith("ativ");
+      const { data: prodsFiltro, error: prodsErr } = await supabaseAdmin!
+        .from("produtos")
+        .select("id")
+        .eq("ativo", apenasAtivos);
+
+      if (prodsErr) {
+        console.error("[admin/participantes] Erro ao buscar produtos por status:", prodsErr);
+      }
+      filtrarPorIds = (prodsFiltro || []).map((p) => p.id);
+    }
+
+    const precisaJoinInner = (produtoId && produtoId !== "todos") || (filtrarPorIds !== null);
+    const joinPrefix = precisaJoinInner ? "pedidos!inner!pedido_id" : "pedidos!pedido_id";
     const selectQuery = `
       *,
       ${joinPrefix} (
@@ -79,7 +95,7 @@ export async function GET(req: NextRequest) {
         usuario_id,
         status,
         produto_id,
-        produtos (id, nome)
+        produtos (id, nome, ativo)
       )
     `;
 
@@ -89,6 +105,17 @@ export async function GET(req: NextRequest) {
 
     if (produtoId && produtoId !== "todos") {
       query = query.eq("pedidos.produto_id", produtoId);
+    } else if (filtrarPorIds !== null) {
+      if (filtrarPorIds.length === 0) {
+        return NextResponse.json({
+          data: [],
+          total: 0,
+          page: isAll ? 1 : page,
+          perPage: isAll ? 0 : perPage,
+          totalPages: 1,
+        });
+      }
+      query = query.in("pedidos.produto_id", filtrarPorIds);
     }
 
     if (search) {
@@ -144,6 +171,7 @@ export async function GET(req: NextRequest) {
       
       const produtoObj = Array.isArray(pedido?.produtos) ? pedido.produtos[0] : pedido?.produtos;
       const produtoNome = produtoObj?.nome || "";
+      const produtoAtivo = produtoObj?.ativo;
       const prodId = pedido?.produto_id || produtoObj?.id || null;
 
       const rawCpf = inscricao.cpf || pedido?.cliente_cpf || pedido?.cliente_documento || (pedido?.usuario_id ? usuarioCpfMap[pedido.usuario_id] : null) || null;
@@ -156,6 +184,7 @@ export async function GET(req: NextRequest) {
         telefone,
         cpf,
         produto: produtoNome,
+        produto_ativo: produtoAtivo,
         produto_id: prodId,
         status: statusPedido,
         pedidos: undefined,

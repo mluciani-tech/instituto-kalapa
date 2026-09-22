@@ -28,13 +28,47 @@ export async function GET(req: NextRequest) {
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
 
+    const produtoId = searchParams.get("produtoId")?.trim() || "";
+    const produtoStatus = searchParams.get("produtoStatus")?.trim().toLowerCase() || "";
+
+    // Se filtrar por status do produto e nenhum produto específico foi escolhido
+    let filtrarPorIds: string[] | null = null;
+    if (produtoStatus === "ativo" || produtoStatus === "ativos" || produtoStatus === "inativo" || produtoStatus === "inativos") {
+      const apenasAtivos = produtoStatus.startsWith("ativ");
+      const { data: prodsFiltro, error: prodsErr } = await supabaseAdmin!
+        .from("produtos")
+        .select("id")
+        .eq("ativo", apenasAtivos);
+
+      if (prodsErr) {
+        console.error("[admin/pedidos] Erro ao buscar produtos por status:", prodsErr);
+      }
+      filtrarPorIds = (prodsFiltro || []).map((p) => p.id);
+    }
+
     let query = supabaseAdmin!
       .from("pedidos")
       .select(`
         *,
-        produtos (nome, slug),
+        produtos (id, nome, slug, ativo),
         inscricoes!pedido_id (nome, telefone, motivacao)
       `, { count: "exact" });
+
+    if (produtoId && produtoId !== "todos") {
+      query = query.eq("produto_id", produtoId);
+    } else if (filtrarPorIds !== null) {
+      if (filtrarPorIds.length === 0) {
+        // Nenhum produto com esse status, retorna vazio
+        return NextResponse.json({
+          data: [],
+          total: 0,
+          page,
+          perPage,
+          totalPages: 1,
+        });
+      }
+      query = query.in("produto_id", filtrarPorIds);
+    }
 
     if (search) {
       const safe = search.replace(/[(),\\]/g, "");

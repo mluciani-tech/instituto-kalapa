@@ -77,7 +77,7 @@ export interface Pedido {
   transaction_nsu?: string | null;
   motivacao?: string | null;
   created_at: string;
-  produtos?: { nome: string; slug: string } | null;
+  produtos?: { id?: string; nome: string; slug: string; ativo?: boolean } | null;
   inscricoes?: { nome: string | null; telefone: string | null; motivacao: string | null } | null;
   usuarios?: { nome: string; email: string; telefone: string; cpf: string } | null;
 }
@@ -94,6 +94,7 @@ export interface Participante {
   valor: number;
   produto?: string;
   produto_id?: string | null;
+  produto_ativo?: boolean;
   status: string;
   created_at: string;
   pedidos?: { cliente_nome: string | null; cliente_telefone: string | null; status: string | null; produtos?: { nome: string } | null } | null;
