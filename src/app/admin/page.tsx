@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, Fragment } from "react";
 import type { Produto, Pedido, Participante, Cupom, Usuario } from "@/lib/types";
+import AdminDashboard from "./components/AdminDashboard";
 
 type Paginated<T> = {
   data: T[];
@@ -11,7 +12,7 @@ type Paginated<T> = {
   totalPages: number;
 };
 
-type Tab = "config" | "sobre" | "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios";
+type Tab = "dashboard" | "config" | "sobre" | "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios";
 
 const FAQ_PADRAO_ADMIN = [
   {
@@ -90,7 +91,7 @@ function SortableHeader({
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>("config");
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [error, setError] = useState("");
 
   // Auth
@@ -1028,6 +1029,7 @@ export default function AdminPage() {
   });
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
+    { id: "dashboard", label: "📊 Visão Geral" },
     { id: "config", label: "Configurações" },
     { id: "sobre", label: "Sobre & FAQ" },
     { id: "produtos", label: "Produtos", count: produtos.length },
@@ -1089,6 +1091,13 @@ export default function AdminPage() {
               &times;
             </button>
           </div>
+        )}
+
+        {/* Tab: Dashboard / Visão Geral */}
+        {activeTab === "dashboard" && (
+          <AdminDashboard
+            onNavigateTab={(targetTab) => setActiveTab(targetTab)}
+          />
         )}
 
         {/* Tab: Configurações */}
