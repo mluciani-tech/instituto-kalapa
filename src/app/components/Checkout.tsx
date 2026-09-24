@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
-import type { Produto, Usuario, BeneficiarioPedido } from "@/lib/types";
+import type { Produto, Usuario } from "@/lib/types";
 
 interface AcompanhanteItem {
   key: string;
@@ -94,15 +94,19 @@ export default function Checkout() {
 
   // Sincronizar participantes extras quando quantidade >= 2
   useEffect(() => {
-    const necessarios: AcompanhanteItem[] = [];
+    if (!isCartCheckout) {
+      setAcompanhantes((prev) => (prev.length > 0 ? [] : prev));
+      return;
+    }
 
-    if (isCartCheckout) {
+    setAcompanhantes((prev) => {
+      const necessarios: AcompanhanteItem[] = [];
       for (const item of cartItems) {
         if (item.quantidade >= 2) {
           const extras = item.quantidade - 1;
           for (let i = 0; i < extras; i++) {
             const key = `${item.produto_id}-${i}`;
-            const existente = acompanhantes.find((a) => a.key === key);
+            const existente = prev.find((a) => a.key === key);
             necessarios.push({
               key,
               produto_id: item.produto_id,
@@ -115,13 +119,11 @@ export default function Checkout() {
           }
         }
       }
-    }
 
-    const currentKeys = acompanhantes.map((a) => a.key).join(",");
-    const nextKeys = necessarios.map((a) => a.key).join(",");
-    if (currentKeys !== nextKeys) {
-      setAcompanhantes(necessarios);
-    }
+      const currentKeys = prev.map((a) => a.key).join(",");
+      const nextKeys = necessarios.map((a) => a.key).join(",");
+      return currentKeys !== nextKeys ? necessarios : prev;
+    });
   }, [cartItems, isCartCheckout]);
 
   const subtotal = isCartCheckout
@@ -173,6 +175,8 @@ export default function Checkout() {
 
   // Finalizar pagamento
   const handleFinalizarPagamento = async () => {
+    if (processando || redirecionando) return;
+
     if (!isCartCheckout && !produto) {
       setErro("Nenhum produto selecionado. Escolha um produto no catálogo.");
       return;

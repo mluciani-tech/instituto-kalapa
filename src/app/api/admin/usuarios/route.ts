@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
                 produtosMap.set(nome, (produtosMap.get(nome) || 0) + qtd);
               }
             } else {
-              const prodObj = (ped as any).produtos;
+              const prodObj = (ped as Record<string, unknown>).produtos as { nome?: string } | { nome?: string }[] | null | undefined;
               const prodNome = Array.isArray(prodObj) ? prodObj[0]?.nome : prodObj?.nome;
               if (prodNome) {
                 produtosMap.set(prodNome, (produtosMap.get(prodNome) || 0) + 1);

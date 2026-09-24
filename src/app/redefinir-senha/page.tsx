@@ -2,12 +2,11 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Lock, ArrowLeft, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Lock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import Footer from "../components/Footer";
 
 function RedefinirSenhaContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { CheckCircle2, ShieldCheck, HeartHandshake } from "lucide-react";
 import BlurText from "@/components/ui/blur-text";
@@ -88,24 +89,24 @@ export default function Hero() {
 
           {/* CTA */}
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
-            <a
+            <Link
               href="/produtos?categoria=vivencias"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-[background-color,border-color] duration-300 glass-card hover:bg-white/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
             >
               Vivências
-            </a>
-            <a
+            </Link>
+            <Link
               href="/produtos?categoria=atendimentos"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-[background-color,border-color] duration-300 glass-card hover:bg-white/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
             >
               Atendimentos
-            </a>
-            <a
+            </Link>
+            <Link
               href="/produtos?categoria=calendario"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-[background-color,border-color] duration-300 glass-card hover:bg-white/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
             >
               Calendário
-            </a>
+            </Link>
             <a
               href="#experiencia"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 hover:border-white/45 text-white font-medium rounded-xl transition-[background-color,border-color] duration-300 glass-card hover:bg-white/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"

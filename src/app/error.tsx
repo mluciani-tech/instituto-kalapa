@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
@@ -10,6 +11,9 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error("[Kalapa Error Boundary]:", error);
+  }, [error]);
   return (
     <div className="min-h-screen bg-brand-offwhite flex items-center justify-center px-6">
       <div className="text-center max-w-md">

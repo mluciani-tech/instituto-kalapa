@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
     }
 
     const valorFinal = Math.max(0, subtotal - valorDesconto);
-    const precoFinalCentavos = Math.round(valorFinal * 100);
+    const ehGratuito = valorFinal === 0;
 
     // 5. Consolidar dados do cliente a partir do usuário autenticado (garante integridade total)
     const clienteNome = clienteLogado.nome.trim();
@@ -204,7 +204,8 @@ export async function POST(req: NextRequest) {
         valor_desconto: valorDesconto > 0 ? valorDesconto : 0,
         cupom_id: cupomId,
         cupom_codigo: cupomCodigoFinal,
-        status: "pendente",
+        status: ehGratuito ? "confirmado" : "pendente",
+        metodo_pagamento: ehGratuito ? "cupom_gratuito" : null,
       })
       .select("id")
       .single();
@@ -228,9 +229,9 @@ export async function POST(req: NextRequest) {
           email: clienteEmail,
           telefone: clienteTelefone || "Não informado",
           motivacao: inscricao?.motivacao || "Compra via E-commerce",
-          metodo_pagamento: inscricao?.metodoPagamento || "infinitepay",
+          metodo_pagamento: ehGratuito ? "cupom_gratuito" : (inscricao?.metodoPagamento || "infinitepay"),
           valor: valorFinal,
-          status: "pendente",
+          status: ehGratuito ? "confirmado" : "pendente",
         });
 
         if (inscricaoError) {
@@ -239,6 +240,60 @@ export async function POST(req: NextRequest) {
       } catch (errInscricao) {
         console.error("[checkout] Falha ao tentar registrar inscrição:", errInscricao);
       }
+    }
+
+    // 7.1 Se o pedido for gratuito (100% de desconto), finaliza imediatamente sem chamar InfinitePay
+    if (ehGratuito) {
+      if (cupomId) {
+        try {
+          const { data: cupomAtual } = await supabaseAdmin!
+            .from("cupons")
+            .select("quantidade_utilizada")
+            .eq("id", cupomId)
+            .single();
+          const qtdAtual = cupomAtual?.quantidade_utilizada || 0;
+          await supabaseAdmin!
+            .from("cupons")
+            .update({ quantidade_utilizada: qtdAtual + 1, updated_at: new Date().toISOString() })
+            .eq("id", cupomId);
+          await supabaseAdmin!.from("cupons_usos").insert({
+            cupom_id: cupomId,
+            pedido_id: pedido.id,
+            usuario_id: clienteLogado.id,
+            valor_desconto: valorDesconto,
+          });
+        } catch (cupomErr) {
+          console.error("[checkout] Erro ao registrar baixa do cupom:", cupomErr);
+        }
+      }
+
+      try {
+        const { notifyPagamentoConfirmado, sendConfirmacaoCliente } = await import("@/lib/email");
+        const nomeProduto = itensProcessados.map((i) => i.nome).join(", ");
+        await notifyPagamentoConfirmado({
+          nome: clienteNome,
+          email: clienteEmail,
+          telefone: clienteTelefone,
+          produto: nomeProduto,
+          valor: 0,
+          metodo: "gratuito",
+          orderNsu,
+        });
+        await sendConfirmacaoCliente({
+          nome: clienteNome,
+          email: clienteEmail,
+          produto: nomeProduto,
+          valor: 0,
+        });
+      } catch (emailErr) {
+        console.error("[checkout] Erro ao enviar e-mails de confirmação gratuita:", emailErr);
+      }
+
+      return NextResponse.json({
+        url: `${SITE_URL}/checkout/sucesso`,
+        order_nsu: orderNsu,
+        gratuito: true,
+      });
     }
 
     // 8. Montar itens para a InfinitePay

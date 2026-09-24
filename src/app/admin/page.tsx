@@ -100,10 +100,6 @@ export default function AdminPage() {
 
   // Config
   const [config, setConfig] = useState<Record<string, string>>({});
-  const [vagasEditando, setVagasEditando] = useState("");
-  const [salvandoVagas, setSalvandoVagas] = useState(false);
-  const [vagasSucesso, setVagasSucesso] = useState("");
-  const [configError, setConfigError] = useState("");
 
   // Sobre & FAQ Facilitadora
   const [facilitadoraNome, setFacilitadoraNome] = useState("");
@@ -225,8 +221,7 @@ export default function AdminPage() {
   const [usuariosTotalPages, setUsuariosTotalPages] = useState(1);
   const [usuariosTotal, setUsuariosTotal] = useState(0);
   const [usuariosSearch, setUsuariosSearch] = useState("");
-  const [usuarioDetalhes, setUsuarioDetalhes] = useState<{ usuario: Usuario; pedidos: any[]; produtos_comprados?: any[] } | null>(null);
-  const [carregandoDetalhes, setCarregandoDetalhes] = useState(false);
+  const [usuarioDetalhes, setUsuarioDetalhes] = useState<{ usuario: Usuario; pedidos: Pedido[]; produtos_comprados?: { nome: string; quantidade: number }[] } | null>(null);
   const [usuarioParaReset, setUsuarioParaReset] = useState<Usuario | null>(null);
   const [novaSenhaInput, setNovaSenhaInput] = useState("");
   const [resetandoSenha, setResetandoSenha] = useState(false);
@@ -249,7 +244,6 @@ export default function AdminPage() {
     if (res.ok) {
       const data = await res.json();
       setConfig(data);
-      setVagasEditando(data.vagas_maximas || "15");
       setFacilitadoraNome(data.facilitadora_nome || "Clatihúcia Capeli");
       setFacilitadoraTitulo(data.facilitadora_titulo || "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal");
       setFacilitadoraFoto(data.facilitadora_foto || "/foto_10.jpg");
@@ -454,12 +448,10 @@ export default function AdminPage() {
   };
 
   const handleVerDetalhesUsuario = async (u: Usuario) => {
-    setCarregandoDetalhes(true);
     const res = await fetch(`/api/admin/usuarios/${u.id}`);
     if (res.ok) {
       setUsuarioDetalhes(await res.json());
     }
-    setCarregandoDetalhes(false);
   };
 
   const handleResetarSenha = async (e: React.FormEvent) => {
@@ -531,27 +523,6 @@ export default function AdminPage() {
   const handleLogout = async () => {
     await fetch("/api/admin/logout", { method: "POST" });
     setAuthed(false);
-  };
-
-  // Config handlers
-  const handleSalvarVagas = async () => {
-    setSalvandoVagas(true);
-    setVagasSucesso("");
-    setConfigError("");
-    const res = await fetch("/api/config", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chave: "vagas_maximas", valor: vagasEditando }),
-    });
-    if (res.ok) {
-      setConfig((prev) => ({ ...prev, vagas_maximas: vagasEditando }));
-      setVagasSucesso("Vagas atualizadas!");
-      setTimeout(() => setVagasSucesso(""), 3000);
-    } else {
-      const data = await res.json();
-      setConfigError(data.error || "Erro ao salvar");
-    }
-    setSalvandoVagas(false);
   };
 
   // Produto handlers
@@ -958,8 +929,8 @@ export default function AdminPage() {
       setSobreSucesso("Informações da Facilitadora, Espaço e FAQ salvas com sucesso!");
       await fetchConfig();
       setTimeout(() => setSobreSucesso(""), 4000);
-    } catch (err: any) {
-      setError(err.message || "Erro ao salvar informações");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro ao salvar informações");
     } finally {
       setSalvandoSobre(false);
     }
@@ -2578,7 +2549,7 @@ export default function AdminPage() {
                     {cupons.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-4 py-8 text-center text-brand-charcoal/50 text-sm">
-                          Nenhum cupom cadastrado ainda. Clique em "+ Novo Cupom" para criar o primeiro.
+                          Nenhum cupom cadastrado ainda. Clique em &ldquo;+ Novo Cupom&rdquo; para criar o primeiro.
                         </td>
                       </tr>
                     ) : (
@@ -2735,7 +2706,7 @@ export default function AdminPage() {
                           <td className="px-4 py-3 text-xs">
                             {u.produtos_comprados && u.produtos_comprados.length > 0 ? (
                               <div className="flex flex-col gap-1 max-w-[220px]">
-                                {u.produtos_comprados.map((prod: any, i: number) => (
+                                {u.produtos_comprados.map((prod: { nome: string; quantidade: number }, i: number) => (
                                   <span
                                     key={i}
                                     className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-brand-beige text-brand-charcoal text-[11px] font-medium truncate"
@@ -3091,7 +3062,7 @@ export default function AdminPage() {
                 </h4>
                 {usuarioDetalhes.produtos_comprados && usuarioDetalhes.produtos_comprados.length > 0 ? (
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    {usuarioDetalhes.produtos_comprados.map((p: any, i: number) => (
+                    {usuarioDetalhes.produtos_comprados.map((p: { nome: string; quantidade: number }, i: number) => (
                       <span
                         key={i}
                         className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-brand-beige text-brand-charcoal text-xs shadow-xs"
@@ -3114,13 +3085,13 @@ export default function AdminPage() {
                   <p className="text-brand-charcoal/50 italic py-2">Nenhum pedido realizado ainda.</p>
                 ) : (
                   <div className="space-y-2">
-                    {usuarioDetalhes.pedidos.map((ped: any) => (
+                    {usuarioDetalhes.pedidos.map((ped: Pedido) => (
                       <div key={ped.id} className="p-2.5 border border-brand-beige rounded-lg flex items-center justify-between">
                         <div>
                           <p className="font-semibold text-brand-charcoal">
                             {Array.isArray(ped.itens) && ped.itens.length > 0
-                              ? ped.itens.map((it: any) => `${it.nome} (${it.quantidade}×)`).join(", ")
-                              : ped.produtos?.nome || "Pedido E-commerce"}
+                              ? ped.itens.map((it: { nome?: string; quantidade?: number }) => `${it.nome || "Item"} (${it.quantidade || 1}×)`).join(", ")
+                              : (ped.produtos as { nome?: string } | undefined)?.nome || "Pedido E-commerce"}
                           </p>
                           <p className="text-[10px] text-brand-charcoal/50 font-mono">
                             {formatDate(ped.created_at)} — {ped.order_nsu}

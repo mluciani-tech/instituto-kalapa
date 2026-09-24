@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
@@ -205,13 +206,13 @@ export default function AboutFacilitator() {
                 <MessageCircle className="w-4 h-4 text-brand-mint" />
                 Conversar com a Facilitadora
               </a>
-              <a
+              <Link
                 href="/produtos?categoria=vivencias"
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-brand-charcoal/20 hover:border-brand-charcoal/40 text-brand-charcoal text-xs md:text-sm font-semibold transition-colors"
               >
                 Ver Vivências Abertas
                 <ArrowRight className="w-4 h-4 text-brand-terracotta" />
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>

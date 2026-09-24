@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Package, ArrowLeft, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, MessageCircle, Sparkles } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
 import type { VagasInfo } from "@/lib/types";
 

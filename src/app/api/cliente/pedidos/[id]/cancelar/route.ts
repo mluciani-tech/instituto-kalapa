@@ -55,7 +55,7 @@ export async function POST(
     // Cancelar também a inscrição associada se houver
     await supabaseAdmin!
       .from("inscricoes")
-      .update({ status: "cancelada" })
+      .update({ status: "cancelado" })
       .eq("pedido_id", id);
 
     return NextResponse.json({ success: true, message: "Pedido cancelado com sucesso." });

@@ -47,7 +47,9 @@ export async function POST(req: NextRequest) {
         );
       }
       const expected = crypto.createHmac("sha256", WEBHOOK_SECRET).update(orderNsu).digest("hex");
-      if (!crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expected))) {
+      const tokenBuf = Buffer.from(token);
+      const expectedBuf = Buffer.from(expected);
+      if (tokenBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(tokenBuf, expectedBuf)) {
         console.warn("[webhook] Token HMAC inválido — requisição rejeitada");
         return NextResponse.json(
           { success: false, message: "Não autorizado" },

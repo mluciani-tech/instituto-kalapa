@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, MessageCircle } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
@@ -148,13 +149,13 @@ export default function ProductHighlights() {
           viewport={{ once: true }}
           className="text-center mt-10"
         >
-          <a
+          <Link
             href="/produtos"
             className="inline-flex items-center gap-2 px-3 py-2.5 -mx-3 rounded-lg text-brand-purple font-semibold hover:text-brand-purple-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple focus-visible:ring-offset-2 focus-visible:ring-offset-brand-offwhite"
           >
             Ver todos os serviços
             <ArrowRight aria-hidden="true" className="w-4 h-4" />
-          </a>
+          </Link>
         </motion.div>
       </div>
     </section>

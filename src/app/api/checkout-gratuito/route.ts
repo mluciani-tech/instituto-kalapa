@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 import { getTurmaAtual, getVagasInfo } from "@/lib/vagas";
+import { getClienteFromRequest } from "@/lib/cliente-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const clienteLogado = await getClienteFromRequest(req);
+    if (!clienteLogado) {
+      return NextResponse.json(
+        { error: "É necessário entrar na sua conta ou cadastrar-se para prosseguir." },
+        { status: 401 }
+      );
+    }
+
     // 1. Buscar produto
     const { data: produto, error: produtoError } = await supabaseAdmin!
       .from("produtos")
@@ -36,6 +45,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Produto não encontrado" },
         { status: 404 }
+      );
+    }
+
+    // Validação de segurança: garantir que o produto é de fato gratuito
+    if (Number(produto.preco) > 0) {
+      return NextResponse.json(
+        { error: "Este produto possui valor e requer pagamento através do checkout regular." },
+        { status: 403 }
       );
     }
 
@@ -60,9 +77,10 @@ export async function POST(req: NextRequest) {
       .insert({
         order_nsu: orderNsu,
         produto_id: produto.id,
-        cliente_nome: inscricao?.nome || "N/A",
-        cliente_email: inscricao?.email || "N/A",
-        cliente_telefone: inscricao?.telefone || null,
+        usuario_id: clienteLogado.id,
+        cliente_nome: clienteLogado.nome || inscricao?.nome || "N/A",
+        cliente_email: clienteLogado.email || inscricao?.email || "N/A",
+        cliente_telefone: clienteLogado.telefone || inscricao?.telefone || null,
         valor: 0,
         status: "confirmado",
         metodo_pagamento: "gratuito",

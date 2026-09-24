@@ -76,7 +76,8 @@ export async function POST(req: NextRequest) {
     const token = createClienteSessionToken(usuario.id, usuario.email);
 
     // Remove hash do payload de resposta
-    const { senha_hash: _, ...usuarioSemSenha } = usuario;
+    const usuarioSemSenha = { ...usuario };
+    delete (usuarioSemSenha as { senha_hash?: string }).senha_hash;
 
     const response = NextResponse.json({
       success: true,
