@@ -161,6 +161,9 @@ export default function AdminPage() {
   const [pedidosProdutoFiltro, setPedidosProdutoFiltro] = useState("");
   const [pedidosSort, setPedidosSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "created_at", dir: "desc" });
   const [pedidoExpandidoId, setPedidoExpandidoId] = useState<string | null>(null);
+  const [pedidosStatusFiltro, setPedidosStatusFiltro] = useState<"todos" | "pago" | "pendente" | "cancelado">("todos");
+  const [pedidosTotaisStatus, setPedidosTotaisStatus] = useState<{ todos: number; pago: number; pendente: number; cancelado: number }>({ todos: 0, pago: 0, pendente: 0, cancelado: 0 });
+  const [formProdutoDestacado, setFormProdutoDestacado] = useState(false);
 
   // Participantes
   const [participantes, setParticipantes] = useState<Participante[]>([]);
@@ -248,7 +251,7 @@ export default function AdminPage() {
       setConfig(data);
       setVagasEditando(data.vagas_maximas || "15");
       setFacilitadoraNome(data.facilitadora_nome || "Clatihúcia Capeli");
-      setFacilitadoraTitulo(data.facilitadora_titulo || "Facilitadora e Terapeuta Sistêmica");
+      setFacilitadoraTitulo(data.facilitadora_titulo || "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal");
       setFacilitadoraFoto(data.facilitadora_foto || "/foto_10.jpg");
       setFacilitadoraCredenciais(data.facilitadora_credenciais || "Constelação Familiar, Vivências em Grupo e Acolhimento do Trauma");
       setFacilitadoraBio(data.facilitadora_bio || "Com mais de 10 anos de dedicação ao cuidado emocional e ao desenvolvimento humano, Clatihúcia Capeli conduz vivências que acolhem a dor sem julgamentos, permitindo que ela se transforme em força e consciência.\n\nSua abordagem integra a sabedoria sistêmica das constelações familiares, a neurobiologia do trauma e a potência curativa da presença em grupo. Cada encontro é cuidadosamente preparado para ser um santuário de respeito, acolhimento genuíno e pertencimento.");
@@ -290,7 +293,8 @@ export default function AdminPage() {
     async (
       page = pedidosPage,
       prodStatus = pedidosProdutoStatusFiltro,
-      prodId = pedidosProdutoFiltro
+      prodId = pedidosProdutoFiltro,
+      statusFiltro = pedidosStatusFiltro
     ) => {
       const params = new URLSearchParams({ page: page.toString(), perPage: "20" });
       if (pedidosSearch) params.set("search", pedidosSearch);
@@ -304,16 +308,22 @@ export default function AdminPage() {
       if (prodId && prodId !== "todos") {
         params.set("produtoId", prodId);
       }
+      if (statusFiltro && statusFiltro !== "todos") {
+        params.set("status", statusFiltro);
+      }
       const res = await fetch(`/api/admin/pedidos?${params.toString()}`);
       if (res.ok) {
-        const json: Paginated<Pedido> = await res.json();
+        const json: Paginated<Pedido> & { totaisStatus?: { todos: number; pago: number; pendente: number; cancelado: number } } = await res.json();
         setPedidos(json.data);
         setPedidosPage(json.page);
         setPedidosTotalPages(json.totalPages);
         setPedidosTotal(json.total);
+        if (json.totaisStatus) {
+          setPedidosTotaisStatus(json.totaisStatus);
+        }
       }
     },
-    [pedidosPage, pedidosSearch, pedidosSort, pedidosProdutoStatusFiltro, pedidosProdutoFiltro]
+    [pedidosPage, pedidosSearch, pedidosSort, pedidosProdutoStatusFiltro, pedidosProdutoFiltro, pedidosStatusFiltro]
   );
 
   const fetchParticipantes = useCallback(
@@ -646,6 +656,22 @@ export default function AdminPage() {
     });
     setProdutoImagemFile(null);
     setShowProdutoForm(true);
+    setFormProdutoDestacado(true);
+
+    setTimeout(() => {
+      const container = document.getElementById("form-produto-container");
+      if (container) {
+        container.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      const inputNome = document.getElementById("input-produto-nome");
+      if (inputNome) inputNome.focus();
+    }, 60);
+
+    setTimeout(() => {
+      setFormProdutoDestacado(false);
+    }, 2000);
   };
 
   const handleDesativarProduto = async (id: string) => {
@@ -1504,8 +1530,23 @@ export default function AdminPage() {
                 </div>
 
                 <button
-                  onClick={() => { resetProdutoForm(); setShowProdutoForm(true); }}
-                  className="px-4 py-2 bg-brand-purple text-white text-sm font-medium rounded-lg hover:bg-brand-purple-dark transition-colors whitespace-nowrap"
+                  onClick={() => {
+                    resetProdutoForm();
+                    setShowProdutoForm(true);
+                    setFormProdutoDestacado(true);
+                    setTimeout(() => {
+                      const container = document.getElementById("form-produto-container");
+                      if (container) {
+                        container.scrollIntoView({ behavior: "smooth", block: "start" });
+                      } else {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }
+                      const inputNome = document.getElementById("input-produto-nome");
+                      if (inputNome) inputNome.focus();
+                    }, 60);
+                    setTimeout(() => setFormProdutoDestacado(false), 2000);
+                  }}
+                  className="px-4 py-2 bg-brand-purple text-white text-sm font-medium rounded-lg hover:bg-brand-purple-dark transition-colors whitespace-nowrap cursor-pointer"
                 >
                   + Novo Produto
                 </button>
@@ -1518,19 +1559,27 @@ export default function AdminPage() {
 
             {/* Formulário de produto */}
             {showProdutoForm && (
-              <div className="bg-white rounded-xl border border-brand-beige p-6 mb-6">
+              <div
+                id="form-produto-container"
+                className={`bg-white rounded-xl border p-6 mb-6 transition-all duration-500 ${
+                  formProdutoDestacado
+                    ? "ring-4 ring-brand-purple/40 border-brand-purple shadow-lg"
+                    : "border-brand-beige"
+                }`}
+              >
                 <h3 className="text-sm font-semibold text-brand-charcoal mb-4">
                   {produtoEditando ? "Editar Produto" : "Novo Produto"}
                 </h3>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Nome *</label>
-<input
-                       value={produtoForm.nome}
-                       onChange={(e) => setProdutoForm({ ...produtoForm, nome: e.target.value })}
-                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
-                       placeholder="Ex: Grupo de Autoconhecimento"
-                     />
+                    <input
+                      id="input-produto-nome"
+                      value={produtoForm.nome}
+                      onChange={(e) => setProdutoForm({ ...produtoForm, nome: e.target.value })}
+                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                      placeholder="Ex: Grupo de Autoconhecimento"
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Slug *</label>
@@ -1793,13 +1842,48 @@ export default function AdminPage() {
         {activeTab === "pedidos" && (
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-base font-semibold text-brand-charcoal">Pedidos</h2>
                 <span className="text-xs bg-brand-beige px-2 py-0.5 rounded-full text-brand-charcoal/70">
                   {pedidosTotal} {pedidosTotal === 1 ? "pedido" : "pedidos"}
                 </span>
+                {pedidosTotaisStatus.todos > 0 && (
+                  <div className="flex items-center gap-1.5 text-[11px] ml-1">
+                    <span className="px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 font-medium">
+                      {pedidosTotaisStatus.pago} pagos
+                    </span>
+                    {pedidosTotaisStatus.pendente > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200 font-medium">
+                        {pedidosTotaisStatus.pendente} pendente
+                      </span>
+                    )}
+                    {pedidosTotaisStatus.cancelado > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 font-medium">
+                        {pedidosTotaisStatus.cancelado} cancelado
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                {/* Filtro Status de Pagamento */}
+                <select
+                  value={pedidosStatusFiltro}
+                  onChange={(e) => {
+                    const novoStatus = e.target.value as "todos" | "pago" | "pendente" | "cancelado";
+                    setPedidosStatusFiltro(novoStatus);
+                    setPedidosPage(1);
+                    void fetchPedidos(1, pedidosProdutoStatusFiltro, pedidosProdutoFiltro, novoStatus);
+                  }}
+                  className="px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white text-brand-charcoal font-medium focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                  aria-label="Filtrar status do pagamento dos pedidos"
+                >
+                  <option value="todos">Status: Todos ({pedidosTotaisStatus.todos || pedidosTotal})</option>
+                  <option value="pago">Apenas Pagos ({pedidosTotaisStatus.pago})</option>
+                  <option value="pendente">Apenas Pendentes ({pedidosTotaisStatus.pendente})</option>
+                  <option value="cancelado">Apenas Cancelados ({pedidosTotaisStatus.cancelado})</option>
+                </select>
+
                 {/* Filtro Status do Produto */}
                 <select
                   value={pedidosProdutoStatusFiltro}
@@ -1816,12 +1900,12 @@ export default function AdminPage() {
                       setPedidosProdutoFiltro(novoProdFiltro);
                     }
                     setPedidosPage(1);
-                    void fetchPedidos(1, novoStatus, novoProdFiltro);
+                    void fetchPedidos(1, novoStatus, novoProdFiltro, pedidosStatusFiltro);
                   }}
                   className="px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30"
                   aria-label="Filtrar status dos produtos em pedidos"
                 >
-                  <option value="todos">Status: Todos</option>
+                  <option value="todos">Produtos: Todos</option>
                   <option value="ativos">Produtos Ativos</option>
                   <option value="inativos">Produtos Inativos</option>
                 </select>
@@ -1833,7 +1917,7 @@ export default function AdminPage() {
                     const novoFiltro = e.target.value;
                     setPedidosProdutoFiltro(novoFiltro);
                     setPedidosPage(1);
-                    void fetchPedidos(1, pedidosProdutoStatusFiltro, novoFiltro);
+                    void fetchPedidos(1, pedidosProdutoStatusFiltro, novoFiltro, pedidosStatusFiltro);
                   }}
                   className="px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30 max-w-[200px] truncate"
                   aria-label="Filtrar por produto"

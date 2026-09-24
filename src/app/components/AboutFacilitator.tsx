@@ -49,7 +49,7 @@ const FAQ_PADRAO: FAQItem[] = [
 
 const DADOS_FACILITADORA_PADRAO = {
   nome: "Clatihúcia Capeli",
-  titulo: "Facilitadora e Terapeuta Sistêmica",
+  titulo: "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal",
   foto_url: "/foto_10.jpg",
   credenciais:
     "Constelação Familiar, Vivências em Grupo e Acolhimento do Trauma",

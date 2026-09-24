@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
 
     const produtoId = searchParams.get("produtoId")?.trim() || "";
     const produtoStatus = searchParams.get("produtoStatus")?.trim().toLowerCase() || "";
+    const statusParam = searchParams.get("status")?.trim().toLowerCase() || "";
 
     // Se filtrar por status do produto e nenhum produto específico foi escolhido
     let filtrarPorIds: string[] | null = null;
@@ -65,9 +66,18 @@ export async function GET(req: NextRequest) {
           page,
           perPage,
           totalPages: 1,
+          totaisStatus: { todos: 0, pago: 0, pendente: 0, cancelado: 0 },
         });
       }
       query = query.in("produto_id", filtrarPorIds);
+    }
+
+    if (statusParam && statusParam !== "todos") {
+      if (statusParam === "pago" || statusParam === "pagos" || statusParam === "confirmado" || statusParam === "confirmados") {
+        query = query.in("status", ["pago", "confirmado"]);
+      } else {
+        query = query.eq("status", statusParam);
+      }
     }
 
     if (search) {
@@ -105,12 +115,32 @@ export async function GET(req: NextRequest) {
       };
     });
 
+    // Buscar contagem por status para os chips informativos
+    let countQuery = supabaseAdmin!.from("pedidos").select("status");
+    if (produtoId && produtoId !== "todos") {
+      countQuery = countQuery.eq("produto_id", produtoId);
+    } else if (filtrarPorIds !== null && filtrarPorIds.length > 0) {
+      countQuery = countQuery.in("produto_id", filtrarPorIds);
+    }
+    if (search) {
+      const safe = search.replace(/[(),\\]/g, "");
+      countQuery = countQuery.or(`cliente_nome.ilike.%${safe}%,cliente_email.ilike.%${safe}%,order_nsu.ilike.%${safe}%`);
+    }
+    const { data: statusRows } = await countQuery;
+    const totaisStatus = {
+      todos: statusRows?.length || 0,
+      pago: statusRows?.filter((r) => r.status === "pago" || r.status === "confirmado").length || 0,
+      pendente: statusRows?.filter((r) => r.status === "pendente").length || 0,
+      cancelado: statusRows?.filter((r) => r.status === "cancelado").length || 0,
+    };
+
     return NextResponse.json({
       data: normalizedData,
       total,
       page,
       perPage,
       totalPages: Math.max(1, Math.ceil(total / perPage)),
+      totaisStatus,
     });
   } catch (error) {
     console.error("[admin/pedidos] Erro:", error);
