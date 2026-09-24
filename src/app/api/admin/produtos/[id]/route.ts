@@ -76,6 +76,25 @@ export async function PUT(
 
   if (updates.vagas_ocupadas_manual !== undefined) {
     updates.vagas_ocupadas_manual = parseIntegerSafely(updates.vagas_ocupadas_manual);
+
+    if (updates.vagas_ocupadas_manual !== null) {
+      const { data: currentProduct, error: fetchErr } = await supabaseAdmin!
+        .from("produtos")
+        .select("vagas_ocupadas_manual")
+        .eq("id", id)
+        .single();
+
+      if (!fetchErr && currentProduct && currentProduct.vagas_ocupadas_manual != null) {
+        if ((updates.vagas_ocupadas_manual as number) < currentProduct.vagas_ocupadas_manual) {
+          return NextResponse.json(
+            {
+              error: `O valor do contador (${updates.vagas_ocupadas_manual}) não pode ser menor do que o já existente no banco de dados (${currentProduct.vagas_ocupadas_manual}).`,
+            },
+            { status: 400 }
+          );
+        }
+      }
+    }
   }
 
   if (updates.slug && typeof updates.slug === "string") {

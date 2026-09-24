@@ -572,11 +572,23 @@ export default function AdminPage() {
       return match ? parseInt(match[1], 10) : null;
     };
 
+    const vagasOcupadasNum = parseVagas(produtoForm.vagas_ocupadas_manual);
+    if (
+      produtoEditando &&
+      produtoEditando.vagas_ocupadas_manual != null &&
+      vagasOcupadasNum !== null &&
+      vagasOcupadasNum < produtoEditando.vagas_ocupadas_manual
+    ) {
+      setError(`O contador de vagas (${vagasOcupadasNum}) não pode ser menor do que o já existente no banco de dados (${produtoEditando.vagas_ocupadas_manual}).`);
+      setSalvandoProduto(false);
+      return;
+    }
+
     const payload = {
       ...produtoForm,
       imagem_url: imagemUrl,
       vagas_maximas: parseVagas(produtoForm.vagas_maximas),
-      vagas_ocupadas_manual: parseVagas(produtoForm.vagas_ocupadas_manual),
+      vagas_ocupadas_manual: vagasOcupadasNum,
       categoria: produtoForm.categoria.trim() || null,
       preco: parseFloat(produtoForm.preco.replace(",", ".")) || 0,
       ordem: parseInt(produtoForm.ordem) || 0,
@@ -661,10 +673,20 @@ export default function AdminPage() {
 
   const handleSalvarContadorRapido = async () => {
     if (!ajustandoContador) return;
-    setSalvandoContador(true);
     const { produto, valor } = ajustandoContador;
     const match = valor.trim().match(/^(\d+)/);
     const vagas_ocupadas_manual = match ? parseInt(match[1], 10) : null;
+
+    if (
+      vagas_ocupadas_manual !== null &&
+      produto.vagas_ocupadas_manual != null &&
+      vagas_ocupadas_manual < produto.vagas_ocupadas_manual
+    ) {
+      setError(`O contador não pode ser menor que o já existente no banco de dados (${produto.vagas_ocupadas_manual}).`);
+      return;
+    }
+
+    setSalvandoContador(true);
     try {
       const res = await fetch(`/api/admin/produtos/${produto.id}`, {
         method: "PUT",
@@ -1618,14 +1640,41 @@ export default function AdminPage() {
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">
                       Vagas Preenchidas / Contador <span className="text-brand-charcoal/30">(opcional)</span>
                     </label>
-<input
-                       value={produtoForm.vagas_ocupadas_manual}
-                       onChange={(e) => setProdutoForm({ ...produtoForm, vagas_ocupadas_manual: e.target.value })}
-                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
-                       placeholder="Ex: 12"
-                       inputMode="numeric"
-                     />
-                    <p className="text-xs text-brand-charcoal/30 mt-1">Deixe em branco para contagem automática via inscrições pagas.</p>
+                    {(() => {
+                      const match = produtoForm.vagas_ocupadas_manual.trim().match(/^(\d+)/);
+                      const valNum = match ? parseInt(match[1], 10) : null;
+                      const valMinBanco = produtoEditando?.vagas_ocupadas_manual;
+                      const isMenorQueBanco =
+                        produtoEditando != null &&
+                        valMinBanco != null &&
+                        valNum !== null &&
+                        valNum < valMinBanco;
+
+                      return (
+                        <>
+                          <input
+                            type="number"
+                            min={valMinBanco ?? 0}
+                            value={produtoForm.vagas_ocupadas_manual}
+                            onChange={(e) => setProdutoForm({ ...produtoForm, vagas_ocupadas_manual: e.target.value })}
+                            className={`w-full px-3 py-2 border rounded-lg text-sm focus-visible:ring-2 ${
+                              isMenorQueBanco
+                                ? "border-red-400 focus-visible:ring-red-300"
+                                : "border-brand-beige focus-visible:ring-brand-purple/30"
+                            }`}
+                            placeholder="Ex: 12"
+                            inputMode="numeric"
+                          />
+                          {isMenorQueBanco ? (
+                            <p className="text-xs text-red-500 font-medium mt-1">
+                              Não pode ser menor que {valMinBanco} (já registrado no banco de dados).
+                            </p>
+                          ) : (
+                            <p className="text-xs text-brand-charcoal/30 mt-1">Deixe em branco para contagem automática via inscrições pagas.</p>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Descrição Curta</label>
@@ -3204,52 +3253,77 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-brand-charcoal/80 mb-1">
-                Vagas Preenchidas na Página
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={ajustandoContador.valor}
-                onChange={(e) =>
-                  setAjustandoContador({ ...ajustandoContador, valor: e.target.value })
-                }
-                placeholder="Deixe vazio para automático"
-                className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
-                autoFocus
-              />
-              <p className="text-[11px] text-brand-charcoal/50 mt-1.5 leading-normal">
-                Digite quantas vagas devem aparecer como ocupadas. Se deixar em branco, o sistema volta a contar as inscrições pagas reais.
-              </p>
-            </div>
+            {(() => {
+              const match = ajustandoContador.valor.trim().match(/^(\d+)/);
+              const valorNumerico = match ? parseInt(match[1], 10) : null;
+              const valMinBanco = ajustandoContador.produto.vagas_ocupadas_manual;
+              const isMenorQueAtual =
+                ajustandoContador.valor.trim() !== "" &&
+                valorNumerico !== null &&
+                valMinBanco != null &&
+                valorNumerico < valMinBanco;
 
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => setAjustandoContador(null)}
-                className="px-3.5 py-2 text-xs text-brand-charcoal/60 hover:text-brand-charcoal transition-colors rounded-lg"
-              >
-                Cancelar
-              </button>
-              {ajustandoContador.valor !== "" && (
-                <button
-                  type="button"
-                  onClick={() => setAjustandoContador({ ...ajustandoContador, valor: "" })}
-                  className="px-3.5 py-2 text-xs text-brand-charcoal/70 hover:bg-brand-beige/50 border border-brand-beige transition-colors rounded-lg"
-                >
-                  Limpar (Automático)
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={handleSalvarContadorRapido}
-                disabled={salvandoContador}
-                className="px-4 py-2 text-xs bg-brand-purple text-white rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors font-medium shadow-xs"
-              >
-                {salvandoContador ? "Salvando..." : "Salvar"}
-              </button>
-            </div>
+              return (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-xs font-medium text-brand-charcoal/80 mb-1">
+                      Vagas Preenchidas na Página
+                    </label>
+                    <input
+                      type="number"
+                      min={valMinBanco ?? 0}
+                      value={ajustandoContador.valor}
+                      onChange={(e) =>
+                        setAjustandoContador({ ...ajustandoContador, valor: e.target.value })
+                      }
+                      placeholder="Deixe vazio para automático"
+                      className={`w-full px-3 py-2 border rounded-lg text-sm focus-visible:ring-2 ${
+                        isMenorQueAtual
+                          ? "border-red-400 focus-visible:ring-red-300"
+                          : "border-brand-beige focus-visible:ring-brand-purple/30"
+                      }`}
+                      autoFocus
+                    />
+                    {isMenorQueAtual ? (
+                      <p className="text-[11px] text-red-500 font-medium mt-1.5 leading-normal">
+                        O valor não pode ser menor que {valMinBanco} (já registrado no banco de dados).
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-brand-charcoal/50 mt-1.5 leading-normal">
+                        Digite quantas vagas devem aparecer como ocupadas. Se deixar em branco, o sistema volta a contar as inscrições pagas reais.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setAjustandoContador(null)}
+                      className="px-3.5 py-2 text-xs text-brand-charcoal/60 hover:text-brand-charcoal transition-colors rounded-lg"
+                    >
+                      Cancelar
+                    </button>
+                    {ajustandoContador.valor !== "" && (
+                      <button
+                        type="button"
+                        onClick={() => setAjustandoContador({ ...ajustandoContador, valor: "" })}
+                        className="px-3.5 py-2 text-xs text-brand-charcoal/70 hover:bg-brand-beige/50 border border-brand-beige transition-colors rounded-lg"
+                      >
+                        Limpar (Automático)
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleSalvarContadorRapido}
+                      disabled={salvandoContador || isMenorQueAtual}
+                      className="px-4 py-2 text-xs bg-brand-purple text-white rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors font-medium shadow-xs"
+                    >
+                      {salvandoContador ? "Salvando..." : "Salvar"}
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
