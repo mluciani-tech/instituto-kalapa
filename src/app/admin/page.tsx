@@ -12,7 +12,7 @@ type Paginated<T> = {
   totalPages: number;
 };
 
-type Tab = "dashboard" | "config" | "sobre" | "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios";
+type Tab = "dashboard" | "sobre" | "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios";
 
 const FAQ_PADRAO_ADMIN = [
   {
@@ -1030,7 +1030,6 @@ export default function AdminPage() {
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: "dashboard", label: "📊 Visão Geral" },
-    { id: "config", label: "Configurações" },
     { id: "sobre", label: "Sobre & FAQ" },
     { id: "produtos", label: "Produtos", count: produtos.length },
     { id: "pedidos", label: "Pedidos", count: pedidosTotal || pedidos.length },
@@ -1098,24 +1097,6 @@ export default function AdminPage() {
           <AdminDashboard
             onNavigateTab={(targetTab) => setActiveTab(targetTab)}
           />
-        )}
-
-        {/* Tab: Configurações */}
-        {activeTab === "config" && (
-          <div className="bg-white rounded-xl border border-brand-beige p-6">
-            <h2 className="text-base font-semibold text-brand-charcoal mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-brand-purple" />
-              Configurações do Site
-            </h2>
-            <div className="max-w-md">
-              <p className="text-sm text-brand-charcoal/60">
-                Turma atual: <strong>{config.turma_atual || "2025-01"}</strong>
-              </p>
-              <p className="mt-3 text-xs text-brand-charcoal/40">
-                O limite de vagas agora é definido por produto na aba <strong>Produtos</strong>.
-              </p>
-            </div>
-          </div>
         )}
 
         {/* Tab: Sobre & FAQ */}
