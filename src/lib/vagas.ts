@@ -57,25 +57,71 @@ export async function countInscricoesPagas(produtoId?: string | null): Promise<n
   const turmaAtual = await getTurmaAtual();
 
   if (produtoId) {
-    const { count, error } = await supabaseAdmin!
-      .from("inscricoes")
-      .select("id, pedidos!inner(produto_id)", { count: "exact", head: true })
-      .eq("turma_id", turmaAtual)
-      .eq("status", "pago")
-      .eq("pedidos.produto_id", produtoId);
+    try {
+      // 1. Contar vagas via pedidos pagos/confirmados (considerando quantidades múltiplas)
+      const { data: pedidos, error: pedError } = await supabaseAdmin!
+        .from("pedidos")
+        .select("id, status, produto_id, itens")
+        .in("status", ["pago", "confirmado"]);
 
-    if (error) {
-      console.error("[vagas] Erro ao contar por produto:", error);
+      let totalVagas = 0;
+      const pedidosContados = new Set<string>();
+
+      if (!pedError && Array.isArray(pedidos)) {
+        for (const ped of pedidos) {
+          let matched = false;
+          let qtd = 0;
+
+          if (ped.produto_id === produtoId) {
+            matched = true;
+          }
+
+          if (Array.isArray(ped.itens)) {
+            for (const it of ped.itens as Array<{ produto_id?: string; quantidade?: number }>) {
+              if (it && it.produto_id === produtoId) {
+                matched = true;
+                qtd += Number(it.quantidade) || 1;
+              }
+            }
+          }
+
+          if (matched) {
+            pedidosContados.add(ped.id);
+            totalVagas += qtd > 0 ? qtd : 1;
+          }
+        }
+      }
+
+      // 2. Contar inscrições pagas avulsas (que não possuem pedido_id já computado)
+      const { data: inscricoes, error: inscError } = await supabaseAdmin!
+        .from("inscricoes")
+        .select("id, pedido_id, status, pedidos(produto_id)")
+        .in("status", ["pago", "confirmado"]);
+
+      if (!inscError && Array.isArray(inscricoes)) {
+        for (const insc of inscricoes as Array<{ id: string; pedido_id?: string | null; pedidos?: { produto_id?: string } | { produto_id?: string }[] | null }>) {
+          if (insc.pedido_id && pedidosContados.has(insc.pedido_id)) {
+            continue;
+          }
+          const pedObj = Array.isArray(insc.pedidos) ? insc.pedidos[0] : insc.pedidos;
+          if (pedObj?.produto_id === produtoId) {
+            totalVagas += 1;
+          }
+        }
+      }
+
+      return Math.max(totalVagas, 0);
+    } catch (err) {
+      console.error("[vagas] Erro ao contar vagas por produto:", err);
       return 0;
     }
-    return count || 0;
   }
 
   const { count, error } = await supabaseAdmin!
     .from("inscricoes")
     .select("*", { count: "exact", head: true })
     .eq("turma_id", turmaAtual)
-    .eq("status", "pago");
+    .in("status", ["pago", "confirmado"]);
 
   if (error) {
     console.error("[vagas] Erro ao contar:", error);

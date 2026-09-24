@@ -219,20 +219,26 @@ export async function POST(req: NextRequest) {
 
     // 7. Criar inscrição vinculada se for serviço/vivência
     if (inscricao || itensProcessados.some((i) => i.vagasMaximas != null)) {
-      await supabaseAdmin!.from("inscricoes").insert({
-        turma_id: turmaAtual,
-        order_nsu: orderNsu,
-        pedido_id: pedido.id,
-        usuario_id: clienteLogado.id,
-        nome: clienteNome,
-        email: clienteEmail,
-        telefone: clienteTelefone || "Não informado",
-        cpf: clienteCpf,
-        motivacao: inscricao?.motivacao || "Compra via E-commerce",
-        metodo_pagamento: inscricao?.metodoPagamento || "infinitepay",
-        valor: valorFinal,
-        status: "pendente",
-      });
+      try {
+        const { error: inscricaoError } = await supabaseAdmin!.from("inscricoes").insert({
+          turma_id: turmaAtual,
+          order_nsu: orderNsu,
+          pedido_id: pedido.id,
+          nome: clienteNome,
+          email: clienteEmail,
+          telefone: clienteTelefone || "Não informado",
+          motivacao: inscricao?.motivacao || "Compra via E-commerce",
+          metodo_pagamento: inscricao?.metodoPagamento || "infinitepay",
+          valor: valorFinal,
+          status: "pendente",
+        });
+
+        if (inscricaoError) {
+          console.error("[checkout] Erro ao registrar inscricao:", inscricaoError);
+        }
+      } catch (errInscricao) {
+        console.error("[checkout] Falha ao tentar registrar inscrição:", errInscricao);
+      }
     }
 
     // 8. Montar itens para a InfinitePay

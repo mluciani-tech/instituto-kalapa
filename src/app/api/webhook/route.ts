@@ -198,6 +198,37 @@ export async function POST(req: NextRequest) {
 
       await supabaseAdmin!.from("inscricoes").update(inscricaoUpdate).eq("id", inscricao.id);
       console.log("[webhook] Inscrição atualizada:", inscricao.id);
+    } else {
+      // Se não havia inscrição vinculada (ex: falha transitória ou compra direta), cria agora com status pago
+      try {
+        const { getTurmaAtual } = await import("@/lib/vagas");
+        const turmaAtual = await getTurmaAtual();
+        const nomeCliente = customerData.nome || pedido.cliente_nome || "Participante";
+        const emailCliente = customerData.email || pedido.cliente_email || "N/A";
+        const telCliente = customerData.telefone || pedido.cliente_telefone || "Não informado";
+
+        const { data: novaInsc, error: novaInscErr } = await supabaseAdmin!.from("inscricoes").insert({
+          turma_id: turmaAtual,
+          order_nsu: order_nsu,
+          pedido_id: pedido.id,
+          nome: nomeCliente,
+          email: emailCliente,
+          telefone: telCliente,
+          motivacao: "Compra via E-commerce",
+          metodo_pagamento: metodoPagamento,
+          valor: valorReais,
+          status: "pago",
+        }).select("id, nome").single();
+
+        if (novaInscErr) {
+          console.error("[webhook] Erro ao criar inscrição no pagamento:", novaInscErr);
+        } else {
+          inscricao = { id: novaInsc.id, nome: novaInsc.nome, email: emailCliente, telefone: telCliente };
+          console.log("[webhook] Inscrição criada no pagamento:", novaInsc.id);
+        }
+      } catch (errInscricaoCriar) {
+        console.error("[webhook] Exceção ao criar inscrição no pagamento:", errInscricaoCriar);
+      }
     }
 
     // 3.1 Criar inscrições vinculadas para participantes/acompanhantes adicionais
