@@ -221,9 +221,12 @@ export async function GET(req: NextRequest) {
           telefoneLimpo = `55${telefoneLimpo}`;
         }
 
-        const prodNome =
-          (Array.isArray(p.produtos) ? p.produtos[0]?.nome : p.produtos?.nome) ||
-          (Array.isArray(p.itens) && p.itens[0]?.nome ? p.itens[0].nome : "Vivência Kalapa");
+        const produtosData = p.produtos as unknown as { nome?: string } | { nome?: string }[] | null;
+        const prodObj = Array.isArray(produtosData) ? produtosData[0] : produtosData;
+        const itensData = p.itens as unknown as Array<{ nome?: string }> | null;
+        const itemObj = Array.isArray(itensData) ? itensData[0] : null;
+
+        const prodNome = prodObj?.nome || itemObj?.nome || "Vivência Kalapa";
 
         const msg = encodeURIComponent(
           `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do Instituto Kalapa. Vimos seu interesse na vivência "${prodNome}". Ficou com alguma dúvida sobre a inscrição ou pagamento? Posso te ajudar!`
