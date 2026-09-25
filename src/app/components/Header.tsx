@@ -14,8 +14,10 @@ import {
   ShoppingBag,
   LogOut,
   Calendar,
+  KeyRound,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import ModalAlterarSenha from "@/components/ModalAlterarSenha";
 import type { Usuario } from "@/lib/types";
 
 const navLinks = [
@@ -96,6 +98,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [modalSenhaOpen, setModalSenhaOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -267,6 +270,17 @@ export default function Header() {
                       Minhas Vivências
                     </Link>
                     <button
+                      type="button"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        setModalSenhaOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-white/80 hover:text-white hover:bg-white/5 transition-colors text-left cursor-pointer"
+                    >
+                      <KeyRound className="w-4 h-4 text-brand-terracotta" />
+                      Alterar Senha
+                    </button>
+                    <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-400 hover:bg-white/5 transition-colors text-left cursor-pointer"
                     >
@@ -331,14 +345,27 @@ export default function Header() {
               );
             })}
             {usuario ? (
-              <Link
-                href="/conta/pedidos"
-                onClick={() => setMenuOpen(false)}
-                className="px-4 py-3 text-sm font-medium text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors flex items-center gap-2"
-              >
-                <Calendar className="w-4 h-4" />
-                Minhas Vivências ({usuario.nome.split(" ")[0]})
-              </Link>
+              <>
+                <Link
+                  href="/conta/pedidos"
+                  onClick={() => setMenuOpen(false)}
+                  className="px-4 py-3 text-sm font-medium text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors flex items-center gap-2"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Minhas Vivências ({usuario.nome.split(" ")[0]})
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setModalSenhaOpen(true);
+                  }}
+                  className="w-full text-left px-4 py-3 text-sm font-medium text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
+                >
+                  <KeyRound className="w-4 h-4" />
+                  Alterar Senha
+                </button>
+              </>
             ) : (
               <Link
                 href="/login"
@@ -357,6 +384,14 @@ export default function Header() {
             </div>
           </nav>
         </div>
+      )}
+
+      {usuario && (
+        <ModalAlterarSenha
+          isOpen={modalSenhaOpen}
+          onClose={() => setModalSenhaOpen(false)}
+          userEmail={usuario.email}
+        />
       )}
     </header>
   );

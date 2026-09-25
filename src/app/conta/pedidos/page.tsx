@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Package, Loader2, XCircle } from "lucide-react";
+import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound } from "lucide-react";
 import Footer from "../../components/Footer";
+import ModalAlterarSenha from "@/components/ModalAlterarSenha";
 import type { Pedido, Usuario } from "@/lib/types";
 
 function formatDate(iso: string) {
@@ -24,6 +25,7 @@ export default function MeusPedidosPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelandoId, setCancelandoId] = useState<string | null>(null);
+  const [modalSenhaOpen, setModalSenhaOpen] = useState(false);
 
   const fetchPedidos = useCallback(async () => {
     try {
@@ -101,9 +103,19 @@ export default function MeusPedidosPage() {
             </Link>
 
             {usuario && (
-              <span className="text-xs text-white/60">
-                Conectado como <strong className="text-brand-terracotta font-semibold">{usuario.nome.split(" ")[0]}</strong>
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-white/60 hidden sm:inline">
+                  Conectado como <strong className="text-brand-terracotta font-semibold">{usuario.nome.split(" ")[0]}</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setModalSenhaOpen(true)}
+                  className="px-3 py-1.5 text-xs font-medium text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-brand-terracotta" />
+                  Alterar Senha
+                </button>
+              </div>
             )}
           </div>
 
@@ -246,6 +258,14 @@ export default function MeusPedidosPage() {
           )}
         </div>
       </div>
+
+      {usuario && (
+        <ModalAlterarSenha
+          isOpen={modalSenhaOpen}
+          onClose={() => setModalSenhaOpen(false)}
+          userEmail={usuario.email}
+        />
+      )}
 
       <Footer />
     </div>

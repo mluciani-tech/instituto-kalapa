@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, Fragment } from "react";
+import { Mail } from "lucide-react";
 import type { Produto, Pedido, Participante, Cupom, Usuario } from "@/lib/types";
 import AdminDashboard from "./components/AdminDashboard";
 
@@ -227,6 +228,8 @@ export default function AdminPage() {
   const [novaSenhaInput, setNovaSenhaInput] = useState("");
   const [resetandoSenha, setResetandoSenha] = useState(false);
   const [resetSenhaSucesso, setResetSenhaSucesso] = useState("");
+  const [enviandoLinkAdmin, setEnviandoLinkAdmin] = useState(false);
+  const [linkAdminSucesso, setLinkAdminSucesso] = useState("");
   const [usuarioParaExcluir, setUsuarioParaExcluir] = useState<Usuario | null>(null);
   const [excluindoUsuario, setExcluindoUsuario] = useState(false);
 
@@ -476,6 +479,33 @@ export default function AdminPage() {
       setError(d.error || "Erro ao redefinir senha");
     }
     setResetandoSenha(false);
+  };
+
+  const handleEnviarLinkResetAdmin = async () => {
+    if (!usuarioParaReset?.email) return;
+    setEnviandoLinkAdmin(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/esqueci-senha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: usuarioParaReset.email }),
+      });
+      if (res.ok) {
+        setLinkAdminSucesso("Link de recuperação enviado com sucesso para o e-mail do cliente!");
+        setTimeout(() => {
+          setLinkAdminSucesso("");
+          setUsuarioParaReset(null);
+        }, 2500);
+      } else {
+        const d = await res.json();
+        setError(d.error || "Erro ao enviar link de recuperação");
+      }
+    } catch {
+      setError("Erro de rede ao enviar link");
+    } finally {
+      setEnviandoLinkAdmin(false);
+    }
   };
 
   const handleExcluirUsuario = async () => {
@@ -2776,6 +2806,7 @@ export default function AdminPage() {
                                   setUsuarioParaReset(u);
                                   setNovaSenhaInput("");
                                   setResetSenhaSucesso("");
+                                  setLinkAdminSucesso("");
                                 }}
                                 className="px-2.5 py-1 text-xs border border-brand-purple/30 text-brand-purple hover:bg-brand-purple/5 rounded-lg transition-colors"
                               >
@@ -3167,17 +3198,20 @@ export default function AdminPage() {
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-base font-semibold text-brand-charcoal mb-1">Resetar Senha</h3>
             <p className="text-xs text-brand-charcoal/60 mb-4">
-              Defina uma nova senha para <strong>{usuarioParaReset.nome}</strong> ({usuarioParaReset.email}):
+              Gerenciar acesso para <strong>{usuarioParaReset.nome}</strong> ({usuarioParaReset.email}):
             </p>
 
-            {resetSenhaSucesso ? (
-              <div className="p-3 bg-green-50 border border-green-200 text-green-700 text-xs rounded-lg mb-4">
-                {resetSenhaSucesso}
+            {resetSenhaSucesso || linkAdminSucesso ? (
+              <div className="p-3 bg-green-50 border border-green-200 text-green-700 text-xs rounded-lg mb-2">
+                {resetSenhaSucesso || linkAdminSucesso}
               </div>
             ) : (
-              <form onSubmit={handleResetarSenha} className="space-y-3">
-                <div>
-                  <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Nova Senha *</label>
+              <div className="space-y-4">
+                {/* Opção 1: Definir Manualmente */}
+                <form onSubmit={handleResetarSenha} className="space-y-2.5">
+                  <label className="text-xs font-semibold text-brand-charcoal/80 block">
+                    1. Definir Nova Senha Manualmente
+                  </label>
                   <input
                     type="password"
                     required
@@ -3187,24 +3221,52 @@ export default function AdminPage() {
                     placeholder="Mínimo de 6 caracteres"
                     className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus-visible:border-brand-purple"
                   />
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={resetandoSenha || novaSenhaInput.length < 6}
+                      className="px-3 py-1.5 text-xs bg-brand-purple text-white rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors cursor-pointer"
+                    >
+                      {resetandoSenha ? "Salvando..." : "Salvar Nova Senha"}
+                    </button>
+                  </div>
+                </form>
+
+                <div className="relative flex py-1 items-center">
+                  <div className="flex-grow border-t border-brand-beige"></div>
+                  <span className="flex-shrink mx-2 text-[10px] text-brand-charcoal/40 uppercase tracking-wider font-semibold">ou</span>
+                  <div className="flex-grow border-t border-brand-beige"></div>
                 </div>
-                <div className="flex gap-2 justify-end pt-2">
+
+                {/* Opção 2: Enviar Link por E-mail */}
+                <div>
+                  <label className="text-xs font-semibold text-brand-charcoal/80 block mb-1">
+                    2. Enviar Link por E-mail
+                  </label>
+                  <p className="text-[11px] text-brand-charcoal/55 mb-2 leading-relaxed">
+                    O cliente receberá um e-mail com instruções e link seguro para definir sua senha.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleEnviarLinkResetAdmin}
+                    disabled={enviandoLinkAdmin}
+                    className="w-full py-2 px-3 text-xs border border-brand-purple/30 text-brand-purple hover:bg-brand-purple/5 font-medium rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    {enviandoLinkAdmin ? "Enviando e-mail..." : `Enviar link de recuperação`}
+                  </button>
+                </div>
+
+                <div className="flex justify-end pt-2 border-t border-brand-beige/60">
                   <button
                     type="button"
                     onClick={() => setUsuarioParaReset(null)}
-                    className="px-4 py-2 text-xs text-brand-charcoal/60 hover:text-brand-charcoal transition-colors"
+                    className="px-4 py-1.5 text-xs text-brand-charcoal/60 hover:text-brand-charcoal transition-colors cursor-pointer"
                   >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={resetandoSenha || novaSenhaInput.length < 6}
-                    className="px-4 py-2 text-xs bg-brand-purple text-white rounded-lg hover:bg-brand-purple-dark disabled:opacity-50 transition-colors"
-                  >
-                    {resetandoSenha ? "Salvando..." : "Salvar Nova Senha"}
+                    Fechar
                   </button>
                 </div>
-              </form>
+              </div>
             )}
           </div>
         </div>
