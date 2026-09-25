@@ -297,44 +297,7 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Filtro de Produtos: Todos, Ativos, Inativos */}
-          <div className="bg-brand-beige-light p-1 rounded-xl border border-brand-beige flex items-center text-xs font-medium">
-            <span className="text-[11px] text-brand-charcoal/50 px-2 font-medium hidden sm:inline">
-              Produtos:
-            </span>
-            <button
-              onClick={() => setStatusProdutoFiltro("todos")}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                statusProdutoFiltro === "todos"
-                  ? "bg-brand-purple text-white shadow-xs font-semibold"
-                  : "text-brand-charcoal/60 hover:text-brand-charcoal"
-              }`}
-            >
-              Todos {totalProdutos > 0 ? `(${totalProdutos})` : ""}
-            </button>
-            <button
-              onClick={() => setStatusProdutoFiltro("ativos")}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                statusProdutoFiltro === "ativos"
-                  ? "bg-brand-purple text-white shadow-xs font-semibold"
-                  : "text-brand-charcoal/60 hover:text-brand-charcoal"
-              }`}
-            >
-              Ativos {totalAtivos > 0 ? `(${totalAtivos})` : ""}
-            </button>
-            <button
-              onClick={() => setStatusProdutoFiltro("inativos")}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                statusProdutoFiltro === "inativos"
-                  ? "bg-brand-purple text-white shadow-xs font-semibold"
-                  : "text-brand-charcoal/60 hover:text-brand-charcoal"
-              }`}
-            >
-              Inativos {totalInativos > 0 ? `(${totalInativos})` : ""}
-            </button>
-          </div>
-
+        <div className="flex items-center gap-2">
           {/* Filtro de Período */}
           <div className="bg-brand-beige-light p-1 rounded-xl border border-brand-beige flex text-xs font-medium">
             <button
@@ -631,15 +594,14 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Termômetro de Ocupação por Produto */}
         <div className="bg-white p-5 sm:p-6 rounded-2xl border border-brand-beige shadow-xs h-fit">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3.5">
             <div>
               <h3 className="text-sm font-bold text-brand-purple flex items-center gap-2">
                 <Flame className="w-4 h-4 text-brand-terracotta" />
                 Termômetro de Ocupação & Vendas
               </h3>
               <p className="text-xs text-brand-charcoal/50 mt-0.5">
-                Capacidade de vagas e receita por vivência ({produtosFiltrados.length} {produtosFiltrados.length === 1 ? "vivência" : "vivências"}
-                {statusProdutoFiltro === "ativos" ? " ativas" : statusProdutoFiltro === "inativos" ? " inativas" : ""})
+                Capacidade de vagas e receita por vivência ({produtosFiltrados.length} {produtosFiltrados.length === 1 ? "vivência" : "vivências"})
                 {receitaProdutosFiltrados > 0 && (
                   <> · Receita: <strong className="text-brand-purple font-semibold">{formatMoney(receitaProdutosFiltrados)}</strong></>
                 )}
@@ -647,10 +609,57 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
             </div>
             <button
               onClick={() => onNavigateTab("produtos")}
-              className="text-xs text-brand-purple font-medium hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs text-brand-purple font-medium hover:underline flex items-center gap-1 cursor-pointer self-start sm:self-auto shrink-0"
             >
               Gerenciar <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
+          </div>
+
+          {/* Filtro Segmentado de Produtos perfeitamente integrado no Card */}
+          <div className="mb-4 pb-3.5 border-b border-brand-beige/70 flex items-center justify-between gap-2.5 flex-wrap">
+            <div className="bg-brand-beige-light p-1 rounded-xl border border-brand-beige flex items-center text-xs font-medium w-full sm:w-auto">
+              <span className="text-[11px] text-brand-charcoal/50 px-2 font-medium hidden xs:inline">
+                Produtos:
+              </span>
+              <button
+                onClick={() => setStatusProdutoFiltro("todos")}
+                className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg transition-all cursor-pointer text-center ${
+                  statusProdutoFiltro === "todos"
+                    ? "bg-brand-purple text-white shadow-xs font-semibold"
+                    : "text-brand-charcoal/60 hover:text-brand-charcoal"
+                }`}
+              >
+                Todos {totalProdutos > 0 ? `(${totalProdutos})` : ""}
+              </button>
+              <button
+                onClick={() => setStatusProdutoFiltro("ativos")}
+                className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg transition-all cursor-pointer text-center ${
+                  statusProdutoFiltro === "ativos"
+                    ? "bg-brand-purple text-white shadow-xs font-semibold"
+                    : "text-brand-charcoal/60 hover:text-brand-charcoal"
+                }`}
+              >
+                Ativos {totalAtivos > 0 ? `(${totalAtivos})` : ""}
+              </button>
+              <button
+                onClick={() => setStatusProdutoFiltro("inativos")}
+                className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg transition-all cursor-pointer text-center ${
+                  statusProdutoFiltro === "inativos"
+                    ? "bg-brand-purple text-white shadow-xs font-semibold"
+                    : "text-brand-charcoal/60 hover:text-brand-charcoal"
+                }`}
+              >
+                Inativos {totalInativos > 0 ? `(${totalInativos})` : ""}
+              </button>
+            </div>
+
+            <span className="text-[11px] text-brand-charcoal/50 font-medium hidden sm:inline">
+              {statusProdutoFiltro === "todos"
+                ? "Exibindo todos os registros"
+                : statusProdutoFiltro === "ativos"
+                ? "Exibindo apenas vivências ativas"
+                : "Exibindo vivências inativas"}
+            </span>
           </div>
 
           <div className="space-y-3">
