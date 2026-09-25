@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { produto_id, itens: cartItens, inscricao, cupom_codigo, beneficiarios } = body;
+    const { produto_id, itens: cartItens, inscricao, cupom_codigo, beneficiarios, pedido_origem_id } = body;
 
     // 0. Exigir autenticação obrigatória (Opção 1 — Somente usuários cadastrados concluem compra)
     const clienteLogado = await getClienteFromRequest(req);
@@ -216,6 +216,30 @@ export async function POST(req: NextRequest) {
         { error: "Erro ao registrar pedido" },
         { status: 500 }
       );
+    }
+
+    // Se for retomada de um pedido pendente anterior, cancelar o anterior para evitar duplicidade
+    if (pedido_origem_id && typeof pedido_origem_id === "string") {
+      try {
+        await supabaseAdmin!
+          .from("pedidos")
+          .update({
+            status: "cancelado",
+            motivacao: `Substituído por nova tentativa (#${pedido.id})`,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", pedido_origem_id)
+          .eq("usuario_id", clienteLogado.id)
+          .eq("status", "pendente");
+
+        await supabaseAdmin!
+          .from("inscricoes")
+          .update({ status: "cancelado" })
+          .eq("pedido_id", pedido_origem_id)
+          .eq("status", "pendente");
+      } catch (errCancel) {
+        console.error("[checkout] Erro ao cancelar pedido anterior substituído:", errCancel);
+      }
     }
 
     // 7. Criar inscrição vinculada se for serviço/vivência

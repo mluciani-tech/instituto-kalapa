@@ -1,11 +1,15 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Clock, AlertCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { Pedido } from "@/lib/types";
 
 export default function CartDrawer() {
+  const router = useRouter();
   const {
     items,
     removeItem,
@@ -14,7 +18,75 @@ export default function CartDrawer() {
     closeDrawer,
     subtotal,
     totalItems,
+    setCartItems,
   } = useCart();
+
+  const [pedidoPendente, setPedidoPendente] = useState<Pedido | null>(null);
+  const [retomandoId, setRetomandoId] = useState<string | null>(null);
+  const [erroRetomada, setErroRetomada] = useState("");
+
+  // Buscar pedidos pendentes caso o carrinho esteja vazio
+  useEffect(() => {
+    if (!isDrawerOpen || items.length > 0) return;
+    let isCancelled = false;
+
+    const checkPendingOrders = async () => {
+      try {
+        const res = await fetch("/api/cliente/pedidos");
+        if (res.ok) {
+          const pedidos: Pedido[] = await res.json();
+          if (!isCancelled && Array.isArray(pedidos)) {
+            const pendente = pedidos.find((p) => p.status === "pendente");
+            setPedidoPendente(pendente || null);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    checkPendingOrders();
+    return () => {
+      isCancelled = true;
+    };
+  }, [isDrawerOpen, items.length]);
+
+  const handleRetomarPedido = async (pedidoId: string) => {
+    setRetomandoId(pedidoId);
+    setErroRetomada("");
+    try {
+      const res = await fetch(`/api/cliente/pedidos/${pedidoId}/retomar`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setErroRetomada(data.error || "Não foi possível retomar esta reserva.");
+        setRetomandoId(null);
+        return;
+      }
+
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("pedido_retomado_id", pedidoId);
+        if (data.beneficiarios && data.beneficiarios.length > 0) {
+          sessionStorage.setItem("pedido_retomado_beneficiarios", JSON.stringify(data.beneficiarios));
+        } else {
+          sessionStorage.removeItem("pedido_retomado_beneficiarios");
+        }
+        if (data.cupom_codigo) {
+          sessionStorage.setItem("pedido_retomado_cupom", data.cupom_codigo);
+        } else {
+          sessionStorage.removeItem("pedido_retomado_cupom");
+        }
+      }
+
+      setCartItems(data.itens);
+      closeDrawer();
+      router.push("/checkout");
+    } catch {
+      setErroRetomada("Erro de conexão ao retomar reserva. Tente novamente.");
+      setRetomandoId(null);
+    }
+  };
 
   if (!isDrawerOpen) return null;
 
@@ -51,23 +123,87 @@ export default function CartDrawer() {
           {/* Body / Items list */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
             {items.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-white/30 border border-white/10">
-                  <ShoppingBag className="w-8 h-8" />
-                </div>
-                <p className="text-sm font-semibold text-white/90 mb-1">
-                  Nenhuma vivência selecionada
-                </p>
-                <p className="text-xs text-white/50 max-w-xs mb-6">
-                  Explore nossas vivências e atendimentos para reservar sua vaga.
-                </p>
-                <Link
-                  href="/produtos"
-                  onClick={closeDrawer}
-                  className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-brand-terracotta/20"
-                >
-                  Explorar Catálogo
-                </Link>
+              <div className="h-full flex flex-col items-center justify-center text-center py-8">
+                {pedidoPendente ? (
+                  <div className="w-full p-5 bg-white/5 border border-brand-terracotta/30 rounded-2xl text-left shadow-xl space-y-3.5">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-terracotta/20 text-brand-terracotta border border-brand-terracotta/30">
+                        <Clock className="w-3 h-3 animate-pulse" />
+                        Reserva pendente
+                      </span>
+                      <span className="text-[11px] text-white/50 font-mono">
+                        #{pedidoPendente.order_nsu?.startsWith("kalapa-")
+                          ? pedidoPendente.order_nsu.slice(-6).toUpperCase()
+                          : pedidoPendente.id.slice(0, 6).toUpperCase()}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="text-xs text-white/50">Você iniciou uma compra recente:</p>
+                      <p className="text-sm font-semibold text-white line-clamp-2">
+                        {pedidoPendente.itens?.[0]?.nome || pedidoPendente.produtos?.nome || "Vivência Terapêutica"}
+                        {pedidoPendente.itens && pedidoPendente.itens.length > 1 ? ` (+${pedidoPendente.itens.length - 1} item)` : ""}
+                      </p>
+                      <p className="text-sm text-brand-terracotta font-bold mt-1">
+                        Total: R$ {Number(pedidoPendente.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+
+                    {erroRetomada && (
+                      <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/25 flex items-start gap-2 text-xs text-red-300">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-400 mt-0.5" />
+                        <span className="flex-1">{erroRetomada}</span>
+                      </div>
+                    )}
+
+                    <div className="pt-2 flex flex-col gap-2">
+                      <button
+                        onClick={() => handleRetomarPedido(pedidoPendente.id)}
+                        disabled={retomandoId === pedidoPendente.id}
+                        className="w-full py-3 px-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-brand-terracotta/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                      >
+                        {retomandoId === pedidoPendente.id ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Verificando vagas...</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingBag className="w-4 h-4" />
+                            <span>Retomar esta reserva</span>
+                          </>
+                        )}
+                      </button>
+
+                      <Link
+                        href="/conta/pedidos"
+                        onClick={closeDrawer}
+                        className="text-center text-[11px] text-white/60 hover:text-white transition-colors py-1.5"
+                      >
+                        Ver todos os meus pedidos
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-white/30 border border-white/10">
+                      <ShoppingBag className="w-8 h-8" />
+                    </div>
+                    <p className="text-sm font-semibold text-white/90 mb-1">
+                      Nenhuma vivência selecionada
+                    </p>
+                    <p className="text-xs text-white/50 max-w-xs mb-6">
+                      Explore nossas vivências e atendimentos para reservar sua vaga.
+                    </p>
+                    <Link
+                      href="/produtos"
+                      onClick={closeDrawer}
+                      className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-brand-terracotta/20"
+                    >
+                      Explorar Catálogo
+                    </Link>
+                  </>
+                )}
               </div>
             ) : (
               items.map((item) => (

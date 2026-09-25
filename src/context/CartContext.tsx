@@ -16,6 +16,7 @@ interface CartContextType {
   removeItem: (produto_id: string) => void;
   updateQuantity: (produto_id: string, quantidade: number) => void;
   clearCart: () => void;
+  setCartItems: (items: ItemCarrinho[]) => void;
   totalItems: number;
   subtotal: number;
   isDrawerOpen: boolean;
@@ -141,6 +142,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const setCartItems = (newItems: ItemCarrinho[]) => {
+    setItems(newItems);
+  };
+
   const totalItems = items.reduce((sum, item) => sum + item.quantidade, 0);
   const subtotal = items.reduce((sum, item) => sum + item.preco * item.quantidade, 0);
 
@@ -152,6 +157,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeItem,
         updateQuantity,
         clearCart,
+        setCartItems,
         totalItems,
         subtotal,
         isDrawerOpen,

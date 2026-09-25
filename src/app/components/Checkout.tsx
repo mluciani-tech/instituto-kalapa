@@ -82,6 +82,14 @@ export default function Checkout() {
             setProduto(data);
           }
         }
+
+        // 3. Pré-carregar cupom salvo se for pedido retomado
+        const savedCupom = typeof window !== "undefined"
+          ? sessionStorage.getItem("pedido_retomado_cupom")
+          : null;
+        if (savedCupom) {
+          setCupomInput(savedCupom);
+        }
       } catch {
         // ignore
       }
@@ -101,27 +109,36 @@ export default function Checkout() {
 
     setAcompanhantes((prev) => {
       const necessarios: AcompanhanteItem[] = [];
+      let savedBeneficiarios: Array<{ nome?: string; email?: string; telefone?: string; produto_id?: string }> = [];
+      try {
+        const raw = typeof window !== "undefined" ? sessionStorage.getItem("pedido_retomado_beneficiarios") : null;
+        if (raw) savedBeneficiarios = JSON.parse(raw);
+      } catch {
+        // ignore
+      }
+
       for (const item of cartItems) {
         if (item.quantidade >= 2) {
           const extras = item.quantidade - 1;
           for (let i = 0; i < extras; i++) {
             const key = `${item.produto_id}-${i}`;
             const existente = prev.find((a) => a.key === key);
+            const saved = savedBeneficiarios.find((b, idx) => (b.produto_id === item.produto_id || !b.produto_id) && idx === i);
             necessarios.push({
               key,
               produto_id: item.produto_id,
               produto_nome: item.nome,
               indice: i + 1,
-              nome: existente?.nome || "",
-              email: existente?.email || "",
-              telefone: existente?.telefone || "",
+              nome: existente?.nome || saved?.nome || "",
+              email: existente?.email || saved?.email || "",
+              telefone: existente?.telefone || saved?.telefone || "",
             });
           }
         }
       }
 
-      const currentKeys = prev.map((a) => a.key).join(",");
-      const nextKeys = necessarios.map((a) => a.key).join(",");
+      const currentKeys = prev.map((a) => `${a.key}-${a.nome}-${a.email}`).join(",");
+      const nextKeys = necessarios.map((a) => `${a.key}-${a.nome}-${a.email}`).join(",");
       return currentKeys !== nextKeys ? necessarios : prev;
     });
   }, [cartItems, isCartCheckout]);
@@ -207,8 +224,13 @@ export default function Checkout() {
     setErro("");
 
     try {
+      const pedidoOrigemId = typeof window !== "undefined"
+        ? sessionStorage.getItem("pedido_retomado_id")
+        : null;
+
       const bodyPayload: Record<string, unknown> = {
         cupom_codigo: cupomAplicado?.codigo || null,
+        pedido_origem_id: pedidoOrigemId || null,
       };
 
       if (isCartCheckout) {
@@ -249,6 +271,9 @@ export default function Checkout() {
       try {
         localStorage.removeItem("kalapa_cart_items_v1");
         sessionStorage.removeItem("produto_selecionado");
+        sessionStorage.removeItem("pedido_retomado_id");
+        sessionStorage.removeItem("pedido_retomado_beneficiarios");
+        sessionStorage.removeItem("pedido_retomado_cupom");
       } catch {
         // ignore
       }

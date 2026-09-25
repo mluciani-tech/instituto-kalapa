@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound } from "lucide-react";
+import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle } from "lucide-react";
 import Footer from "../../components/Footer";
 import ModalAlterarSenha from "@/components/ModalAlterarSenha";
+import { useCart } from "@/context/CartContext";
 import type { Pedido, Usuario } from "@/lib/types";
 
 function formatDate(iso: string) {
@@ -25,7 +26,10 @@ export default function MeusPedidosPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelandoId, setCancelandoId] = useState<string | null>(null);
+  const [retomandoId, setRetomandoId] = useState<string | null>(null);
+  const [erroRetomada, setErroRetomada] = useState<{ [pedidoId: string]: string }>({});
   const [modalSenhaOpen, setModalSenhaOpen] = useState(false);
+  const { setCartItems } = useCart();
 
   const fetchPedidos = useCallback(async () => {
     try {
@@ -73,6 +77,52 @@ export default function MeusPedidosPage() {
       alert("Erro ao cancelar pedido");
     }
     setCancelandoId(null);
+  };
+
+  const handleRetomarPedido = async (pedidoId: string) => {
+    setRetomandoId(pedidoId);
+    setErroRetomada((prev) => ({ ...prev, [pedidoId]: "" }));
+    try {
+      const res = await fetch(`/api/cliente/pedidos/${pedidoId}/retomar`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setErroRetomada((prev) => ({
+          ...prev,
+          [pedidoId]: data.error || "Não foi possível retomar este pedido.",
+        }));
+        setRetomandoId(null);
+        return;
+      }
+
+      // Guardar pedido_origem_id na sessão para vincular e substituir ao finalizar o checkout
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("pedido_retomado_id", pedidoId);
+        if (data.beneficiarios && data.beneficiarios.length > 0) {
+          sessionStorage.setItem("pedido_retomado_beneficiarios", JSON.stringify(data.beneficiarios));
+        } else {
+          sessionStorage.removeItem("pedido_retomado_beneficiarios");
+        }
+        if (data.cupom_codigo) {
+          sessionStorage.setItem("pedido_retomado_cupom", data.cupom_codigo);
+        } else {
+          sessionStorage.removeItem("pedido_retomado_cupom");
+        }
+      }
+
+      // Atualizar itens no carrinho global
+      setCartItems(data.itens);
+
+      // Redirecionar para o Checkout
+      router.push("/checkout");
+    } catch {
+      setErroRetomada((prev) => ({
+        ...prev,
+        [pedidoId]: "Erro de conexão ao retomar pedido. Tente novamente.",
+      }));
+      setRetomandoId(null);
+    }
   };
 
   if (loading) {
@@ -226,16 +276,36 @@ export default function MeusPedidosPage() {
                         ) : null}
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {isPendente && (
-                          <button
-                            onClick={() => handleCancelarPedido(p.id)}
-                            disabled={cancelandoId === p.id}
-                            className="px-3.5 py-1.5 text-xs text-red-300 hover:text-red-200 hover:bg-red-500/15 border border-red-500/20 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <XCircle className="w-3.5 h-3.5" />
-                            {cancelandoId === p.id ? "Cancelando..." : "Cancelar pedido"}
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handleCancelarPedido(p.id)}
+                              disabled={cancelandoId === p.id || retomandoId === p.id}
+                              className="px-3 py-1.5 text-xs text-red-300 hover:text-red-200 hover:bg-red-500/15 border border-red-500/20 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            >
+                              <XCircle className="w-3.5 h-3.5" />
+                              {cancelandoId === p.id ? "Cancelando..." : "Cancelar pedido"}
+                            </button>
+
+                            <button
+                              onClick={() => handleRetomarPedido(p.id)}
+                              disabled={retomandoId === p.id || cancelandoId === p.id}
+                              className="px-4 py-1.5 text-xs font-semibold text-white bg-brand-terracotta hover:bg-brand-terracotta-dark border border-brand-terracotta/40 rounded-xl transition-all shadow-md shadow-brand-terracotta/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            >
+                              {retomandoId === p.id ? (
+                                <>
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  <span>Verificando...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ShoppingBag className="w-3.5 h-3.5" />
+                                  <span>Continuar compra</span>
+                                </>
+                              )}
+                            </button>
+                          </>
                         )}
 
                         {isPago && p.receipt_url && (
@@ -251,6 +321,17 @@ export default function MeusPedidosPage() {
                         )}
                       </div>
                     </div>
+
+                    {/* Mensagem de indisponibilidade ou erro na retomada */}
+                    {erroRetomada[p.id] && (
+                      <div className="mt-3 p-3 rounded-xl bg-red-500/10 border border-red-500/25 flex items-start gap-2.5 text-xs text-red-300 animate-in fade-in">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="font-semibold text-red-200">Não foi possível continuar esta compra:</p>
+                          <p className="mt-0.5 text-red-300/90">{erroRetomada[p.id]}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
