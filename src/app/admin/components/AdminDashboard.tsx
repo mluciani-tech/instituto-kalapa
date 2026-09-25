@@ -78,6 +78,7 @@ interface AdminDashboardProps {
 
 export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
   const [periodo, setPeriodo] = useState<"7d" | "30d" | "90d" | "total">("30d");
+  const [statusProdutoFiltro, setStatusProdutoFiltro] = useState<"todos" | "ativos" | "inativos">("todos");
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -89,6 +90,26 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
     valor: number;
     pedidos: number;
   } | null>(null);
+
+  const totalProdutos = data?.produtosRanking.length || 0;
+  const totalAtivos = data?.produtosRanking.filter((p) => p.ativo !== false).length || 0;
+  const totalInativos = data?.produtosRanking.filter((p) => p.ativo === false).length || 0;
+
+  const produtosFiltrados = (data?.produtosRanking || []).filter((p) => {
+    if (statusProdutoFiltro === "ativos") return p.ativo !== false;
+    if (statusProdutoFiltro === "inativos") return p.ativo === false;
+    return true;
+  });
+
+  const vagasOcupadasFiltradas = produtosFiltrados.reduce(
+    (sum, p) => sum + (p.vagas_preenchidas || 0),
+    0
+  );
+
+  const receitaProdutosFiltrados = produtosFiltrados.reduce(
+    (sum, p) => sum + (p.receita || 0),
+    0
+  );
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -277,10 +298,48 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Filtro de Produtos: Todos, Ativos, Inativos */}
+          <div className="bg-brand-beige-light p-1 rounded-xl border border-brand-beige flex items-center text-xs font-medium">
+            <span className="text-[11px] text-brand-charcoal/50 px-2 font-medium hidden sm:inline">
+              Produtos:
+            </span>
+            <button
+              onClick={() => setStatusProdutoFiltro("todos")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                statusProdutoFiltro === "todos"
+                  ? "bg-brand-purple text-white shadow-xs font-semibold"
+                  : "text-brand-charcoal/60 hover:text-brand-charcoal"
+              }`}
+            >
+              Todos {totalProdutos > 0 ? `(${totalProdutos})` : ""}
+            </button>
+            <button
+              onClick={() => setStatusProdutoFiltro("ativos")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                statusProdutoFiltro === "ativos"
+                  ? "bg-brand-purple text-white shadow-xs font-semibold"
+                  : "text-brand-charcoal/60 hover:text-brand-charcoal"
+              }`}
+            >
+              Ativos {totalAtivos > 0 ? `(${totalAtivos})` : ""}
+            </button>
+            <button
+              onClick={() => setStatusProdutoFiltro("inativos")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                statusProdutoFiltro === "inativos"
+                  ? "bg-brand-purple text-white shadow-xs font-semibold"
+                  : "text-brand-charcoal/60 hover:text-brand-charcoal"
+              }`}
+            >
+              Inativos {totalInativos > 0 ? `(${totalInativos})` : ""}
+            </button>
+          </div>
+
+          {/* Filtro de Período */}
           <div className="bg-brand-beige-light p-1 rounded-xl border border-brand-beige flex text-xs font-medium">
             <button
               onClick={() => setPeriodo("7d")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 periodo === "7d"
                   ? "bg-brand-purple text-white shadow-xs font-semibold"
                   : "text-brand-charcoal/60 hover:text-brand-charcoal"
@@ -290,7 +349,7 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
             </button>
             <button
               onClick={() => setPeriodo("30d")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 periodo === "30d"
                   ? "bg-brand-purple text-white shadow-xs font-semibold"
                   : "text-brand-charcoal/60 hover:text-brand-charcoal"
@@ -300,7 +359,7 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
             </button>
             <button
               onClick={() => setPeriodo("90d")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 periodo === "90d"
                   ? "bg-brand-purple text-white shadow-xs font-semibold"
                   : "text-brand-charcoal/60 hover:text-brand-charcoal"
@@ -310,7 +369,7 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
             </button>
             <button
               onClick={() => setPeriodo("total")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 periodo === "total"
                   ? "bg-brand-purple text-white shadow-xs font-semibold"
                   : "text-brand-charcoal/60 hover:text-brand-charcoal"
@@ -323,7 +382,7 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
           <button
             onClick={fetchDashboard}
             disabled={loading}
-            className="p-2 border border-brand-beige rounded-xl hover:bg-brand-beige/40 text-brand-charcoal/70 transition-colors disabled:opacity-50"
+            className="p-2 border border-brand-beige rounded-xl hover:bg-brand-beige/40 text-brand-charcoal/70 transition-colors disabled:opacity-50 cursor-pointer"
             title="Recarregar dados"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -374,10 +433,14 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
           </div>
           <div className="mt-3">
             <div className="text-2xl font-bold text-brand-purple tracking-tight">
-              {data ? `${data.kpis.totalVagasOcupadas} participantes` : "—"}
+              {data ? `${vagasOcupadasFiltradas} participantes` : "—"}
             </div>
             <p className="text-[11px] text-brand-charcoal/50 mt-1">
-              Nas turmas e vivências ativas
+              {statusProdutoFiltro === "todos"
+                ? "Nas turmas e vivências (todas)"
+                : statusProdutoFiltro === "ativos"
+                ? "Nas turmas e vivências ativas"
+                : "Nas vivências inativas / encerradas"}
             </p>
           </div>
         </div>
@@ -575,80 +638,99 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
                 Termômetro de Ocupação & Vendas
               </h3>
               <p className="text-xs text-brand-charcoal/50 mt-0.5">
-                Capacidade de vagas e receita por vivência
+                Capacidade de vagas e receita por vivência ({produtosFiltrados.length} {produtosFiltrados.length === 1 ? "vivência" : "vivências"}
+                {statusProdutoFiltro === "ativos" ? " ativas" : statusProdutoFiltro === "inativos" ? " inativas" : ""})
+                {receitaProdutosFiltrados > 0 && (
+                  <> · Receita: <strong className="text-brand-purple font-semibold">{formatMoney(receitaProdutosFiltrados)}</strong></>
+                )}
               </p>
             </div>
             <button
               onClick={() => onNavigateTab("produtos")}
-              className="text-xs text-brand-purple font-medium hover:underline flex items-center gap-1"
+              className="text-xs text-brand-purple font-medium hover:underline flex items-center gap-1 cursor-pointer"
             >
               Gerenciar <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           <div className="space-y-3">
-            {data?.produtosRanking.map((prod) => {
-              const pct = prod.percentual_ocupacao ?? 0;
-              return (
-                <div key={prod.id} className="p-3.5 rounded-xl border border-brand-beige hover:border-brand-purple/20 transition-all bg-white">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="min-w-0 flex-1">
-                      <h4 className="text-xs font-bold text-brand-charcoal break-words leading-snug">{prod.nome}</h4>
-                      <p className="text-[11px] text-brand-charcoal/50 mt-1">
-                        Faturamento: <strong className="text-brand-purple font-semibold">{formatMoney(prod.receita)}</strong>
-                      </p>
+            {produtosFiltrados.length === 0 ? (
+              <div className="text-center py-8 px-4 bg-brand-beige-light/40 rounded-xl border border-dashed border-brand-beige">
+                <p className="text-xs font-medium text-brand-charcoal/60">
+                  Nenhuma vivência {statusProdutoFiltro === "inativos" ? "inativa" : statusProdutoFiltro === "ativos" ? "ativa" : ""} encontrada.
+                </p>
+              </div>
+            ) : (
+              produtosFiltrados.map((prod) => {
+                const pct = prod.percentual_ocupacao ?? 0;
+                return (
+                  <div key={prod.id} className="p-3.5 rounded-xl border border-brand-beige hover:border-brand-purple/20 transition-all bg-white">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h4 className="text-xs font-bold text-brand-charcoal break-words leading-snug">{prod.nome}</h4>
+                          {prod.ativo === false && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold bg-gray-100 text-gray-500 border border-gray-200 shrink-0">
+                              Inativo
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-brand-charcoal/50 mt-1">
+                          Faturamento: <strong className="text-brand-purple font-semibold">{formatMoney(prod.receita)}</strong>
+                        </p>
+                      </div>
+
+                      {prod.vagas_maximas ? (
+                        <span
+                          className={`text-[10px] px-2.5 py-0.5 rounded-full font-semibold whitespace-nowrap shrink-0 ${
+                            prod.status_ocupacao === "lotada"
+                              ? "bg-red-100 text-red-700"
+                              : prod.status_ocupacao === "quase_lotada"
+                              ? "bg-amber-100 text-amber-800"
+                              : "bg-brand-mint/20 text-brand-mint-dark"
+                          }`}
+                        >
+                          {prod.status_ocupacao === "lotada"
+                            ? "Turma Lotada"
+                            : prod.status_ocupacao === "quase_lotada"
+                            ? "Últimas Vagas!"
+                            : "Vagas Abertas"}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-brand-beige text-brand-charcoal/60 shrink-0">
+                          Sem limite
+                        </span>
+                      )}
                     </div>
 
                     {prod.vagas_maximas ? (
-                      <span
-                        className={`text-[10px] px-2.5 py-0.5 rounded-full font-semibold whitespace-nowrap shrink-0 ${
-                          prod.status_ocupacao === "lotada"
-                            ? "bg-red-100 text-red-700"
-                            : prod.status_ocupacao === "quase_lotada"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-brand-mint/20 text-brand-mint-dark"
-                        }`}
-                      >
-                        {prod.status_ocupacao === "lotada"
-                          ? "Turma Lotada"
-                          : prod.status_ocupacao === "quase_lotada"
-                          ? "Últimas Vagas!"
-                          : "Vagas Abertas"}
-                      </span>
+                      <div>
+                        <div className="w-full bg-brand-charcoal/10 rounded-full h-2 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              prod.status_ocupacao === "lotada"
+                                ? "bg-red-500"
+                                : prod.status_ocupacao === "quase_lotada"
+                                ? "bg-brand-terracotta"
+                                : "bg-brand-mint"
+                            }`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-[11px] text-brand-charcoal/60 mt-1.5">
+                          <span>{prod.vagas_preenchidas} de {prod.vagas_maximas} vagas ocupadas</span>
+                          <span className="font-semibold text-brand-purple">{pct}%</span>
+                        </div>
+                      </div>
                     ) : (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-brand-beige text-brand-charcoal/60 shrink-0">
-                        Sem limite
-                      </span>
+                      <div className="text-[11px] text-brand-charcoal/60 mt-1">
+                        {prod.vagas_preenchidas} inscrição(ões) confirmada(s)
+                      </div>
                     )}
                   </div>
-
-                  {prod.vagas_maximas ? (
-                    <div>
-                      <div className="w-full bg-brand-charcoal/10 rounded-full h-2 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            prod.status_ocupacao === "lotada"
-                              ? "bg-red-500"
-                              : prod.status_ocupacao === "quase_lotada"
-                              ? "bg-brand-terracotta"
-                              : "bg-brand-mint"
-                          }`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      <div className="flex justify-between text-[11px] text-brand-charcoal/60 mt-1.5">
-                        <span>{prod.vagas_preenchidas} de {prod.vagas_maximas} vagas ocupadas</span>
-                        <span className="font-semibold text-brand-purple">{pct}%</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-[11px] text-brand-charcoal/60 mt-1">
-                      {prod.vagas_preenchidas} inscrição(ões) confirmada(s)
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 

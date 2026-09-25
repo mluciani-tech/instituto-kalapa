@@ -202,7 +202,7 @@ export async function GET(req: NextRequest) {
         id: prod.id,
         nome: prod.nome,
         slug: prod.slug,
-        ativo: prod.ativo,
+        ativo: prod.ativo ?? true,
         receita: vInfo.receita,
         vagas_maximas: maximas,
         vagas_preenchidas: preenchidas,

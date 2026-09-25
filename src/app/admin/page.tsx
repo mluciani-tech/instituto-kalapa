@@ -1518,17 +1518,39 @@ export default function AdminPage() {
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                {/* Filtro Status do Produto */}
-                <select
-                  value={produtosStatusFiltro}
-                  onChange={(e) => setProdutosStatusFiltro(e.target.value as "todos" | "ativos" | "inativos")}
-                  className="px-3 py-2 border border-brand-beige rounded-lg text-sm bg-white text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30"
-                  aria-label="Filtrar status dos produtos"
-                >
-                  <option value="todos">Status: Todos</option>
-                  <option value="ativos">Produtos Ativos</option>
-                  <option value="inativos">Produtos Inativos</option>
-                </select>
+                {/* Botões Filtro Status do Produto */}
+                <div className="bg-brand-beige-light p-1 rounded-xl border border-brand-beige flex items-center text-xs font-medium">
+                  <button
+                    onClick={() => setProdutosStatusFiltro("todos")}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      produtosStatusFiltro === "todos"
+                        ? "bg-brand-purple text-white shadow-xs font-semibold"
+                        : "text-brand-charcoal/60 hover:text-brand-charcoal"
+                    }`}
+                  >
+                    Todos ({produtos.length})
+                  </button>
+                  <button
+                    onClick={() => setProdutosStatusFiltro("ativos")}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      produtosStatusFiltro === "ativos"
+                        ? "bg-brand-purple text-white shadow-xs font-semibold"
+                        : "text-brand-charcoal/60 hover:text-brand-charcoal"
+                    }`}
+                  >
+                    Ativos ({produtos.filter((p) => p.ativo !== false).length})
+                  </button>
+                  <button
+                    onClick={() => setProdutosStatusFiltro("inativos")}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      produtosStatusFiltro === "inativos"
+                        ? "bg-brand-purple text-white shadow-xs font-semibold"
+                        : "text-brand-charcoal/60 hover:text-brand-charcoal"
+                    }`}
+                  >
+                    Inativos ({produtos.filter((p) => p.ativo === false).length})
+                  </button>
+                </div>
 
                 {/* Campo de Busca */}
                 <div className="w-full sm:w-56">
