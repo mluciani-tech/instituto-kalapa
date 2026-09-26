@@ -103,9 +103,38 @@ export async function calculateAvailableSlots(params: {
     .eq("ativo", true)
     .order("start_time", { ascending: true });
 
-  if (availError || !availabilities || availabilities.length === 0) {
+  let effectiveAvailabilities: TherapistAvailability[] = availabilities || [];
+
+  if (effectiveAvailabilities.length === 0 && dayOfWeek >= 1 && dayOfWeek <= 5) {
+    // Fallback inteligente caso a tabela ainda não tenha sido preenchida no Supabase
+    effectiveAvailabilities = [
+      {
+        id: "default-manha",
+        therapist_id: therapistId,
+        day_of_week: dayOfWeek,
+        start_time: "09:00:00",
+        end_time: "12:00:00",
+        slot_duration_minutes: 50,
+        buffer_duration_minutes: 10,
+        ativo: true,
+      },
+      {
+        id: "default-tarde",
+        therapist_id: therapistId,
+        day_of_week: dayOfWeek,
+        start_time: "14:00:00",
+        end_time: "18:00:00",
+        slot_duration_minutes: 50,
+        buffer_duration_minutes: 10,
+        ativo: true,
+      },
+    ];
+  }
+
+  if (effectiveAvailabilities.length === 0) {
     return [];
   }
+
 
   // 4. Determinar intervalo do dia em UTC (das 00:00 às 23:59:59 horário de Brasília)
   const startOfDayUtc = parseLocalToUtc(dateStr, "00:00:00");
@@ -145,7 +174,7 @@ export async function calculateAvailableSlots(params: {
   const nowTime = new Date().getTime();
   const minAdvanceTime = nowTime + minAdvanceHours * 60 * 60 * 1000;
 
-  for (const window of availabilities as TherapistAvailability[]) {
+  for (const window of effectiveAvailabilities) {
     const slotDurationMs = (window.slot_duration_minutes || 50) * 60 * 1000;
     const bufferDurationMs = (window.buffer_duration_minutes || 10) * 60 * 1000;
     const totalStepMs = slotDurationMs + bufferDurationMs;
