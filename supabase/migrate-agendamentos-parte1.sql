@@ -1,9 +1,4 @@
--- ============================================================
--- Migration: Módulo de Calendário e Agendamento Nativo
--- Instituto Kalapa
--- ============================================================
-
--- 1. TABELAS
+-- PARTE 1: TABELAS, VÍNCULOS E SEGURANÇA (RLS)
 CREATE TABLE IF NOT EXISTS therapists (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   nome TEXT NOT NULL,
@@ -66,17 +61,14 @@ CREATE TABLE IF NOT EXISTS appointment_logs (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. VÍNCULO EM PEDIDOS
 ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS agendamento_id UUID REFERENCES appointments(id) ON DELETE SET NULL;
 
--- 3. ÍNDICES DE PERFORMANCE
 CREATE INDEX IF NOT EXISTS idx_appointments_therapist_time ON appointments(therapist_id, start_time, end_time);
 CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
 CREATE INDEX IF NOT EXISTS idx_appointments_patient ON appointments(patient_id);
 CREATE INDEX IF NOT EXISTS idx_therapist_avail_day ON therapist_availability(therapist_id, day_of_week);
 CREATE INDEX IF NOT EXISTS idx_therapist_blocks_range ON therapist_blocks(therapist_id, start_time, end_time);
 
--- 4. ROW LEVEL SECURITY (RLS)
 ALTER TABLE therapists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE therapist_availability ENABLE ROW LEVEL SECURITY;
 ALTER TABLE therapist_blocks ENABLE ROW LEVEL SECURITY;
@@ -94,42 +86,3 @@ CREATE POLICY "leitura_publica_therapist_blocks" ON therapist_blocks FOR SELECT 
 
 DROP POLICY IF EXISTS "leitura_publica_appointments" ON appointments;
 CREATE POLICY "leitura_publica_appointments" ON appointments FOR SELECT USING (true);
-
--- 5. DADOS INICIAIS (SEED)
-INSERT INTO therapists (id, nome, titulo, foto_url, bio, ativo)
-VALUES (
-  'e7f53a4e-1288-4e89-b051-5b7415444b01',
-  'Clatihúcia Capeli',
-  'Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal',
-  '/foto_10.jpg',
-  'Com mais de 10 anos de dedicação ao cuidado emocional e ao desenvolvimento humano, Clatihúcia Capeli conduz vivências e atendimentos que acolhem a dor sem julgamentos, integrando constelação familiar e neurobiologia do trauma.',
-  true
-)
-ON CONFLICT (id) DO UPDATE SET
-  nome = EXCLUDED.nome,
-  titulo = EXCLUDED.titulo,
-  ativo = true;
-
--- Limpar e popular grade semanal padrão (Segunda a Sexta: 09h-12h e 14h-18h)
-DELETE FROM therapist_availability WHERE therapist_id = 'e7f53a4e-1288-4e89-b051-5b7415444b01';
-
-INSERT INTO therapist_availability (therapist_id, day_of_week, start_time, end_time, slot_duration_minutes, buffer_duration_minutes, ativo)
-SELECT 
-  'e7f53a4e-1288-4e89-b051-5b7415444b01',
-  d,
-  t.start_time,
-  t.end_time,
-  50,
-  10,
-  true
-FROM generate_series(1, 5) AS d
-CROSS JOIN (
-  VALUES 
-    ('09:00:00'::TIME, '12:00:00'::TIME),
-    ('14:00:00'::TIME, '18:00:00'::TIME)
-) AS t(start_time, end_time);
-
--- Atualizar produto 'atendimentos' para a categoria 'atendimentos'
-UPDATE produtos 
-SET categoria = 'atendimentos', ativo = true 
-WHERE slug = 'atendimentos';
