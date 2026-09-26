@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Fragment } from "react";
 import { Mail } from "lucide-react";
 import type { Produto, Pedido, Participante, Cupom, Usuario } from "@/lib/types";
 import AdminDashboard from "./components/AdminDashboard";
+import AdminAgenda from "./components/AdminAgenda";
 
 type Paginated<T> = {
   data: T[];
@@ -13,7 +14,7 @@ type Paginated<T> = {
   totalPages: number;
 };
 
-type Tab = "dashboard" | "sobre" | "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios";
+type Tab = "dashboard" | "sobre" | "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios" | "agendamentos";
 
 const FAQ_PADRAO_ADMIN = [
   {
@@ -1064,6 +1065,7 @@ export default function AdminPage() {
     { id: "produtos", label: "Produtos", count: produtos.length },
     { id: "pedidos", label: "Pedidos", count: pedidosTotal || pedidos.length },
     { id: "participantes", label: "Inscrições", count: participantesTotal || participantes.length },
+    { id: "agendamentos", label: "🗓️ Agenda & Atendimentos" },
     { id: "cupons", label: "Cupons", count: cupons.length },
     { id: "usuarios", label: "Usuários", count: usuariosTotal },
   ];
@@ -3590,6 +3592,9 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      {activeTab === "agendamentos" && <AdminAgenda />}
     </div>
   );
 }
+

@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle } from "lucide-react";
+import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle, Calendar, Clock, Phone } from "lucide-react";
 import Footer from "../../components/Footer";
 import ModalAlterarSenha from "@/components/ModalAlterarSenha";
 import { useCart } from "@/context/CartContext";
-import type { Pedido, Usuario } from "@/lib/types";
+import type { Pedido, Usuario, Appointment } from "@/lib/types";
 
 function formatDate(iso: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -24,8 +24,11 @@ export default function MeusPedidosPage() {
   const router = useRouter();
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [agendamentos, setAgendamentos] = useState<Appointment[]>([]);
+  const [activeTab, setActiveTab] = useState<"pedidos" | "consultas">("pedidos");
   const [loading, setLoading] = useState(true);
   const [cancelandoId, setCancelandoId] = useState<string | null>(null);
+  const [cancelandoApptId, setCancelandoApptId] = useState<string | null>(null);
   const [retomandoId, setRetomandoId] = useState<string | null>(null);
   const [erroRetomada, setErroRetomada] = useState<{ [pedidoId: string]: string }>({});
   const [modalSenhaOpen, setModalSenhaOpen] = useState(false);
@@ -45,16 +48,26 @@ export default function MeusPedidosPage() {
       }
       setUsuario(authData.usuario);
 
-      const pedidosRes = await fetch("/api/cliente/pedidos");
+      const [pedidosRes, apptsRes] = await Promise.all([
+        fetch("/api/cliente/pedidos"),
+        fetch("/api/agendamentos"),
+      ]);
+
       if (pedidosRes.ok) {
         const data = await pedidosRes.json();
         setPedidos(data);
+      }
+
+      if (apptsRes.ok) {
+        const apptData = await apptsRes.json();
+        setAgendamentos(apptData || []);
       }
     } catch {
       // ignore
     }
     setLoading(false);
   }, [router]);
+
 
   useEffect(() => {
     fetchPedidos();
@@ -78,6 +91,27 @@ export default function MeusPedidosPage() {
     }
     setCancelandoId(null);
   };
+
+  const handleCancelarAgendamento = async (id: string) => {
+    if (!confirm("Deseja realmente cancelar este atendimento? O horário será liberado na agenda.")) return;
+    setCancelandoApptId(id);
+    try {
+      const res = await fetch(`/api/agendamentos/${id}/cancelar`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Atendimento cancelado com sucesso.");
+        await fetchPedidos();
+      } else {
+        alert(data.error || "Erro ao cancelar atendimento.");
+      }
+    } catch {
+      alert("Erro ao conectar com o servidor.");
+    }
+    setCancelandoApptId(null);
+  };
+
 
   const handleRetomarPedido = async (pedidoId: string) => {
     setRetomandoId(pedidoId);
@@ -170,25 +204,55 @@ export default function MeusPedidosPage() {
           </div>
 
           {/* Título com estilo Kalapa */}
-          <div className="mb-8">
+          <div className="mb-6">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/70 text-xs font-semibold tracking-wide mb-3 border border-white/10">
               ✦ Área do Cliente
             </span>
             <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-              Meus pedidos
+              Minha Conta
             </h1>
             <p className="text-xs md:text-sm text-white/50 mt-1">
-              Acompanhe suas inscrições, vivências, compras e comprovantes de pagamento
+              Acompanhe suas inscrições, vivências, agendamentos terapêuticos e comprovantes
             </p>
           </div>
 
-          {/* Lista de cards */}
-          {pedidos.length === 0 ? (
-            <div className="glass-card border border-white/10 rounded-2xl p-12 text-center shadow-xl">
-              <Package className="w-14 h-14 text-white/25 mx-auto mb-4" />
-              <h2 className="text-base font-semibold text-white mb-1">
-                Nenhum pedido encontrado
-              </h2>
+          {/* Sub-Tabs: Pedidos vs Consultas */}
+          <div className="flex gap-2 mb-6 border-b border-white/10 pb-3">
+            <button
+              type="button"
+              onClick={() => setActiveTab("pedidos")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === "pedidos"
+                  ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/20"
+                  : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              <Package className="w-3.5 h-3.5" />
+              <span>Meus Pedidos ({pedidos.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("consultas")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === "consultas"
+                  ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/20"
+                  : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Minhas Consultas & Atendimentos ({agendamentos.length})</span>
+            </button>
+          </div>
+
+          {activeTab === "pedidos" ? (
+            /* Lista de cards */
+            pedidos.length === 0 ? (
+              <div className="glass-card border border-white/10 rounded-2xl p-12 text-center shadow-xl">
+                <Package className="w-14 h-14 text-white/25 mx-auto mb-4" />
+                <h2 className="text-base font-semibold text-white mb-1">
+                  Nenhum pedido encontrado
+                </h2>
+
               <p className="text-xs text-white/50 max-w-sm mx-auto mb-6">
                 Você ainda não realizou nenhum pedido no INstituto Kalapa. Conheça nossas vivências e atendimentos.
               </p>
@@ -336,9 +400,159 @@ export default function MeusPedidosPage() {
                 );
               })}
             </div>
+            )
+          ) : (
+            /* Lista de Consultas do Cliente */
+            agendamentos.length === 0 ? (
+              <div className="glass-card border border-white/10 rounded-2xl p-12 text-center shadow-xl">
+                <Calendar className="w-14 h-14 text-white/25 mx-auto mb-4" />
+                <h2 className="text-base font-semibold text-white mb-1">
+                  Nenhum atendimento agendado
+                </h2>
+                <p className="text-xs text-white/50 max-w-sm mx-auto mb-6">
+                  Você ainda não possui atendimentos individuais marcados. Escolha uma data e horário disponível com a facilitadora.
+                </p>
+                <Link
+                  href="/produtos/atendimentos"
+                  className="inline-block px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-brand-terracotta/20 cursor-pointer"
+                >
+                  Agendar Atendimento
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {agendamentos.map((appt) => {
+                  const startMs = new Date(appt.start_time).getTime();
+                  const nowMs = Date.now();
+                  const diffHours = (startMs - nowMs) / (1000 * 60 * 60);
+                  const isCancelavel = (appt.status === "CONFIRMED" || appt.status === "PENDING") && diffHours >= 24;
+                  const isEmBreve = (appt.status === "CONFIRMED" || appt.status === "PENDING") && diffHours < 24 && diffHours > 0;
+
+                  const statusColors: Record<string, string> = {
+                    CONFIRMED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+                    PENDING: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+                    COMPLETED: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+                    CANCELED: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+                  };
+                  const statusLabels: Record<string, string> = {
+                    CONFIRMED: "Confirmado",
+                    PENDING: "Aguardando Pagamento",
+                    COMPLETED: "Atendimento Realizado",
+                    CANCELED: "Cancelado",
+                  };
+
+                  return (
+                    <div
+                      key={appt.id}
+                      className="glass-card border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl transition-all"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+                        <div>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-brand-terracotta block">
+                            Atendimento Individual
+                          </span>
+                          <h3 className="text-base font-bold text-white mt-0.5">
+                            Com {appt.therapists?.nome || "Clatihúcia Capeli"}
+                          </h3>
+                        </div>
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${
+                            statusColors[appt.status] || "bg-white/10 text-white"
+                          }`}
+                        >
+                          {statusLabels[appt.status] || appt.status}
+                        </span>
+                      </div>
+
+                      <div className="py-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-white/80">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-brand-terracotta shrink-0" />
+                          <span className="capitalize">
+                            {new Intl.DateTimeFormat("pt-BR", {
+                              timeZone: "America/Sao_Paulo",
+                              weekday: "long",
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                            }).format(new Date(appt.start_time))}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-brand-terracotta shrink-0" />
+                          <span>
+                            {new Intl.DateTimeFormat("pt-BR", {
+                              timeZone: "America/Sao_Paulo",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }).format(new Date(appt.start_time))}{" "}
+                            às{" "}
+                            {new Intl.DateTimeFormat("pt-BR", {
+                              timeZone: "America/Sao_Paulo",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }).format(new Date(appt.end_time))}{" "}
+                            (50 min)
+                          </span>
+                        </div>
+                      </div>
+
+                      {appt.notes && (
+                        <p className="text-xs text-white/50 italic mb-3">
+                          Obs: {appt.notes}
+                        </p>
+                      )}
+
+                      {appt.cancellation_reason && (
+                        <p className="text-xs text-rose-400 mb-3">
+                          Motivo do cancelamento: {appt.cancellation_reason}
+                        </p>
+                      )}
+
+                      <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div className="text-[11px] text-white/50">
+                          {isCancelavel ? (
+                            <span>Cancelamento autônomo disponível até 24h antes da sessão.</span>
+                          ) : isEmBreve ? (
+                            <span className="text-amber-300">
+                              Faltam menos de 24h. Para remarcações emergenciais, contate o suporte.
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {isCancelavel && (
+                            <button
+                              type="button"
+                              disabled={cancelandoApptId === appt.id}
+                              onClick={() => handleCancelarAgendamento(appt.id)}
+                              className="px-3 py-1.5 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/30 rounded-xl transition-colors font-medium cursor-pointer disabled:opacity-50"
+                            >
+                              {cancelandoApptId === appt.id ? "Cancelando..." : "Cancelar Consulta"}
+                            </button>
+                          )}
+
+                          {isEmBreve && (
+                            <a
+                              href="https://wa.me/5511999999999?text=Olá,%20preciso%20de%20ajuda%20com%20meu%20atendimento"
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-3 py-1.5 text-xs text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/30 rounded-xl transition-colors font-medium flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Phone className="w-3.5 h-3.5" />
+                              Falar no WhatsApp
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )
           )}
         </div>
       </div>
+
 
       {usuario && (
         <ModalAlterarSenha

@@ -142,4 +142,86 @@ export interface ItemCarrinho {
   quantidade: number;
   imagem_url?: string | null;
   categoria?: string | null;
+  agendamento_id?: string | null;
+  agendamento_inicio?: string | null;
+  agendamento_fim?: string | null;
+  terapeuta_nome?: string | null;
 }
+
+export interface Therapist {
+  id: string;
+  nome: string;
+  titulo?: string | null;
+  email?: string | null;
+  telefone?: string | null;
+  foto_url?: string | null;
+  bio?: string | null;
+  ativo: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface TherapistAvailability {
+  id: string;
+  therapist_id: string;
+  day_of_week: number; // 0 a 6 (0 = Domingo)
+  start_time: string; // "09:00:00"
+  end_time: string; // "12:00:00"
+  slot_duration_minutes: number;
+  buffer_duration_minutes: number;
+  ativo: boolean;
+  created_at?: string;
+}
+
+export interface TherapistBlock {
+  id: string;
+  therapist_id: string;
+  start_time: string; // ISO 8601 UTC
+  end_time: string; // ISO 8601 UTC
+  reason?: string | null;
+  created_at?: string;
+}
+
+export type AppointmentStatus = "PENDING" | "CONFIRMED" | "CANCELED" | "COMPLETED";
+
+export interface Appointment {
+  id: string;
+  therapist_id: string;
+  patient_id?: string | null;
+  produto_id?: string | null;
+  pedido_id?: string | null;
+  start_time: string; // ISO 8601 UTC
+  end_time: string; // ISO 8601 UTC
+  status: AppointmentStatus;
+  expires_at?: string | null;
+  notes?: string | null;
+  cancellation_reason?: string | null;
+  canceled_at?: string | null;
+  canceled_by?: "patient" | "therapist" | "system" | null;
+  created_at: string;
+  updated_at?: string;
+  therapists?: Therapist | null;
+  produtos?: Produto | null;
+  usuarios?: Usuario | null;
+  pedidos?: Pedido | null;
+}
+
+export interface TimeSlot {
+  startTime: string; // ISO 8601 UTC
+  endTime: string; // ISO 8601 UTC
+  timeDisplay: string; // "09:00"
+  timeEndDisplay: string; // "09:50"
+  available: boolean;
+  reason?: string;
+}
+
+export interface AppointmentLog {
+  id: string;
+  appointment_id: string;
+  action: string;
+  actor_type: "patient" | "therapist" | "admin" | "system";
+  actor_id?: string | null;
+  details?: Record<string, unknown>;
+  created_at: string;
+}
+

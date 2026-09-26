@@ -13,6 +13,7 @@ import {
   MapPin,
   LogIn,
   AlertCircle,
+  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -58,6 +59,13 @@ export default function Checkout() {
     totalComDesconto: number;
   } | null>(null);
 
+  const [agendamentoInfo, setAgendamentoInfo] = useState<{
+    id: string;
+    terapeuta: string;
+    data: string;
+    horario: string;
+  } | null>(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -90,6 +98,21 @@ export default function Checkout() {
         if (savedCupom) {
           setCupomInput(savedCupom);
         }
+
+        // 4. Carregar agendamento pré-reservado se existir
+        const savedApptId = typeof window !== "undefined" ? sessionStorage.getItem("agendamento_id") : null;
+        const savedTerapeuta = typeof window !== "undefined" ? sessionStorage.getItem("agendamento_terapeuta") : null;
+        const savedData = typeof window !== "undefined" ? sessionStorage.getItem("agendamento_data") : null;
+        const savedHorario = typeof window !== "undefined" ? sessionStorage.getItem("agendamento_horario") : null;
+
+        if (savedApptId) {
+          setAgendamentoInfo({
+            id: savedApptId,
+            terapeuta: savedTerapeuta || "Clatihúcia Capeli",
+            data: savedData ? savedData.split("-").reverse().join("/") : "",
+            horario: savedHorario || "",
+          });
+        }
       } catch {
         // ignore
       }
@@ -97,6 +120,7 @@ export default function Checkout() {
     };
     fetchData();
   }, []);
+
 
   const isCartCheckout = cartItems.length > 0;
 
@@ -228,9 +252,15 @@ export default function Checkout() {
         ? sessionStorage.getItem("pedido_retomado_id")
         : null;
 
+      const agendamentoId = agendamentoInfo?.id
+        || (typeof window !== "undefined" ? sessionStorage.getItem("agendamento_id") : null)
+        || cartItems.find((i) => i.agendamento_id)?.agendamento_id
+        || null;
+
       const bodyPayload: Record<string, unknown> = {
         cupom_codigo: cupomAplicado?.codigo || null,
         pedido_origem_id: pedidoOrigemId || null,
+        agendamento_id: agendamentoId,
       };
 
       if (isCartCheckout) {
@@ -274,6 +304,10 @@ export default function Checkout() {
         sessionStorage.removeItem("pedido_retomado_id");
         sessionStorage.removeItem("pedido_retomado_beneficiarios");
         sessionStorage.removeItem("pedido_retomado_cupom");
+        sessionStorage.removeItem("agendamento_id");
+        sessionStorage.removeItem("agendamento_terapeuta");
+        sessionStorage.removeItem("agendamento_data");
+        sessionStorage.removeItem("agendamento_horario");
       } catch {
         // ignore
       }
@@ -351,6 +385,31 @@ export default function Checkout() {
                   + Adicionar mais
                 </Link>
               </div>
+
+              {/* Card de Agendamento Pré-Reservado se houver */}
+              {agendamentoInfo && (
+                <div className="mb-4 p-4 rounded-2xl bg-brand-terracotta/10 border border-brand-terracotta/30 flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-brand-terracotta/20 flex items-center justify-center text-brand-terracotta shrink-0 mt-0.5">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-brand-terracotta">
+                        Horário Pré-Reservado (Hold 15 min)
+                      </span>
+                      <span className="text-[10px] bg-brand-terracotta text-white px-2 py-0.5 rounded-full font-bold">
+                        Exclusivo
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-brand-charcoal mt-0.5">
+                      Atendimento com {agendamentoInfo.terapeuta}
+                    </p>
+                    <p className="text-xs text-brand-charcoal/80">
+                      🗓️ {agendamentoInfo.data} às {agendamentoInfo.horario} (50 min)
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Lista de itens */}
               <div className="space-y-3 max-h-72 overflow-y-auto pr-1">

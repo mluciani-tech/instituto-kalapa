@@ -12,6 +12,10 @@ interface CartContextType {
     preco?: number | null;
     imagem_url?: string | null;
     categoria?: string | null;
+    agendamento_id?: string | null;
+    agendamento_inicio?: string | null;
+    agendamento_fim?: string | null;
+    terapeuta_nome?: string | null;
   }, quantidade?: number) => void;
   removeItem: (produto_id: string) => void;
   updateQuantity: (produto_id: string, quantidade: number) => void;
@@ -88,15 +92,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       preco?: number | null;
       imagem_url?: string | null;
       categoria?: string | null;
+      agendamento_id?: string | null;
+      agendamento_inicio?: string | null;
+      agendamento_fim?: string | null;
+      terapeuta_nome?: string | null;
     },
     quantidade = 1
   ) => {
     const precoNum = produto.preco ?? 0;
     setItems((prev) => {
-      const existing = prev.find((item) => item.produto_id === produto.id);
+      const existing = prev.find((item) => item.produto_id === produto.id && item.agendamento_id === produto.agendamento_id);
       if (existing) {
         return prev.map((item) =>
-          item.produto_id === produto.id
+          item.produto_id === produto.id && item.agendamento_id === produto.agendamento_id
             ? { ...item, quantidade: item.quantidade + quantidade }
             : item
         );
@@ -111,11 +119,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           quantidade,
           imagem_url: produto.imagem_url || null,
           categoria: produto.categoria || null,
+          agendamento_id: produto.agendamento_id || null,
+          agendamento_inicio: produto.agendamento_inicio || null,
+          agendamento_fim: produto.agendamento_fim || null,
+          terapeuta_nome: produto.terapeuta_nome || null,
         },
       ];
     });
     setIsDrawerOpen(true);
   };
+
 
   const removeItem = (produto_id: string) => {
     setItems((prev) => prev.filter((item) => item.produto_id !== produto_id));

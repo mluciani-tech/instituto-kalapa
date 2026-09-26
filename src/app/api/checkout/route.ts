@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { produto_id, itens: cartItens, inscricao, cupom_codigo, beneficiarios, pedido_origem_id } = body;
+    const { produto_id, itens: cartItens, inscricao, cupom_codigo, beneficiarios, pedido_origem_id, agendamento_id } = body;
 
     // 0. Exigir autenticação obrigatória (Opção 1 — Somente usuários cadastrados concluem compra)
     const clienteLogado = await getClienteFromRequest(req);
@@ -206,6 +206,7 @@ export async function POST(req: NextRequest) {
         cupom_codigo: cupomCodigoFinal,
         status: ehGratuito ? "confirmado" : "pendente",
         metodo_pagamento: ehGratuito ? "cupom_gratuito" : null,
+        agendamento_id: agendamento_id || null,
       })
       .select("id")
       .single();
@@ -216,6 +217,37 @@ export async function POST(req: NextRequest) {
         { error: "Erro ao registrar pedido" },
         { status: 500 }
       );
+    }
+
+    // Vincular agendamento ao pedido criado
+    if (agendamento_id && typeof agendamento_id === "string") {
+      try {
+        const appointmentUpdate: Record<string, unknown> = {
+          pedido_id: pedido.id,
+          updated_at: new Date().toISOString(),
+        };
+
+        if (ehGratuito) {
+          appointmentUpdate.status = "CONFIRMED";
+          appointmentUpdate.expires_at = null;
+        }
+
+        await supabaseAdmin!
+          .from("appointments")
+          .update(appointmentUpdate)
+          .eq("id", agendamento_id);
+
+        if (ehGratuito) {
+          await supabaseAdmin!.from("appointment_logs").insert({
+            appointment_id: agendamento_id,
+            action: "CONFIRMED_GRATUITO",
+            actor_type: "system",
+            details: { pedido_id: pedido.id },
+          });
+        }
+      } catch (errAppt) {
+        console.error("[checkout] Erro ao vincular pedido ao agendamento:", errAppt);
+      }
     }
 
     // Se for retomada de um pedido pendente anterior, cancelar o anterior para evitar duplicidade

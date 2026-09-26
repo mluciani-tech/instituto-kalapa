@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
+import ProductAppointmentSection from "@/components/agendamento/ProductAppointmentSection";
 
 interface ProductDetailClientProps {
   produto: Produto;
@@ -28,14 +29,16 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
   const { addItem, clearCart, openDrawer } = useCart();
   const [copiado, setCopiado] = useState(false);
 
+  const isAgendamento = produto.slug === "atendimentos" || produto.categoria === "atendimentos";
+
   const preco = produto.preco ?? 0;
   const isGratuito = preco <= 0;
   const precoFormatado = isGratuito
     ? "Gratuito"
     : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const vagasEsgotadas = vagas && vagas.restantes <= 0;
-  const vagasQuaseEsgotadas = vagas && vagas.restantes > 0 && vagas.restantes <= 3;
+  const vagasEsgotadas = !isAgendamento && vagas && vagas.restantes <= 0;
+  const vagasQuaseEsgotadas = !isAgendamento && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
 
   const handleCompartilhar = async () => {
     const shareUrl = window.location.href;
@@ -180,7 +183,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
           </div>
 
           {/* Contador de vagas se aplicável */}
-          {vagas && (
+          {!isAgendamento && vagas && (
             <div className="mb-6 p-4 rounded-xl bg-brand-offwhite border border-brand-charcoal/10">
               <div className="flex items-center justify-between text-xs sm:text-sm mb-1.5">
                 <span className="text-brand-charcoal/70 font-medium">
@@ -271,45 +274,57 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  addItem({
-                    id: produto.id,
-                    slug: produto.slug,
-                    nome: produto.nome,
-                    preco: produto.preco,
-                    imagem_url: produto.imagem_url,
-                    categoria: produto.categoria,
-                  });
-                  openDrawer();
-                }}
-                disabled={!!vagasEsgotadas}
-                className="flex-1 py-3.5 px-4 font-semibold text-sm rounded-xl border border-brand-purple/30 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <ShoppingBag className="w-4 h-4" />
-                Adicionar à Reserva
-              </button>
+              {isAgendamento ? (
+                <a
+                  href="#agendamento-section"
+                  className="flex-1 py-3.5 px-5 font-bold text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>Escolher Data e Horário</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addItem({
+                        id: produto.id,
+                        slug: produto.slug,
+                        nome: produto.nome,
+                        preco: produto.preco,
+                        imagem_url: produto.imagem_url,
+                        categoria: produto.categoria,
+                      });
+                      openDrawer();
+                    }}
+                    disabled={!!vagasEsgotadas}
+                    className="flex-1 py-3.5 px-4 font-semibold text-sm rounded-xl border border-brand-purple/30 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    Adicionar à Reserva
+                  </button>
 
-              <button
-                type="button"
-                onClick={handleComprarAgora}
-                disabled={!!vagasEsgotadas}
-                className={`flex-1 py-3.5 px-5 font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer ${
-                  vagasEsgotadas
-                    ? "bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed"
-                    : "bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-brand-terracotta/25 hover:-translate-y-0.5"
-                }`}
-              >
-                {vagasEsgotadas ? (
-                  "Turma Lotada"
-                ) : (
-                  <>
-                    <span>Garantir Vaga</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
+                  <button
+                    type="button"
+                    onClick={handleComprarAgora}
+                    disabled={!!vagasEsgotadas}
+                    className={`flex-1 py-3.5 px-5 font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer ${
+                      vagasEsgotadas
+                        ? "bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed"
+                        : "bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-brand-terracotta/25 hover:-translate-y-0.5"
+                    }`}
+                  >
+                    {vagasEsgotadas ? (
+                      "Turma Lotada"
+                    ) : (
+                      <>
+                        <span>Garantir Vaga</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="flex items-center justify-center gap-2 text-xs text-brand-charcoal/50 mt-4">
@@ -319,6 +334,14 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
           </div>
         </div>
       </div>
+
+      {/* Módulo de Agendamento Nativo para Atendimentos Individuais */}
+      {isAgendamento && (
+        <div id="agendamento-section" className="scroll-mt-10">
+          <ProductAppointmentSection produto={produto} />
+        </div>
+      )}
     </div>
   );
 }
+

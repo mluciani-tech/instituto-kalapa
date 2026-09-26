@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
     // 1. Buscar pedido pelo order_nsu
     const { data: pedido, error: pedidoError } = await supabaseAdmin!
       .from("pedidos")
-      .select("id, status, cliente_nome, cliente_email, cliente_telefone, usuario_id, cupom_id, valor_desconto, beneficiarios, produtos(nome)")
+      .select("id, status, cliente_nome, cliente_email, cliente_telefone, usuario_id, cupom_id, valor_desconto, beneficiarios, agendamento_id, produtos(nome)")
       .eq("order_nsu", order_nsu)
       .single();
 
@@ -157,7 +157,45 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // 2.2 Confirmar agendamento vinculado se houver
+    try {
+      let apptId = pedido.agendamento_id;
+      if (!apptId) {
+        const { data: apptByPedido } = await supabaseAdmin!
+          .from("appointments")
+          .select("id")
+          .eq("pedido_id", pedido.id)
+          .maybeSingle();
+        if (apptByPedido) apptId = apptByPedido.id;
+      }
+
+      if (apptId) {
+        const nowIso = new Date().toISOString();
+        await supabaseAdmin!
+          .from("appointments")
+          .update({
+            status: "CONFIRMED",
+            expires_at: null,
+            pedido_id: pedido.id,
+            updated_at: nowIso,
+          })
+          .eq("id", apptId);
+
+        await supabaseAdmin!.from("appointment_logs").insert({
+          appointment_id: apptId,
+          action: "CONFIRMED_PAYMENT",
+          actor_type: "system",
+          details: { pedido_id: pedido.id, order_nsu, valor: valorReais },
+        });
+
+        console.log("[webhook] Agendamento confirmado com sucesso:", apptId);
+      }
+    } catch (errAppt) {
+      console.error("[webhook] Erro ao confirmar agendamento vinculado:", errAppt);
+    }
+
     console.log("[webhook] Pedido atualizado:", pedido.id);
+
 
     // 3. Atualizar inscrição vinculada
     let inscricao: { id: string; nome: string; email: string; telefone: string | null } | null = null;
