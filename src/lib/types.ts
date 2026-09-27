@@ -16,6 +16,7 @@ export interface Produto {
   vagas_ocupadas_manual?: number | null;
   categoria?: string | null;
   forma_pagamento_disponivel?: string | null;
+  atendimento_individual?: boolean;
   created_at?: string;
 }
 

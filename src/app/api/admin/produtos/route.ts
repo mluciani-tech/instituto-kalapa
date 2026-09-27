@@ -45,7 +45,23 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { slug, nome, descricao, descricao_curta, preco, imagem_url, beneficios, destaque, ativo, ordem, vagas_maximas, vagas_ocupadas_manual, categoria, forma_pagamento_disponivel } = body;
+  const {
+    slug,
+    nome,
+    descricao,
+    descricao_curta,
+    preco,
+    imagem_url,
+    beneficios,
+    destaque,
+    ativo,
+    ordem,
+    vagas_maximas,
+    vagas_ocupadas_manual,
+    categoria,
+    forma_pagamento_disponivel,
+    atendimento_individual,
+  } = body;
 
   if (!slug || !nome) {
     return NextResponse.json(
@@ -64,26 +80,42 @@ export async function POST(req: NextRequest) {
     return null;
   };
 
-  const { data, error } = await supabaseAdmin!
+  const insertPayload: Record<string, unknown> = {
+    slug,
+    nome,
+    descricao: descricao || null,
+    descricao_curta: descricao_curta || null,
+    preco,
+    imagem_url: imagem_url || null,
+    beneficios: beneficios || [],
+    destaque: destaque || false,
+    ativo: ativo !== false,
+    ordem: ordem || 0,
+    vagas_maximas: parseIntegerSafely(vagas_maximas),
+    vagas_ocupadas_manual: parseIntegerSafely(vagas_ocupadas_manual),
+    categoria: categoria || null,
+    forma_pagamento_disponivel: forma_pagamento_disponivel || "ambos",
+    atendimento_individual: Boolean(atendimento_individual),
+  };
+
+  let { data, error } = await supabaseAdmin!
     .from("produtos")
-    .insert({
-      slug,
-      nome,
-      descricao: descricao || null,
-      descricao_curta: descricao_curta || null,
-      preco,
-      imagem_url: imagem_url || null,
-      beneficios: beneficios || [],
-      destaque: destaque || false,
-      ativo: ativo !== false,
-      ordem: ordem || 0,
-      vagas_maximas: parseIntegerSafely(vagas_maximas),
-      vagas_ocupadas_manual: parseIntegerSafely(vagas_ocupadas_manual),
-      categoria: categoria || null,
-      forma_pagamento_disponivel: forma_pagamento_disponivel || "ambos",
-    })
+    .insert(insertPayload)
     .select()
     .single();
+
+  // Se a coluna ainda não existir no Postgres, tenta sem o campo para manter estabilidade
+  if (error && error.message?.includes("atendimento_individual")) {
+    console.warn("[admin/produtos] Coluna atendimento_individual não encontrada no banco. Tentando fallback.");
+    delete insertPayload.atendimento_individual;
+    const retry = await supabaseAdmin!
+      .from("produtos")
+      .insert(insertPayload)
+      .select()
+      .single();
+    data = retry.data;
+    error = retry.error;
+  }
 
   if (error) {
     console.error("[admin/produtos] Erro ao criar:", error);

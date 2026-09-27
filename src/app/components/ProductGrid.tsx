@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, MessageCircle, Sparkles } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
 import type { VagasInfo } from "@/lib/types";
+import { isProdutoAgendamento } from "@/lib/agendamento";
 
 interface ProductGridProps {
   categoria?: string | null;
@@ -29,9 +30,17 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
         if (categoria) {
           const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
           const cat = normalize(categoria);
-          produtosData = produtosData.filter(
-            (p) => normalize(p.categoria || "") === cat || normalize(p.slug || "") === cat
-          );
+          if (cat === "atendimentos" || cat === "atendimento") {
+            produtosData = produtosData.filter(
+              (p) =>
+                p.atendimento_individual === true ||
+                (p.atendimento_individual === undefined && isProdutoAgendamento(p))
+            );
+          } else {
+            produtosData = produtosData.filter(
+              (p) => normalize(p.categoria || "") === cat || normalize(p.slug || "") === cat
+            );
+          }
         }
 
         setProdutos(produtosData);

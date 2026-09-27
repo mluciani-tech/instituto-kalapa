@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Fragment } from "react";
 import { Mail } from "lucide-react";
 import type { Produto, Pedido, Participante, Cupom, Usuario } from "@/lib/types";
+import { isProdutoAgendamento } from "@/lib/agendamento";
 import AdminDashboard from "./components/AdminDashboard";
 import AdminAgenda from "./components/AdminAgenda";
 
@@ -137,6 +138,7 @@ export default function AdminPage() {
     vagas_ocupadas_manual: "",
     categoria: "",
     forma_pagamento_disponivel: "ambos",
+    atendimento_individual: false,
     destaque: false,
     ativo: true,
     ordem: "0",
@@ -563,7 +565,9 @@ export default function AdminPage() {
       slug: "", nome: "", descricao: "", descricao_curta: "",
       preco: "", imagem_url: "", beneficios: "", vagas_maximas: "",
       vagas_ocupadas_manual: "",
-      categoria: "", forma_pagamento_disponivel: "ambos", destaque: false, ativo: true, ordem: "0",
+      categoria: "", forma_pagamento_disponivel: "ambos",
+      atendimento_individual: false,
+      destaque: false, ativo: true, ordem: "0",
     });
     setProdutoImagemFile(null);
     setProdutoEditando(null);
@@ -665,6 +669,7 @@ export default function AdminPage() {
       vagas_ocupadas_manual: p.vagas_ocupadas_manual != null ? p.vagas_ocupadas_manual.toString() : "",
       categoria: p.categoria || "",
       forma_pagamento_disponivel: p.forma_pagamento_disponivel || "ambos",
+      atendimento_individual: p.atendimento_individual ?? isProdutoAgendamento(p),
       destaque: p.destaque ?? false,
       ativo: p.ativo ?? true,
       ordem: (p.ordem ?? 0).toString(),
@@ -1669,6 +1674,23 @@ export default function AdminPage() {
                       <option value="cartao">Apenas Cartão</option>
                     </select>
                   </div>
+                  <div className="sm:col-span-2 p-4 rounded-xl border border-brand-terracotta/30 bg-brand-terracotta/5 flex items-start gap-3 transition-colors hover:bg-brand-terracotta/10">
+                    <input
+                      type="checkbox"
+                      id="input-atendimento-individual"
+                      checked={produtoForm.atendimento_individual}
+                      onChange={(e) => setProdutoForm({ ...produtoForm, atendimento_individual: e.target.checked })}
+                      className="mt-1 w-4 h-4 rounded border-brand-terracotta text-brand-terracotta focus:ring-brand-terracotta/30 cursor-pointer"
+                    />
+                    <label htmlFor="input-atendimento-individual" className="cursor-pointer select-none">
+                      <span className="text-xs sm:text-sm font-bold text-brand-charcoal flex items-center gap-1.5">
+                        🗓️ Atendimento Individual (Exige seleção de data/horário na agenda)
+                      </span>
+                      <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
+                        Marque esta opção para atendimentos terapêuticos individuais. O paciente será direcionado para selecionar data e horário na agenda antes do pagamento. Este produto também aparecerá no filtro de <strong>Atendimentos</strong>.
+                      </p>
+                    </label>
+                  </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Limite de Pessoas <span className="text-brand-charcoal/30">(opcional)</span></label>
 <input
@@ -1841,10 +1863,15 @@ export default function AdminPage() {
                 {produtosFiltrados.map((p) => (
                   <div key={p.id} className="bg-white rounded-xl border border-brand-beige p-4 flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium text-brand-charcoal text-sm">{p.nome}</span>
                         {!p.ativo && <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded">Inativo</span>}
                         {p.destaque && <span className="text-xs bg-brand-terracotta/10 text-brand-terracotta px-1.5 py-0.5 rounded">Destaque</span>}
+                        {(p.atendimento_individual || isProdutoAgendamento(p)) && (
+                          <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
+                            🗓️ Atendimento Individual
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-brand-charcoal/40 mt-0.5">
                         {p.slug}{p.preco != null && p.preco > 0 ? ` · R$ ${(p.preco ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : ""} · Ordem: {p.ordem}{p.categoria ? ` · ${p.categoria}` : ""}{p.vagas_maximas != null ? ` · Limite: ${p.vagas_maximas} pessoas` : ""}{p.vagas_maximas != null ? (p.vagas_ocupadas_manual != null ? ` · Contador: ${p.vagas_ocupadas_manual}/${p.vagas_maximas} (Manual)` : ` · Contador: Auto`) : ""}

@@ -9,8 +9,18 @@ const PENDING_HOLD_MINUTES = 15;
  * Verifica se um produto é um atendimento individual que exige agendamento prévio na agenda.
  * Reconhece variações em categoria, slug e nome de forma case-insensitive e acento-insensível.
  */
-export function isProdutoAgendamento(p?: { slug?: string | null; categoria?: string | null; nome?: string | null } | null): boolean {
+export function isProdutoAgendamento(p?: {
+  slug?: string | null;
+  categoria?: string | null;
+  nome?: string | null;
+  atendimento_individual?: boolean | null;
+} | null): boolean {
   if (!p) return false;
+
+  // Prioridade absoluta para o campo booleano explícito de atendimento individual
+  if (p.atendimento_individual !== undefined && p.atendimento_individual !== null) {
+    return Boolean(p.atendimento_individual);
+  }
 
   const norm = (s?: string | null) =>
     (s || "")

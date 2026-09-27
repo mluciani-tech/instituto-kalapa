@@ -51,7 +51,7 @@ export async function PUT(
   const updates: Record<string, unknown> = {};
   const allowedFields = [
     "slug", "nome", "descricao", "descricao_curta", "preco",
-    "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "vagas_ocupadas_manual", "categoria", "forma_pagamento_disponivel",
+    "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "vagas_ocupadas_manual", "categoria", "forma_pagamento_disponivel", "atendimento_individual",
   ];
 
   for (const field of allowedFields) {
@@ -110,12 +110,29 @@ export async function PUT(
 
   updates.updated_at = new Date().toISOString();
 
-  const { data, error } = await supabaseAdmin!
+  if (updates.atendimento_individual !== undefined) {
+    updates.atendimento_individual = Boolean(updates.atendimento_individual);
+  }
+
+  let { data, error } = await supabaseAdmin!
     .from("produtos")
     .update(updates)
     .eq("id", id)
     .select()
     .single();
+
+  if (error && error.message?.includes("atendimento_individual")) {
+    console.warn("[admin/produtos] Coluna atendimento_individual não encontrada no banco. Tentando fallback.");
+    delete updates.atendimento_individual;
+    const retry = await supabaseAdmin!
+      .from("produtos")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+    data = retry.data;
+    error = retry.error;
+  }
 
   if (error) {
     console.error("[admin/produtos] Erro ao atualizar:", JSON.stringify(error, null, 2));
