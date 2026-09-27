@@ -36,6 +36,18 @@ const WEEKDAYS = [
   { id: 0, name: "Domingo" },
 ];
 
+function maskPhone(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits.length ? `(${digits}` : "";
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
 function formatDateTimeBr(isoStr: string) {
   try {
     const d = new Date(isoStr);
@@ -1074,10 +1086,24 @@ export default function AdminAgenda() {
                     required
                     value={therapistEmail}
                     onChange={(e) => setTherapistEmail(e.target.value)}
+                    onBlur={(e) => {
+                      // Força feedback visual ao sair do campo
+                      e.target.reportValidity?.();
+                    }}
                     placeholder="exemplo: terapeuta@institutokalapa.com.br"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-brand-beige bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-purple"
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white text-xs text-brand-charcoal focus:outline-hidden transition-colors ${
+                      therapistEmail && !isValidEmail(therapistEmail)
+                        ? "border-red-400 focus:border-red-500"
+                        : "border-brand-beige focus:border-brand-purple"
+                    }`}
                   />
                 </div>
+                {therapistEmail && !isValidEmail(therapistEmail) && (
+                  <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    E-mail inválido. Verifique o endereço digitado.
+                  </p>
+                )}
                 <p className="text-[11px] text-brand-charcoal/60 mt-1.5">
                   Quando o pagamento for confirmado, um e-mail com os dados do paciente, serviço e horário reservado será despachado para esta caixa postal.
                 </p>
@@ -1091,9 +1117,11 @@ export default function AdminAgenda() {
                   <Phone className="w-4 h-4 text-brand-charcoal/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
+                    inputMode="numeric"
                     value={therapistTelefone}
-                    onChange={(e) => setTherapistTelefone(e.target.value)}
+                    onChange={(e) => setTherapistTelefone(maskPhone(e.target.value))}
                     placeholder="ex: (11) 99999-9999"
+                    maxLength={16}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-brand-beige bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-purple"
                   />
                 </div>
@@ -1116,7 +1144,7 @@ export default function AdminAgenda() {
               <button
                 type="button"
                 onClick={handleTestarEnvioEmail}
-                disabled={testandoEmail || !therapistEmail}
+                disabled={testandoEmail || !therapistEmail || !isValidEmail(therapistEmail)}
                 className="px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-brand-charcoal text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
@@ -1125,7 +1153,7 @@ export default function AdminAgenda() {
 
               <button
                 type="submit"
-                disabled={salvandoConfigTerapeuta}
+                disabled={salvandoConfigTerapeuta || !therapistEmail || !isValidEmail(therapistEmail)}
                 className="px-6 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-dark text-white text-xs font-bold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
