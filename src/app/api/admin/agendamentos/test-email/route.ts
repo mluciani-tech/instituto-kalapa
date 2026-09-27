@@ -40,9 +40,9 @@ export async function POST(req: NextRequest) {
       observacoes: "Este é um disparo de teste gerado pelo painel administrativo para validar a recepção de alertas de novos agendamentos via SMTP Hostinger.",
     });
 
-    if (res && res.success === false) {
+    if (!res.success) {
       return NextResponse.json(
-        { error: `Erro no servidor SMTP da Hostinger: ${res.error || 'Verifique usuário, senha ou porta 465'}` },
+        { error: `Erro no servidor SMTP da Hostinger: ${res.error || "Verifique usuário, senha ou porta 465"}` },
         { status: 400 }
       );
     }

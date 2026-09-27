@@ -282,7 +282,7 @@ export async function sendNotificacaoAgendamentoTerapeuta(params: {
   dataHoraFim: string; // Ex: HH:mm
   orderNsu?: string | null;
   observacoes?: string | null;
-}): Promise<void> {
+}): Promise<{ success: boolean; error?: string }> {
   const {
     destinatarioEmail,
     terapeutaNome,
