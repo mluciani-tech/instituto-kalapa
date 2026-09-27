@@ -247,7 +247,7 @@ export async function POST(req: NextRequest) {
 
           // Notificar terapeuta por e-mail para agendamento 100% gratuito confirmado
           try {
-            const { notificarTerapeutaPorAgendamentoId } = await import("@/lib/agendamento");
+            const { notificarTerapeutaPorAgendamentoId } = await import("@/lib/agendamento-server");
             await notificarTerapeutaPorAgendamentoId(agendamento_id, orderNsu);
           } catch (notifErr) {
             console.error("[checkout] Erro ao notificar terapeuta por agendamento gratuito:", notifErr);

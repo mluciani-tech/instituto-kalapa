@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
 
         // Notificar terapeuta por e-mail
         try {
-          const { notificarTerapeutaPorAgendamentoId } = await import("@/lib/agendamento");
+          const { notificarTerapeutaPorAgendamentoId } = await import("@/lib/agendamento-server");
           await notificarTerapeutaPorAgendamentoId(apptId, order_nsu);
         } catch (notifErr) {
           console.error("[webhook] Erro ao disparar notificação de agendamento ao terapeuta:", notifErr);
