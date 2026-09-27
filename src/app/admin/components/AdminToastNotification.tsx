@@ -24,7 +24,6 @@ export default function AdminToastNotification({
   onNewAppointmentsCountChange,
 }: AdminToastNotificationProps) {
   const [activeToast, setActiveToast] = useState<AppointmentNotification | null>(null);
-  const [unseenCount, setUnseenCount] = useState(0);
 
   const checkRecentAppointments = useCallback(async () => {
     try {
@@ -35,7 +34,6 @@ export default function AdminToastNotification({
       const appts: AppointmentNotification[] = data.appointments || [];
 
       if (appts.length === 0) {
-        setUnseenCount(0);
         onNewAppointmentsCountChange?.(0);
         return;
       }
@@ -65,7 +63,6 @@ export default function AdminToastNotification({
           count = 1;
         }
 
-        setUnseenCount(count);
         onNewAppointmentsCountChange?.(count);
       }
     } catch {

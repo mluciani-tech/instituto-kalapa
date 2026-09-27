@@ -19,12 +19,13 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
+  LucideIcon,
 } from "lucide-react";
 
 interface ManualSection {
   id: string;
   title: string;
-  icon: any;
+  icon: LucideIcon;
   summary: string;
   badge?: string;
 }

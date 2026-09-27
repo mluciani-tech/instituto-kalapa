@@ -72,7 +72,10 @@ async function sendEmail(to: string, subject: string, html: string): Promise<{ s
   const smtp = await getSmtpConfig();
   if (smtp) {
     try {
-      const nodemailer = await import("nodemailer");
+      // Dynamic require safe for Next.js bundler
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const nodemailerReq: any = eval("require");
+      const nodemailer = nodemailerReq("nodemailer");
       const transporter = nodemailer.createTransport({
         host: smtp.host,
         port: smtp.port,
