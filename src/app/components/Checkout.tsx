@@ -14,6 +14,7 @@ import {
   LogIn,
   AlertCircle,
   Calendar,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -124,6 +125,18 @@ export default function Checkout() {
 
   const isCartCheckout = cartItems.length > 0;
 
+  // Verifica se o checkout contém atendimento que exige agendamento prévio
+  const atendimentoCartItem = isCartCheckout
+    ? cartItems.find((i) => i.categoria === "atendimentos" || i.slug === "atendimentos")
+    : null;
+  const atendimentoSingle = !isCartCheckout && (produto?.categoria === "atendimentos" || produto?.slug === "atendimentos")
+    ? produto
+    : null;
+  const precisaAgendamento = !!(atendimentoCartItem || atendimentoSingle);
+  const temAgendamentoValido = !!agendamentoInfo?.id;
+  const agendamentoPendente = precisaAgendamento && !temAgendamentoValido;
+  const targetAgendamentoId = atendimentoCartItem?.produto_id || atendimentoSingle?.id || "atendimentos";
+
   // Sincronizar participantes extras quando quantidade >= 2
   useEffect(() => {
     if (!isCartCheckout) {
@@ -225,6 +238,11 @@ export default function Checkout() {
 
     if (!usuario) {
       setErro("Para sua segurança e emissão dos ingressos, faça login ou cadastre-se para continuar.");
+      return;
+    }
+
+    if (agendamentoPendente) {
+      setErro("Para atendimentos terapêuticos, é obrigatório selecionar uma data e horário na agenda antes do pagamento.");
       return;
     }
 
@@ -407,6 +425,36 @@ export default function Checkout() {
                     <p className="text-xs text-brand-charcoal/80">
                       🗓️ {agendamentoInfo.data} às {agendamentoInfo.horario} (50 min)
                     </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Alerta de Horário Não Selecionado se for Atendimento */}
+              {agendamentoPendente && (
+                <div className="mb-4 p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 block">
+                      Horário não agendado
+                    </span>
+                    <p className="text-xs font-bold text-brand-charcoal mt-0.5">
+                      {atendimentoCartItem?.nome || atendimentoSingle?.nome || "Atendimento Individual"}
+                    </p>
+                    <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
+                      Este atendimento exige a escolha prévia de um dia e horário na agenda antes do pagamento.
+                    </p>
+                    <div className="mt-2.5">
+                      <Link
+                        href={`/produtos/${targetAgendamentoId}#agendamento`}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                      >
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>Abrir Agenda Disponível</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               )}
@@ -727,7 +775,27 @@ export default function Checkout() {
                 </div>
               )}
 
-              {usuario ? (
+              {agendamentoPendente ? (
+                <div className="space-y-3">
+                  <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-xs">
+                    <p className="font-bold flex items-center gap-1.5 mb-1">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      Agendamento Obrigatório Antes do Pagamento
+                    </p>
+                    <p className="leading-relaxed">
+                      Para este atendimento terapêutico individual, você deve primeiro escolher o dia e horário na agenda da terapeuta.
+                    </p>
+                  </div>
+                  <Link
+                    href={`/produtos/${targetAgendamentoId}#agendamento`}
+                    className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-brand-terracotta/25 cursor-pointer flex items-center justify-center gap-2 text-center"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    <span>Escolher Data e Horário na Agenda</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              ) : usuario ? (
                 <button
                   onClick={handleFinalizarPagamento}
                   disabled={processando}

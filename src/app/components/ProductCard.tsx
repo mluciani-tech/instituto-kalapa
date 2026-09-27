@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, ArrowRight, ShoppingBag, Share2, CheckCheck } from "lucide-react";
+import { Check, ArrowRight, ShoppingBag, Share2, CheckCheck, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
@@ -53,7 +53,13 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
     }
   };
 
+  const isAgendamento = produto.slug === "atendimentos" || produto.categoria === "atendimentos";
+
   const handleEscolher = () => {
+    if (isAgendamento) {
+      router.push(`/produtos/${produto.id}#agendamento`);
+      return;
+    }
     // Sincroniza o produto escolhido limpando itens anteriores e inserindo o produto direto
     clearCart();
     addItem({
@@ -173,8 +179,13 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
               </ul>
             )}
 
-            {/* Contador de vagas */}
-            {vagas && (
+            {/* Indicador de agendamento ou contador de vagas */}
+            {isAgendamento ? (
+              <div className="mb-4 flex items-center gap-2 text-xs text-brand-charcoal/70 bg-brand-terracotta/10 px-3.5 py-2.5 rounded-xl border border-brand-terracotta/25">
+                <Calendar className="w-4 h-4 text-brand-terracotta shrink-0" />
+                <span className="font-medium text-brand-charcoal">Sessão individual · Escolha seu horário na agenda</span>
+              </div>
+            ) : vagas && (
               <div className="mb-4">
                 <div className="flex items-center justify-between text-sm mb-1.5">
                   <span className="text-brand-charcoal/60">
@@ -216,43 +227,56 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
 
               {!isGratuito && (
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      addItem({
-                        id: produto.id,
-                        slug: produto.slug,
-                        nome: produto.nome,
-                        preco: produto.preco,
-                        imagem_url: produto.imagem_url,
-                        categoria: produto.categoria,
-                      });
-                      openDrawer();
-                    }}
-                    disabled={!!vagasEsgotadas}
-                    className="flex-1 py-3 px-3 font-medium text-xs md:text-sm rounded-xl border border-brand-purple/20 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
-                    title="Adicionar à sua lista de reserva"
-                  >
-                    <ShoppingBag aria-hidden="true" className="w-4 h-4" />
-                    Reservar
-                  </button>
+                  {isAgendamento ? (
+                    <Link
+                      href={`/produtos/${produto.id}#agendamento`}
+                      className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Calendar className="w-4 h-4 text-white" />
+                      <span>Ver Agenda & Horários</span>
+                      <ArrowRight className="w-4 h-4 ml-auto" />
+                    </Link>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          addItem({
+                            id: produto.id,
+                            slug: produto.slug,
+                            nome: produto.nome,
+                            preco: produto.preco,
+                            imagem_url: produto.imagem_url,
+                            categoria: produto.categoria,
+                          });
+                          openDrawer();
+                        }}
+                        disabled={!!vagasEsgotadas}
+                        className="flex-1 py-3 px-3 font-medium text-xs md:text-sm rounded-xl border border-brand-purple/20 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
+                        title="Adicionar à sua lista de reserva"
+                      >
+                        <ShoppingBag aria-hidden="true" className="w-4 h-4" />
+                        Reservar
+                      </button>
 
-                  <button
-                    onClick={handleEscolher}
-                    disabled={!!vagasEsgotadas}
-                    className={`flex-1 py-3 px-4 font-semibold text-xs md:text-sm rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
-                      vagasEsgotadas
-                        ? 'bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed'
-                        : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
-                    }`}
-                  >
-                    {vagasEsgotadas ? 'Turma lotada' : (
-                      <>
-                        Garantir Vaga
-                        <ArrowRight aria-hidden="true" className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
+                      <button
+                        onClick={handleEscolher}
+                        disabled={!!vagasEsgotadas}
+                        className={`flex-1 py-3 px-4 font-semibold text-xs md:text-sm rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
+                          vagasEsgotadas
+                            ? 'bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed'
+                            : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
+                        }`}
+                      >
+                        {vagasEsgotadas ? 'Turma lotada' : (
+                          <>
+                            Garantir Vaga
+                            <ArrowRight aria-hidden="true" className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

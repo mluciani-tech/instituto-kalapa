@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,8 @@ import {
   CheckCheck, 
   Sparkles,
   MessageCircle,
-  ShieldCheck 
+  ShieldCheck,
+  Calendar
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
@@ -30,6 +31,20 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
   const [copiado, setCopiado] = useState(false);
 
   const isAgendamento = produto.slug === "atendimentos" || produto.categoria === "atendimentos";
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && isAgendamento) {
+      const hash = window.location.hash;
+      if (hash === "#agendamento" || hash === "#agendamento-section") {
+        setTimeout(() => {
+          const el = document.getElementById("agendamento") || document.getElementById("agendamento-section");
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 300);
+      }
+    }
+  }, [isAgendamento]);
 
   const preco = produto.preco ?? 0;
   const isGratuito = preco <= 0;
@@ -182,6 +197,23 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
             )}
           </div>
 
+          {/* Aviso destacado de agendamento obrigatório */}
+          {isAgendamento && (
+            <div className="mb-6 p-4 rounded-2xl bg-brand-terracotta/10 border border-brand-terracotta/25 flex items-start gap-3.5 shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-brand-terracotta/20 flex items-center justify-center text-brand-terracotta shrink-0 mt-0.5">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-xs font-bold text-brand-charcoal uppercase tracking-wider">
+                  Etapa 1: Agendamento Obrigatório
+                </h4>
+                <p className="text-xs text-brand-charcoal/75 mt-0.5 leading-relaxed">
+                  Para este atendimento terapêutico individual, selecione o dia e o horário disponível na agenda abaixo. O pagamento no checkout só ocorre após você confirmar seu horário pré-reservado.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Contador de vagas se aplicável */}
           {!isAgendamento && vagas && (
             <div className="mb-6 p-4 rounded-xl bg-brand-offwhite border border-brand-charcoal/10">
@@ -276,11 +308,17 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
             <div className="flex flex-col sm:flex-row gap-3">
               {isAgendamento ? (
                 <a
-                  href="#agendamento-section"
-                  className="flex-1 py-3.5 px-5 font-bold text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                  href="#agendamento"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const el = document.getElementById("agendamento") || document.getElementById("agendamento-section");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="flex-1 py-3.5 px-5 font-bold text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer"
                 >
-                  <span>Escolher Data e Horário</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <Calendar className="w-4 h-4 text-white" />
+                  <span>Escolher Data e Horário na Agenda</span>
+                  <ArrowRight className="w-4 h-4 ml-auto" />
                 </a>
               ) : (
                 <>

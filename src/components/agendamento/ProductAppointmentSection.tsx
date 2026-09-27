@@ -19,13 +19,22 @@ function formatDateStr(d: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export default function ProductAppointmentSection({ produto }: ProductAppointmentSectionProps) {
-  // Data inicial: amanhã ou hoje
-  const today = new Date();
-  const tomorrow = new Date();
-  tomorrow.setDate(today.getDate() + 1);
+function getNextWorkingDayStr(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  // Se for sábado (6), pula 2 dias para segunda-feira
+  if (d.getDay() === 6) {
+    d.setDate(d.getDate() + 2);
+  } else if (d.getDay() === 0) {
+    // Se for domingo (0), pula 1 dia para segunda-feira
+    d.setDate(d.getDate() + 1);
+  }
+  return formatDateStr(d);
+}
 
-  const [selectedDate, setSelectedDate] = useState<string>(formatDateStr(tomorrow));
+export default function ProductAppointmentSection({ produto }: ProductAppointmentSectionProps) {
+  // Data inicial: próximo dia útil garantido com slots disponíveis
+  const [selectedDate, setSelectedDate] = useState<string>(getNextWorkingDayStr());
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -104,7 +113,7 @@ export default function ProductAppointmentSection({ produto }: ProductAppointmen
   };
 
   return (
-    <div className="mt-8 pt-8 border-t border-brand-charcoal/10">
+    <div id="agendamento" className="mt-8 pt-8 border-t border-brand-charcoal/10 scroll-mt-20">
       <div className="mb-6">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-terracotta/10 text-brand-terracotta text-xs font-semibold mb-2">
           <CalendarIcon className="w-3.5 h-3.5" />

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Clock, AlertCircle, Loader2 } from "lucide-react";
+import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Clock, AlertCircle, Loader2, Calendar } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Pedido } from "@/lib/types";
@@ -271,6 +271,22 @@ export default function CartDrawer() {
                         <span>{item.quantidade - 1} acompanhante{item.quantidade - 1 > 1 ? "s" : ""} · dados solicitados no checkout</span>
                       </p>
                     )}
+
+                    {(item.categoria === "atendimentos" || item.slug === "atendimentos") && !item.agendamento_id && (
+                      <div className="mt-2.5 p-2 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-between gap-2 text-[11px] text-amber-200">
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <Calendar className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                          Horário não selecionado
+                        </span>
+                        <Link
+                          href={`/produtos/${item.produto_id}#agendamento`}
+                          onClick={closeDrawer}
+                          className="font-bold text-brand-terracotta hover:underline shrink-0"
+                        >
+                          Agendar →
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
@@ -278,25 +294,48 @@ export default function CartDrawer() {
           </div>
 
           {/* Footer */}
-          {items.length > 0 && (
-            <div className="p-5 border-t border-white/10 bg-brand-purple-deep space-y-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-white/60">Subtotal</span>
-                <span className="text-base font-bold text-brand-terracotta">
-                  R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                </span>
-              </div>
+          {items.length > 0 && (() => {
+            const itemPendenteAgendamento = items.find(
+              (i) => (i.categoria === "atendimentos" || i.slug === "atendimentos") && !i.agendamento_id
+            );
 
-              <Link
-                href="/checkout"
-                onClick={closeDrawer}
-                className="w-full py-3.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-brand-terracotta/25 flex items-center justify-center gap-2"
-              >
-                <span>Confirmar Reserva</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          )}
+            return (
+              <div className="p-5 border-t border-white/10 bg-brand-purple-deep space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/60">Subtotal</span>
+                  <span className="text-base font-bold text-brand-terracotta">
+                    R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+
+                {itemPendenteAgendamento ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-amber-300 font-medium text-center">
+                      ⚠️ Selecione o horário na agenda antes de pagar
+                    </p>
+                    <Link
+                      href={`/produtos/${itemPendenteAgendamento.produto_id}#agendamento`}
+                      onClick={closeDrawer}
+                      className="w-full py-3.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-brand-terracotta/25 flex items-center justify-center gap-2 cursor-pointer text-center"
+                    >
+                      <Calendar className="w-4 h-4" />
+                      <span>Escolher Horário na Agenda</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                ) : (
+                  <Link
+                    href="/checkout"
+                    onClick={closeDrawer}
+                    className="w-full py-3.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-brand-terracotta/25 flex items-center justify-center gap-2"
+                  >
+                    <span>Confirmar Reserva</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
