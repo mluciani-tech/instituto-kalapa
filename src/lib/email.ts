@@ -1,41 +1,140 @@
-// Envio de e-mails via Resend (server-side apenas).
-// Sem RESEND_API_KEY configurada, apenas loga no console (mock).
+// Envio de e-mails via SMTP Hostinger (ou fallback Resend / Mock)
+import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 
 const EMAIL_FROM = process.env.KALAPA_EMAIL_FROM || "contato@institutokalapa.com.br";
 const EMAIL_TO = process.env.KALAPA_EMAIL_TO || "contato@institutokalapa.com.br";
 
-const apiKey = process.env.RESEND_API_KEY;
-const isResendConfigured =
-  !!apiKey && apiKey !== "re_sua_key_aqui" && apiKey.startsWith("re_");
-
 export const formatCurrency = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-async function sendEmail(to: string, subject: string, html: string): Promise<void> {
-  if (!isResendConfigured) {
-    console.log("=========================================");
-    console.log("MOCK: E-MAIL NÃO ENVIADO (RESEND_API_KEY ausente)");
-    console.log(`Para: ${to}`);
-    console.log(`Assunto: ${subject}`);
-    console.log("=========================================");
-    return;
+export interface SmtpConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  pass: string;
+  fromName?: string;
+}
+
+export async function getSmtpConfig(): Promise<SmtpConfig | null> {
+  // 1. Tentar buscar da tabela configuracoes do Supabase
+  if (isAdminConfigured()) {
+    try {
+      const { data } = await supabaseAdmin!
+        .from("configuracoes")
+        .select("chave, valor")
+        .in("chave", ["smtp_host", "smtp_port", "smtp_user", "smtp_pass", "smtp_from_name"]);
+
+      if (data && data.length > 0) {
+        const map: Record<string, string> = {};
+        data.forEach((item) => {
+          map[item.chave] = item.valor;
+        });
+
+        if (map.smtp_host && map.smtp_user && map.smtp_pass) {
+          const port = parseInt(map.smtp_port || "465", 10);
+          return {
+            host: map.smtp_host,
+            port,
+            secure: port === 465,
+            user: map.smtp_user,
+            pass: map.smtp_pass,
+            fromName: map.smtp_from_name || "INstituto Kalapa",
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("[email] Erro ao buscar SMTP das configurações:", err);
+    }
   }
 
-  try {
-    const { Resend } = await import("resend");
-    const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
-      from: `INstituto Kalapa <${EMAIL_FROM}>`,
-      to: [to],
-      subject,
-      html,
-    });
-    if (error) {
-      console.error("[email] Erro do Resend:", error);
-    }
-  } catch (err) {
-    console.error("[email] Erro inesperado:", err);
+  // 2. Fallback para variáveis de ambiente
+  const envHost = process.env.SMTP_HOST;
+  const envUser = process.env.SMTP_USER;
+  const envPass = process.env.SMTP_PASS;
+  if (envHost && envUser && envPass) {
+    const port = parseInt(process.env.SMTP_PORT || "465", 10);
+    return {
+      host: envHost,
+      port,
+      secure: port === 465,
+      user: envUser,
+      pass: envPass,
+      fromName: process.env.SMTP_FROM_NAME || "INstituto Kalapa",
+    };
   }
+
+  return null;
+}
+
+async function sendEmail(to: string, subject: string, html: string): Promise<{ success: boolean; error?: string }> {
+  // A. Prioridade 1: SMTP da Hostinger
+  const smtp = await getSmtpConfig();
+  if (smtp) {
+    try {
+      const nodemailer = await import("nodemailer");
+      const transporter = nodemailer.createTransport({
+        host: smtp.host,
+        port: smtp.port,
+        secure: smtp.secure, // true para porta 465 (SSL)
+        auth: {
+          user: smtp.user,
+          pass: smtp.pass,
+        },
+        tls: {
+          // Permite conexões seguras sem bloqueios
+          rejectUnauthorized: false,
+        },
+      });
+
+      const sender = `"${smtp.fromName || 'INstituto Kalapa'}" <${smtp.user}>`;
+      await transporter.sendMail({
+        from: sender,
+        to,
+        subject,
+        html,
+      });
+
+      console.log(`[email] E-mail enviado com sucesso via SMTP Hostinger para: ${to}`);
+      return { success: true };
+    } catch (smtpErr: any) {
+      console.error("[email] Erro ao enviar via SMTP Hostinger:", smtpErr);
+      return { success: false, error: smtpErr?.message || "Falha no envio SMTP Hostinger" };
+    }
+  }
+
+  // B. Prioridade 2: Resend (caso configurado)
+  const apiKey = process.env.RESEND_API_KEY;
+  const isResendConfigured = !!apiKey && apiKey !== "re_sua_key_aqui" && apiKey.startsWith("re_");
+
+  if (isResendConfigured) {
+    try {
+      const { Resend } = await import("resend");
+      const resend = new Resend(apiKey);
+      const { error } = await resend.emails.send({
+        from: `INstituto Kalapa <${EMAIL_FROM}>`,
+        to: [to],
+        subject,
+        html,
+      });
+      if (error) {
+        console.error("[email] Erro do Resend:", error);
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (err: any) {
+      console.error("[email] Erro inesperado Resend:", err);
+      return { success: false, error: err?.message };
+    }
+  }
+
+  // C. Fallback: Log no console (Mock)
+  console.log("=========================================");
+  console.log("MOCK: E-MAIL NÃO ENVIADO (SMTP Hostinger / Resend não configurados)");
+  console.log(`Para: ${to}`);
+  console.log(`Assunto: ${subject}`);
+  console.log("=========================================");
+  return { success: true };
 }
 
 const baseStyles = `
@@ -166,5 +265,96 @@ export async function sendPasswordResetEmail(params: {
   `;
 
   await sendEmail(email, "Redefinição de Senha — INstituto Kalapa", html);
+}
+
+/** Notificação para o TERAPEUTA e/ou ADMIN: Novo agendamento confirmado */
+export async function sendNotificacaoAgendamentoTerapeuta(params: {
+  destinatarioEmail?: string | null;
+  terapeutaNome: string;
+  pacienteNome: string;
+  pacienteEmail?: string | null;
+  pacienteTelefone?: string | null;
+  produtoNome: string;
+  dataHoraInicio: string; // Ex: DD/MM/YYYY às HH:mm
+  dataHoraFim: string; // Ex: HH:mm
+  orderNsu?: string | null;
+  observacoes?: string | null;
+}): Promise<void> {
+  const {
+    destinatarioEmail,
+    terapeutaNome,
+    pacienteNome,
+    pacienteEmail,
+    pacienteTelefone,
+    produtoNome,
+    dataHoraInicio,
+    dataHoraFim,
+    orderNsu,
+    observacoes,
+  } = params;
+
+  const toEmail = destinatarioEmail && destinatarioEmail.includes("@") ? destinatarioEmail : EMAIL_TO;
+  const telLimpo = (pacienteTelefone || "").replace(/\D/g, "");
+  const whatsappUrl = telLimpo ? `https://wa.me/55${telLimpo}` : null;
+
+  const html = `
+    <div style="${baseStyles}">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <h1 style="color: #1A3C4D; font-size: 22px; margin: 0;">INstituto Kalapa</h1>
+        <p style="color: #6D28D9; font-size: 14px; font-weight: 600; margin-top: 4px;">🗓️ Novo Agendamento Confirmado!</p>
+      </div>
+
+      <div style="background: #ffffff; border-radius: 12px; padding: 22px; margin-bottom: 16px; border-left: 4px solid #6D28D9;">
+        <p style="color: #1A3C4D; font-size: 15px; margin: 0 0 12px 0;">
+          Olá, <strong>${terapeutaNome}</strong>! Um novo atendimento foi agendado e confirmado para você.
+        </p>
+        <div style="background: #F3EEFA; border-radius: 8px; padding: 14px; margin-bottom: 8px;">
+          <p style="margin: 0; color: #4B2E83; font-weight: 700; font-size: 16px;">
+            ⏰ ${dataHoraInicio} até ${dataHoraFim}
+          </p>
+          <p style="margin: 4px 0 0 0; color: #6D28D9; font-size: 14px;">
+            Serviço: <strong>${produtoNome}</strong>
+          </p>
+        </div>
+      </div>
+
+      <div style="background: #ffffff; border-radius: 12px; padding: 22px; margin-bottom: 16px;">
+        <h2 style="color: #4A4A4A; font-size: 16px; margin-top: 0; margin-bottom: 14px;">Dados do(a) Paciente</h2>
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #4A4A4A;">
+          <tr>
+            <td style="padding: 6px 0; font-weight: 600; width: 130px;">Nome:</td>
+            <td style="padding: 6px 0;"><strong>${pacienteNome}</strong></td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; font-weight: 600;">Telefone:</td>
+            <td style="padding: 6px 0;">
+              ${pacienteTelefone || "Não informado"}
+              ${whatsappUrl ? ` — <a href="${whatsappUrl}" style="color: #059669; text-decoration: none; font-weight: 600;">Chamar no WhatsApp</a>` : ""}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; font-weight: 600;">E-mail:</td>
+            <td style="padding: 6px 0;">${pacienteEmail || "Não informado"}</td>
+          </tr>
+          ${observacoes ? `
+          <tr>
+            <td style="padding: 6px 0; font-weight: 600;">Observações:</td>
+            <td style="padding: 6px 0; color: #9A3412;">${observacoes}</td>
+          </tr>` : ""}
+          ${orderNsu ? `
+          <tr>
+            <td style="padding: 6px 0; font-weight: 600;">Pedido:</td>
+            <td style="padding: 6px 0; font-family: monospace; font-size: 12px;">#${orderNsu}</td>
+          </tr>` : ""}
+        </table>
+      </div>
+
+      <p style="text-align: center; color: #7D8C6E; font-size: 12px; margin-top: 24px;">
+        INstituto Kalapa — Sistema de Gestão de Agenda & Atendimentos
+      </p>
+    </div>
+  `;
+
+  return await sendEmail(toEmail, `🗓️ Novo Agendamento: ${pacienteNome} em ${dataHoraInicio}`, html);
 }
 

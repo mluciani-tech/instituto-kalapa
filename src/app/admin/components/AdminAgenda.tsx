@@ -16,8 +16,15 @@ import {
   Mail,
   Shield,
   Search,
+  Settings,
+  Send,
+  Bell,
+  Lock,
+  Eye,
+  EyeOff,
+  Server,
 } from "lucide-react";
-import type { Appointment, TherapistAvailability, TherapistBlock } from "@/lib/types";
+import type { Appointment, TherapistAvailability, TherapistBlock, Therapist } from "@/lib/types";
 
 const WEEKDAYS = [
   { id: 1, name: "Segunda-feira" },
@@ -46,10 +53,27 @@ function formatDateTimeBr(isoStr: string) {
 }
 
 export default function AdminAgenda() {
-  const [activeSubTab, setActiveSubTab] = useState<"consultas" | "grade" | "bloqueios">("consultas");
+  const [activeSubTab, setActiveSubTab] = useState<"consultas" | "grade" | "bloqueios" | "configuracoes">("consultas");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sucesso, setSucesso] = useState("");
+
+  // Terapeutas & Notificação State
+  const [therapists, setTherapists] = useState<Therapist[]>([]);
+  const [selectedTherapistId, setSelectedTherapistId] = useState<string>("");
+  const [therapistEmail, setTherapistEmail] = useState<string>("");
+  const [therapistTelefone, setTherapistTelefone] = useState<string>("");
+  const [salvandoConfigTerapeuta, setSalvandoConfigTerapeuta] = useState(false);
+  const [testandoEmail, setTestandoEmail] = useState(false);
+
+  // SMTP Hostinger State
+  const [smtpHost, setSmtpHost] = useState("smtp.hostinger.com");
+  const [smtpPort, setSmtpPort] = useState("465");
+  const [smtpUser, setSmtpUser] = useState("");
+  const [smtpPass, setSmtpPass] = useState("");
+  const [smtpFromName, setSmtpFromName] = useState("INstituto Kalapa");
+  const [mostrarSenhaSmtp, setMostrarSenhaSmtp] = useState(false);
+  const [salvandoSmtp, setSalvandoSmtp] = useState(false);
 
   // 1. Consultas State
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -171,14 +195,152 @@ export default function AdminAgenda() {
     }
   }, []);
 
+  // Carregar Terapeutas & Email de Notificação
+  const fetchTherapists = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/agendamentos/therapists");
+      if (res.ok) {
+        const data = await res.json();
+        const list: Therapist[] = data.therapists || [];
+        setTherapists(list);
+        if (list.length > 0) {
+          const primeiro = list[0];
+          setSelectedTherapistId(primeiro.id);
+          setTherapistEmail(primeiro.email || "");
+          setTherapistTelefone(primeiro.telefone || "");
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Carregar Configurações SMTP
+  const fetchSmtp = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/config/smtp");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.smtp) {
+          setSmtpHost(data.smtp.host || "smtp.hostinger.com");
+          setSmtpPort(data.smtp.port || "465");
+          setSmtpUser(data.smtp.user || "");
+          setSmtpPass(data.smtp.pass || "");
+          setSmtpFromName(data.smtp.fromName || "INstituto Kalapa");
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   useEffect(() => {
     const loadAll = async () => {
       setLoading(true);
-      await Promise.all([fetchAppointments(), fetchGrade(), fetchBlocks()]);
+      await Promise.all([fetchAppointments(), fetchGrade(), fetchBlocks(), fetchTherapists(), fetchSmtp()]);
       setLoading(false);
     };
     loadAll();
-  }, [fetchAppointments, fetchGrade, fetchBlocks]);
+  }, [fetchAppointments, fetchGrade, fetchBlocks, fetchTherapists, fetchSmtp]);
+
+  // Ação: Salvar configurações SMTP da Hostinger
+  const handleSalvarSmtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSalvandoSmtp(true);
+    setError("");
+    setSucesso("");
+
+    try {
+      const res = await fetch("/api/admin/config/smtp", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          host: smtpHost,
+          port: smtpPort,
+          user: smtpUser,
+          pass: smtpPass,
+          fromName: smtpFromName,
+        }),
+      });
+
+      if (res.ok) {
+        setSucesso("Configurações do SMTP da Hostinger salvas com sucesso no banco de dados!");
+        await fetchSmtp();
+      } else {
+        const d = await res.json();
+        setError(d.error || "Erro ao salvar credenciais SMTP.");
+      }
+    } catch {
+      setError("Falha de conexão ao salvar SMTP.");
+    }
+    setSalvandoSmtp(false);
+  };
+
+  // Ação: Salvar configurações de notificação do terapeuta
+  const handleSalvarConfigTerapeuta = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTherapistId) return;
+
+    setSalvandoConfigTerapeuta(true);
+    setError("");
+    setSucesso("");
+
+    try {
+      const res = await fetch("/api/admin/agendamentos/therapists", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selectedTherapistId,
+          email: therapistEmail,
+          telefone: therapistTelefone,
+        }),
+      });
+
+      if (res.ok) {
+        setSucesso("E-mail de notificação e dados do terapeuta salvos com sucesso!");
+        await fetchTherapists();
+      } else {
+        const d = await res.json();
+        setError(d.error || "Erro ao salvar dados do terapeuta.");
+      }
+    } catch {
+      setError("Falha de conexão ao salvar configurações.");
+    }
+    setSalvandoConfigTerapeuta(false);
+  };
+
+  // Ação: Enviar e-mail de teste
+  const handleTestarEnvioEmail = async () => {
+    if (!therapistEmail || !therapistEmail.includes("@")) {
+      setError("Informe um e-mail válido para testar o envio de notificação.");
+      return;
+    }
+
+    setTestandoEmail(true);
+    setError("");
+    setSucesso("");
+
+    try {
+      const res = await fetch("/api/admin/agendamentos/test-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: therapistEmail,
+          terapeuta_id: selectedTherapistId,
+        }),
+      });
+
+      if (res.ok) {
+        setSucesso(`E-mail de teste enviado com sucesso para ${therapistEmail}!`);
+      } else {
+        const d = await res.json();
+        setError(d.error || "Erro ao disparar e-mail de teste.");
+      }
+    } catch {
+      setError("Falha de conexão ao disparar e-mail de teste.");
+    }
+    setTestandoEmail(false);
+  };
 
   // Ação: Alterar status de consulta (ex: COMPLETED)
   const handleUpdateStatus = async (apptId: string, novoStatus: "COMPLETED") => {
@@ -445,6 +607,19 @@ export default function AdminAgenda() {
         >
           <Shield className="w-4 h-4" />
           <span>Bloqueios & Exceções ({blocks.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("configuracoes")}
+          className={`pb-3 px-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap shrink-0 touch-manipulation ${
+            activeSubTab === "configuracoes"
+              ? "border-brand-purple text-brand-purple"
+              : "border-transparent text-brand-charcoal/50 hover:text-brand-charcoal"
+          }`}
+        >
+          <Settings className="w-4 h-4" />
+          <span>Configurações & Notificações</span>
         </button>
       </div>
 
@@ -837,6 +1012,255 @@ export default function AdminAgenda() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* =========================================================================
+          ABA 4: CONFIGURAÇÕES & NOTIFICAÇÕES DE AGENDAMENTO
+          ========================================================================= */}
+      {activeSubTab === "configuracoes" && (
+        <div className="bg-white rounded-2xl border border-brand-beige p-6 space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-brand-beige">
+            <div className="p-3 bg-purple-100 text-brand-purple rounded-xl">
+              <Bell className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-brand-charcoal">
+                Notificação de Agendamento por E-mail
+              </h2>
+              <p className="text-xs text-brand-charcoal/60">
+                Configure para qual endereço de e-mail o sistema deve avisar instantaneamente a facilitadora/terapeuta sempre que um cliente agendar e confirmar uma sessão.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSalvarConfigTerapeuta} className="max-w-2xl space-y-5">
+            {therapists.length > 1 && (
+              <div>
+                <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                  Selecione o Terapeuta / Facilitador
+                </label>
+                <select
+                  value={selectedTherapistId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedTherapistId(id);
+                    const t = therapists.find((item) => item.id === id);
+                    if (t) {
+                      setTherapistEmail(t.email || "");
+                      setTherapistTelefone(t.telefone || "");
+                    }
+                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-beige bg-brand-beige-light text-xs font-semibold text-brand-charcoal focus:outline-hidden focus:border-brand-purple"
+                >
+                  {therapists.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.nome} ({t.titulo || "Facilitadora"})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="bg-brand-beige-light/50 p-4 rounded-xl border border-brand-beige space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                  E-mail do Terapeuta para Notificações *
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-brand-charcoal/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    value={therapistEmail}
+                    onChange={(e) => setTherapistEmail(e.target.value)}
+                    placeholder="exemplo: terapeuta@institutokalapa.com.br"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-brand-beige bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-purple"
+                  />
+                </div>
+                <p className="text-[11px] text-brand-charcoal/60 mt-1.5">
+                  Quando o pagamento for confirmado, um e-mail com os dados do paciente, serviço e horário reservado será despachado para esta caixa postal.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                  WhatsApp / Telefone de Contato Profissional
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-brand-charcoal/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={therapistTelefone}
+                    onChange={(e) => setTherapistTelefone(e.target.value)}
+                    placeholder="ex: (11) 99999-9999"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-brand-beige bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-purple"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100 flex items-start gap-3">
+              <span className="text-lg">💡</span>
+              <div className="text-xs text-brand-charcoal/80 space-y-1">
+                <p className="font-semibold text-brand-purple">Como funciona a notificação automática?</p>
+                <p>
+                  1. O cliente escolhe dia/hora no produto individual de atendimento.<br />
+                  2. Ao concluir o checkout com sucesso (PIX, Cartão ou cortesia), o status muda para <strong>CONFIRMED</strong>.<br />
+                  3. O e-mail configurado acima recebe instantaneamente a ficha da consulta com botão direto para o WhatsApp do paciente.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <button
+                type="button"
+                onClick={handleTestarEnvioEmail}
+                disabled={testandoEmail || !therapistEmail}
+                className="px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-brand-charcoal text-xs font-semibold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>{testandoEmail ? "Enviando teste..." : "Enviar E-mail de Teste"}</span>
+              </button>
+
+              <button
+                type="submit"
+                disabled={salvandoConfigTerapeuta}
+                className="px-6 py-2.5 rounded-xl bg-brand-purple hover:bg-brand-purple-dark text-white text-xs font-bold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                <Save className="w-4 h-4" />
+                <span>{salvandoConfigTerapeuta ? "Salvando..." : "Salvar Terapeuta"}</span>
+              </button>
+            </div>
+          </form>
+
+          {/* =========================================================================
+              SEÇÃO: DADOS DO SERVIDOR SMTP HOSTINGER
+              ========================================================================= */}
+          <div className="pt-6 border-t-2 border-brand-beige">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-amber-100 text-amber-800 rounded-xl">
+                <Server className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-brand-charcoal">
+                  Servidor de Envio de E-mail (SMTP Hostinger)
+                </h3>
+                <p className="text-xs text-brand-charcoal/60">
+                  Preencha com os dados do seu e-mail corporativo da Hostinger para que o sistema autentique e envie as mensagens sem intermediários.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSalvarSmtp} className="max-w-2xl space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                    Servidor SMTP (Host) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={smtpHost}
+                    onChange={(e) => setSmtpHost(e.target.value)}
+                    placeholder="smtp.hostinger.com"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-beige bg-white text-xs font-mono text-brand-charcoal focus:outline-hidden focus:border-brand-purple"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                    Porta *
+                  </label>
+                  <select
+                    value={smtpPort}
+                    onChange={(e) => setSmtpPort(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-beige bg-white text-xs font-mono text-brand-charcoal focus:outline-hidden focus:border-brand-purple"
+                  >
+                    <option value="465">465 (SSL/TLS - Recomendado)</option>
+                    <option value="587">587 (STARTTLS)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                    Usuário / E-mail Remetente *
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-brand-charcoal/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      required
+                      value={smtpUser}
+                      onChange={(e) => setSmtpUser(e.target.value)}
+                      placeholder="contato@institutokalapa.com.br"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-brand-beige bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-purple"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                    Senha do E-mail Hostinger *
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-brand-charcoal/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type={mostrarSenhaSmtp ? "text" : "password"}
+                      required
+                      value={smtpPass}
+                      onChange={(e) => setSmtpPass(e.target.value)}
+                      placeholder="••••••••••••"
+                      className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-brand-beige bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-purple font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setMostrarSenhaSmtp(!mostrarSenhaSmtp)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-brand-charcoal/40 hover:text-brand-charcoal cursor-pointer"
+                      title={mostrarSenhaSmtp ? "Ocultar senha" : "Ver senha"}
+                    >
+                      {mostrarSenhaSmtp ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                  Nome de Exibição do Remetente
+                </label>
+                <input
+                  type="text"
+                  value={smtpFromName}
+                  onChange={(e) => setSmtpFromName(e.target.value)}
+                  placeholder="INstituto Kalapa"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-beige bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-purple"
+                />
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-900 space-y-1">
+                <p className="font-bold flex items-center gap-1.5">
+                  <span>🔒</span> Segurança e Armazenamento:
+                </p>
+                <p className="text-[11px] leading-relaxed">
+                  As credenciais SMTP são salvas na tabela de configurações protegida por RLS e usadas exclusivamente em chamadas server-side seguras para notificar o terapeuta e o comprador.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end pt-1">
+                <button
+                  type="submit"
+                  disabled={salvandoSmtp || !smtpUser}
+                  className="px-6 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold flex items-center gap-2 transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{salvandoSmtp ? "Salvando SMTP..." : "Salvar Configurações SMTP"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

@@ -6,6 +6,8 @@ import type { Produto, Pedido, Participante, Cupom, Usuario } from "@/lib/types"
 import { isProdutoAgendamento } from "@/lib/agendamento";
 import AdminDashboard from "./components/AdminDashboard";
 import AdminAgenda from "./components/AdminAgenda";
+import AdminToastNotification from "./components/AdminToastNotification";
+import AdminManual from "./components/AdminManual";
 
 type Paginated<T> = {
   data: T[];
@@ -15,7 +17,7 @@ type Paginated<T> = {
   totalPages: number;
 };
 
-type Tab = "dashboard" | "sobre" | "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios" | "agendamentos";
+type Tab = "dashboard" | "sobre" | "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios" | "agendamentos" | "manual";
 
 const FAQ_PADRAO_ADMIN = [
   {
@@ -95,6 +97,7 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const [newAppointmentsCount, setNewAppointmentsCount] = useState(0);
   const [error, setError] = useState("");
 
   // Auth
@@ -1064,15 +1067,16 @@ export default function AdminPage() {
     return true;
   });
 
-  const tabs: { id: Tab; label: string; count?: number }[] = [
+  const tabs: { id: Tab; label: string; count?: number; highlight?: boolean }[] = [
     { id: "dashboard", label: "📊 Visão Geral" },
     { id: "sobre", label: "Sobre & FAQ" },
     { id: "produtos", label: "Produtos", count: produtos.length },
     { id: "pedidos", label: "Pedidos", count: pedidosTotal || pedidos.length },
     { id: "participantes", label: "Inscrições", count: participantesTotal || participantes.length },
-    { id: "agendamentos", label: "🗓️ Agenda & Atendimentos" },
+    { id: "agendamentos", label: "🗓️ Agenda & Atendimentos", count: newAppointmentsCount > 0 ? newAppointmentsCount : undefined, highlight: newAppointmentsCount > 0 },
     { id: "cupons", label: "Cupons", count: cupons.length },
     { id: "usuarios", label: "Usuários", count: usuariosTotal },
+    { id: "manual", label: "📖 Manual do Sistema" },
   ];
 
   return (
@@ -1101,16 +1105,27 @@ export default function AdminPage() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
+              onClick={() => {
+                setActiveTab(tab.id);
+                if (tab.id === "agendamentos") {
+                  setNewAppointmentsCount(0);
+                }
+              }}
+              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 flex items-center gap-1.5 ${
                 activeTab === tab.id
                   ? "border-brand-purple text-brand-purple"
                   : "border-transparent text-brand-charcoal/50 hover:text-brand-charcoal"
               }`}
             >
-              {tab.label}
+              <span>{tab.label}</span>
               {tab.count !== undefined && (
-                <span className="ml-1.5 text-xs bg-brand-beige px-1.5 py-0.5 rounded-full">
+                <span
+                  className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
+                    tab.highlight
+                      ? "bg-purple-600 text-white animate-pulse"
+                      : "bg-brand-beige text-brand-charcoal/80"
+                  }`}
+                >
                   {tab.count}
                 </span>
               )}
@@ -3621,6 +3636,20 @@ export default function AdminPage() {
       )}
 
       {activeTab === "agendamentos" && <AdminAgenda />}
+      {activeTab === "manual" && <AdminManual />}
+
+      {/* Notificações Flutuantes do Administrador (Toast em tempo real) */}
+      <AdminToastNotification
+        onNavigateToAgenda={() => {
+          setActiveTab("agendamentos");
+          setNewAppointmentsCount(0);
+        }}
+        onNewAppointmentsCountChange={(count) => {
+          if (activeTab !== "agendamentos") {
+            setNewAppointmentsCount(count);
+          }
+        }}
+      />
     </div>
   );
 }

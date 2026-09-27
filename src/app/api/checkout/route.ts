@@ -244,6 +244,14 @@ export async function POST(req: NextRequest) {
             actor_type: "system",
             details: { pedido_id: pedido.id },
           });
+
+          // Notificar terapeuta por e-mail para agendamento 100% gratuito confirmado
+          try {
+            const { notificarTerapeutaPorAgendamentoId } = await import("@/lib/agendamento");
+            await notificarTerapeutaPorAgendamentoId(agendamento_id, orderNsu);
+          } catch (notifErr) {
+            console.error("[checkout] Erro ao notificar terapeuta por agendamento gratuito:", notifErr);
+          }
         }
       } catch (errAppt) {
         console.error("[checkout] Erro ao vincular pedido ao agendamento:", errAppt);

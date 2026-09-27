@@ -189,6 +189,14 @@ export async function POST(req: NextRequest) {
         });
 
         console.log("[webhook] Agendamento confirmado com sucesso:", apptId);
+
+        // Notificar terapeuta por e-mail
+        try {
+          const { notificarTerapeutaPorAgendamentoId } = await import("@/lib/agendamento");
+          await notificarTerapeutaPorAgendamentoId(apptId, order_nsu);
+        } catch (notifErr) {
+          console.error("[webhook] Erro ao disparar notificação de agendamento ao terapeuta:", notifErr);
+        }
       }
     } catch (errAppt) {
       console.error("[webhook] Erro ao confirmar agendamento vinculado:", errAppt);
