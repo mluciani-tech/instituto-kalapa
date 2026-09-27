@@ -8,6 +8,7 @@ import { Check, ArrowRight, ShoppingBag, Share2, CheckCheck, Calendar } from "lu
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
+import { isProdutoAgendamento } from "@/lib/agendamento";
 
 export type { Produto };
 
@@ -53,7 +54,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
     }
   };
 
-  const isAgendamento = produto.slug === "atendimentos" || produto.categoria === "atendimentos";
+  const isAgendamento = isProdutoAgendamento(produto);
 
   const handleEscolher = () => {
     if (isAgendamento) {

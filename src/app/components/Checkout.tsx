@@ -20,6 +20,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import type { Produto, Usuario } from "@/lib/types";
+import { isProdutoAgendamento } from "@/lib/agendamento";
 
 interface AcompanhanteItem {
   key: string;
@@ -127,9 +128,9 @@ export default function Checkout() {
 
   // Verifica se o checkout contém atendimento que exige agendamento prévio
   const atendimentoCartItem = isCartCheckout
-    ? cartItems.find((i) => i.categoria === "atendimentos" || i.slug === "atendimentos")
+    ? cartItems.find((i) => isProdutoAgendamento({ slug: i.slug, categoria: i.categoria, nome: i.nome }))
     : null;
-  const atendimentoSingle = !isCartCheckout && (produto?.categoria === "atendimentos" || produto?.slug === "atendimentos")
+  const atendimentoSingle = !isCartCheckout && produto && isProdutoAgendamento(produto)
     ? produto
     : null;
   const precisaAgendamento = !!(atendimentoCartItem || atendimentoSingle);

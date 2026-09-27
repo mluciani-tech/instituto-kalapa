@@ -7,6 +7,7 @@ import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Clock, AlertCircle, Lo
 import Image from "next/image";
 import Link from "next/link";
 import type { Pedido } from "@/lib/types";
+import { isProdutoAgendamento } from "@/lib/agendamento";
 
 export default function CartDrawer() {
   const router = useRouter();
@@ -272,7 +273,7 @@ export default function CartDrawer() {
                       </p>
                     )}
 
-                    {(item.categoria === "atendimentos" || item.slug === "atendimentos") && !item.agendamento_id && (
+                    {isProdutoAgendamento({ slug: item.slug, categoria: item.categoria, nome: item.nome }) && !item.agendamento_id && (
                       <div className="mt-2.5 p-2 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-between gap-2 text-[11px] text-amber-200">
                         <span className="flex items-center gap-1.5 font-medium">
                           <Calendar className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -296,7 +297,7 @@ export default function CartDrawer() {
           {/* Footer */}
           {items.length > 0 && (() => {
             const itemPendenteAgendamento = items.find(
-              (i) => (i.categoria === "atendimentos" || i.slug === "atendimentos") && !i.agendamento_id
+              (i) => isProdutoAgendamento({ slug: i.slug, categoria: i.categoria, nome: i.nome }) && !i.agendamento_id
             );
 
             return (

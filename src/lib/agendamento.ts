@@ -5,6 +5,54 @@ const BRAZIL_OFFSET = "-03:00"; // Fuso horário padrão de Brasília (UTC-3)
 const DEFAULT_MIN_ADVANCE_HOURS = 4;
 const PENDING_HOLD_MINUTES = 15;
 
+/**
+ * Verifica se um produto é um atendimento individual que exige agendamento prévio na agenda.
+ * Reconhece variações em categoria, slug e nome de forma case-insensitive e acento-insensível.
+ */
+export function isProdutoAgendamento(p?: { slug?: string | null; categoria?: string | null; nome?: string | null } | null): boolean {
+  if (!p) return false;
+
+  const norm = (s?: string | null) =>
+    (s || "")
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+  const slug = norm(p.slug);
+  const cat = norm(p.categoria);
+  const nome = norm(p.nome);
+
+  // 1. Categoria é Atendimentos
+  if (cat === "atendimentos" || cat === "atendimento") {
+    return true;
+  }
+
+  // 2. Slug contém terapia, atendimento, sessao, consulta
+  if (
+    slug.includes("terapia") ||
+    slug.includes("atendimento") ||
+    slug.includes("sessao") ||
+    slug.includes("consulta")
+  ) {
+    return true;
+  }
+
+  // 3. Nome contém referências a atendimentos terapêuticos individuais
+  if (
+    nome.includes("terapia") ||
+    nome.includes("atendimento") ||
+    nome.includes("oleacao") ||
+    nome.includes("abhyanga") ||
+    nome.includes("psicoterapia") ||
+    nome.includes("constelacao individual")
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 /** Converte data (YYYY-MM-DD) e hora (HH:mm ou HH:mm:ss) para Date UTC considerando o fuso de Brasília */
 export function parseLocalToUtc(dateStr: string, timeStr: string): Date {
   const normalizedTime = timeStr.length === 5 ? `${timeStr}:00` : timeStr;

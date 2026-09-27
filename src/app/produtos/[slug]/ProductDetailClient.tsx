@@ -19,6 +19,7 @@ import {
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
 import ProductAppointmentSection from "@/components/agendamento/ProductAppointmentSection";
+import { isProdutoAgendamento } from "@/lib/agendamento";
 
 interface ProductDetailClientProps {
   produto: Produto;
@@ -30,7 +31,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
   const { addItem, clearCart, openDrawer } = useCart();
   const [copiado, setCopiado] = useState(false);
 
-  const isAgendamento = produto.slug === "atendimentos" || produto.categoria === "atendimentos";
+  const isAgendamento = isProdutoAgendamento(produto);
 
   useEffect(() => {
     if (typeof window !== "undefined" && isAgendamento) {
