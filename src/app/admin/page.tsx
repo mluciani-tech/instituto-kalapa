@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback, Fragment } from "react";
-import { Mail } from "lucide-react";
+import { Mail, Menu } from "lucide-react";
 import type { Produto, Pedido, Participante, Cupom, Usuario } from "@/lib/types";
 import { isProdutoAgendamento } from "@/lib/agendamento";
 import AdminDashboard from "./components/AdminDashboard";
 import AdminAgenda from "./components/AdminAgenda";
 import AdminToastNotification from "./components/AdminToastNotification";
 import AdminManual from "./components/AdminManual";
+import AdminSidebar from "./components/AdminSidebar";
 
 type Paginated<T> = {
   data: T[];
@@ -97,6 +98,7 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [newAppointmentsCount, setNewAppointmentsCount] = useState(0);
   const [error, setError] = useState("");
 
@@ -1080,62 +1082,38 @@ export default function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-brand-beige-light">
-      {/* Header */}
-      <header className="bg-white border-b border-brand-beige sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-base font-bold text-brand-purple">INstituto Kalapa</h1>
-            <span className="text-xs text-brand-charcoal/40">Admin</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <a href="/produtos" target="_blank" className="text-xs text-brand-purple hover:underline">
-              Ver catálogo ↗
-            </a>
-            <button onClick={handleLogout} className="text-sm text-brand-charcoal/50 hover:text-brand-charcoal transition-colors px-3 py-2">
-              Sair
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex bg-brand-beige-light">
+      {/* Sidebar */}
+      <AdminSidebar
+        activeTab={activeTab}
+        tabs={tabs}
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          if (tab === "agendamentos") setNewAppointmentsCount(0);
+        }}
+        onLogout={handleLogout}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-      {/* Tabs */}
-      <div className="bg-white border-b border-brand-beige">
-        <div className="max-w-6xl mx-auto px-4 flex gap-1 overflow-x-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                if (tab.id === "agendamentos") {
-                  setNewAppointmentsCount(0);
-                }
-              }}
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 flex items-center gap-1.5 ${
-                activeTab === tab.id
-                  ? "border-brand-purple text-brand-purple"
-                  : "border-transparent text-brand-charcoal/50 hover:text-brand-charcoal"
-              }`}
-            >
-              <span>{tab.label}</span>
-              {tab.count !== undefined && (
-                <span
-                  className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
-                    tab.highlight
-                      ? "bg-purple-600 text-white animate-pulse"
-                      : "bg-brand-beige text-brand-charcoal/80"
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Área de conteúdo */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Topbar mobile */}
+        <header className="lg:hidden sticky top-0 z-10 bg-white border-b border-brand-beige h-14 flex items-center px-4 gap-3 shrink-0">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-lg hover:bg-brand-beige/50 transition-colors text-brand-charcoal"
+            aria-label="Abrir menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <h1 className="text-sm font-bold text-brand-purple">INstituto Kalapa</h1>
+          <span className="text-xs text-brand-charcoal/40">Admin</span>
+        </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
-        {error && (
+        <main className="flex-1 px-4 lg:px-6 py-6 overflow-auto">
+          {error && (
+
           <div role="alert" className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
             {error}
             <button onClick={() => setError("")} className="float-right font-bold" aria-label="Fechar">
@@ -2920,6 +2898,10 @@ export default function AdminPage() {
             )}
           </div>
         )}
+        {/* Tab: Agenda & Atendimentos */}
+        {activeTab === "agendamentos" && <AdminAgenda />}
+        {/* Tab: Manual do Sistema */}
+        {activeTab === "manual" && <AdminManual />}
       </main>
 
 
@@ -3635,9 +3617,6 @@ export default function AdminPage() {
         </div>
       )}
 
-      {activeTab === "agendamentos" && <AdminAgenda />}
-      {activeTab === "manual" && <AdminManual />}
-
       {/* Notificações Flutuantes do Administrador (Toast em tempo real) */}
       <AdminToastNotification
         onNavigateToAgenda={() => {
@@ -3650,6 +3629,7 @@ export default function AdminPage() {
           }
         }}
       />
+      </div>
     </div>
   );
 }
