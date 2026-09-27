@@ -231,11 +231,11 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                   {isAgendamento ? (
                     <Link
                       href={`/produtos/${produto.id}#agendamento`}
-                      className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
                     >
-                      <Calendar className="w-4 h-4 text-white" />
+                      <Calendar className="w-4 h-4 text-white shrink-0" />
                       <span>Ver Agenda & Horários</span>
-                      <ArrowRight className="w-4 h-4 ml-auto" />
+                      <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
                     </Link>
                   ) : (
                     <>

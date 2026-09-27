@@ -30,7 +30,7 @@ export default function TimeSlotPicker({
   const availableSlots = slots.filter((s) => s.available);
 
   return (
-    <div className="bg-white/80 backdrop-blur-md rounded-2xl p-5 border border-brand-charcoal/10 shadow-sm flex flex-col justify-between h-full">
+    <div className="bg-white/80 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-brand-charcoal/10 shadow-sm flex flex-col justify-between h-full">
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ export default function TimeSlotPicker({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[260px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5 max-h-[260px] overflow-y-auto pr-1 overscroll-contain">
             {slots.map((slot) => {
               const isSelected = selectedSlot?.startTime === slot.startTime;
               const isAvailable = slot.available;
@@ -78,11 +78,13 @@ export default function TimeSlotPicker({
                   disabled={!isAvailable}
                   onClick={() => onSelectSlot(slot)}
                   title={slot.reason || `${slot.timeDisplay} às ${slot.timeEndDisplay}`}
-                  className={`py-2.5 px-3 rounded-xl text-xs font-semibold transition-all flex flex-col items-center justify-center cursor-pointer border ${
+                  aria-label={`Horário das ${slot.timeDisplay} às ${slot.timeEndDisplay}, ${slot.available ? "disponível" : "indisponível"}`}
+                  aria-pressed={isSelected}
+                  className={`py-2.5 px-2.5 sm:px-3 rounded-xl text-xs font-semibold transition-all flex flex-col items-center justify-center touch-manipulation min-h-[48px] border ${
                     isSelected
-                      ? "bg-brand-terracotta text-white border-brand-terracotta shadow-md shadow-brand-terracotta/25 scale-[1.02]"
+                      ? "bg-brand-terracotta text-white border-brand-terracotta shadow-md shadow-brand-terracotta/25 scale-[1.02] active:scale-95 cursor-pointer"
                       : isAvailable
-                      ? "bg-white hover:bg-brand-terracotta/10 text-brand-charcoal border-brand-charcoal/15 hover:border-brand-terracotta/50"
+                      ? "bg-white hover:bg-brand-terracotta/10 text-brand-charcoal border-brand-charcoal/15 hover:border-brand-terracotta/50 active:scale-95 cursor-pointer"
                       : "bg-brand-charcoal/5 text-brand-charcoal/30 border-transparent cursor-not-allowed line-through"
                   }`}
                 >

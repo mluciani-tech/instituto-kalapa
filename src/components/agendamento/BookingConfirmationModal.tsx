@@ -74,6 +74,22 @@ export default function BookingConfirmationModal({
   const [cadCpf, setCadCpf] = useState("");
   const [cadSenha, setCadSenha] = useState("");
 
+  const formatTelefone = (v: string) => {
+    const digits = v.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
+
+  const formatCpf = (v: string) => {
+    const digits = v.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+  };
+
   if (!isOpen) return null;
 
   const precoFormatado = (produto.preco ?? 0).toLocaleString("pt-BR", {
@@ -212,30 +228,31 @@ export default function BookingConfirmationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-charcoal/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-brand-charcoal/10 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-brand-charcoal/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-brand-charcoal/10 flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="p-6 pb-4 border-b border-brand-charcoal/10 flex items-center justify-between bg-brand-offwhite">
+        <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-brand-charcoal/10 flex items-center justify-between bg-brand-offwhite">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-brand-terracotta/15 flex items-center justify-center text-brand-terracotta">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-base text-brand-charcoal">Confirmar Atendimento</h3>
-              <p className="text-xs text-brand-charcoal/60">Hold temporário de 15 minutos na agenda</p>
+              <h3 className="font-bold text-sm sm:text-base text-brand-charcoal">Confirmar Atendimento</h3>
+              <p className="text-[11px] sm:text-xs text-brand-charcoal/60">Hold temporário de 15 minutos na agenda</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-full text-brand-charcoal/40 hover:text-brand-charcoal hover:bg-brand-charcoal/5 transition-colors cursor-pointer"
+            aria-label="Fechar modal"
+            className="p-2 rounded-full text-brand-charcoal/40 hover:text-brand-charcoal hover:bg-brand-charcoal/5 transition-colors cursor-pointer touch-manipulation"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-5">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 overscroll-contain">
           {/* Card Resumo do Agendamento */}
           <div className="p-4 rounded-2xl bg-brand-offwhite/80 border border-brand-charcoal/10 space-y-3">
             <div className="flex items-start justify-between">
@@ -361,7 +378,7 @@ export default function BookingConfirmationModal({
                       className="w-full px-3.5 py-2 rounded-xl border border-brand-charcoal/15 bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-terracotta"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                       <label className="block text-xs font-semibold text-brand-charcoal mb-1">E-mail</label>
                       <input
@@ -370,31 +387,33 @@ export default function BookingConfirmationModal({
                         value={cadEmail}
                         onChange={(e) => setCadEmail(e.target.value)}
                         placeholder="seu@email.com"
-                        className="w-full px-3.5 py-2 rounded-xl border border-brand-charcoal/15 bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-terracotta"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-charcoal/15 bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-terracotta"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-brand-charcoal mb-1">WhatsApp</label>
                       <input
                         type="tel"
+                        inputMode="tel"
                         required
                         value={cadTelefone}
-                        onChange={(e) => setCadTelefone(e.target.value)}
+                        onChange={(e) => setCadTelefone(formatTelefone(e.target.value))}
                         placeholder="(11) 99999-9999"
-                        className="w-full px-3.5 py-2 rounded-xl border border-brand-charcoal/15 bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-terracotta"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-charcoal/15 bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-terracotta"
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                       <label className="block text-xs font-semibold text-brand-charcoal mb-1">CPF</label>
                       <input
                         type="text"
+                        inputMode="numeric"
                         required
                         value={cadCpf}
-                        onChange={(e) => setCadCpf(e.target.value)}
+                        onChange={(e) => setCadCpf(formatCpf(e.target.value))}
                         placeholder="000.000.000-00"
-                        className="w-full px-3.5 py-2 rounded-xl border border-brand-charcoal/15 bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-terracotta"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-charcoal/15 bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-terracotta"
                       />
                     </div>
                     <div>
@@ -405,7 +424,7 @@ export default function BookingConfirmationModal({
                         value={cadSenha}
                         onChange={(e) => setCadSenha(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full px-3.5 py-2 rounded-xl border border-brand-charcoal/15 bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-terracotta"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-charcoal/15 bg-white text-xs text-brand-charcoal focus:outline-hidden focus:border-brand-terracotta"
                       />
                     </div>
                   </div>

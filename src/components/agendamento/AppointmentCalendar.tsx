@@ -77,7 +77,7 @@ export default function AppointmentCalendar({
     (currentYear === today.getFullYear() && currentMonth <= today.getMonth());
 
   return (
-    <div className="bg-white/80 backdrop-blur-md rounded-2xl p-5 border border-brand-charcoal/10 shadow-sm">
+    <div className="bg-white/80 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-brand-charcoal/10 shadow-sm">
       {/* Cabeçalho do Calendário */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export default function AppointmentCalendar({
             onClick={handlePrevMonth}
             disabled={isCurrentMonthOrPast}
             aria-label="Mês anterior"
-            className="p-1.5 rounded-lg text-brand-charcoal/60 hover:text-brand-charcoal hover:bg-brand-charcoal/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="p-2 sm:p-1.5 rounded-lg text-brand-charcoal/60 hover:text-brand-charcoal hover:bg-brand-charcoal/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer touch-manipulation"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -101,7 +101,7 @@ export default function AppointmentCalendar({
             type="button"
             onClick={handleNextMonth}
             aria-label="Próximo mês"
-            className="p-1.5 rounded-lg text-brand-charcoal/60 hover:text-brand-charcoal hover:bg-brand-charcoal/5 transition-colors"
+            className="p-2 sm:p-1.5 rounded-lg text-brand-charcoal/60 hover:text-brand-charcoal hover:bg-brand-charcoal/5 transition-colors cursor-pointer touch-manipulation"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -109,12 +109,12 @@ export default function AppointmentCalendar({
       </div>
 
       {/* Dias da semana */}
-      <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+      <div className="grid grid-cols-7 gap-1 mb-2 text-center select-none" aria-hidden="true">
         {WEEKDAYS.map((day, idx) => (
           <span
             key={day}
-            className={`text-xs font-semibold py-1 ${
-              idx === 0 || idx === 6 ? "text-brand-charcoal/40" : "text-brand-charcoal/60"
+            className={`text-[11px] sm:text-xs font-semibold py-1 ${
+              idx === 0 || idx === 6 ? "text-brand-charcoal/40" : "text-brand-charcoal/65"
             }`}
           >
             {day}
@@ -123,10 +123,10 @@ export default function AppointmentCalendar({
       </div>
 
       {/* Grade de Dias */}
-      <div className="grid grid-cols-7 gap-1 text-center">
+      <div className="grid grid-cols-7 gap-1 text-center" role="grid" aria-label={`Calendário de ${MONTH_NAMES[currentMonth]} de ${currentYear}`}>
         {/* Espaços vazios do início do mês */}
         {Array.from({ length: firstDayOfWeek }).map((_, idx) => (
-          <div key={`empty-${idx}`} className="h-9 sm:h-10" />
+          <div key={`empty-${idx}`} className="h-10 sm:h-11" />
         ))}
 
         {/* Dias do mês */}
@@ -149,21 +149,23 @@ export default function AppointmentCalendar({
               type="button"
               disabled={isDisabled}
               onClick={() => onSelectDate(dateStr)}
-              className={`h-9 sm:h-10 rounded-xl text-xs sm:text-sm font-medium transition-all relative flex flex-col items-center justify-center cursor-pointer ${
+              aria-label={`${day} de ${MONTH_NAMES[currentMonth]} de ${currentYear}${isSelected ? ", selecionado" : ""}${isToday ? ", hoje" : ""}${isDisabled ? ", indisponível" : ""}`}
+              aria-pressed={isSelected}
+              className={`h-10 sm:h-11 rounded-xl text-xs sm:text-sm font-medium transition-all relative flex flex-col items-center justify-center touch-manipulation active:scale-95 ${
                 isSelected
                   ? "bg-brand-terracotta text-white font-bold shadow-md shadow-brand-terracotta/30 scale-105 z-10"
                   : isToday
-                  ? "border border-brand-terracotta text-brand-terracotta font-semibold hover:bg-brand-terracotta/10"
+                  ? "border border-brand-terracotta text-brand-terracotta font-semibold hover:bg-brand-terracotta/10 cursor-pointer"
                   : isDisabled
                   ? "text-brand-charcoal/20 cursor-not-allowed bg-transparent"
                   : isWeekend
-                  ? "text-brand-charcoal/50 hover:bg-brand-charcoal/5"
-                  : "text-brand-charcoal hover:bg-brand-terracotta/10 hover:text-brand-terracotta"
+                  ? "text-brand-charcoal/50 hover:bg-brand-charcoal/5 cursor-pointer"
+                  : "text-brand-charcoal hover:bg-brand-terracotta/10 hover:text-brand-terracotta cursor-pointer"
               }`}
             >
               <span>{day}</span>
               {isToday && !isSelected && (
-                <span className="w-1 h-1 rounded-full bg-brand-terracotta absolute bottom-1" />
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta absolute bottom-1" />
               )}
             </button>
           );
@@ -171,16 +173,18 @@ export default function AppointmentCalendar({
       </div>
 
       {/* Legenda sutil */}
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-brand-charcoal/10 text-[11px] text-brand-charcoal/50">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-brand-terracotta" />
-          <span>Selecionado</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pt-3 border-t border-brand-charcoal/10 text-[11px] text-brand-charcoal/50 select-none">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-brand-terracotta" />
+            <span>Selecionado</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full border border-brand-terracotta" />
+            <span>Hoje</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full border border-brand-terracotta" />
-          <span>Hoje</span>
-        </div>
-        <span>Horário de Brasília (UTC-3)</span>
+        <span className="text-[10px] text-brand-charcoal/40">Horário de Brasília (UTC-3)</span>
       </div>
     </div>
   );

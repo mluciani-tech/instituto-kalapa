@@ -113,7 +113,7 @@ export default function ProductAppointmentSection({ produto }: ProductAppointmen
   };
 
   return (
-    <div id="agendamento" className="mt-8 pt-8 border-t border-brand-charcoal/10 scroll-mt-20">
+    <div id="agendamento" className="mt-8 pt-8 border-t border-brand-charcoal/10 scroll-mt-24">
       <div className="mb-6">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-terracotta/10 text-brand-terracotta text-xs font-semibold mb-2">
           <CalendarIcon className="w-3.5 h-3.5" />
@@ -178,18 +178,18 @@ export default function ProductAppointmentSection({ produto }: ProductAppointmen
 
       {/* Barra de Ação Inferior */}
       <div className="mt-6 p-4 sm:p-5 rounded-2xl bg-white border border-brand-charcoal/10 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
+        <div className="text-center sm:text-left w-full sm:w-auto">
           {selectedSlot ? (
             <div>
               <span className="text-xs text-brand-charcoal/60">Sessão selecionada:</span>
-              <p className="text-sm font-bold text-brand-charcoal">
+              <p className="text-sm font-bold text-brand-charcoal mt-0.5">
                 {selectedDate.split("-").reverse().join("/")} às {selectedSlot.timeDisplay} ({selectedSlot.timeEndDisplay})
               </p>
             </div>
           ) : (
             <div>
               <span className="text-xs text-brand-charcoal/60">Passo 1 de 2:</span>
-              <p className="text-sm font-medium text-brand-charcoal">
+              <p className="text-sm font-medium text-brand-charcoal mt-0.5">
                 Selecione uma data e um horário disponível acima
               </p>
             </div>
@@ -200,7 +200,7 @@ export default function ProductAppointmentSection({ produto }: ProductAppointmen
           type="button"
           onClick={handleProsseguir}
           disabled={!selectedSlot}
-          className="w-full sm:w-auto py-3.5 px-6 font-bold text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          className="w-full sm:w-auto py-3.5 px-7 font-bold text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 touch-manipulation"
         >
           <span>Avançar para Reserva</span>
           <ArrowRight className="w-4 h-4" />

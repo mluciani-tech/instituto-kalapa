@@ -407,11 +407,11 @@ export default function AdminAgenda() {
       )}
 
       {/* Sub-navegação */}
-      <div className="flex border-b border-brand-beige bg-white rounded-t-2xl px-4 pt-3 gap-2 overflow-x-auto">
+      <div className="flex border-b border-brand-beige bg-white rounded-t-2xl px-4 pt-3 gap-2 overflow-x-auto no-scrollbar">
         <button
           type="button"
           onClick={() => setActiveSubTab("consultas")}
-          className={`pb-3 px-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
+          className={`pb-3 px-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap shrink-0 touch-manipulation ${
             activeSubTab === "consultas"
               ? "border-brand-purple text-brand-purple"
               : "border-transparent text-brand-charcoal/50 hover:text-brand-charcoal"
@@ -424,7 +424,7 @@ export default function AdminAgenda() {
         <button
           type="button"
           onClick={() => setActiveSubTab("grade")}
-          className={`pb-3 px-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
+          className={`pb-3 px-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap shrink-0 touch-manipulation ${
             activeSubTab === "grade"
               ? "border-brand-purple text-brand-purple"
               : "border-transparent text-brand-charcoal/50 hover:text-brand-charcoal"
@@ -437,7 +437,7 @@ export default function AdminAgenda() {
         <button
           type="button"
           onClick={() => setActiveSubTab("bloqueios")}
-          className={`pb-3 px-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
+          className={`pb-3 px-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap shrink-0 touch-manipulation ${
             activeSubTab === "bloqueios"
               ? "border-brand-purple text-brand-purple"
               : "border-transparent text-brand-charcoal/50 hover:text-brand-charcoal"

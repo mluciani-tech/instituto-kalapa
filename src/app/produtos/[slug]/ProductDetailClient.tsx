@@ -315,11 +315,11 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                     const el = document.getElementById("agendamento") || document.getElementById("agendamento-section");
                     if (el) el.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="flex-1 py-3.5 px-5 font-bold text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer"
+                  className="flex-1 py-3.5 px-4 sm:px-5 font-bold text-xs sm:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
                 >
-                  <Calendar className="w-4 h-4 text-white" />
-                  <span>Escolher Data e Horário na Agenda</span>
-                  <ArrowRight className="w-4 h-4 ml-auto" />
+                  <Calendar className="w-4 h-4 text-white shrink-0" />
+                  <span className="truncate">Escolher Data e Horário na Agenda</span>
+                  <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
                 </a>
               ) : (
                 <>

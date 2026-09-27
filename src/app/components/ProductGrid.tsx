@@ -88,13 +88,17 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
         </div>
 
         <h3 className="text-xl font-bold text-brand-charcoal mb-2 font-sans">
-          {categoria
+          {categoria === "atendimentos"
+            ? "Nenhum atendimento individual disponível no momento"
+            : categoria
             ? `Nenhuma vivência encontrada em "${categoria}"`
             : "Novas turmas em preparação"}
         </h3>
 
         <p className="text-brand-charcoal/65 text-sm mb-6 leading-relaxed">
-          {categoria
+          {categoria === "atendimentos"
+            ? "No momento as vagas para atendimentos individuais estão completas ou em atualização. Fale diretamente com nossa facilitadora para consultar novos horários."
+            : categoria
             ? "No momento não temos turmas com inscrições abertas nesta categoria ou o calendário está sendo atualizado. Explore todas as vivências ativas ou consulte nossa facilitadora."
             : "Nossos grupos são reduzidos e abertos periodicamente. Entre em contato conosco para conhecer a programação e reservar sua vaga antecipadamente."}
         </p>
