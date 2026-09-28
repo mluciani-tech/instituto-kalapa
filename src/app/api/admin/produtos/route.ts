@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
     categoria,
     forma_pagamento_disponivel,
     atendimento_individual,
+    duracao_minutos,
   } = body;
 
   if (!slug || !nome) {
@@ -80,6 +81,8 @@ export async function POST(req: NextRequest) {
     return null;
   };
 
+  const parsedDuracao = parseIntegerSafely(duracao_minutos);
+
   const insertPayload: Record<string, unknown> = {
     slug,
     nome,
@@ -96,6 +99,7 @@ export async function POST(req: NextRequest) {
     categoria: categoria || null,
     forma_pagamento_disponivel: forma_pagamento_disponivel || "ambos",
     atendimento_individual: Boolean(atendimento_individual),
+    duracao_minutos: parsedDuracao !== null ? parsedDuracao : (Boolean(atendimento_individual) ? 90 : null),
   };
 
   let { data, error } = await supabaseAdmin!
@@ -104,10 +108,11 @@ export async function POST(req: NextRequest) {
     .select()
     .single();
 
-  // Se a coluna ainda não existir no Postgres, tenta sem o campo para manter estabilidade
-  if (error && error.message?.includes("atendimento_individual")) {
-    console.warn("[admin/produtos] Coluna atendimento_individual não encontrada no banco. Tentando fallback.");
-    delete insertPayload.atendimento_individual;
+  // Se alguma coluna ainda não existir no Postgres, tenta fallback defensivo
+  if (error && (error.message?.includes("duracao_minutos") || error.message?.includes("atendimento_individual"))) {
+    console.warn("[admin/produtos] Coluna nova não encontrada no banco. Tentando fallback defensivo.");
+    if (error.message?.includes("duracao_minutos")) delete insertPayload.duracao_minutos;
+    if (error.message?.includes("atendimento_individual")) delete insertPayload.atendimento_individual;
     const retry = await supabaseAdmin!
       .from("produtos")
       .insert(insertPayload)

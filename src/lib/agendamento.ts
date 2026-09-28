@@ -141,13 +141,33 @@ export async function calculateAvailableSlots(params: {
   therapistId: string;
   dateStr: string; // YYYY-MM-DD
   minAdvanceHours?: number;
+  produtoId?: string;
+  duracaoMinutos?: number;
 }): Promise<TimeSlot[]> {
   if (!isAdminConfigured()) return [];
 
-  const { therapistId, dateStr, minAdvanceHours = DEFAULT_MIN_ADVANCE_HOURS } = params;
+  const { therapistId, dateStr, minAdvanceHours = DEFAULT_MIN_ADVANCE_HOURS, produtoId, duracaoMinutos } = params;
 
   // 1. Limpar holds expirados antes do cálculo
   await cleanExpiredPendingAppointments();
+
+  // Determinar duração específica do produto se fornecido
+  let overrideDuration: number | null = duracaoMinutos || null;
+  if (!overrideDuration && produtoId) {
+    try {
+      const { data: prod } = await supabaseAdmin!
+        .from("produtos")
+        .select("duracao_minutos")
+        .eq("id", produtoId)
+        .maybeSingle();
+
+      if (prod?.duracao_minutos && prod.duracao_minutos > 0) {
+        overrideDuration = prod.duracao_minutos;
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   // 2. Determinar dia da semana
   const dayOfWeek = getDayOfWeekFromDateStr(dateStr);
@@ -164,7 +184,7 @@ export async function calculateAvailableSlots(params: {
   let effectiveAvailabilities: TherapistAvailability[] = availabilities || [];
 
   if (effectiveAvailabilities.length === 0 && dayOfWeek >= 1 && dayOfWeek <= 5) {
-    // Fallback inteligente caso a tabela ainda não tenha sido preenchida no Supabase
+    // Fallback inteligente com 3 turnos (Manhã 09-12, Tarde 13-15, Noite 18-21)
     effectiveAvailabilities = [
       {
         id: "default-manha",
@@ -172,18 +192,28 @@ export async function calculateAvailableSlots(params: {
         day_of_week: dayOfWeek,
         start_time: "09:00:00",
         end_time: "12:00:00",
-        slot_duration_minutes: 50,
-        buffer_duration_minutes: 10,
+        slot_duration_minutes: 90,
+        buffer_duration_minutes: 0,
         ativo: true,
       },
       {
         id: "default-tarde",
         therapist_id: therapistId,
         day_of_week: dayOfWeek,
-        start_time: "14:00:00",
-        end_time: "18:00:00",
-        slot_duration_minutes: 50,
-        buffer_duration_minutes: 10,
+        start_time: "13:00:00",
+        end_time: "15:00:00",
+        slot_duration_minutes: 90,
+        buffer_duration_minutes: 0,
+        ativo: true,
+      },
+      {
+        id: "default-noite",
+        therapist_id: therapistId,
+        day_of_week: dayOfWeek,
+        start_time: "18:00:00",
+        end_time: "21:00:00",
+        slot_duration_minutes: 90,
+        buffer_duration_minutes: 0,
         ativo: true,
       },
     ];
@@ -233,8 +263,11 @@ export async function calculateAvailableSlots(params: {
   const minAdvanceTime = nowTime + minAdvanceHours * 60 * 60 * 1000;
 
   for (const window of effectiveAvailabilities) {
-    const slotDurationMs = (window.slot_duration_minutes || 50) * 60 * 1000;
-    const bufferDurationMs = (window.buffer_duration_minutes || 10) * 60 * 1000;
+    const slotDurationMins = overrideDuration || window.slot_duration_minutes || 90;
+    const bufferDurationMins = overrideDuration ? 0 : (window.buffer_duration_minutes || 0);
+
+    const slotDurationMs = slotDurationMins * 60 * 1000;
+    const bufferDurationMs = bufferDurationMins * 60 * 1000;
     const totalStepMs = slotDurationMs + bufferDurationMs;
 
     // Converte horários de início e fim da janela para UTC do dia solicitado

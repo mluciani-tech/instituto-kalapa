@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const therapistId = searchParams.get("therapist_id") || DEFAULT_THERAPIST_ID;
     const dateStr = searchParams.get("date"); // YYYY-MM-DD
+    const produtoId = searchParams.get("produto_id") || undefined;
 
     if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       return NextResponse.json(
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest) {
     const slots = await calculateAvailableSlots({
       therapistId,
       dateStr,
+      produtoId,
     });
 
     return NextResponse.json({

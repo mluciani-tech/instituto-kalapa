@@ -144,6 +144,7 @@ export default function AdminPage() {
     categoria: "",
     forma_pagamento_disponivel: "ambos",
     atendimento_individual: false,
+    duracao_minutos: "90",
     destaque: false,
     ativo: true,
     ordem: "0",
@@ -572,6 +573,7 @@ export default function AdminPage() {
       vagas_ocupadas_manual: "",
       categoria: "", forma_pagamento_disponivel: "ambos",
       atendimento_individual: false,
+      duracao_minutos: "90",
       destaque: false, ativo: true, ordem: "0",
     });
     setProdutoImagemFile(null);
@@ -633,6 +635,7 @@ export default function AdminPage() {
       categoria: produtoForm.categoria.trim() || null,
       preco: parseFloat(produtoForm.preco.replace(",", ".")) || 0,
       ordem: parseInt(produtoForm.ordem) || 0,
+      duracao_minutos: parseInt(produtoForm.duracao_minutos, 10) || 90,
       beneficios: produtoForm.beneficios.split("\n").filter((b) => b.trim()),
     };
 
@@ -675,6 +678,7 @@ export default function AdminPage() {
       categoria: p.categoria || "",
       forma_pagamento_disponivel: p.forma_pagamento_disponivel || "ambos",
       atendimento_individual: p.atendimento_individual ?? isProdutoAgendamento(p),
+      duracao_minutos: (p.duracao_minutos != null ? p.duracao_minutos : 90).toString(),
       destaque: p.destaque ?? false,
       ativo: p.ativo ?? true,
       ordem: (p.ordem ?? 0).toString(),
@@ -765,6 +769,8 @@ export default function AdminPage() {
       vagas_ocupadas_manual: p.vagas_ocupadas_manual,
       categoria: p.categoria || null,
       forma_pagamento_disponivel: p.forma_pagamento_disponivel || "ambos",
+      atendimento_individual: p.atendimento_individual,
+      duracao_minutos: p.duracao_minutos ?? 90,
       destaque: p.destaque ?? false,
       ativo: false,
       ordem: p.ordem ?? 0,
@@ -1667,22 +1673,81 @@ export default function AdminPage() {
                       <option value="cartao">Apenas Cartão</option>
                     </select>
                   </div>
-                  <div className="sm:col-span-2 p-4 rounded-xl border border-brand-terracotta/30 bg-brand-terracotta/5 flex items-start gap-3 transition-colors hover:bg-brand-terracotta/10">
-                    <input
-                      type="checkbox"
-                      id="input-atendimento-individual"
-                      checked={produtoForm.atendimento_individual}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, atendimento_individual: e.target.checked })}
-                      className="mt-1 w-4 h-4 rounded border-brand-terracotta text-brand-terracotta focus:ring-brand-terracotta/30 cursor-pointer"
-                    />
-                    <label htmlFor="input-atendimento-individual" className="cursor-pointer select-none">
-                      <span className="text-xs sm:text-sm font-bold text-brand-charcoal flex items-center gap-1.5">
-                        🗓️ Atendimento Individual (Exige seleção de data/horário na agenda)
-                      </span>
-                      <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
-                        Marque esta opção para atendimentos terapêuticos individuais. O paciente será direcionado para selecionar data e horário na agenda antes do pagamento. Este produto também aparecerá no filtro de <strong>Atendimentos</strong>.
-                      </p>
-                    </label>
+                  <div className="sm:col-span-2 p-4 rounded-xl border border-brand-terracotta/30 bg-brand-terracotta/5 flex flex-col gap-3 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        id="input-atendimento-individual"
+                        checked={produtoForm.atendimento_individual}
+                        onChange={(e) => setProdutoForm({ ...produtoForm, atendimento_individual: e.target.checked })}
+                        className="mt-1 w-4 h-4 rounded border-brand-terracotta text-brand-terracotta focus:ring-brand-terracotta/30 cursor-pointer"
+                      />
+                      <label htmlFor="input-atendimento-individual" className="cursor-pointer select-none">
+                        <span className="text-xs sm:text-sm font-bold text-brand-charcoal flex items-center gap-1.5">
+                          🗓️ Atendimento Individual (Exige seleção de data/horário na agenda)
+                        </span>
+                        <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
+                          Marque esta opção para atendimentos terapêuticos individuais. O paciente será direcionado para selecionar data e horário na agenda antes do pagamento. Este produto também aparecerá no filtro de <strong>Atendimentos</strong>.
+                        </p>
+                      </label>
+                    </div>
+
+                    {produtoForm.atendimento_individual && (
+                      <div className="mt-1 pt-3 border-t border-brand-terracotta/20 bg-white/80 rounded-xl p-3.5 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <label className="block text-xs font-bold text-brand-charcoal">
+                            ⏱️ Tempo de Consulta / Atendimento (já inclui o intervalo)
+                          </label>
+                          <span className="text-xs font-semibold text-brand-purple">
+                            {parseInt(produtoForm.duracao_minutos, 10) >= 60
+                              ? `${Math.floor(parseInt(produtoForm.duracao_minutos, 10) / 60)}h${(parseInt(produtoForm.duracao_minutos, 10) % 60).toString().padStart(2, "0")}m`
+                              : `${produtoForm.duracao_minutos} min`}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-brand-charcoal/60 leading-relaxed">
+                          Define a duração de cada bloco de horário deste serviço na agenda. O valor inicial padrão é de <strong>1:30hs (90 min)</strong>.
+                        </p>
+
+                        <div className="flex items-center gap-2 flex-wrap pt-1">
+                          {[
+                            { label: "1h30 (90 min)", value: "90" },
+                            { label: "1h (60 min)", value: "60" },
+                            { label: "45 min", value: "45" },
+                            { label: "2h (120 min)", value: "120" },
+                          ].map((chip) => {
+                            const isSelected = produtoForm.duracao_minutos === chip.value;
+                            return (
+                              <button
+                                key={chip.value}
+                                type="button"
+                                onClick={() => setProdutoForm({ ...produtoForm, duracao_minutos: chip.value })}
+                                className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
+                                  isSelected
+                                    ? "bg-brand-purple text-white border-brand-purple shadow-xs"
+                                    : "bg-white text-brand-charcoal/80 border-brand-beige hover:border-brand-purple/40"
+                                }`}
+                              >
+                                {chip.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-1">
+                          <label className="text-xs text-brand-charcoal/70 font-medium">Ou digite em minutos:</label>
+                          <input
+                            type="number"
+                            min="15"
+                            step="5"
+                            value={produtoForm.duracao_minutos}
+                            onChange={(e) => setProdutoForm({ ...produtoForm, duracao_minutos: e.target.value })}
+                            className="w-24 px-2.5 py-1 text-xs border border-brand-beige rounded-md bg-white focus-visible:ring-2 focus-visible:ring-brand-purple/30 font-bold text-brand-charcoal"
+                            placeholder="90"
+                          />
+                          <span className="text-xs text-brand-charcoal/50">minutos por sessão</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Limite de Pessoas <span className="text-brand-charcoal/30">(opcional)</span></label>
@@ -1862,7 +1927,7 @@ export default function AdminPage() {
                         {p.destaque && <span className="text-xs bg-brand-terracotta/10 text-brand-terracotta px-1.5 py-0.5 rounded">Destaque</span>}
                         {(p.atendimento_individual || isProdutoAgendamento(p)) && (
                           <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
-                            🗓️ Atendimento Individual
+                            🗓️ Atendimento ({p.duracao_minutos ? `${Math.floor(p.duracao_minutos / 60)}h${(p.duracao_minutos % 60).toString().padStart(2, "0")}m` : "1h30"})
                           </span>
                         )}
                       </div>

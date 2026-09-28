@@ -51,7 +51,7 @@ export async function PUT(
   const updates: Record<string, unknown> = {};
   const allowedFields = [
     "slug", "nome", "descricao", "descricao_curta", "preco",
-    "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "vagas_ocupadas_manual", "categoria", "forma_pagamento_disponivel", "atendimento_individual",
+    "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "vagas_ocupadas_manual", "categoria", "forma_pagamento_disponivel", "atendimento_individual", "duracao_minutos",
   ];
 
   for (const field of allowedFields) {
@@ -72,6 +72,10 @@ export async function PUT(
 
   if (updates.vagas_maximas !== undefined) {
     updates.vagas_maximas = parseIntegerSafely(updates.vagas_maximas);
+  }
+
+  if (updates.duracao_minutos !== undefined) {
+    updates.duracao_minutos = parseIntegerSafely(updates.duracao_minutos);
   }
 
   if (updates.vagas_ocupadas_manual !== undefined) {
@@ -121,9 +125,10 @@ export async function PUT(
     .select()
     .single();
 
-  if (error && error.message?.includes("atendimento_individual")) {
-    console.warn("[admin/produtos] Coluna atendimento_individual não encontrada no banco. Tentando fallback.");
-    delete updates.atendimento_individual;
+  if (error && (error.message?.includes("duracao_minutos") || error.message?.includes("atendimento_individual"))) {
+    console.warn("[admin/produtos] Coluna nova não encontrada no banco ao atualizar. Tentando fallback defensivo.");
+    if (error.message?.includes("duracao_minutos")) delete updates.duracao_minutos;
+    if (error.message?.includes("atendimento_individual")) delete updates.atendimento_individual;
     const retry = await supabaseAdmin!
       .from("produtos")
       .update(updates)

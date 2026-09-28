@@ -80,7 +80,7 @@ export default function ProductAppointmentSection({ produto }: ProductAppointmen
     setLoadingSlots(true);
     setSelectedSlot(null);
     try {
-      const res = await fetch(`/api/agendamentos/slots?date=${date}&therapist_id=${therapistId}`);
+      const res = await fetch(`/api/agendamentos/slots?date=${date}&therapist_id=${therapistId}&produto_id=${produto.id}`);
       if (res.ok) {
         const data = await res.json();
         setSlots(data.slots || []);
@@ -91,7 +91,7 @@ export default function ProductAppointmentSection({ produto }: ProductAppointmen
       setSlots([]);
     }
     setLoadingSlots(false);
-  }, []);
+  }, [produto.id]);
 
   useEffect(() => {
     if (terapeutaSelecionada && selectedDate) {

@@ -17,6 +17,7 @@ export interface Produto {
   categoria?: string | null;
   forma_pagamento_disponivel?: string | null;
   atendimento_individual?: boolean;
+  duracao_minutos?: number | null;
   created_at?: string;
 }
 

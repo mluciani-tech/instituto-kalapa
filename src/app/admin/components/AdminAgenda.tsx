@@ -97,7 +97,7 @@ export default function AdminAgenda() {
   const [justificativaCancelamento, setJustificativaCancelamento] = useState("");
   const [salvandoCancelamento, setSalvandoCancelamento] = useState(false);
 
-  // 2. Grade de Horários State
+  // 2. Grade de Horários State (3 turnos: Manhã 09-12, Tarde 13-15, Noite 18-21)
   const [grade, setGrade] = useState<{
     [day: number]: {
       ativo: boolean;
@@ -107,17 +107,20 @@ export default function AdminAgenda() {
       tardeAtivo: boolean;
       tardeInicio: string;
       tardeFim: string;
+      noiteAtivo: boolean;
+      noiteInicio: string;
+      noiteFim: string;
       slotMinutos: number;
       bufferMinutos: number;
     };
   }>({
-    1: { ativo: true, manhaAtivo: true, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: true, tardeInicio: "14:00", tardeFim: "18:00", slotMinutos: 50, bufferMinutos: 10 },
-    2: { ativo: true, manhaAtivo: true, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: true, tardeInicio: "14:00", tardeFim: "18:00", slotMinutos: 50, bufferMinutos: 10 },
-    3: { ativo: true, manhaAtivo: true, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: true, tardeInicio: "14:00", tardeFim: "18:00", slotMinutos: 50, bufferMinutos: 10 },
-    4: { ativo: true, manhaAtivo: true, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: true, tardeInicio: "14:00", tardeFim: "18:00", slotMinutos: 50, bufferMinutos: 10 },
-    5: { ativo: true, manhaAtivo: true, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: true, tardeInicio: "14:00", tardeFim: "18:00", slotMinutos: 50, bufferMinutos: 10 },
-    6: { ativo: false, manhaAtivo: false, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: false, tardeInicio: "14:00", tardeFim: "18:00", slotMinutos: 50, bufferMinutos: 10 },
-    0: { ativo: false, manhaAtivo: false, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: false, tardeInicio: "14:00", tardeFim: "18:00", slotMinutos: 50, bufferMinutos: 10 },
+    1: { ativo: true, manhaAtivo: true, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: true, tardeInicio: "13:00", tardeFim: "15:00", noiteAtivo: true, noiteInicio: "18:00", noiteFim: "21:00", slotMinutos: 90, bufferMinutos: 0 },
+    2: { ativo: true, manhaAtivo: true, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: true, tardeInicio: "13:00", tardeFim: "15:00", noiteAtivo: true, noiteInicio: "18:00", noiteFim: "21:00", slotMinutos: 90, bufferMinutos: 0 },
+    3: { ativo: true, manhaAtivo: true, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: true, tardeInicio: "13:00", tardeFim: "15:00", noiteAtivo: true, noiteInicio: "18:00", noiteFim: "21:00", slotMinutos: 90, bufferMinutos: 0 },
+    4: { ativo: true, manhaAtivo: true, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: true, tardeInicio: "13:00", tardeFim: "15:00", noiteAtivo: true, noiteInicio: "18:00", noiteFim: "21:00", slotMinutos: 90, bufferMinutos: 0 },
+    5: { ativo: true, manhaAtivo: true, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: true, tardeInicio: "13:00", tardeFim: "15:00", noiteAtivo: true, noiteInicio: "18:00", noiteFim: "21:00", slotMinutos: 90, bufferMinutos: 0 },
+    6: { ativo: false, manhaAtivo: false, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: false, tardeInicio: "13:00", tardeFim: "15:00", noiteAtivo: false, noiteInicio: "18:00", noiteFim: "21:00", slotMinutos: 90, bufferMinutos: 0 },
+    0: { ativo: false, manhaAtivo: false, manhaInicio: "09:00", manhaFim: "12:00", tardeAtivo: false, tardeInicio: "13:00", tardeFim: "15:00", noiteAtivo: false, noiteInicio: "18:00", noiteFim: "21:00", slotMinutos: 90, bufferMinutos: 0 },
   });
   const [salvandoGrade, setSalvandoGrade] = useState(false);
 
@@ -161,10 +164,13 @@ export default function AdminAgenda() {
               manhaInicio: "09:00",
               manhaFim: "12:00",
               tardeAtivo: false,
-              tardeInicio: "14:00",
-              tardeFim: "18:00",
-              slotMinutos: 50,
-              bufferMinutos: 10,
+              tardeInicio: "13:00",
+              tardeFim: "15:00",
+              noiteAtivo: false,
+              noiteInicio: "18:00",
+              noiteFim: "21:00",
+              slotMinutos: 90,
+              bufferMinutos: 0,
             };
           }
 
@@ -172,18 +178,22 @@ export default function AdminAgenda() {
           rawAvail.forEach((w) => {
             const d = w.day_of_week;
             novaGrade[d].ativo = true;
-            novaGrade[d].slotMinutos = w.slot_duration_minutes || 50;
-            novaGrade[d].bufferMinutos = w.buffer_duration_minutes || 10;
+            novaGrade[d].slotMinutos = w.slot_duration_minutes || 90;
+            novaGrade[d].bufferMinutos = w.buffer_duration_minutes || 0;
 
             const startHour = parseInt(w.start_time.slice(0, 2), 10);
             if (startHour < 13) {
               novaGrade[d].manhaAtivo = true;
               novaGrade[d].manhaInicio = w.start_time.slice(0, 5);
               novaGrade[d].manhaFim = w.end_time.slice(0, 5);
-            } else {
+            } else if (startHour >= 13 && startHour < 17) {
               novaGrade[d].tardeAtivo = true;
               novaGrade[d].tardeInicio = w.start_time.slice(0, 5);
               novaGrade[d].tardeFim = w.end_time.slice(0, 5);
+            } else {
+              novaGrade[d].noiteAtivo = true;
+              novaGrade[d].noiteInicio = w.start_time.slice(0, 5);
+              novaGrade[d].noiteFim = w.end_time.slice(0, 5);
             }
           });
           setGrade(novaGrade);
@@ -448,8 +458,19 @@ export default function AdminAgenda() {
             day_of_week: day,
             start_time: `${cfg.tardeInicio}:00`,
             end_time: `${cfg.tardeFim}:00`,
-            slot_duration_minutes: cfg.slotMinutos,
-            buffer_duration_minutes: cfg.bufferMinutos,
+            slot_duration_minutes: cfg.slotMinutos || 90,
+            buffer_duration_minutes: cfg.bufferMinutos || 0,
+            ativo: true,
+          });
+        }
+
+        if (cfg.noiteAtivo) {
+          windows.push({
+            day_of_week: day,
+            start_time: `${cfg.noiteInicio}:00`,
+            end_time: `${cfg.noiteFim}:00`,
+            slot_duration_minutes: cfg.slotMinutos || 90,
+            buffer_duration_minutes: cfg.bufferMinutos || 0,
             ativo: true,
           });
         }
@@ -952,10 +973,55 @@ export default function AdminAgenda() {
                         </div>
                       </div>
 
+                      {/* Turno Noite */}
+                      <div className="flex items-center justify-between gap-2">
+                        <label className="flex items-center gap-1.5 font-medium text-brand-charcoal/80">
+                          <input
+                            type="checkbox"
+                            checked={cfg.noiteAtivo}
+                            onChange={(e) =>
+                              setGrade((prev) => ({
+                                ...prev,
+                                [wd.id]: { ...prev[wd.id], noiteAtivo: e.target.checked },
+                              }))
+                            }
+                            className="rounded-sm accent-brand-terracotta"
+                          />
+                          <span>Noite:</span>
+                        </label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="time"
+                            disabled={!cfg.noiteAtivo}
+                            value={cfg.noiteInicio}
+                            onChange={(e) =>
+                              setGrade((prev) => ({
+                                ...prev,
+                                [wd.id]: { ...prev[wd.id], noiteInicio: e.target.value },
+                              }))
+                            }
+                            className="px-2 py-1 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40"
+                          />
+                          <span>às</span>
+                          <input
+                            type="time"
+                            disabled={!cfg.noiteAtivo}
+                            value={cfg.noiteFim}
+                            onChange={(e) =>
+                              setGrade((prev) => ({
+                                ...prev,
+                                [wd.id]: { ...prev[wd.id], noiteFim: e.target.value },
+                              }))
+                            }
+                            className="px-2 py-1 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40"
+                          />
+                        </div>
+                      </div>
+
                       {/* Parâmetros de sessão */}
                       <div className="pt-2 border-t border-brand-charcoal/10 flex items-center justify-between text-[11px] text-brand-charcoal/60">
-                        <span>Duração: <strong>{cfg.slotMinutos} min</strong></span>
-                        <span>Intervalo: <strong>{cfg.bufferMinutos} min</strong></span>
+                        <span>Tempo por Consulta: <strong>{cfg.slotMinutos} min (1h30)</strong></span>
+                        <span className="text-[10px] text-brand-charcoal/50">(inclui intervalo)</span>
                       </div>
                     </div>
                   )}
