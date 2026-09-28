@@ -1726,6 +1726,7 @@ export default function AdminPage() {
                               <button
                                 key={chip.value}
                                 type="button"
+                                aria-pressed={isSelected}
                                 onClick={() => setProdutoForm({ ...produtoForm, duracao_minutos: chip.value })}
                                 className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
                                   isSelected
@@ -1740,8 +1741,9 @@ export default function AdminPage() {
                         </div>
 
                         <div className="flex items-center gap-2 pt-1">
-                          <label className="text-xs text-brand-charcoal/70 font-medium">Ou digite em minutos:</label>
+                          <label htmlFor="duracao-minutos-input" className="text-xs text-brand-charcoal/70 font-medium">Ou digite em minutos:</label>
                           <input
+                            id="duracao-minutos-input"
                             type="number"
                             min="15"
                             step="5"
