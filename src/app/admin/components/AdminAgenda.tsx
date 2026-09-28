@@ -1020,7 +1020,7 @@ export default function AdminAgenda() {
 
                       {/* Parâmetros de sessão */}
                       <div className="pt-2 border-t border-brand-charcoal/10 flex items-center justify-between text-[11px] text-brand-charcoal/60">
-                        <span>Tempo por Consulta: <strong>{cfg.slotMinutos} min (1h30)</strong></span>
+                        <span>Tempo por Consulta: <strong>{cfg.slotMinutos} min ({(() => { const h = Math.floor(cfg.slotMinutos / 60); const m = cfg.slotMinutos % 60; return m > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${h}h`; })()})</strong></span>
                         <span className="text-[10px] text-brand-charcoal/50">(inclui intervalo)</span>
                       </div>
                     </div>
