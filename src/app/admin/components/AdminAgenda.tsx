@@ -64,6 +64,12 @@ function formatDateTimeBr(isoStr: string) {
   }
 }
 
+function formatSlotDuration(minutos: number): string {
+  const h = Math.floor(minutos / 60);
+  const m = minutos % 60;
+  return m > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${h}h`;
+}
+
 export default function AdminAgenda() {
   const [activeSubTab, setActiveSubTab] = useState<"consultas" | "grade" | "bloqueios" | "configuracoes">("consultas");
   const [loading, setLoading] = useState(true);
@@ -1020,7 +1026,7 @@ export default function AdminAgenda() {
 
                       {/* Parâmetros de sessão */}
                       <div className="pt-2 border-t border-brand-charcoal/10 flex flex-wrap items-center justify-between gap-1 text-[11px] text-brand-charcoal/60">
-                        <span>Tempo por Consulta: <strong>{cfg.slotMinutos} min ({(() => { const h = Math.floor(cfg.slotMinutos / 60); const m = cfg.slotMinutos % 60; return m > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${h}h`; })()})</strong></span>
+                        <span>Tempo por Consulta: <strong>{cfg.slotMinutos} min ({formatSlotDuration(cfg.slotMinutos)})</strong></span>
                         <span className="text-[10px] text-brand-charcoal/50">(inclui intervalo)</span>
                       </div>
                     </div>
