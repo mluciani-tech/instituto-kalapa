@@ -884,8 +884,8 @@ export default function AdminAgenda() {
                   {cfg.ativo && (
                     <div className="space-y-3 text-xs">
                       {/* Turno Manhã */}
-                      <div className="flex items-center justify-between gap-2">
-                        <label className="flex items-center gap-1.5 font-medium text-brand-charcoal/80">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
+                        <label className="flex items-center gap-1.5 font-medium text-brand-charcoal/80 min-h-[44px] sm:min-h-0">
                           <input
                             type="checkbox"
                             checked={cfg.manhaAtivo}
@@ -895,11 +895,11 @@ export default function AdminAgenda() {
                                 [wd.id]: { ...prev[wd.id], manhaAtivo: e.target.checked },
                               }))
                             }
-                            className="rounded-sm accent-brand-terracotta"
+                            className="rounded-sm accent-brand-terracotta w-4 h-4"
                           />
-                          <span>Manhã:</span>
+                          <span>🌅 Manhã:</span>
                         </label>
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center gap-1 ml-6 sm:ml-0">
                           <input
                             type="time"
                             disabled={!cfg.manhaAtivo}
@@ -910,9 +910,9 @@ export default function AdminAgenda() {
                                 [wd.id]: { ...prev[wd.id], manhaInicio: e.target.value },
                               }))
                             }
-                            className="px-2 py-1 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40"
+                            className="px-2 py-2 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40 min-h-[44px] sm:min-h-0 sm:py-1"
                           />
-                          <span>às</span>
+                          <span className="text-brand-charcoal/50">às</span>
                           <input
                             type="time"
                             disabled={!cfg.manhaAtivo}
@@ -923,14 +923,14 @@ export default function AdminAgenda() {
                                 [wd.id]: { ...prev[wd.id], manhaFim: e.target.value },
                               }))
                             }
-                            className="px-2 py-1 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40"
+                            className="px-2 py-2 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40 min-h-[44px] sm:min-h-0 sm:py-1"
                           />
                         </div>
                       </div>
 
                       {/* Turno Tarde */}
-                      <div className="flex items-center justify-between gap-2">
-                        <label className="flex items-center gap-1.5 font-medium text-brand-charcoal/80">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
+                        <label className="flex items-center gap-1.5 font-medium text-brand-charcoal/80 min-h-[44px] sm:min-h-0">
                           <input
                             type="checkbox"
                             checked={cfg.tardeAtivo}
@@ -940,11 +940,11 @@ export default function AdminAgenda() {
                                 [wd.id]: { ...prev[wd.id], tardeAtivo: e.target.checked },
                               }))
                             }
-                            className="rounded-sm accent-brand-terracotta"
+                            className="rounded-sm accent-brand-terracotta w-4 h-4"
                           />
-                          <span>Tarde:</span>
+                          <span>🌤️ Tarde:</span>
                         </label>
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center gap-1 ml-6 sm:ml-0">
                           <input
                             type="time"
                             disabled={!cfg.tardeAtivo}
@@ -955,9 +955,9 @@ export default function AdminAgenda() {
                                 [wd.id]: { ...prev[wd.id], tardeInicio: e.target.value },
                               }))
                             }
-                            className="px-2 py-1 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40"
+                            className="px-2 py-2 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40 min-h-[44px] sm:min-h-0 sm:py-1"
                           />
-                          <span>às</span>
+                          <span className="text-brand-charcoal/50">às</span>
                           <input
                             type="time"
                             disabled={!cfg.tardeAtivo}
@@ -968,14 +968,14 @@ export default function AdminAgenda() {
                                 [wd.id]: { ...prev[wd.id], tardeFim: e.target.value },
                               }))
                             }
-                            className="px-2 py-1 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40"
+                            className="px-2 py-2 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40 min-h-[44px] sm:min-h-0 sm:py-1"
                           />
                         </div>
                       </div>
 
                       {/* Turno Noite */}
-                      <div className="flex items-center justify-between gap-2">
-                        <label className="flex items-center gap-1.5 font-medium text-brand-charcoal/80">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
+                        <label className="flex items-center gap-1.5 font-medium text-brand-charcoal/80 min-h-[44px] sm:min-h-0">
                           <input
                             type="checkbox"
                             checked={cfg.noiteAtivo}
@@ -985,11 +985,11 @@ export default function AdminAgenda() {
                                 [wd.id]: { ...prev[wd.id], noiteAtivo: e.target.checked },
                               }))
                             }
-                            className="rounded-sm accent-brand-terracotta"
+                            className="rounded-sm accent-brand-terracotta w-4 h-4"
                           />
-                          <span>Noite:</span>
+                          <span>🌙 Noite:</span>
                         </label>
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center gap-1 ml-6 sm:ml-0">
                           <input
                             type="time"
                             disabled={!cfg.noiteAtivo}
@@ -1000,9 +1000,9 @@ export default function AdminAgenda() {
                                 [wd.id]: { ...prev[wd.id], noiteInicio: e.target.value },
                               }))
                             }
-                            className="px-2 py-1 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40"
+                            className="px-2 py-2 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40 min-h-[44px] sm:min-h-0 sm:py-1"
                           />
-                          <span>às</span>
+                          <span className="text-brand-charcoal/50">às</span>
                           <input
                             type="time"
                             disabled={!cfg.noiteAtivo}
@@ -1013,13 +1013,13 @@ export default function AdminAgenda() {
                                 [wd.id]: { ...prev[wd.id], noiteFim: e.target.value },
                               }))
                             }
-                            className="px-2 py-1 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40"
+                            className="px-2 py-2 rounded-md border border-brand-charcoal/20 bg-white text-xs disabled:opacity-40 min-h-[44px] sm:min-h-0 sm:py-1"
                           />
                         </div>
                       </div>
 
                       {/* Parâmetros de sessão */}
-                      <div className="pt-2 border-t border-brand-charcoal/10 flex items-center justify-between text-[11px] text-brand-charcoal/60">
+                      <div className="pt-2 border-t border-brand-charcoal/10 flex flex-wrap items-center justify-between gap-1 text-[11px] text-brand-charcoal/60">
                         <span>Tempo por Consulta: <strong>{cfg.slotMinutos} min ({(() => { const h = Math.floor(cfg.slotMinutos / 60); const m = cfg.slotMinutos % 60; return m > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${h}h`; })()})</strong></span>
                         <span className="text-[10px] text-brand-charcoal/50">(inclui intervalo)</span>
                       </div>

@@ -1740,7 +1740,7 @@ export default function AdminPage() {
                           })}
                         </div>
 
-                        <div className="flex items-center gap-2 pt-1">
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
                           <label htmlFor="duracao-minutos-input" className="text-xs text-brand-charcoal/70 font-medium">Ou digite em minutos:</label>
                           <input
                             id="duracao-minutos-input"
@@ -1749,7 +1749,7 @@ export default function AdminPage() {
                             step="5"
                             value={produtoForm.duracao_minutos}
                             onChange={(e) => setProdutoForm({ ...produtoForm, duracao_minutos: e.target.value })}
-                            className="w-24 px-2.5 py-1 text-xs border border-brand-beige rounded-md bg-white focus-visible:ring-2 focus-visible:ring-brand-purple/30 font-bold text-brand-charcoal"
+                            className="w-24 px-2.5 py-2 sm:py-1 text-xs border border-brand-beige rounded-md bg-white focus-visible:ring-2 focus-visible:ring-brand-purple/30 font-bold text-brand-charcoal min-h-[44px] sm:min-h-0"
                             placeholder="90"
                           />
                           <span className="text-xs text-brand-charcoal/50">minutos por sessão</span>
