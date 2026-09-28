@@ -46,14 +46,15 @@ export default function AdminManual() {
       id: "agenda",
       title: "2. Agenda & Notificações Hostinger",
       icon: Calendar,
-      summary: "Grade semanal, bloqueios, e-mail da terapeuta e SMTP corporativo.",
-      badge: "Novo",
+      summary: "3 turnos (Manhã/Tarde/Noite), bloqueios, e-mail da terapeuta e SMTP corporativo.",
+      badge: "Atualizado",
     },
     {
       id: "produtos",
       title: "3. Catálogo & Vagas",
       icon: ShoppingBag,
-      summary: "Produtos com vagas por turma vs atendimentos individuais com agenda.",
+      summary: "Produtos com vagas por turma vs atendimentos individuais com tempo de consulta e agenda.",
+      badge: "Atualizado",
     },
     {
       id: "checkout",
@@ -78,7 +79,7 @@ export default function AdminManual() {
       title: "7. Histórico & Versões do Sistema",
       icon: Zap,
       summary: "Registro de atualizações contínuas e notas de versão do projeto.",
-      badge: "v2.6",
+      badge: "v2.7",
     },
   ];
 
@@ -333,7 +334,11 @@ export default function AdminManual() {
                     <Clock className="w-4 h-4" /> Grade Semanal de Trabalho
                   </h4>
                   <p className="text-brand-charcoal/70">
-                    Define quais dias da semana e turnos (Manhã: ex. 09h às 12h / Tarde: ex. 14h às 18h) estão abertos para reservas, além da duração das sessões (50 min) e intervalo de respiro (10 min).
+                    Define quais dias da semana e turnos estão abertos para reservas. O sistema opera com <strong>3 turnos fixos</strong>:
+                    <br />• <strong>Manhã:</strong> 09:00 às 12:00
+                    <br />• <strong>Tarde:</strong> 13:00 às 15:00
+                    <br />• <strong>Noite:</strong> 18:00 às 21:00
+                    <br />Por padrão, Segunda a Sexta têm os 3 turnos ativos; Sábado e Domingo ficam inativos. A duração dos slots é definida automaticamente pelo produto selecionado pelo cliente.
                   </p>
                 </div>
 
@@ -391,7 +396,27 @@ export default function AdminManual() {
                     1. Vá na aba <strong>Produtos</strong> e clique em <strong>Novo Produto</strong>.<br />
                     2. Preencha Nome, Descrição e Valor.<br />
                     3. Na opção <strong>Tipo de Produto</strong>, selecione <strong>Atendimento Terapêutico Individual</strong> (isso ativa a flag <code className="bg-brand-beige px-1 py-0.5 rounded text-brand-purple">atendimento_individual = true</code>).<br />
-                    4. Salve o produto. Na vitrine pública, o botão mudará automaticamente de <em>&ldquo;Inscrever-se&rdquo;</em> para <em>&ldquo;Agendar Sessão&rdquo;</em> e solicitará a escolha de data antes do pagamento.
+                    4. Defina o <strong>Tempo de Consulta</strong> (veja abaixo).<br />
+                    5. Salve o produto. Na vitrine pública, o botão mudará automaticamente de <em>&ldquo;Inscrever-se&rdquo;</em> para <em>&ldquo;Agendar Sessão&rdquo;</em> e solicitará a escolha de data antes do pagamento.
+                  </p>
+                </div>
+
+                <div className="border border-brand-purple/30 rounded-xl p-4 space-y-2 bg-brand-beige-light/40">
+                  <h4 className="font-bold text-brand-purple flex items-center gap-1.5">
+                    <Clock className="w-4 h-4" /> Tempo de Consulta (campo exclusivo de Atendimento Individual)
+                  </h4>
+                  <p className="text-brand-charcoal/70 leading-relaxed">
+                    Ao marcar &ldquo;Atendimento Terapêutico Individual&rdquo;, aparece o campo <strong>Tempo de Consulta</strong>. Selecione uma das durações pré-definidas ou informe um valor personalizado:
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {["45min", "1h", "1:30hs", "2h", "3h"].map((t) => (
+                      <span key={t} className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-bold text-[11px] border border-brand-purple/20">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-brand-charcoal/70 leading-relaxed mt-2">
+                    <strong>Padrão:</strong> 1:30hs (90 min — já inclui o intervalo de transição). Este valor controla diretamente quantos horários o sistema gera por turno: por exemplo, com 1:30hs no turno da manhã (09:00–12:00) serão gerados 2 slots (09:00 e 10:30).
                   </p>
                 </div>
 
@@ -553,16 +578,36 @@ export default function AdminManual() {
                   </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-mono font-bold text-xs">
-                  Versão Atual: v2.6.0
+                  Versão Atual: v2.7.0
                 </div>
               </div>
 
               <div className="space-y-4">
-                {/* v2.6.0 */}
+                {/* v2.7.0 */}
                 <div className="relative pl-6 border-l-2 border-brand-purple space-y-1.5">
                   <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-purple" />
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-purple">v2.6.0</span>
+                    <span className="font-bold text-xs text-brand-purple">v2.7.0</span>
+                    <span className="text-[10px] text-brand-charcoal/50">Setembro / 2026</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-brand-charcoal">
+                    Tempo de Consulta por Produto & 3 Turnos no Calendário (Manhã / Tarde / Noite)
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
+                    <li>Novo campo <strong>Tempo de Consulta</strong> nos produtos de Atendimento Individual (45min, 1h, 1:30hs, 2h, 3h ou valor personalizado).</li>
+                    <li>Padrão de 1:30hs (90 min) que já inclui o intervalo de transição entre sessões.</li>
+                    <li>Badge de duração exibido na listagem de produtos do painel admin.</li>
+                    <li>Grade semanal expandida para <strong>3 turnos independentes</strong>: Manhã (09:00–12:00), Tarde (13:00–15:00) e Noite (18:00–21:00).</li>
+                    <li>Slots do calendário do cliente calculados dinamicamente pela duração do produto selecionado.</li>
+                    <li>Padrão: Segunda a Sexta com os 3 turnos ativos; Sábado e Domingo inativos (editáveis).</li>
+                  </ul>
+                </div>
+
+                {/* v2.6.0 */}
+                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
+                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-brand-charcoal/70">v2.6.0</span>
                     <span className="text-[10px] text-brand-charcoal/50">Setembro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">
