@@ -65,9 +65,11 @@ function formatDateTimeBr(isoStr: string) {
 }
 
 function formatSlotDuration(minutos: number): string {
+  if (!minutos || minutos <= 0) return "1:30hs";
+  if (minutos < 60) return `${minutos}min`;
   const h = Math.floor(minutos / 60);
   const m = minutos % 60;
-  return m > 0 ? `${h}h${m.toString().padStart(2, "0")}` : `${h}h`;
+  return m > 0 ? `${h}:${m.toString().padStart(2, "0")}hs` : `${h}h`;
 }
 
 export default function AdminAgenda() {
@@ -184,8 +186,9 @@ export default function AdminAgenda() {
           rawAvail.forEach((w) => {
             const d = w.day_of_week;
             novaGrade[d].ativo = true;
-            novaGrade[d].slotMinutos = w.slot_duration_minutes || 90;
-            novaGrade[d].bufferMinutos = w.buffer_duration_minutes || 0;
+            const duracao = (!w.slot_duration_minutes || w.slot_duration_minutes === 50) ? 90 : w.slot_duration_minutes;
+            novaGrade[d].slotMinutos = duracao;
+            novaGrade[d].bufferMinutos = (w.slot_duration_minutes === 50) ? 0 : (w.buffer_duration_minutes || 0);
 
             const startHour = parseInt(w.start_time.slice(0, 2), 10);
             if (startHour < 13) {
@@ -1026,7 +1029,7 @@ export default function AdminAgenda() {
 
                       {/* Parâmetros de sessão */}
                       <div className="pt-2 border-t border-brand-charcoal/10 flex flex-wrap items-center justify-between gap-1 text-[11px] text-brand-charcoal/60">
-                        <span>Tempo por Consulta: <strong>{cfg.slotMinutos} min ({formatSlotDuration(cfg.slotMinutos)})</strong></span>
+                        <span>Tempo por Consulta: <strong>{formatSlotDuration(cfg.slotMinutos)} ({cfg.slotMinutos} min)</strong></span>
                         <span className="text-[10px] text-brand-charcoal/50">(inclui intervalo)</span>
                       </div>
                     </div>

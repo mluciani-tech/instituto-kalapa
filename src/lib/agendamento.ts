@@ -263,8 +263,12 @@ export async function calculateAvailableSlots(params: {
   const minAdvanceTime = nowTime + minAdvanceHours * 60 * 60 * 1000;
 
   for (const window of effectiveAvailabilities) {
-    const slotDurationMins = overrideDuration || window.slot_duration_minutes || 90;
-    const bufferDurationMins = overrideDuration ? 0 : (window.buffer_duration_minutes || 0);
+    const rawSlotMins = window.slot_duration_minutes;
+    const effectiveWindowDuration = (!rawSlotMins || rawSlotMins === 50) ? 90 : rawSlotMins;
+    const effectiveWindowBuffer = rawSlotMins === 50 ? 0 : (window.buffer_duration_minutes || 0);
+
+    const slotDurationMins = overrideDuration || effectiveWindowDuration;
+    const bufferDurationMins = overrideDuration ? 0 : effectiveWindowBuffer;
 
     const slotDurationMs = slotDurationMins * 60 * 1000;
     const bufferDurationMs = bufferDurationMins * 60 * 1000;

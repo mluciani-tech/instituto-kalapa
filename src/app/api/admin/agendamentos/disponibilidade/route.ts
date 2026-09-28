@@ -32,7 +32,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Erro ao buscar grade" }, { status: 500 });
     }
 
-    return NextResponse.json({ availability: data || [] });
+    // Normaliza registros legados de 50min (versão anterior) para o padrão de 90min (1:30hs)
+    const sanitizedData = (data || []).map((row: any) => ({
+      ...row,
+      slot_duration_minutes: (!row.slot_duration_minutes || row.slot_duration_minutes === 50) ? 90 : Number(row.slot_duration_minutes),
+      buffer_duration_minutes: (!row.slot_duration_minutes || row.slot_duration_minutes === 50) ? 0 : Number(row.buffer_duration_minutes || 0),
+    }));
+
+    return NextResponse.json({ availability: sanitizedData });
   } catch (err) {
     console.error("[api/admin/agendamentos/disponibilidade] Erro:", err);
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
@@ -75,8 +82,8 @@ export async function PUT(req: NextRequest) {
         day_of_week: Number(w.day_of_week),
         start_time: w.start_time,
         end_time: w.end_time,
-        slot_duration_minutes: Number(w.slot_duration_minutes) || 50,
-        buffer_duration_minutes: Number(w.buffer_duration_minutes) || 10,
+        slot_duration_minutes: Number(w.slot_duration_minutes) || 90,
+        buffer_duration_minutes: Number(w.buffer_duration_minutes) || 0,
         ativo: w.ativo !== false,
       }));
 
