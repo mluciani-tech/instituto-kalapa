@@ -87,6 +87,27 @@ export async function PUT(req: NextRequest) {
       throw error;
     }
 
+    // Se estiver atualizando dados da Facilitadora, sincroniza automaticamente com o registro padrão em therapists
+    if (["facilitadora_foto", "facilitadora_nome", "facilitadora_titulo", "facilitadora_bio"].includes(chave)) {
+      const fieldMap: Record<string, string> = {
+        facilitadora_foto: "foto_url",
+        facilitadora_nome: "nome",
+        facilitadora_titulo: "titulo",
+        facilitadora_bio: "bio",
+      };
+      const therapistField = fieldMap[chave];
+      if (therapistField) {
+        supabaseAdmin!
+          .from("therapists")
+          .update({ [therapistField]: String(valor), updated_at: new Date().toISOString() })
+          .eq("id", "e7f53a4e-1288-4e89-b051-5b7415444b01")
+          .then(
+            () => {},
+            (e: unknown) => console.error("[config] Erro ao sincronizar therapist:", e)
+          );
+      }
+    }
+
     return NextResponse.json({ success: true, chave, valor });
   } catch (error) {
     console.error("[config] Erro ao atualizar configuração:", error);

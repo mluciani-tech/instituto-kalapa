@@ -49,10 +49,24 @@ export default function ProductAppointmentSection({ produto }: ProductAppointmen
   useEffect(() => {
     const fetchInit = async () => {
       try {
-        const [userRes, therapistsRes] = await Promise.all([
+        const [userRes, therapistsRes, configRes] = await Promise.all([
           fetch("/api/auth/me"),
           fetch("/api/agendamentos/therapists"),
+          fetch("/api/config"),
         ]);
+
+        let fotoConfig = "";
+        let nomeConfig = "";
+        let tituloConfig = "";
+
+        if (configRes.ok) {
+          const cfg = await configRes.json();
+          if (cfg) {
+            fotoConfig = cfg.facilitadora_foto?.trim() || "";
+            nomeConfig = cfg.facilitadora_nome?.trim() || "";
+            tituloConfig = cfg.facilitadora_titulo?.trim() || "";
+          }
+        }
 
         if (userRes.ok) {
           const ud = await userRes.json();
@@ -64,8 +78,19 @@ export default function ProductAppointmentSection({ produto }: ProductAppointmen
         if (therapistsRes.ok) {
           const td = await therapistsRes.json();
           if (Array.isArray(td) && td.length > 0) {
-            setTerapeutas(td);
-            setTerapeutaSelecionada(td[0]);
+            const sanitized = td.map((t: Therapist, index: number) => {
+              if (index === 0) {
+                return {
+                  ...t,
+                  foto_url: fotoConfig || t.foto_url || "/foto_10.jpg",
+                  nome: nomeConfig || t.nome || "Clatihúcia Capeli",
+                  titulo: tituloConfig || t.titulo || "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal",
+                };
+              }
+              return t;
+            });
+            setTerapeutas(sanitized);
+            setTerapeutaSelecionada(sanitized[0]);
           }
         }
       } catch (err) {
