@@ -1698,10 +1698,15 @@ export default function AdminPage() {
                           <label className="block text-xs font-bold text-brand-charcoal">
                             ⏱️ Tempo de Consulta / Atendimento (já inclui o intervalo)
                           </label>
-                          <span className="text-xs font-semibold text-brand-purple">
-                            {parseInt(produtoForm.duracao_minutos, 10) >= 60
-                              ? `${Math.floor(parseInt(produtoForm.duracao_minutos, 10) / 60)}h${(parseInt(produtoForm.duracao_minutos, 10) % 60).toString().padStart(2, "0")}m`
-                              : `${produtoForm.duracao_minutos} min`}
+                          <span className="text-xs font-bold text-brand-purple">
+                            {(() => {
+                              const d = parseInt(produtoForm.duracao_minutos, 10) || 0;
+                              if (d <= 0) return "—";
+                              if (d < 60) return `${d} min`;
+                              const h = Math.floor(d / 60);
+                              const m = d % 60;
+                              return m > 0 ? `${h}h${m.toString().padStart(2, "0")}m` : `${h}h`;
+                            })()}
                           </span>
                         </div>
                         <p className="text-[11px] text-brand-charcoal/60 leading-relaxed">
@@ -1710,10 +1715,11 @@ export default function AdminPage() {
 
                         <div className="flex items-center gap-2 flex-wrap pt-1">
                           {[
-                            { label: "1h30 (90 min)", value: "90" },
-                            { label: "1h (60 min)", value: "60" },
                             { label: "45 min", value: "45" },
+                            { label: "1h (60 min)", value: "60" },
+                            { label: "1:30hs (90 min)", value: "90" },
                             { label: "2h (120 min)", value: "120" },
+                            { label: "3h (180 min)", value: "180" },
                           ].map((chip) => {
                             const isSelected = produtoForm.duracao_minutos === chip.value;
                             return (
@@ -1927,7 +1933,14 @@ export default function AdminPage() {
                         {p.destaque && <span className="text-xs bg-brand-terracotta/10 text-brand-terracotta px-1.5 py-0.5 rounded">Destaque</span>}
                         {(p.atendimento_individual || isProdutoAgendamento(p)) && (
                           <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
-                            🗓️ Atendimento ({p.duracao_minutos ? `${Math.floor(p.duracao_minutos / 60)}h${(p.duracao_minutos % 60).toString().padStart(2, "0")}m` : "1h30"})
+                            🗓️ Atendimento ({(() => {
+                              const d = p.duracao_minutos;
+                              if (!d) return "1:30hs";
+                              if (d < 60) return `${d}min`;
+                              const h = Math.floor(d / 60);
+                              const m = d % 60;
+                              return m > 0 ? `${h}:${m.toString().padStart(2, "0")}hs` : `${h}h`;
+                            })()})
                           </span>
                         )}
                       </div>
