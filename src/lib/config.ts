@@ -74,6 +74,21 @@ export const DEFAULTS_CONFIG: Record<string, string> = {
   espaco_descricao: DADOS_FACILITADORA_PADRAO.espaco_descricao,
 };
 
+export const CHAVES_PUBLICAS_PERMITIDAS = new Set([
+  "preco_sessao",
+  "vagas_maximas",
+  "turma_atual",
+  "facilitadora_nome",
+  "facilitadora_titulo",
+  "facilitadora_foto",
+  "facilitadora_credenciais",
+  "facilitadora_bio",
+  "espaco_titulo",
+  "espaco_descricao",
+  "espaco_fotos",
+  "faq_itens",
+]);
+
 export async function getPublicConfig(): Promise<Record<string, string>> {
   if (!isAdminConfigured()) {
     return DEFAULTS_CONFIG;
@@ -94,7 +109,9 @@ export async function getPublicConfig(): Promise<Record<string, string>> {
 
     const config: Record<string, string> = { ...DEFAULTS_CONFIG };
     data?.forEach((item) => {
-      config[item.chave] = item.valor;
+      if (CHAVES_PUBLICAS_PERMITIDAS.has(item.chave)) {
+        config[item.chave] = item.valor;
+      }
     });
 
     return config;

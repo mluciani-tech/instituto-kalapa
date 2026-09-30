@@ -3,6 +3,13 @@ import { checkAdminAuth } from "@/lib/admin-auth";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 
 export async function DELETE(req: NextRequest) {
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_ADMIN_RESET !== "true") {
+    return NextResponse.json(
+      { error: "Ação de limpeza em lote desativada em produção por segurança." },
+      { status: 403 }
+    );
+  }
+
   if (!(await checkAdminAuth(req))) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }

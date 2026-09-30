@@ -36,28 +36,32 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // Verificação de origem: token HMAC por order_nsu (não expõe o secret real na URL)
-    if (WEBHOOK_SECRET) {
-      const token = req.nextUrl.searchParams.get("token");
-      const orderNsu = body.order_nsu;
-      if (!orderNsu || !token) {
-        console.warn("[webhook] Token ou order_nsu ausente — requisição rejeitada");
-        return NextResponse.json(
-          { success: false, message: "Não autorizado" },
-          { status: 401 }
-        );
-      }
-      const expected = crypto.createHmac("sha256", WEBHOOK_SECRET).update(orderNsu).digest("hex");
-      const tokenBuf = Buffer.from(token);
-      const expectedBuf = Buffer.from(expected);
-      if (tokenBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(tokenBuf, expectedBuf)) {
-        console.warn("[webhook] Token HMAC inválido — requisição rejeitada");
-        return NextResponse.json(
-          { success: false, message: "Não autorizado" },
-          { status: 401 }
-        );
-      }
-    } else {
-      console.warn("[webhook] WEBHOOK_SECRET não configurado — endpoint sem verificação de origem!");
+    if (!WEBHOOK_SECRET) {
+      console.error("[webhook] WEBHOOK_SECRET não configurado — rejeitando requisição por segurança");
+      return NextResponse.json(
+        { success: false, message: "Não autorizado" },
+        { status: 401 }
+      );
+    }
+
+    const token = req.nextUrl.searchParams.get("token");
+    const orderNsu = body.order_nsu;
+    if (!orderNsu || !token) {
+      console.warn("[webhook] Token ou order_nsu ausente — requisição rejeitada");
+      return NextResponse.json(
+        { success: false, message: "Não autorizado" },
+        { status: 401 }
+      );
+    }
+    const expected = crypto.createHmac("sha256", WEBHOOK_SECRET).update(orderNsu).digest("hex");
+    const tokenBuf = Buffer.from(token);
+    const expectedBuf = Buffer.from(expected);
+    if (tokenBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(tokenBuf, expectedBuf)) {
+      console.warn("[webhook] Token HMAC inválido — requisição rejeitada");
+      return NextResponse.json(
+        { success: false, message: "Não autorizado" },
+        { status: 401 }
+      );
     }
 
     console.log("[webhook] Pagamento recebido:", body.order_nsu, body.transaction_nsu);

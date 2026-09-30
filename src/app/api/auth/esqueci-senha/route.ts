@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 import { generatePasswordResetToken } from "@/lib/cliente-auth";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,18 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://instituto-kalapa.v
 
 export async function POST(req: NextRequest) {
   try {
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
+
+    if (!rateLimit(`client-forgot-pwd:${ip}`, 5, 15 * 60 * 1000)) {
+      return NextResponse.json(
+        { error: "Muitas solicitações de recuperação. Tente novamente em 15 minutos." },
+        { status: 429 }
+      );
+    }
+
     const { email } = await req.json();
 
     if (!email?.trim() || !email.includes("@")) {

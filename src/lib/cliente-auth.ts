@@ -8,11 +8,14 @@ const COOKIE_NAME = "cliente_session";
 const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias
 
 function getSecret(): string {
-  return (
-    process.env.SESSION_SECRET ||
-    process.env.ADMIN_PASSWORD ||
-    "instituto-kalapa-ecommerce-secret-key-2026"
-  );
+  const secret = process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("SESSION_SECRET ou ADMIN_PASSWORD não configurado no ambiente.");
+    }
+    return "instituto-kalapa-dev-secret-local-only";
+  }
+  return secret;
 }
 
 // ============================================

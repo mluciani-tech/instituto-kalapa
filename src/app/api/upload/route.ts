@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabase";
 import { checkAdminAuth } from "@/lib/admin-auth";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MIME_TO_EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
 const BUCKET = "produtos";
 
 export async function POST(req: NextRequest) {
@@ -45,8 +52,9 @@ export async function POST(req: NextRequest) {
       .then(() => {})
       .catch(() => {});
 
-    const ext = file.name.split(".").pop() || "jpg";
-    const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+    const ext = MIME_TO_EXT[file.type] || "jpg";
+    const randomSuffix = crypto.randomBytes(8).toString("hex");
+    const filename = `${Date.now()}-${randomSuffix}.${ext}`;
 
     const bytes = await file.arrayBuffer();
 

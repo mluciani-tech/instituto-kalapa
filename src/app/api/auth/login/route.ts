@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 import { verifyPassword, createClienteSessionToken, setClienteSessionCookie } from "@/lib/cliente-auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
+
+    if (!rateLimit(`client-login:${ip}`, 10, 15 * 60 * 1000)) {
+      return NextResponse.json(
+        { error: "Muitas tentativas de login. Tente novamente em 15 minutos." },
+        { status: 429 }
+      );
+    }
+
     if (!isAdminConfigured()) {
       return NextResponse.json(
         { error: "Banco de dados não configurado" },
