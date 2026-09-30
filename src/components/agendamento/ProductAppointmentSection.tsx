@@ -7,6 +7,7 @@ import AppointmentCalendar from "./AppointmentCalendar";
 import TimeSlotPicker from "./TimeSlotPicker";
 import BookingConfirmationModal from "./BookingConfirmationModal";
 import type { Produto, Therapist, TimeSlot, Usuario } from "@/lib/types";
+import { FOTO_FACILITADORA_PADRAO } from "@/lib/config";
 
 interface ProductAppointmentSectionProps {
   produto: Produto;
@@ -82,7 +83,7 @@ export default function ProductAppointmentSection({ produto }: ProductAppointmen
               if (index === 0) {
                 return {
                   ...t,
-                  foto_url: fotoConfig || t.foto_url || "/foto_10.jpg",
+                  foto_url: fotoConfig || t.foto_url || FOTO_FACILITADORA_PADRAO,
                   nome: nomeConfig || t.nome || "Clatihúcia Capeli",
                   titulo: tituloConfig || t.titulo || "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal",
                 };

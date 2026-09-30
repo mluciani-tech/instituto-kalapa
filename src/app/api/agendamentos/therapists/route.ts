@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
+import { FOTO_FACILITADORA_PADRAO } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -7,7 +8,7 @@ const TERAPEUTA_PADRAO = {
   id: "e7f53a4e-1288-4e89-b051-5b7415444b01",
   nome: "Clatihúcia Capeli",
   titulo: "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal",
-  foto_url: "/foto_10.jpg",
+  foto_url: FOTO_FACILITADORA_PADRAO,
   bio: "Com mais de 10 anos de dedicação ao cuidado emocional e ao desenvolvimento humano, Clatihúcia Capeli conduz vivências e atendimentos que acolhem a dor sem julgamentos.",
   ativo: true,
 };

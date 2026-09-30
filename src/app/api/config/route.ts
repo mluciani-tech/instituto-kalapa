@@ -1,43 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkAdminAuth } from "@/lib/admin-auth";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
+import { getPublicConfig } from "@/lib/config";
 
-const DEFAULTS: Record<string, string> = {
-  preco_sessao: "97",
-  vagas_maximas: "15",
-  turma_atual: "2025-01",
-};
+export const dynamic = "force-dynamic";
 
 // GET: Buscar configurações (público — usado na landing page)
 export async function GET() {
-  if (!isAdminConfigured()) {
-    return NextResponse.json(DEFAULTS);
-  }
-
-  try {
-    const { data, error } = await supabaseAdmin!
-      .from("configuracoes")
-      .select("chave, valor");
-
-    if (error) {
-      // Tabela não existe — retornar defaults
-      if (error.message?.includes("does not exist") || error.code === "42P01") {
-        console.warn("[config] Tabela configuracoes não existe. Usando valores padrão.");
-        return NextResponse.json(DEFAULTS);
-      }
-      throw error;
-    }
-
-    const config: Record<string, string> = { ...DEFAULTS };
-    data?.forEach((item) => {
-      config[item.chave] = item.valor;
-    });
-
-    return NextResponse.json(config);
-  } catch (error) {
-    console.error("[config] Erro ao buscar configurações:", error);
-    return NextResponse.json(DEFAULTS);
-  }
+  const config = await getPublicConfig();
+  return NextResponse.json(config);
 }
 
 // PUT: Atualizar configurações (apenas admin autenticado)

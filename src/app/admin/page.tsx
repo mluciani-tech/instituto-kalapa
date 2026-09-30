@@ -9,6 +9,7 @@ import AdminAgenda from "./components/AdminAgenda";
 import AdminToastNotification from "./components/AdminToastNotification";
 import AdminManual from "./components/AdminManual";
 import AdminSidebar from "./components/AdminSidebar";
+import { FOTO_FACILITADORA_PADRAO } from "@/lib/config";
 
 type Paginated<T> = {
   data: T[];
@@ -277,7 +278,7 @@ export default function AdminPage() {
       setConfig(data);
       setFacilitadoraNome(data.facilitadora_nome || "Clatihúcia Capeli");
       setFacilitadoraTitulo(data.facilitadora_titulo || "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal");
-      setFacilitadoraFoto(data.facilitadora_foto || "/foto_10.jpg");
+      setFacilitadoraFoto(data.facilitadora_foto || FOTO_FACILITADORA_PADRAO);
       setFacilitadoraCredenciais(data.facilitadora_credenciais || "Constelação Familiar, Vivências em Grupo e Acolhimento do Trauma");
       setFacilitadoraBio(data.facilitadora_bio || "Com mais de 10 anos de dedicação ao cuidado emocional e ao desenvolvimento humano, Clatihúcia Capeli conduz vivências que acolhem a dor sem julgamentos, permitindo que ela se transforme em força e consciência.\n\nSua abordagem integra a sabedoria sistêmica das constelações familiares, a neurobiologia do trauma e a potência curativa da presença em grupo. Cada encontro é cuidadosamente preparado para ser um santuário de respeito, acolhimento genuíno e pertencimento.");
       setEspacoTitulo(data.espaco_titulo || "Espaço Serena — Refúgio e Natureza");

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkAdminAuth } from "@/lib/admin-auth";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
+import { FOTO_FACILITADORA_PADRAO } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ const TERAPEUTA_PADRAO = {
   titulo: "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal",
   email: "contato@institutokalapa.com.br",
   telefone: "(11) 99999-9999",
-  foto_url: "/foto_10.jpg",
+  foto_url: FOTO_FACILITADORA_PADRAO,
   bio: "Com mais de 10 anos de dedicação ao cuidado emocional e ao desenvolvimento humano, Clatihúcia Capeli conduz vivências e atendimentos que acolhem a dor sem julgamentos.",
   ativo: true,
 };

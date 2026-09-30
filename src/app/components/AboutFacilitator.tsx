@@ -15,93 +15,80 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-interface FAQItem {
-  pergunta: string;
-  resposta: string;
+import {
+  DADOS_FACILITADORA_PADRAO,
+  FAQ_PADRAO,
+  type FAQItem,
+  type FacilitadoraDados,
+} from "@/lib/config";
+
+interface AboutFacilitatorProps {
+  initialConfig?: Record<string, string> | null;
 }
 
-const FAQ_PADRAO: FAQItem[] = [
-  {
-    pergunta: "Preciso expor minha história ou falar na primeira sessão?",
-    resposta:
-      "De forma alguma. Cada participante tem seu próprio ritmo e tempo de abertura. Estar no grupo já é um ato de presença e transformação. Você só compartilha o que sentir no coração, sem qualquer pressão.",
-  },
-  {
-    pergunta: "Como funcionam os grupos reduzidos?",
-    resposta:
-      "Nossos grupos contam com no máximo 15 participantes por encontro. Essa limitação garante que cada pessoa seja verdadeiramente ouvida, acolhida e acompanhada com cuidado individualizado e respeito ao seu processo.",
-  },
-  {
-    pergunta: "Qual é a política de sigilo do INstituto Kalapa?",
-    resposta:
-      "O sigilo é nosso pilar ético inegociável. Tudo o que é compartilhado, vivenciado e revelado nos encontros permanece estritamente dentro do círculo do grupo, criando um solo seguro e confiável.",
-  },
-  {
-    pergunta: "O que devo levar e como me preparar para o encontro?",
-    resposta:
-      "Venha com roupas confortáveis que permitam sentar e se movimentar com liberdade. Não é necessária nenhuma experiência prévia em terapias ou vivências. O espaço oferece todo o suporte para sua chegada.",
-  },
-  {
-    pergunta: "Qual a frequência dos encontros?",
-    resposta:
-      "As vivências acontecem em ritmo quinzenal consciente. Esse intervalo é intencional: permite que os aprendizados e sentimentos acessados no grupo sejam integrados à sua rotina diária no seu próprio tempo.",
-  },
-];
+function parseFaq(faqRaw?: string | null): FAQItem[] {
+  if (!faqRaw) return FAQ_PADRAO;
+  try {
+    const parsed = JSON.parse(faqRaw);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+  } catch {
+    // fallback
+  }
+  return FAQ_PADRAO;
+}
 
-const DADOS_FACILITADORA_PADRAO = {
-  nome: "Clatihúcia Capeli",
-  titulo: "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal",
-  foto_url: "/foto_10.jpg",
-  credenciais:
-    "Constelação Familiar, Vivências em Grupo e Acolhimento do Trauma",
-  bio: "Com mais de 10 anos de dedicação ao cuidado emocional e ao desenvolvimento humano, Clatihúcia Capeli conduz vivências que acolhem a dor sem julgamentos, permitindo que ela se transforme em força e consciência.\n\nSua abordagem integra a sabedoria sistêmica das constelações familiares, a neurobiologia do trauma e a potência curativa da presença em grupo. Cada encontro é cuidadosamente preparado para ser um santuário de respeito, acolhimento genuíno e pertencimento.",
-  espaco_titulo: "Espaço Serena — Refúgio e Natureza",
-  espaco_descricao:
-    "Localizado em meio à natureza na Granja Viana (Cotia - SP), o espaço foi concebido como um refúgio acolhedor, silencioso e seguro para vivências presenciais transformadoras.",
-  espaco_fotos: ["/foto2.jpg", "/foto4.jpg", "/foto6a.jpg"],
-};
+function parseEspacoFotos(fotosRaw?: string | null): string[] {
+  if (!fotosRaw) return DADOS_FACILITADORA_PADRAO.espaco_fotos;
+  try {
+    const parsed = JSON.parse(fotosRaw);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+  } catch {
+    // fallback
+  }
+  return DADOS_FACILITADORA_PADRAO.espaco_fotos;
+}
 
-export default function AboutFacilitator() {
+function buildDadosFromConfig(config?: Record<string, string> | null): FacilitadoraDados {
+  if (!config) return DADOS_FACILITADORA_PADRAO;
+  return {
+    nome: config.facilitadora_nome || DADOS_FACILITADORA_PADRAO.nome,
+    titulo: config.facilitadora_titulo || DADOS_FACILITADORA_PADRAO.titulo,
+    foto_url: config.facilitadora_foto || DADOS_FACILITADORA_PADRAO.foto_url,
+    credenciais:
+      config.facilitadora_credenciais || DADOS_FACILITADORA_PADRAO.credenciais,
+    bio: config.facilitadora_bio || DADOS_FACILITADORA_PADRAO.bio,
+    espaco_titulo:
+      config.espaco_titulo || DADOS_FACILITADORA_PADRAO.espaco_titulo,
+    espaco_descricao:
+      config.espaco_descricao || DADOS_FACILITADORA_PADRAO.espaco_descricao,
+    espaco_fotos: parseEspacoFotos(config.espaco_fotos),
+  };
+}
+
+export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProps = {}) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
-  const [dados, setDados] = useState(DADOS_FACILITADORA_PADRAO);
-  const [faq, setFaq] = useState<FAQItem[]>(FAQ_PADRAO);
+  const [dados, setDados] = useState<FacilitadoraDados>(() => buildDadosFromConfig(initialConfig));
+  const [faq, setFaq] = useState<FAQItem[]>(() => parseFaq(initialConfig?.faq_itens));
 
   useEffect(() => {
-    fetch("/api/config")
-      .then((r) => r.json())
-      .then((config) => {
-        if (!config) return;
-        setDados({
-          nome: config.facilitadora_nome || DADOS_FACILITADORA_PADRAO.nome,
-          titulo: config.facilitadora_titulo || DADOS_FACILITADORA_PADRAO.titulo,
-          foto_url: config.facilitadora_foto || DADOS_FACILITADORA_PADRAO.foto_url,
-          credenciais:
-            config.facilitadora_credenciais ||
-            DADOS_FACILITADORA_PADRAO.credenciais,
-          bio: config.facilitadora_bio || DADOS_FACILITADORA_PADRAO.bio,
-          espaco_titulo:
-            config.espaco_titulo || DADOS_FACILITADORA_PADRAO.espaco_titulo,
-          espaco_descricao:
-            config.espaco_descricao ||
-            DADOS_FACILITADORA_PADRAO.espaco_descricao,
-          espaco_fotos: config.espaco_fotos
-            ? JSON.parse(config.espaco_fotos)
-            : DADOS_FACILITADORA_PADRAO.espaco_fotos,
-        });
-
-        if (config.faq_itens) {
-          try {
-            const parsed = JSON.parse(config.faq_itens);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setFaq(parsed);
-            }
-          } catch {
-            // mantém padrão
+    // Se não veio do SSR ou se houver atualização remota
+    if (!initialConfig) {
+      fetch("/api/config")
+        .then((r) => r.json())
+        .then((config) => {
+          if (!config) return;
+          setDados(buildDadosFromConfig(config));
+          if (config.faq_itens) {
+            setFaq(parseFaq(config.faq_itens));
           }
-        }
-      })
-      .catch(() => {});
-  }, []);
+        })
+        .catch(() => {});
+    }
+  }, [initialConfig]);
 
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -150,6 +137,7 @@ export default function AboutFacilitator() {
                   src={dados.foto_url}
                   alt={dados.nome}
                   fill
+                  priority
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 40vw"
                 />
