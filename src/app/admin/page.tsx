@@ -9,6 +9,7 @@ import AdminAgenda from "./components/AdminAgenda";
 import AdminToastNotification from "./components/AdminToastNotification";
 import AdminManual from "./components/AdminManual";
 import AdminSidebar from "./components/AdminSidebar";
+import AdminAlterarSenhaModal from "./components/AdminAlterarSenhaModal";
 import { FOTO_FACILITADORA_PADRAO } from "@/lib/config";
 
 type Paginated<T> = {
@@ -125,6 +126,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
+  const [modalSenhaOpen, setModalSenhaOpen] = useState(false);
 
   // Config
   const [config, setConfig] = useState<Record<string, string>>({});
@@ -1117,6 +1119,7 @@ export default function AdminPage() {
           if (tab === "agendamentos") setNewAppointmentsCount(0);
         }}
         onLogout={handleLogout}
+        onOpenAlterarSenha={() => setModalSenhaOpen(true)}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
@@ -3707,6 +3710,12 @@ export default function AdminPage() {
             setNewAppointmentsCount(count);
           }
         }}
+      />
+
+      {/* Modal de Alteração de Senha do Administrador */}
+      <AdminAlterarSenhaModal
+        isOpen={modalSenhaOpen}
+        onClose={() => setModalSenhaOpen(false)}
       />
       </div>
     </div>

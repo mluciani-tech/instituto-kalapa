@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSessionToken } from "@/lib/auth";
+import { createSessionTokenForAdmin } from "@/lib/auth";
+import { verifyAdminPassword } from "@/lib/admin-password";
 import { rateLimit } from "@/lib/rate-limit";
 
 // Máx 5 tentativas a cada 15 minutos por IP
@@ -29,12 +30,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = await createSessionToken(password);
-
-    if (!token) {
+    const isValid = await verifyAdminPassword(password);
+    if (!isValid) {
       return NextResponse.json(
         { error: "Senha inválida" },
         { status: 401 }
+      );
+    }
+
+    const token = await createSessionTokenForAdmin();
+
+    if (!token) {
+      return NextResponse.json(
+        { error: "Erro ao gerar sessão" },
+        { status: 500 }
       );
     }
 

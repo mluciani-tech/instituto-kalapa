@@ -20,6 +20,8 @@ import {
   Mail,
   Smartphone,
   Lock,
+  AlertCircle,
+  KeyRound,
 } from "lucide-react";
 
 interface ManualSection {
@@ -69,17 +71,24 @@ export default function AdminManual() {
       summary: "Criação de cupons %, valor fixo ou 100% cortesia com baixa automática.",
     },
     {
+      id: "seguranca",
+      title: "6. Segurança & Senha do Painel",
+      icon: ShieldCheck,
+      summary: "Troca dinâmica de senha do Admin, proteção RLS, sessões seguras e boas práticas.",
+      badge: "Novo",
+    },
+    {
       id: "faq",
-      title: "6. Dúvidas Frequentes & Resolução",
+      title: "7. Dúvidas Frequentes & Resolução",
       icon: HelpCircle,
       summary: "Perguntas operacionais do dia a dia e procedimentos recomendados.",
     },
     {
       id: "changelog",
-      title: "7. Histórico & Versões do Sistema",
+      title: "8. Histórico & Versões do Sistema",
       icon: Zap,
       summary: "Registro de atualizações contínuas e notas de versão do projeto.",
-      badge: "v2.7",
+      badge: "v2.8",
     },
   ];
 
@@ -514,20 +523,110 @@ export default function AdminManual() {
             </div>
           )}
 
-          {/* SEÇÃO 6: FAQ */}
+          {/* SEÇÃO 6: SEGURANÇA & SENHA */}
+          {activeSection === "seguranca" && (
+            <div className="bg-white rounded-2xl border border-brand-beige p-6 space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-brand-charcoal">
+                  6. Segurança, Senha Mestra & Proteção de Dados
+                </h2>
+                <p className="text-xs text-brand-charcoal/70 mt-1">
+                  Gerenciamento da credencial administrativa, sessões seguras e diretrizes de proteção do sistema.
+                </p>
+              </div>
+
+              {/* Card 1: Como Alterar a Senha */}
+              <div className="bg-brand-purple/5 border border-brand-purple/20 rounded-2xl p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-brand-purple text-white flex items-center justify-center">
+                    <KeyRound className="w-5 h-5 text-brand-beige" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-brand-purple-deep">Como Alterar a Senha do Administrador</h3>
+                    <p className="text-xs text-brand-charcoal/70">Processo rápido disponível diretamente pelo painel administrativo.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-brand-purple">1. Acesse o Menu</span>
+                    <p className="text-brand-charcoal/70">No rodapé da barra lateral esquerda, clique em <strong>Alterar Senha</strong> (ícone de chave).</p>
+                  </div>
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-brand-purple">2. Senha Atual</span>
+                    <p className="text-brand-charcoal/70">Digite a senha que você utilizou para acessar o painel hoje.</p>
+                  </div>
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-brand-purple">3. Nova Senha</span>
+                    <p className="text-brand-charcoal/70">Crie uma nova senha de no mínimo 8 caracteres e confirme digitando novamente.</p>
+                  </div>
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-brand-purple">4. Salvar & Renovar</span>
+                    <p className="text-brand-charcoal/70">Clique em salvar. Sua sessão é renovada automaticamente e outras sessões são desconectadas.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Como funciona nos bastidores */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="bg-brand-beige-light/60 p-4 rounded-xl border border-brand-beige space-y-2">
+                  <div className="flex items-center gap-2 text-brand-purple font-bold">
+                    <ShieldCheck className="w-4 h-4 text-brand-mint" />
+                    <span>Criptografia scrypt + Salt no Supabase</span>
+                  </div>
+                  <p className="text-brand-charcoal/70 leading-relaxed">
+                    A sua senha nunca é gravada em texto puro. O sistema gera um hash criptográfico com <strong>scrypt e salt único</strong> armazenado de forma privada no Supabase, protegido por políticas estritas de RLS (acessível exclusivamente pelo backend via service_role).
+                  </p>
+                </div>
+
+                <div className="bg-brand-beige-light/60 p-4 rounded-xl border border-brand-beige space-y-2">
+                  <div className="flex items-center gap-2 text-brand-purple font-bold">
+                    <Zap className="w-4 h-4 text-brand-terracotta" />
+                    <span>Invalidação Imediata de Outras Sessões</span>
+                  </div>
+                  <p className="text-brand-charcoal/70 leading-relaxed">
+                    Se outro computador ou navegador estiver conectado ao painel com a senha anterior, a sessão dele é invalidada automaticamente no instante da troca. Apenas o seu navegador ativo recebe o novo cookie de autorização.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 3: Boas Práticas e Recomendações */}
+              <div className="border border-brand-beige rounded-xl p-4 bg-white space-y-2 text-xs">
+                <h4 className="font-bold text-brand-charcoal flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-brand-terracotta" />
+                  <span>Recomendações Importantes de Segurança</span>
+                </h4>
+                <ul className="list-disc list-inside text-brand-charcoal/70 space-y-1">
+                  <li>Troque a senha periodicamente ou sempre que houver mudança na equipe com acesso de gestão.</li>
+                  <li>Evite reutilizar senhas pessoais ou combinações simples como datas de aniversário.</li>
+                  <li>Em caso de emergência ou esquecimento da senha, o acesso mestre pode ser restaurado via console Supabase ou redefinindo a variável no Vercel.</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* SEÇÃO 7: FAQ */}
           {activeSection === "faq" && (
             <div className="bg-white rounded-2xl border border-brand-beige p-6 space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-brand-charcoal">
-                  6. Dúvidas Frequentes & Procedimentos Administrativos
+                  7. Dúvidas Frequentes & Procedimentos Administrativos
                 </h2>
                 <p className="text-xs text-brand-charcoal/70 mt-1">
-                  Respostas rápidas para situações rotineiras de atendimento ao cliente.
+                  Respostas rápidas para situações rotineiras de atendimento ao cliente e gestão de acesso.
                 </p>
               </div>
 
               <div className="space-y-3">
                 {[
+                  {
+                    q: "Como faço para alterar a senha do painel administrativo?",
+                    a: "No rodapé do menu lateral à esquerda, clique no botão 'Alterar Senha'. Digite sua senha atual, escolha a nova senha (mínimo de 8 caracteres) e confirme. Ao salvar, sua sessão continua conectada e todos os outros computadores precisarão digitar a nova senha.",
+                  },
+                  {
+                    q: "O que acontece se eu esquecer a senha atual do painel de administração?",
+                    a: "Por motivos de segurança, a senha é armazenada como hash criptográfico não reversível. Caso a senha seja esquecida, o desenvolvedor ou responsável pela infraestrutura técnica pode restaurar a credencial pelo Supabase (tabela configuracoes) ou pela variável ADMIN_PASSWORD na Vercel.",
+                  },
                   {
                     q: "Um cliente pediu para cancelar ou reagendar a sessão. O que devo fazer?",
                     a: "Acesse a aba '🗓️ Agenda & Atendimentos', localize a consulta do paciente e clique no botão 'Cancelar Consulta'. O sistema solicitará uma justificativa obrigatória por escrito, liberará o horário na grade para outros pacientes e registrará a ocorrência na auditoria.",
@@ -565,29 +664,48 @@ export default function AdminManual() {
             </div>
           )}
 
-          {/* SEÇÃO 7: CHANGELOG & VERSÕES */}
+          {/* SEÇÃO 8: CHANGELOG & VERSÕES */}
           {activeSection === "changelog" && (
             <div className="bg-white rounded-2xl border border-brand-beige p-6 space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-brand-beige">
                 <div>
                   <h2 className="text-lg font-bold text-brand-charcoal">
-                    7. Versões do Sistema & Notas de Atualização
+                    8. Versões do Sistema & Notas de Atualização
                   </h2>
                   <p className="text-xs text-brand-charcoal/70 mt-1">
                     Mecanismo dinâmico de documentação: sempre que houver novas melhorias ou correções, este histórico é atualizado para manter a equipe informada.
                   </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-mono font-bold text-xs">
-                  Versão Atual: v2.7.0
+                  Versão Atual: v2.8.0
                 </div>
               </div>
 
               <div className="space-y-4">
-                {/* v2.7.0 */}
+                {/* v2.8.0 */}
                 <div className="relative pl-6 border-l-2 border-brand-purple space-y-1.5">
                   <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-purple" />
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-purple">v2.7.0</span>
+                    <span className="font-bold text-xs text-brand-purple">v2.8.0</span>
+                    <span className="text-[10px] text-brand-charcoal/50">Setembro / 2026</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-brand-charcoal">
+                    Módulo de Troca de Senha do Admin & Hardening de Cibersegurança
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
+                    <li>Novo botão <strong>Alterar Senha</strong> no rodapé da barra lateral com modal seguro e validação de senha atual.</li>
+                    <li>Armazenamento criptografado via hash <strong>scrypt + salt</strong> na tabela de configurações do Supabase.</li>
+                    <li>Renovação automática e transparente de sessão ativa, com revogação instantânea de sessões em outros navegadores.</li>
+                    <li>Hardening completo de políticas RLS do Supabase, isolando dados pessoais e notas terapêuticas contra extração via chave anônima.</li>
+                    <li>Rate limiting nas rotas de autenticação e proteção contra vazamento público de credenciais SMTP.</li>
+                  </ul>
+                </div>
+
+                {/* v2.7.0 */}
+                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
+                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-brand-charcoal/70">v2.7.0</span>
                     <span className="text-[10px] text-brand-charcoal/50">Setembro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">

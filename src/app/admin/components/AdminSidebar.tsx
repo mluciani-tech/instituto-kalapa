@@ -13,6 +13,7 @@ import {
   BookOpen,
   ExternalLink,
   LogOut,
+  KeyRound,
 } from "lucide-react";
 
 type Tab =
@@ -38,6 +39,7 @@ interface AdminSidebarProps {
   tabs: TabItem[];
   onTabChange: (tab: Tab) => void;
   onLogout: () => void;
+  onOpenAlterarSenha?: () => void;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -71,6 +73,7 @@ function SidebarContent({
   tabs,
   onTabChange,
   onLogout,
+  onOpenAlterarSenha,
   onClose,
 }: Omit<AdminSidebarProps, "isOpen">) {
   return (
@@ -143,6 +146,18 @@ function SidebarContent({
           <ExternalLink className="w-4 h-4 shrink-0 text-white/50 group-hover:text-white/80" />
           <span>Ver catálogo</span>
         </a>
+        {onOpenAlterarSenha && (
+          <button
+            onClick={() => {
+              onOpenAlterarSenha();
+              onClose();
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/65 hover:bg-white/10 hover:text-white transition-all group"
+          >
+            <KeyRound className="w-4 h-4 shrink-0 text-white/50 group-hover:text-white/80" />
+            <span>Alterar Senha</span>
+          </button>
+        )}
         <button
           onClick={onLogout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/65 hover:bg-red-500/20 hover:text-red-200 transition-all group"
