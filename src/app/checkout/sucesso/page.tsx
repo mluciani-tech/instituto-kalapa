@@ -1,6 +1,7 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, Sparkles, Package, Clock, AlertCircle } from "lucide-react";
@@ -21,21 +22,21 @@ interface PedidoPublico {
 
 function SucessoContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const { clearCart } = useCart();
+  const { clearCart, closeDrawer } = useCart();
   const [pedido, setPedido] = useState<PedidoPublico | null>(null);
   const [naoEncontrado, setNaoEncontrado] = useState(false);
 
-  // Garantir que o carrinho esteja sempre limpo ao chegar na tela de sucesso
+  // Garantir que o carrinho e drawer estejam sempre limpos/fechados ao chegar na tela de sucesso
   useEffect(() => {
     clearCart();
+    closeDrawer();
     try {
       localStorage.removeItem("kalapa_cart_items_v1");
       sessionStorage.removeItem("produto_selecionado");
     } catch {
       // ignore
     }
-  }, [clearCart]);
+  }, [clearCart, closeDrawer]);
 
   const receiptUrl = searchParams.get("receipt_url");
   const orderNsu = searchParams.get("order_nsu");
@@ -85,7 +86,7 @@ function SucessoContent() {
   const pago = pedido?.status === "pago";
 
   return (
-    <section className="relative min-h-screen py-20 bg-brand-charcoal overflow-hidden flex items-center justify-center">
+    <section className="relative min-h-screen pt-28 pb-16 md:pt-36 md:pb-24 bg-brand-charcoal overflow-hidden flex items-center justify-center">
       <div className="absolute inset-0 bg-gradient-to-br from-brand-charcoal via-brand-purple-deep/30 to-brand-charcoal" />
 
       <div className="relative z-10 w-full max-w-2xl mx-auto px-6">
@@ -200,13 +201,13 @@ function SucessoContent() {
             <p className="text-xs text-white/60 mb-4">
               Você pode visualizar o status em tempo real e comprovante na sua área do cliente.
             </p>
-            <button
-              onClick={() => router.push("/conta/pedidos")}
+            <Link
+              href="/conta/pedidos"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-purple-900/40 cursor-pointer"
             >
               Acompanhar meu pedido
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
@@ -220,12 +221,12 @@ function SucessoContent() {
                 Ver comprovante
               </a>
             )}
-            <button
-              onClick={() => router.push("/")}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/15 text-white text-sm font-medium rounded-xl transition-all duration-200"
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/15 text-white text-sm font-medium rounded-xl transition-all duration-200 cursor-pointer"
             >
               Voltar para Home
-            </button>
+            </Link>
           </div>
 
         </motion.div>

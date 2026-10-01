@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import type { ItemCarrinho } from "@/lib/types";
 
 interface CartContextType {
@@ -84,7 +84,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
-  const addItem = (
+  const addItem = useCallback((
     produto: {
       id: string;
       slug?: string;
@@ -127,16 +127,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       ];
     });
     setIsDrawerOpen(true);
-  };
+  }, []);
 
-
-  const removeItem = (produto_id: string) => {
+  const removeItem = useCallback((produto_id: string) => {
     setItems((prev) => prev.filter((item) => item.produto_id !== produto_id));
-  };
+  }, []);
 
-  const updateQuantity = (produto_id: string, quantidade: number) => {
+  const updateQuantity = useCallback((produto_id: string, quantidade: number) => {
     if (quantidade <= 0) {
-      removeItem(produto_id);
+      setItems((prev) => prev.filter((item) => item.produto_id !== produto_id));
       return;
     }
     setItems((prev) =>
@@ -144,41 +143,68 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         item.produto_id === produto_id ? { ...item, quantidade } : item
       )
     );
-  };
+  }, []);
 
-  const clearCart = () => {
-    setItems([]);
+  const clearCart = useCallback(() => {
+    setItems((prev) => (prev.length === 0 ? prev : []));
+    setIsDrawerOpen(false);
     try {
       localStorage.removeItem(CART_STORAGE_KEY);
     } catch {
       // ignore
     }
-  };
+  }, []);
 
-  const setCartItems = (newItems: ItemCarrinho[]) => {
+  const setCartItems = useCallback((newItems: ItemCarrinho[]) => {
     setItems(newItems);
-  };
+  }, []);
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantidade, 0);
-  const subtotal = items.reduce((sum, item) => sum + item.preco * item.quantidade, 0);
+  const openDrawer = useCallback(() => setIsDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setIsDrawerOpen(false), []);
+  const toggleDrawer = useCallback(() => setIsDrawerOpen((prev) => !prev), []);
+
+  const totalItems = useMemo(
+    () => items.reduce((sum, item) => sum + item.quantidade, 0),
+    [items]
+  );
+  const subtotal = useMemo(
+    () => items.reduce((sum, item) => sum + item.preco * item.quantidade, 0),
+    [items]
+  );
+
+  const value = useMemo(
+    () => ({
+      items,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      setCartItems,
+      totalItems,
+      subtotal,
+      isDrawerOpen,
+      openDrawer,
+      closeDrawer,
+      toggleDrawer,
+    }),
+    [
+      items,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      setCartItems,
+      totalItems,
+      subtotal,
+      isDrawerOpen,
+      openDrawer,
+      closeDrawer,
+      toggleDrawer,
+    ]
+  );
 
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        setCartItems,
-        totalItems,
-        subtotal,
-        isDrawerOpen,
-        openDrawer: () => setIsDrawerOpen(true),
-        closeDrawer: () => setIsDrawerOpen(false),
-        toggleDrawer: () => setIsDrawerOpen((prev) => !prev),
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
