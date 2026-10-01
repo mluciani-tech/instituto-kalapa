@@ -557,8 +557,8 @@ export default function AdminManual() {
                     <p className="text-brand-charcoal/70">Digite a senha que você utilizou para acessar o painel hoje.</p>
                   </div>
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
-                    <span className="font-bold text-brand-purple">3. Nova Senha</span>
-                    <p className="text-brand-charcoal/70">Crie uma nova senha de no mínimo 8 caracteres e confirme digitando novamente.</p>
+                    <span className="font-bold text-brand-purple">3. Nova Senha & Diretrizes</span>
+                    <p className="text-brand-charcoal/70">Digite a nova senha atendendo às diretrizes de segurança (mínimo 8 caracteres, maiúsculas, minúsculas, números e caracteres especiais) e confirme.</p>
                   </div>
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
                     <span className="font-bold text-brand-purple">4. Salvar & Renovar</span>

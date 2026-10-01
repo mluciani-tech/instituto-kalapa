@@ -4,8 +4,9 @@ const SESSION_DURATION = 24 * 60 * 60 * 1000;
 
 function getSecret(): string {
   const secret = process.env.SESSION_SECRET;
-  if (secret) return secret;
-  return process.env.ADMIN_PASSWORD || "";
+  if (secret) return secret.trim().replace(/^["']|["']$/g, "");
+  const fallback = process.env.ADMIN_PASSWORD || "";
+  return fallback.trim().replace(/^["']|["']$/g, "");
 }
 
 let cachedCredentialId: { value: string; expiresAt: number } | null = null;
@@ -29,7 +30,7 @@ export async function getAdminCredentialIdentifier(): Promise<string> {
         .maybeSingle();
 
       if (data?.valor) {
-        cachedCredentialId = { value: data.valor, expiresAt: now + 15000 };
+        cachedCredentialId = { value: data.valor, expiresAt: now + 30000 };
         return data.valor;
       }
     }
@@ -37,8 +38,10 @@ export async function getAdminCredentialIdentifier(): Promise<string> {
     console.warn("[auth] Falha ao consultar admin_password_hash no Supabase:", err);
   }
 
-  const fallback = process.env.ADMIN_PASSWORD || "";
-  cachedCredentialId = { value: fallback, expiresAt: now + 15000 };
+  const rawEnv = process.env.ADMIN_PASSWORD || "";
+  const fallback = rawEnv.trim().replace(/^["']|["']$/g, "");
+  // Não faz cache longo de falha transitória para tentar novamente em caso de oscilação
+  cachedCredentialId = { value: fallback, expiresAt: now + 2000 };
   return fallback;
 }
 

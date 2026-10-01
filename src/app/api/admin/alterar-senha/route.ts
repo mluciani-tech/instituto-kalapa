@@ -17,24 +17,27 @@ export async function POST(req: NextRequest) {
       req.headers.get("x-real-ip") ||
       "unknown";
 
-    if (!rateLimit(`admin-change-pass:${ip}`, 5, 15 * 60 * 1000)) {
+    // 15 tentativas a cada 15 minutos para evitar bloqueio acidental durante configuracao
+    if (!rateLimit(`admin-change-pass:${ip}`, 15, 15 * 60 * 1000)) {
       return NextResponse.json(
-        { error: "Muitas tentativas de alteração de senha. Tente novamente em 15 minutos." },
+        { error: "Muitas tentativas de alteração de senha. Aguarde alguns minutos antes de tentar novamente." },
         { status: 429 }
       );
     }
 
     const body = await req.json();
-    const { senhaAtual, novaSenha, confirmarNovaSenha } = body;
+    const senhaAtual = typeof body.senhaAtual === "string" ? body.senhaAtual : "";
+    const novaSenha = typeof body.novaSenha === "string" ? body.novaSenha : "";
+    const confirmarNovaSenha = typeof body.confirmarNovaSenha === "string" ? body.confirmarNovaSenha : "";
 
-    if (!senhaAtual || typeof senhaAtual !== "string") {
+    if (!senhaAtual.trim()) {
       return NextResponse.json(
         { error: "A senha atual é obrigatória." },
         { status: 400 }
       );
     }
 
-    if (!novaSenha || typeof novaSenha !== "string" || novaSenha.length < 8) {
+    if (!novaSenha.trim() || novaSenha.trim().length < 8) {
       return NextResponse.json(
         { error: "A nova senha deve ter no mínimo 8 caracteres." },
         { status: 400 }
@@ -43,12 +46,12 @@ export async function POST(req: NextRequest) {
 
     if (novaSenha !== confirmarNovaSenha) {
       return NextResponse.json(
-        { error: "A confirmação da nova senha não coincide." },
+        { error: "A confirmação da nova senha não coincide com a nova senha digitada." },
         { status: 400 }
       );
     }
 
-    if (senhaAtual === novaSenha) {
+    if (senhaAtual.trim() === novaSenha.trim()) {
       return NextResponse.json(
         { error: "A nova senha deve ser diferente da senha atual." },
         { status: 400 }
@@ -58,7 +61,7 @@ export async function POST(req: NextRequest) {
     const isCurrentValid = await verifyAdminPassword(senhaAtual);
     if (!isCurrentValid) {
       return NextResponse.json(
-        { error: "A senha atual informada está incorreta." },
+        { error: "A senha atual informada está incorreta. Verifique a credencial digitada." },
         { status: 400 }
       );
     }
@@ -84,10 +87,10 @@ export async function POST(req: NextRequest) {
     }
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error("[admin/alterar-senha] Erro ao alterar senha:", error);
     return NextResponse.json(
-      { error: "Erro interno ao atualizar a senha do administrador." },
+      { error: error?.message || "Erro interno ao atualizar a senha do administrador." },
       { status: 500 }
     );
   }

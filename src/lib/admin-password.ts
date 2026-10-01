@@ -3,7 +3,10 @@ import { hashPassword, verifyPassword } from "./cliente-auth";
 import crypto from "crypto";
 
 export async function verifyAdminPassword(password: string): Promise<boolean> {
-  if (!password) return false;
+  if (!password || typeof password !== "string") return false;
+
+  const rawInput = password;
+  const trimmedInput = password.trim();
 
   try {
     if (isAdminConfigured()) {
@@ -14,24 +17,48 @@ export async function verifyAdminPassword(password: string): Promise<boolean> {
         .maybeSingle();
 
       if (data?.valor) {
-        return verifyPassword(password, data.valor);
+        if (verifyPassword(rawInput, data.valor) || verifyPassword(trimmedInput, data.valor)) {
+          return true;
+        }
       }
     }
   } catch (err) {
     console.warn("[admin-password] Erro ao verificar hash de senha do admin:", err);
   }
 
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) return false;
+  // Fallback para ADMIN_PASSWORD da variável de ambiente
+  const rawEnv = process.env.ADMIN_PASSWORD;
+  if (!rawEnv) return false;
 
-  const bufA = Buffer.from(password);
-  const bufB = Buffer.from(adminPassword);
-  if (bufA.length !== bufB.length) return false;
-  return crypto.timingSafeEqual(bufA, bufB);
+  // Trata quotes adicionadas em Vercel ou arquivos .env ("minhasenha" ou 'minhasenha') e espaços
+  const cleanEnv = rawEnv.trim().replace(/^["']|["']$/g, "");
+
+  const safeCompare = (a: string, b: string) => {
+    try {
+      const bufA = Buffer.from(a);
+      const bufB = Buffer.from(b);
+      if (bufA.length !== bufB.length) return false;
+      return crypto.timingSafeEqual(bufA, bufB);
+    } catch {
+      return false;
+    }
+  };
+
+  if (
+    safeCompare(rawInput, rawEnv) ||
+    safeCompare(trimmedInput, cleanEnv) ||
+    safeCompare(trimmedInput, rawEnv) ||
+    safeCompare(rawInput, cleanEnv)
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 export async function setAdminPassword(newPassword: string): Promise<boolean> {
-  if (!newPassword || typeof newPassword !== "string" || newPassword.length < 8) {
+  const sanitized = newPassword?.trim();
+  if (!sanitized || sanitized.length < 8) {
     throw new Error("A nova senha deve ter no mínimo 8 caracteres.");
   }
 
@@ -39,7 +66,7 @@ export async function setAdminPassword(newPassword: string): Promise<boolean> {
     throw new Error("Banco de dados não configurado (SUPABASE_SERVICE_ROLE_KEY ausente).");
   }
 
-  const newHash = hashPassword(newPassword);
+  const newHash = hashPassword(sanitized);
 
   const { error } = await supabaseAdmin!
     .from("configuracoes")
@@ -53,7 +80,8 @@ export async function setAdminPassword(newPassword: string): Promise<boolean> {
     );
 
   if (error) {
-    throw error;
+    console.error("[admin-password] Erro ao salvar novo hash de senha no Supabase:", error);
+    throw new Error(`Falha ao gravar senha no banco de dados: ${error.message || "erro de conexão ou permissão"}`);
   }
 
   return true;
