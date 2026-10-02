@@ -23,6 +23,14 @@ import {
   AlertCircle,
   KeyRound,
   Share2,
+  Sparkles,
+  Printer,
+  Wind,
+  Flame,
+  Droplets,
+  Scale,
+  Utensils,
+  Coffee,
 } from "lucide-react";
 
 interface ManualSection {
@@ -72,24 +80,31 @@ export default function AdminManual() {
       summary: "Criação de cupons %, valor fixo ou 100% cortesia com baixa automática.",
     },
     {
+      id: "teste-yin-yang",
+      title: "6. Autoavaliação Yin/Yang & Relatório PDF",
+      icon: Sparkles,
+      summary: "Módulo de Medicina Tradicional Chinesa, captação de clientes, diagnóstico e emissão de laudo A4.",
+      badge: "Novo",
+    },
+    {
       id: "seguranca",
-      title: "6. Segurança & Recuperação de Senha",
+      title: "7. Segurança & Recuperação de Senha",
       icon: ShieldCheck,
       summary: "Autoatendimento de recuperação de senha, suporte manual no admin, SMTP Hostinger e credenciais.",
       badge: "Atualizado",
     },
     {
       id: "faq",
-      title: "7. Dúvidas Frequentes & Resolução",
+      title: "8. Dúvidas Frequentes & Resolução",
       icon: HelpCircle,
       summary: "Perguntas operacionais do dia a dia e procedimentos recomendados.",
     },
     {
       id: "changelog",
-      title: "8. Histórico & Versões do Sistema",
+      title: "9. Histórico & Versões do Sistema",
       icon: Zap,
       summary: "Registro de atualizações contínuas e notas de versão do projeto.",
-      badge: "v2.10",
+      badge: "v2.11",
     },
   ];
 
@@ -538,12 +553,128 @@ export default function AdminManual() {
             </div>
           )}
 
-          {/* SEÇÃO 6: SEGURANÇA & SENHA */}
+          {/* SEÇÃO 6: TESTE YIN/YANG & RELATÓRIO PDF */}
+          {activeSection === "teste-yin-yang" && (
+            <div className="bg-white rounded-2xl border border-brand-beige p-6 space-y-6">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-terracotta/15 text-xs font-semibold text-brand-terracotta mb-2">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Novo Módulo Clínico de Autoconhecimento</span>
+                </div>
+                <h2 className="text-lg font-bold text-brand-charcoal">
+                  6. Autoavaliação Energética Yin/Yang & Emissão de Relatório PDF
+                </h2>
+                <p className="text-xs text-brand-charcoal/70 mt-1">
+                  Ferramenta de engajamento baseada no Cânone do Imperador Amarelo (<em>Huangdi Neijing</em>) da Medicina Tradicional Chinesa (MTC), com diagnóstico personalizado, metrônomo respiratório e geração de laudo A4 para impressão.
+                </p>
+              </div>
+
+              {/* Card 1: Como Funciona o Teste */}
+              <div className="bg-brand-purple/5 border border-brand-purple/20 rounded-2xl p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-brand-purple text-white flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-brand-beige" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-brand-purple-deep">O Fluxo da Experiência do Usuário</h3>
+                    <p className="text-xs text-brand-charcoal/70">Captação ativa de cadastros e triagem diagnóstica terapêutica.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-brand-purple">1. Acesso na Home</span>
+                    <p className="text-brand-charcoal/70">O visitante clica no botão destacado <strong>&ldquo;Faça o seu teste&rdquo;</strong> (ao lado de Calendário na Hero) ou pelo link no menu superior.</p>
+                  </div>
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-brand-purple">2. Login Obrigatório</span>
+                    <p className="text-brand-charcoal/70">Para personalizar o laudo e armazenar o histórico, é exigido login ou cadastro rápido gratuito, com retorno automático.</p>
+                  </div>
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-brand-purple">3. 15 Perguntas MTC</span>
+                    <p className="text-brand-charcoal/70">O participante responde a 15 dimensões fisiológicas comparando tendências Yang (fogo/ação) e Yin (frescor/recolhimento).</p>
+                  </div>
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-brand-purple">4. Relatório em PDF</span>
+                    <p className="text-brand-charcoal/70">O sistema calcula o placar, entrega o diagnóstico detalhado e gera o documento A4 profissional para download ou impressão.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: As 3 Classificações Energéticas */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold text-brand-charcoal/60 uppercase tracking-wider">
+                  Os 3 Padrões Diagnósticos Gerados pelo Sistema
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="bg-orange-50/70 p-4 rounded-xl border border-orange-200 space-y-2">
+                    <div className="flex items-center gap-1.5 font-bold text-orange-900">
+                      <Flame className="w-4 h-4 text-orange-600" />
+                      <span>Predominância Yang (Calor/Fogo)</span>
+                    </div>
+                    <p className="text-orange-950/80 leading-relaxed">
+                      Sintomas de aceleração mental, calor corporal, agitação e insônia de início (dificuldade de adormecer). Requer resfriamento consciente, alimentos cozidos na água/vapor e chás drenantes (hortelã, camomila, erva-cidreira).
+                    </p>
+                  </div>
+
+                  <div className="bg-emerald-50/70 p-4 rounded-xl border border-emerald-200 space-y-2">
+                    <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                      <Droplets className="w-4 h-4 text-emerald-600" />
+                      <span>Predominância Yin (Frio/Recolhimento)</span>
+                    </div>
+                    <p className="text-emerald-950/80 leading-relaxed">
+                      Sensação frequente de frio, extremidades geladas, lentidão matinal e sono pesado com cansaço ao acordar. Requer tonificação do fogo vital com raízes, canela, gengibre, noz-moscada e preparos assados ou ensopados.
+                    </p>
+                  </div>
+
+                  <div className="bg-amber-50/70 p-4 rounded-xl border border-amber-200 space-y-2">
+                    <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                      <Scale className="w-4 h-4 text-amber-600" />
+                      <span>Equilíbrio Dinâmico</span>
+                    </div>
+                    <p className="text-amber-950/80 leading-relaxed">
+                      Harmonia entre repouso e ação. As orientações focam na manutenção dos ritmos diários conforme as quatro estações climáticas e preservação das reservas profundas de energia (*Jing*).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Recursos Inclusos na Página e no Relatório */}
+              <div className="bg-brand-beige-light/40 border border-brand-beige rounded-2xl p-5 space-y-3 text-xs">
+                <h3 className="text-sm font-bold text-brand-charcoal flex items-center gap-2">
+                  <Printer className="w-4 h-4 text-brand-terracotta" />
+                  <span>Conteúdos Clínicos Entregues ao Paciente</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-brand-charcoal/80">
+                  <ul className="space-y-1.5 list-disc list-inside">
+                    <li><strong>Impacto no Sono (Wei Qi):</strong> Explicação fisiológica clássica do Cânone de Medicina Chinesa sobre como a energia defensiva afeta a qualidade do descanso.</li>
+                    <li><strong>Sinais de Alerta:</strong> Prevenção de burnout, hiperacidez, enxaquecas ou fadiga crônica se o padrão não for compensado.</li>
+                    <li><strong>Dietoterapia Terapêutica:</strong> Alimentos indicados, especiarias medicinais e o que deve ser evitado ou moderado.</li>
+                  </ul>
+                  <ul className="space-y-1.5 list-disc list-inside">
+                    <li><strong>Fitoterapia & Chás:</strong> Prescrições com modo de preparo correto (infusão vs decocção) e melhores horários de ingestão.</li>
+                    <li><strong>Metrônomo Respiratório Interativo:</strong> Widget com animação expansiva em tela guiando a respiração terapêutica (4s/8s ou 4s/2s/4s).</li>
+                    <li><strong>Relatório Clínico Formatado (A4):</strong> Emissão com 1 clique com tabela de todas as 15 respostas e cabeçalho oficial do Instituto.</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Card 4: Conversão para Vivências e Consultas */}
+              <div className="border border-brand-mint/40 bg-brand-mint/10 rounded-xl p-4 text-xs space-y-1.5">
+                <p className="font-bold text-brand-mint">Funil de Conversão Terapêutica do Instituto</p>
+                <p className="text-brand-charcoal/80 leading-relaxed">
+                  O teste é uma excelente porta de entrada para novos alunos e pacientes. Ao concluir o teste, o usuário é convidado a participar das vivências semanais de grupo (quintas-feiras às 19:30) ou agendar uma consulta individual de Medicina Chinesa com as terapeutas do Instituto.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* SEÇÃO 7: SEGURANÇA & SENHA */}
           {activeSection === "seguranca" && (
             <div className="bg-white rounded-2xl border border-brand-beige p-6 space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-brand-charcoal">
-                  6. Segurança, Senha Mestra & Proteção de Dados
+                  7. Segurança, Senha Mestra & Proteção de Dados
                 </h2>
                 <p className="text-xs text-brand-charcoal/70 mt-1">
                   Gerenciamento da credencial administrativa, sessões seguras e diretrizes de proteção do sistema.
@@ -662,12 +793,12 @@ export default function AdminManual() {
             </div>
           )}
 
-          {/* SEÇÃO 7: FAQ */}
+          {/* SEÇÃO 8: FAQ */}
           {activeSection === "faq" && (
             <div className="bg-white rounded-2xl border border-brand-beige p-6 space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-brand-charcoal">
-                  7. Dúvidas Frequentes & Procedimentos Administrativos
+                  8. Dúvidas Frequentes & Procedimentos Administrativos
                 </h2>
                 <p className="text-xs text-brand-charcoal/70 mt-1">
                   Respostas rápidas para situações rotineiras de atendimento ao cliente e gestão de acesso.
@@ -676,6 +807,18 @@ export default function AdminManual() {
 
               <div className="space-y-3">
                 {[
+                  {
+                    q: "O que é o teste 'Faça o seu teste' na página inicial e como os clientes participam?",
+                    a: "É uma avaliação energética e clínica baseada na Medicina Tradicional Chinesa (MTC) e no Cânone do Imperador Amarelo. O cliente responde a 15 perguntas práticas e recebe um diagnóstico completo (Yang, Yin ou Equilíbrio), orientações de sono, alimentação, chás, metrônomo de respiração e emissão de laudo A4 em PDF. Para realizar o teste, o cliente deve estar cadastrado/logado na plataforma.",
+                  },
+                  {
+                    q: "Como o participante pode salvar ou imprimir o laudo em PDF do teste Yin/Yang?",
+                    a: "Na tela de resultado do teste, há o botão 'Visualizar & Imprimir Relatório em PDF'. O sistema abre um modal formatado com o cabeçalho oficial do INstituto Kalapa, dados do participante e data de emissão, acionando a impressão ou o salvamento direto em PDF pelo navegador.",
+                  },
+                  {
+                    q: "Como funciona a recuperação de senha quando o cliente esquece?",
+                    a: "O cliente pode solicitar autonomamente na tela de /login clicando em 'Esqueceu a senha?'. O sistema despacha um e-mail com token seguro de 1 hora via SMTP Hostinger. Alternativamente, o administrador pode entrar na aba 'Usuários', clicar em 'Resetar Senha' e enviar pelo WhatsApp ou e-mail com 1 clique.",
+                  },
                   {
                     q: "Como faço para alterar a senha do painel administrativo?",
                     a: "No rodapé do menu lateral à esquerda, clique no botão 'Alterar Senha'. Digite sua senha atual, escolha a nova senha (mínimo de 8 caracteres) e confirme. Ao salvar, sua sessão continua conectada e todos os outros computadores precisarão digitar a nova senha.",
@@ -721,29 +864,51 @@ export default function AdminManual() {
             </div>
           )}
 
-          {/* SEÇÃO 8: CHANGELOG & VERSÕES */}
+          {/* SEÇÃO 9: CHANGELOG & VERSÕES */}
           {activeSection === "changelog" && (
             <div className="bg-white rounded-2xl border border-brand-beige p-6 space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-brand-beige">
                 <div>
                   <h2 className="text-lg font-bold text-brand-charcoal">
-                    8. Versões do Sistema & Notas de Atualização
+                    9. Versões do Sistema & Notas de Atualização
                   </h2>
                   <p className="text-xs text-brand-charcoal/70 mt-1">
                     Mecanismo dinâmico de documentação: sempre que houver novas melhorias ou correções, este histórico é atualizado para manter a equipe informada.
                   </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-mono font-bold text-xs">
-                  Versão Atual: v2.10.0
+                  Versão Atual: v2.11.0
                 </div>
               </div>
 
               <div className="space-y-4">
-                {/* v2.10.0 */}
+                {/* v2.11.0 */}
                 <div className="relative pl-6 border-l-2 border-brand-purple space-y-1.5">
                   <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-purple" />
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-purple">v2.10.0</span>
+                    <span className="font-bold text-xs text-brand-purple">v2.11.0</span>
+                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-brand-charcoal">
+                    Módulo de Autoavaliação Yin/Yang (MTC) & Emissão de Relatório Clínico A4
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
+                    <li>Novo botão de ação rápida <strong>&ldquo;Faça o seu teste&rdquo;</strong> ao lado de Calendário na Hero da Home e no menu superior.</li>
+                    <li>Questionário clínico interativo com as 15 dimensões fisiológicas e comportamentais do Cânone do Imperador Amarelo (MTC).</li>
+                    <li>Exigência amigável de login ou cadastro prévio, ampliando a base de clientes do Instituto com redirecionamento automático.</li>
+                    <li>Diagnóstico trifásico (Predominância Yang, Predominância Yin e Equilíbrio) com prescrições de sono, dietoterapia e chás.</li>
+                    <li>Metrônomo visual interativo para guia de respiração terapêutica com tempos de expansão e ancoragem.</li>
+                    <li>Emissão com 1 clique de <strong>Relatório Clínico em PDF (formato A4)</strong> para consulta ou impressão pelo paciente.</li>
+                    <li>Fotografias editoriais em estilo zen contemporâneo geradas por inteligência artificial e harmonizadas com a paleta Kalapa.</li>
+                    <li>Suporte a e-mail multipart (HTML + Texto Puro) no módulo de recuperação de senha para máxima compatibilidade anti-spam.</li>
+                  </ul>
+                </div>
+
+                {/* v2.10.0 */}
+                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
+                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-brand-charcoal/70">v2.10.0</span>
                     <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">
