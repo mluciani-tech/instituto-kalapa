@@ -82,20 +82,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Verifica se já existe outro produto com o mesmo slug para evitar colisões
-  const { data: existingSlug } = await supabaseAdmin!
-    .from("produtos")
-    .select("id, nome")
-    .eq("slug", cleanSlug)
-    .maybeSingle();
-
-  if (existingSlug) {
-    return NextResponse.json(
-      { error: `O slug "${cleanSlug}" já está em uso pelo produto "${existingSlug.nome}". Escolha um slug único.` },
-      { status: 400 }
-    );
-  }
-
   const parseIntegerSafely = (val: unknown): number | null => {
     if (val === null || val === undefined || val === "") return null;
     if (typeof val === "number") return isNaN(val) ? null : Math.round(val);

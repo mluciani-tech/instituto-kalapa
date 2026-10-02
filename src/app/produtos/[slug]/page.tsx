@@ -11,9 +11,12 @@ interface PageProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-async function getProdutoBySlug(slug: string, idParam?: string): Promise<Produto | null> {
+async function getProdutoBySlug(
+  slug: string,
+  idParam?: string
+): Promise<{ produto: Produto | null; redirectCategoria?: string }> {
   if (!isAdminConfigured()) {
-    return null;
+    return { produto: null };
   }
 
   // 1. Se foi passado ID explícito via query param (?id=...)
@@ -25,7 +28,7 @@ async function getProdutoBySlug(slug: string, idParam?: string): Promise<Produto
       .eq("ativo", true)
       .maybeSingle();
 
-    if (byParamId) return byParamId;
+    if (byParamId) return { produto: byParamId };
   }
 
   // 2. Se o próprio slug da rota é um UUID de produto (ex: /produtos/e1928374-...)
@@ -39,32 +42,53 @@ async function getProdutoBySlug(slug: string, idParam?: string): Promise<Produto
       .eq("ativo", true)
       .maybeSingle();
 
-    if (byId) return byId;
+    if (byId) return { produto: byId };
   }
 
-  // 3. Busca por slug
-  const { data: bySlug } = await supabaseAdmin!
+  // 3. Termos ou categorias genéricas sempre redirecionam para o catálogo
+  const genericSlugs: Record<string, string> = {
+    vivencia: "vivencias",
+    vivencias: "vivencias",
+    atendimento: "atendimentos",
+    atendimentos: "atendimentos",
+    calendario: "calendario",
+    "terapia-adulto": "atendimentos",
+  };
+  const lowerSlug = slug.toLowerCase();
+  if (genericSlugs[lowerSlug]) {
+    return { produto: null, redirectCategoria: genericSlugs[lowerSlug] };
+  }
+
+  // 4. Busca todos os produtos ativos com este slug
+  const { data: bySlugList } = await supabaseAdmin!
     .from("produtos")
     .select("*")
     .eq("slug", slug)
     .eq("ativo", true)
-    .order("ordem", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+    .order("ordem", { ascending: true });
 
-  return bySlug || null;
+  if (bySlugList && bySlugList.length > 1) {
+    // Se múltiplos produtos ativos compartilham o mesmo slug, redireciona para a listagem para mostrar todos
+    return { produto: null, redirectCategoria: slug };
+  }
+
+  if (bySlugList && bySlugList.length === 1) {
+    return { produto: bySlugList[0] };
+  }
+
+  return { produto: null };
 }
 
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const resolvedSearchParams = (await searchParams) || {};
   const idParam = typeof resolvedSearchParams.id === "string" ? resolvedSearchParams.id : undefined;
-  const produto = await getProdutoBySlug(slug, idParam);
+  const { produto } = await getProdutoBySlug(slug, idParam);
 
   if (!produto) {
     return {
-      title: "Produto não encontrado — INstituto Kalapa",
-      description: "A vivência procurada não foi encontrada.",
+      title: "Produtos — INstituto Kalapa",
+      description: "Conheça nossas vivências e atendimentos terapêuticos.",
     };
   }
 
@@ -112,14 +136,13 @@ export default async function ProdutoDetailPage({ params, searchParams }: PagePr
   const { slug } = await params;
   const resolvedSearchParams = (await searchParams) || {};
   const idParam = typeof resolvedSearchParams.id === "string" ? resolvedSearchParams.id : undefined;
-  const produto = await getProdutoBySlug(slug, idParam);
+  const { produto, redirectCategoria } = await getProdutoBySlug(slug, idParam);
+
+  if (redirectCategoria) {
+    redirect(`/produtos?categoria=${redirectCategoria}`);
+  }
 
   if (!produto) {
-    // Se o slug for o nome de uma categoria ou termo genérico, redireciona para a listagem correspondente
-    if (slug === "vivencias" || slug === "vivencia" || slug === "atendimentos" || slug === "atendimento" || slug === "calendario") {
-      const cat = slug === "vivencia" ? "vivencias" : slug === "atendimento" ? "atendimentos" : slug;
-      redirect(`/produtos?categoria=${cat}`);
-    }
     notFound();
   }
 

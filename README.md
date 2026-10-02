@@ -45,11 +45,10 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
 - **Novo Menu Lateral (Sidebar):**
   - *Desktop:* Barra lateral fixa à esquerda com 9 abas organizadas, contadores dinâmicos, alertas pulsantes para novos agendamentos e rodapé integrado com atalho para catálogo e logout.
   - *Mobile:* Drawer deslizante acionado por botão hambúrguer com fechamento rápido ao toque no fundo escurecido.
-- **Gestão de Produtos & Governança de Slugs:**
+- **Gestão de Produtos:**
   - CRUD completo, upload de fotos no Supabase Storage, alternância entre turma de grupo ou atendimento individual, ajuste manual de vagas.
   - Geração automática de slug a partir do nome do produto (`slugify`).
-  - Prevenção ativa contra colisões com verificação de unicidade no frontend e backend (POST/PUT).
-  - Alerta visual `⚠️ Slug duplicado` para saneamento de produtos legados e sufixo aleatório único em clonagens.
+  - Total flexibilidade para produtos compartilharem categorias ou termos de slug sem restrições ou bloqueios no painel.
 - **Agenda & Atendimentos:**
   - Grade semanal de disponibilidade da terapeuta (turnos manhã e tarde, sessões de 50 min com intervalo).
   - Bloqueios de feriados e férias sem afetar a grade fixa.
