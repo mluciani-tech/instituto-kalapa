@@ -9,8 +9,6 @@ import {
   ArrowRight, 
   ShoppingBag, 
   Check, 
-  Share2, 
-  CheckCheck, 
   Sparkles,
   MessageCircle,
   ShieldCheck,
@@ -20,6 +18,7 @@ import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
 import ProductAppointmentSection from "@/components/agendamento/ProductAppointmentSection";
 import { isProdutoAgendamento } from "@/lib/agendamento";
+import ProductShareMenu from "@/app/components/ProductShareMenu";
 
 interface ProductDetailClientProps {
   produto: Produto;
@@ -29,7 +28,6 @@ interface ProductDetailClientProps {
 export default function ProductDetailClient({ produto, vagas }: ProductDetailClientProps) {
   const router = useRouter();
   const { addItem, clearCart, openDrawer } = useCart();
-  const [copiado, setCopiado] = useState(false);
 
   const isAgendamento = isProdutoAgendamento(produto);
 
@@ -55,35 +53,6 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
 
   const vagasEsgotadas = !isAgendamento && vagas && vagas.restantes <= 0;
   const vagasQuaseEsgotadas = !isAgendamento && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
-
-  const handleCompartilhar = async () => {
-    const shareUrl = window.location.href;
-    const shareData = {
-      title: `${produto.nome} — INstituto Kalapa`,
-      text: produto.descricao_curta || produto.descricao || `Conheça a vivência ${produto.nome} no INstituto Kalapa!`,
-      url: shareUrl,
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        return;
-      } catch (err: unknown) {
-        if (err instanceof Error && err.name === "AbortError") {
-          return;
-        }
-      }
-    }
-
-    // Fallback: copiar para área de transferência
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopiado(true);
-      setTimeout(() => setCopiado(false), 3000);
-    } catch {
-      // ignore
-    }
-  };
 
   const handleComprarAgora = () => {
     clearCart();
@@ -114,47 +83,39 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
           Voltar para todos os serviços
         </Link>
 
-        <button
-          onClick={handleCompartilhar}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-brand-charcoal/15 bg-white hover:bg-brand-purple/5 text-brand-charcoal hover:text-brand-purple text-xs font-semibold transition-all shadow-xs cursor-pointer"
-          title="Compartilhar vivência com um amigo"
-        >
-          {copiado ? (
-            <>
-              <CheckCheck className="w-4 h-4 text-brand-mint" />
-              <span className="text-brand-mint">Link copiado!</span>
-            </>
-          ) : (
-            <>
-              <Share2 className="w-4 h-4" />
-              <span>Compartilhar</span>
-            </>
-          )}
-        </button>
+        {/* Menu de Compartilhamento na barra superior */}
+        <ProductShareMenu produto={produto} variant="button" align="right" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Coluna Visual (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="relative aspect-4/3 w-full rounded-2xl overflow-hidden border border-[#B8965A]/30 shadow-lg bg-white">
-            {produto.imagem_url ? (
-              <Image
-                src={produto.imagem_url}
-                alt={produto.nome}
-                fill
-                priority
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-brand-purple/20 to-brand-terracotta/20 flex items-center justify-center">
-                <span className="text-6xl">✦</span>
-              </div>
-            )}
-            {produto.destaque && (
-              <div className="absolute top-4 left-4 px-3.5 py-1 rounded-full bg-brand-terracotta text-white text-xs font-bold tracking-wide shadow-md">
-                Destaque
-              </div>
-            )}
+          <div className="relative aspect-4/3 w-full rounded-2xl border border-[#B8965A]/30 shadow-lg bg-white">
+            <div className="relative w-full h-full rounded-2xl overflow-hidden">
+              {produto.imagem_url ? (
+                <Image
+                  src={produto.imagem_url}
+                  alt={produto.nome}
+                  fill
+                  priority
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-brand-purple/20 to-brand-terracotta/20 flex items-center justify-center">
+                  <span className="text-6xl">✦</span>
+                </div>
+              )}
+              {produto.destaque && (
+                <div className="absolute top-4 left-4 px-3.5 py-1 rounded-full bg-brand-terracotta text-white text-xs font-bold tracking-wide shadow-md">
+                  Destaque
+                </div>
+              )}
+            </div>
+
+            {/* Botão de Compartilhar circular no canto da foto */}
+            <div className="absolute top-4 right-4 z-20">
+              <ProductShareMenu produto={produto} variant="circle" align="right" />
+            </div>
           </div>
 
           {/* Dúvidas via WhatsApp */}

@@ -4,13 +4,15 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, ArrowRight, ShoppingBag, Share2, CheckCheck, Calendar } from "lucide-react";
+import { Check, ArrowRight, ShoppingBag, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
 import { isProdutoAgendamento } from "@/lib/agendamento";
 
 export type { Produto };
+
+import ProductShareMenu from "./ProductShareMenu";
 
 interface ProductCardProps {
   produto: Produto;
@@ -21,38 +23,6 @@ interface ProductCardProps {
 export default function ProductCard({ produto, index = 0, vagas }: ProductCardProps) {
   const router = useRouter();
   const { addItem, clearCart, openDrawer } = useCart();
-  const [copiado, setCopiado] = useState(false);
-
-  const handleCompartilhar = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const url = `${origin}/produtos/${produto.id}`;
-    const shareData = {
-      title: `${produto.nome} — INstituto Kalapa`,
-      text: produto.descricao_curta || produto.descricao || `Conheça a vivência ${produto.nome} no INstituto Kalapa!`,
-      url,
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        return;
-      } catch (err: unknown) {
-        if (err instanceof Error && err.name === "AbortError") {
-          return;
-        }
-      }
-    }
-
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopiado(true);
-      setTimeout(() => setCopiado(false), 2500);
-    } catch {
-      // fallback
-    }
-  };
 
   const isAgendamento = isProdutoAgendamento(produto);
 
@@ -123,23 +93,11 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                 Destaque
               </div>
             )}
+          </div>
 
-            {/* Botão de Compartilhar */}
-            <button
-              onClick={handleCompartilhar}
-              aria-label={`Compartilhar ${produto.nome}`}
-              title={copiado ? "Link copiado para a área de transferência!" : "Compartilhar com um amigo"}
-              className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 hover:bg-white text-brand-charcoal/80 hover:text-brand-purple shadow-sm transition-all duration-200 cursor-pointer flex items-center gap-1.5 backdrop-blur-xs"
-            >
-              {copiado ? (
-                <>
-                  <CheckCheck className="w-4 h-4 text-brand-mint" />
-                  <span className="text-[11px] font-bold text-brand-mint pr-1">Copiado!</span>
-                </>
-              ) : (
-                <Share2 className="w-4 h-4" />
-              )}
-            </button>
+          {/* Botão de Compartilhar com Popover */}
+          <div className="absolute top-3 right-3 z-30">
+            <ProductShareMenu produto={produto} variant="circle" />
           </div>
 
           {/* Conteúdo */}
