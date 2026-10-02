@@ -32,9 +32,10 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
 - **Recuperação Autônoma de Senha:**
   - Fluxo de autoatendimento no `/login` com token temporário de 1 hora via SMTP Hostinger corporativo.
   - Formato multipart (HTML + Texto Puro) garantindo alta entregabilidade sem bloqueio de spam.
-- **Catálogo Duplo:**
+- **Catálogo Duplo & Compartilhamento Social:**
   - *Vivências & Cursos (Em Grupo):* Controle de vagas máximas e preenchidas, badges dinâmicos de disponibilidade.
   - *Atendimentos Individuais:* Escolha prévia de data e horário na agenda antes do pagamento com reserva temporária (*Hold* de 15 min).
+  - *Compartilhamento Único & OpenGraph:* Links de compartilhamento individualizados por ID no WhatsApp, Web Share e cópia de link, garantindo prévias fiéis em redes sociais sem colisão de slugs legados.
 - **Checkout Seguro:**
   - Identificação de cliente, aplicação de cupons (%, valor fixo ou cortesia 100%).
   - Pix com QR Code dinâmico e Cartão de Crédito.
@@ -44,7 +45,11 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
 - **Novo Menu Lateral (Sidebar):**
   - *Desktop:* Barra lateral fixa à esquerda com 9 abas organizadas, contadores dinâmicos, alertas pulsantes para novos agendamentos e rodapé integrado com atalho para catálogo e logout.
   - *Mobile:* Drawer deslizante acionado por botão hambúrguer com fechamento rápido ao toque no fundo escurecido.
-- **Gestão de Produtos:** CRUD completo, upload de fotos no Supabase Storage, alternância entre turma de grupo ou atendimento individual, ajuste manual de vagas.
+- **Gestão de Produtos & Governança de Slugs:**
+  - CRUD completo, upload de fotos no Supabase Storage, alternância entre turma de grupo ou atendimento individual, ajuste manual de vagas.
+  - Geração automática de slug a partir do nome do produto (`slugify`).
+  - Prevenção ativa contra colisões com verificação de unicidade no frontend e backend (POST/PUT).
+  - Alerta visual `⚠️ Slug duplicado` para saneamento de produtos legados e sufixo aleatório único em clonagens.
 - **Agenda & Atendimentos:**
   - Grade semanal de disponibilidade da terapeuta (turnos manhã e tarde, sessões de 50 min com intervalo).
   - Bloqueios de feriados e férias sem afetar a grade fixa.
