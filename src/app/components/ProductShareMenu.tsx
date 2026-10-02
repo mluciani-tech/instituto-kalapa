@@ -151,7 +151,7 @@ export default function ProductShareMenu({
           }}
           aria-label={`Compartilhar ${produto.nome}`}
           title="Compartilhar produto"
-          className={`flex items-center justify-center w-9 h-9 rounded-full bg-black/60 hover:bg-black/85 text-white/90 hover:text-white border border-white/20 backdrop-blur-md shadow-md transition-all duration-200 cursor-pointer active:scale-95 ${className}`}
+          className={`flex items-center justify-center w-9 h-9 rounded-full bg-brand-purple-deep/80 hover:bg-brand-purple-deep text-brand-offwhite hover:text-white border border-[#B8965A]/40 hover:border-[#B8965A] backdrop-blur-md shadow-md transition-all duration-200 cursor-pointer active:scale-95 ${className}`}
         >
           <Share2 className="w-4 h-4" />
         </button>
@@ -172,39 +172,39 @@ export default function ProductShareMenu({
         </button>
       )}
 
-      {/* Popover Escuro Elegante */}
+      {/* Popover Escuro Alinhado à Paleta Kalapa (Deep Ocean, Terracotta/Gold & Mint) */}
       {isOpen && (
         <div
           role="dialog"
           aria-label="Opções de compartilhamento"
-          className={`absolute top-full mt-2 z-50 w-72 sm:w-80 rounded-2xl bg-[#141416]/95 backdrop-blur-xl border border-white/12 shadow-[0_12px_40px_rgba(0,0,0,0.65)] p-4 text-left transition-all animate-in fade-in zoom-in-95 duration-150 ${
+          className={`absolute top-full mt-2 z-50 w-72 sm:w-80 rounded-2xl bg-brand-purple-deep/95 backdrop-blur-xl border border-brand-terracotta/35 shadow-[0_12px_40px_rgba(13,30,40,0.7)] p-4 text-left transition-all animate-in fade-in zoom-in-95 duration-150 ${
             align === "right" ? "right-0" : "left-0"
           }`}
         >
-          {/* Cabeçalho */}
+          {/* Cabeçalho com Dourado/Terracota e Off-white da Marca */}
           <div className="mb-2">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 block">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-brand-terracotta block">
               COMPARTILHAR PRODUTO
             </span>
             <span
-              className="text-sm font-semibold text-white truncate block mt-0.5"
+              className="text-sm font-semibold text-brand-offwhite truncate block mt-0.5"
               title={produto.nome}
             >
               {produto.nome}
             </span>
           </div>
 
-          <div className="h-px bg-white/10 my-2.5" />
+          <div className="h-px bg-brand-terracotta/20 my-2.5" />
 
           {/* Lista de Opções */}
           <div className="space-y-1">
-            {/* Opção 1: WhatsApp */}
+            {/* Opção 1: WhatsApp (Verde Menta / Sage Kalapa) */}
             <button
               type="button"
               onClick={handleWhatsAppShare}
-              className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/8 transition-colors text-left group cursor-pointer"
+              className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/6 transition-colors text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-full bg-emerald-950/80 border border-emerald-800/40 text-[#25D366] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+              <div className="w-9 h-9 rounded-full bg-brand-mint/20 border border-brand-mint/45 text-brand-mint flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
                 {/* Ícone oficial do WhatsApp em SVG limpo */}
                 <svg
                   className="w-4.5 h-4.5 fill-current"
@@ -214,30 +214,30 @@ export default function ProductShareMenu({
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-semibold text-white block group-hover:text-emerald-400 transition-colors">
+                <span className="text-xs font-semibold text-brand-offwhite block group-hover:text-brand-mint transition-colors">
                   WhatsApp
                 </span>
-                <span className="text-[11px] text-zinc-400 leading-tight block truncate mt-0.5">
+                <span className="text-[11px] text-brand-purple-light/70 leading-tight block truncate mt-0.5">
                   Com foto, preço e especificações
                 </span>
               </div>
             </button>
 
-            {/* Opção 2: Copiar Link */}
+            {/* Opção 2: Copiar Link (Dourado / Terracota Kalapa e Verde Menta ao Copiar) */}
             <button
               type="button"
               onClick={handleCopyLink}
-              className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/8 transition-colors text-left group cursor-pointer"
+              className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/6 transition-colors text-left group cursor-pointer"
             >
               <div
                 className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all shadow-xs ${
                   copiado
-                    ? "bg-emerald-950/80 border border-emerald-800/40 text-emerald-400 scale-105"
-                    : "bg-purple-950/80 border border-purple-800/40 text-purple-300 group-hover:scale-105"
+                    ? "bg-brand-mint/30 border border-brand-mint/70 text-brand-mint scale-105"
+                    : "bg-brand-terracotta/20 border border-brand-terracotta/40 text-brand-terracotta group-hover:scale-105"
                 }`}
               >
                 {copiado ? (
-                  <Check className="w-4.5 h-4.5 text-emerald-400 animate-in zoom-in duration-150" />
+                  <Check className="w-4.5 h-4.5 text-brand-mint animate-in zoom-in duration-150" />
                 ) : (
                   <Link2 className="w-4.5 h-4.5" />
                 )}
@@ -246,13 +246,13 @@ export default function ProductShareMenu({
                 <span
                   className={`text-xs font-semibold block transition-colors ${
                     copiado
-                      ? "text-emerald-400"
-                      : "text-white group-hover:text-purple-300"
+                      ? "text-brand-mint"
+                      : "text-brand-offwhite group-hover:text-brand-terracotta"
                   }`}
                 >
                   {copiado ? "Link copiado!" : "Copiar link"}
                 </span>
-                <span className="text-[11px] text-zinc-400 leading-tight block truncate mt-0.5">
+                <span className="text-[11px] text-brand-purple-light/70 leading-tight block truncate mt-0.5">
                   {copiado
                     ? "Copiado para a área de transferência"
                     : "Link direto com identificador"}
@@ -260,20 +260,20 @@ export default function ProductShareMenu({
               </div>
             </button>
 
-            {/* Opção 3: Mais opções... */}
+            {/* Opção 3: Mais opções... (Tons Ocean e Meteorite da Marca) */}
             <button
               type="button"
               onClick={handleMoreOptions}
-              className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/8 transition-colors text-left group cursor-pointer"
+              className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/6 transition-colors text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-full bg-zinc-800/90 border border-zinc-700/50 text-zinc-200 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+              <div className="w-9 h-9 rounded-full bg-brand-meteorite/30 border border-brand-purple-light/25 text-brand-purple-light flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
                 <Share2 className="w-4.5 h-4.5" />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-semibold text-white block group-hover:text-zinc-200 transition-colors">
+                <span className="text-xs font-semibold text-brand-offwhite block group-hover:text-brand-purple-light transition-colors">
                   Mais opções...
                 </span>
-                <span className="text-[11px] text-zinc-400 leading-tight block truncate mt-0.5">
+                <span className="text-[11px] text-brand-purple-light/70 leading-tight block truncate mt-0.5">
                   Instagram, Telegram, e-mail
                 </span>
               </div>
