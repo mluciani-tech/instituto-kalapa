@@ -8,7 +8,7 @@ import type { Produto, VagasInfo } from "@/lib/types";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ id?: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 async function getProdutoBySlug(slug: string, idParam?: string): Promise<Produto | null> {
@@ -57,7 +57,8 @@ async function getProdutoBySlug(slug: string, idParam?: string): Promise<Produto
 
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const { id: idParam } = (await searchParams) || {};
+  const resolvedSearchParams = (await searchParams) || {};
+  const idParam = typeof resolvedSearchParams.id === "string" ? resolvedSearchParams.id : undefined;
   const produto = await getProdutoBySlug(slug, idParam);
 
   if (!produto) {
@@ -109,7 +110,8 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
 
 export default async function ProdutoDetailPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
-  const { id: idParam } = (await searchParams) || {};
+  const resolvedSearchParams = (await searchParams) || {};
+  const idParam = typeof resolvedSearchParams.id === "string" ? resolvedSearchParams.id : undefined;
   const produto = await getProdutoBySlug(slug, idParam);
 
   if (!produto) {

@@ -21,6 +21,7 @@ import {
   Smartphone,
   Lock,
   AlertCircle,
+  AlertTriangle,
   KeyRound,
   Share2,
   Sparkles,

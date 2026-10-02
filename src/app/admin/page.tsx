@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Fragment } from "react";
+import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
 import { Mail, Menu, Copy, Check, MessageCircle, ExternalLink, KeyRound, CheckCircle2 } from "lucide-react";
 import type { Produto, Pedido, Participante, Cupom, Usuario } from "@/lib/types";
 import { isProdutoAgendamento } from "@/lib/agendamento";
