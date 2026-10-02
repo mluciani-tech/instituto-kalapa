@@ -230,41 +230,48 @@ export async function sendPasswordResetEmail(params: {
   nome: string;
   email: string;
   resetLink: string;
-}): Promise<void> {
+}): Promise<{ success: boolean; error?: string }> {
   const { nome, email, resetLink } = params;
 
   const html = `
     <div style="${baseStyles}">
-      <div style="text-align: center; margin-bottom: 32px;">
-        <h1 style="color: #1A3C4D; font-size: 24px; margin: 0;">INstituto Kalapa</h1>
-        <p style="color: #7D8C6E; font-size: 14px; margin-top: 4px;">Recuperação de Senha</p>
+      <div style="text-align: center; margin-bottom: 28px;">
+        <h1 style="color: #1A3C4D; font-size: 24px; margin: 0; font-weight: 800; letter-spacing: -0.5px;">INstituto Kalapa</h1>
+        <p style="color: #7D8C6E; font-size: 14px; font-weight: 600; margin-top: 6px;">🔐 Recuperação de Senha</p>
       </div>
-      <div style="background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 16px;">
-        <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6; margin-top: 0;">
+      <div style="background: #ffffff; border-radius: 14px; padding: 26px; margin-bottom: 18px; border-left: 4px solid #B8965A; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        <p style="color: #1A3C4D; font-size: 15px; line-height: 1.6; margin-top: 0;">
           Olá, <strong>${nome}</strong>!
         </p>
-        <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6;">
-          Recebemos uma solicitação para redefinir a senha da sua conta no INstituto Kalapa.
+        <p style="color: #4A4A4A; font-size: 14px; line-height: 1.6;">
+          Recebemos uma solicitação para redefinir a senha de acesso da sua conta no INstituto Kalapa.
         </p>
-        <p style="color: #4A4A4A; font-size: 15px; line-height: 1.6;">
-          Para criar uma nova senha, clique no botão seguro abaixo. Este link expira em 1 hora:
-        </p>
-        <div style="text-align: center; margin: 28px 0;">
-          <a href="${resetLink}" style="background-color: #6D28D9; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; display: inline-block;">
-            Redefinir Minha Senha
-          </a>
+        <div style="background: #FDFBF7; border: 1px solid #EFE8DC; border-radius: 10px; padding: 14px; margin: 18px 0; text-align: center;">
+          <p style="color: #8C6D37; font-size: 13px; font-weight: 600; margin: 0 0 14px 0;">
+            ⏰ Este link é seguro e expira em 1 hora.
+          </p>
+          <div style="margin: 8px 0;">
+            <a href="${resetLink}" target="_blank" rel="noopener noreferrer" style="background-color: #B8965A; color: #ffffff; padding: 13px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; letter-spacing: 0.3px;">
+              Criar Nova Senha
+            </a>
+          </div>
         </div>
-        <p style="color: #888888; font-size: 13px; line-height: 1.5;">
-          Se você não solicitou a alteração da sua senha, desconsidere este e-mail com segurança. Sua senha atual permanecerá inalterada.
+        <p style="color: #7A7A7A; font-size: 12px; line-height: 1.5; margin-top: 18px;">
+          Caso o botão acima não abra, você também pode copiar e colar o endereço abaixo diretamente no seu navegador:<br/>
+          <a href="${resetLink}" style="color: #8C6D37; word-break: break-all; font-size: 11px;">${resetLink}</a>
+        </p>
+        <hr style="border: none; border-top: 1px solid #EAEAEA; margin: 18px 0;" />
+        <p style="color: #999999; font-size: 12px; line-height: 1.5; margin-bottom: 0;">
+          🛡️ Se você não solicitou a alteração de sua senha, desconsidere este e-mail com total segurança. Nenhuma alteração foi realizada na sua conta.
         </p>
       </div>
-      <p style="text-align: center; color: #7D8C6E; font-size: 12px; margin-top: 32px;">
-        INstituto Kalapa — Transformação Comportamental
+      <p style="text-align: center; color: #7D8C6E; font-size: 12px; margin-top: 24px;">
+        INstituto Kalapa — Transformação Comportamental & Autoconhecimento
       </p>
     </div>
   `;
 
-  await sendEmail(email, "Redefinição de Senha — INstituto Kalapa", html);
+  return await sendEmail(email, "🔐 Redefinição de Senha — INstituto Kalapa", html);
 }
 
 /** Notificação para o TERAPEUTA e/ou ADMIN: Novo agendamento confirmado */

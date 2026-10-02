@@ -73,10 +73,10 @@ export default function AdminManual() {
     },
     {
       id: "seguranca",
-      title: "6. Segurança & Senha do Painel",
+      title: "6. Segurança & Recuperação de Senha",
       icon: ShieldCheck,
-      summary: "Troca dinâmica de senha do Admin, proteção RLS, sessões seguras e boas práticas.",
-      badge: "Novo",
+      summary: "Autoatendimento de recuperação de senha, suporte manual no admin, SMTP Hostinger e credenciais.",
+      badge: "Atualizado",
     },
     {
       id: "faq",
@@ -89,7 +89,7 @@ export default function AdminManual() {
       title: "8. Histórico & Versões do Sistema",
       icon: Zap,
       summary: "Registro de atualizações contínuas e notas de versão do projeto.",
-      badge: "v2.9",
+      badge: "v2.10",
     },
   ];
 
@@ -582,6 +582,48 @@ export default function AdminManual() {
                 </div>
               </div>
 
+              {/* Card 2: Recuperação de Senha do Usuário */}
+              <div className="bg-brand-beige-light/40 border border-brand-beige rounded-2xl p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-brand-charcoal text-white flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-brand-beige" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-brand-charcoal">Recuperação de Senha de Clientes & Terapeutas</h3>
+                    <p className="text-xs text-brand-charcoal/70">Autoatendimento autônomo na loja e suporte multicanal no painel admin.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1.5">
+                    <span className="font-bold text-emerald-700 flex items-center gap-1.5">
+                      <span>⚡</span> 1. Autoatendimento Autônomo
+                    </span>
+                    <p className="text-brand-charcoal/70 leading-relaxed">
+                      O usuário cadastrado clica em <em>&ldquo;Esqueceu a senha?&rdquo;</em> na tela pública de <strong>/login</strong>. O sistema gera automaticamente um token de segurança de 1 hora e despacha o e-mail via servidor corporativo Hostinger. O cliente revalida seu acesso sozinho, sem depender da administração.
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1.5">
+                    <span className="font-bold text-brand-purple flex items-center gap-1.5">
+                      <span>🛠️</span> 2. Suporte Manual no Admin
+                    </span>
+                    <p className="text-brand-charcoal/70 leading-relaxed">
+                      Na aba <strong>Usuários</strong>, o administrador pode clicar em <em>&ldquo;Resetar Senha&rdquo;</em> em qualquer cliente. O modal permite disparar o e-mail oficial com 1 clique e disponibiliza o botão para copiar o link ou enviá-lo diretamente pelo WhatsApp com texto acolhedor.
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1.5">
+                    <span className="font-bold text-brand-terracotta flex items-center gap-1.5">
+                      <span>🔒</span> 3. SMTP Hostinger Compartilhado
+                    </span>
+                    <p className="text-brand-charcoal/70 leading-relaxed">
+                      As credenciais corporativas salvas na aba <strong>Agenda &rarr; Configurações</strong> (servidor <code>smtp.hostinger.com:465</code> SSL) são reutilizadas de forma unificada e segura para os e-mails de recuperação de senha e notificações de agendamentos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Card 2: Como funciona nos bastidores */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div className="bg-brand-beige-light/60 p-4 rounded-xl border border-brand-beige space-y-2">
@@ -692,16 +734,35 @@ export default function AdminManual() {
                   </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-mono font-bold text-xs">
-                  Versão Atual: v2.9.0
+                  Versão Atual: v2.10.0
                 </div>
               </div>
 
               <div className="space-y-4">
-                {/* v2.9.0 */}
+                {/* v2.10.0 */}
                 <div className="relative pl-6 border-l-2 border-brand-purple space-y-1.5">
                   <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-purple" />
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-purple">v2.9.0</span>
+                    <span className="font-bold text-xs text-brand-purple">v2.10.0</span>
+                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-brand-charcoal">
+                    Ativação do Módulo de Recuperação de Senha & Suporte Multicanal
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
+                    <li>Autoatendimento autônomo completo na tela pública de <strong>/login</strong> (modal com despacho instantâneo via SMTP Hostinger).</li>
+                    <li>Novo endpoint administrativo com geração de token seguro de 1 hora e despacho de e-mail institucional padronizado.</li>
+                    <li>Ação rápida na aba <strong>Usuários</strong> e no modal de detalhes com botão para cópia de link seguro e envio com 1 clique para WhatsApp.</li>
+                    <li>Reutilização integrada das credenciais SMTP corporativas da Hostinger salvas no banco de dados.</li>
+                    <li>Detecção dinâmica de domínio base para garantir que os links de redefinição funcionem em qualquer ambiente.</li>
+                  </ul>
+                </div>
+
+                {/* v2.9.0 */}
+                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
+                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-brand-charcoal/70">v2.9.0</span>
                     <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">

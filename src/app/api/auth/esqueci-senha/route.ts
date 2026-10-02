@@ -6,7 +6,16 @@ import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://instituto-kalapa.vercel.app";
+function getBaseUrl(req: NextRequest): string {
+  const origin = req.headers.get("origin");
+  if (origin && !origin.includes("null")) return origin;
+
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+  const proto = req.headers.get("x-forwarded-proto") || "https";
+  if (host) return `${proto}://${host}`;
+
+  return process.env.NEXT_PUBLIC_SITE_URL || "https://instituto-kalapa.vercel.app";
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,17 +73,22 @@ export async function POST(req: NextRequest) {
       })
       .eq("id", usuario.id);
 
-    const resetLink = `${SITE_URL}/redefinir-senha?token=${token}`;
+    const baseUrl = getBaseUrl(req);
+    const resetLink = `${baseUrl}/redefinir-senha?token=${token}`;
 
-    await sendPasswordResetEmail({
+    const emailRes = await sendPasswordResetEmail({
       nome: usuario.nome,
       email: usuario.email,
       resetLink,
     });
 
+    if (!emailRes.success) {
+      console.warn("[auth/esqueci-senha] Alerta: Falha no despacho via SMTP Hostinger:", emailRes.error);
+    }
+
     return NextResponse.json({
       success: true,
-      message: "Se o e-mail estiver cadastrado, você receberá o link de recuperação.",
+      message: "Se o e-mail estiver cadastrado, você receberá o link de recuperação em instantes.",
     });
   } catch (error) {
     console.error("[auth/esqueci-senha] Erro:", error);
