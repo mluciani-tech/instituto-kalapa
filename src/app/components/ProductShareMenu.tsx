@@ -54,7 +54,7 @@ export default function ProductShareMenu({
 
   const getShareUrl = () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    return `${origin}/produtos/${produto.slug || produto.id}`;
+    return `${origin}/produtos/${produto.id}`;
   };
 
   // 1. WhatsApp: chamada com link direto e convite acolhedor

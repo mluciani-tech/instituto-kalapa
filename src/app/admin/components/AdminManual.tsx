@@ -584,7 +584,7 @@ export default function AdminManual() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
                     <span className="font-bold text-brand-purple">1. Acesso na Home</span>
-                    <p className="text-brand-charcoal/70">O visitante clica no botão destacado <strong>&ldquo;Faça o seu teste&rdquo;</strong> (ao lado de Calendário na Hero) ou pelo link no menu superior.</p>
+                    <p className="text-brand-charcoal/70">O visitante clica no botão de destaque <strong>&ldquo;Faça o seu teste&rdquo;</strong> (posicionado ao lado de Calendário na Hero principal).</p>
                   </div>
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
                     <span className="font-bold text-brand-purple">2. Login Obrigatório</span>
@@ -601,12 +601,17 @@ export default function AdminManual() {
                 </div>
               </div>
 
-              {/* Card 2: As 3 Classificações Energéticas */}
+              {/* Card 2: Regra Antiempatia e Diagnósticos */}
               <div className="space-y-3">
-                <h3 className="text-xs font-bold text-brand-charcoal/60 uppercase tracking-wider">
-                  Os 3 Padrões Diagnósticos Gerados pelo Sistema
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-brand-charcoal/60 uppercase tracking-wider">
+                    Padrões Diagnósticos & Regra Estrita de Empate
+                  </h3>
+                  <span className="text-[11px] font-semibold text-brand-terracotta bg-brand-terracotta/10 px-2.5 py-0.5 rounded-full">
+                    Empates Bloqueados
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                   <div className="bg-orange-50/70 p-4 rounded-xl border border-orange-200 space-y-2">
                     <div className="flex items-center gap-1.5 font-bold text-orange-900">
                       <Flame className="w-4 h-4 text-orange-600" />
@@ -626,15 +631,12 @@ export default function AdminManual() {
                       Sensação frequente de frio, extremidades geladas, lentidão matinal e sono pesado com cansaço ao acordar. Requer tonificação do fogo vital com raízes, canela, gengibre, noz-moscada e preparos assados ou ensopados.
                     </p>
                   </div>
+                </div>
 
-                  <div className="bg-amber-50/70 p-4 rounded-xl border border-amber-200 space-y-2">
-                    <div className="flex items-center gap-1.5 font-bold text-amber-900">
-                      <Scale className="w-4 h-4 text-amber-600" />
-                      <span>Equilíbrio Dinâmico</span>
-                    </div>
-                    <p className="text-amber-950/80 leading-relaxed">
-                      Harmonia entre repouso e ação. As orientações focam na manutenção dos ritmos diários conforme as quatro estações climáticas e preservação das reservas profundas de energia (*Jing*).
-                    </p>
+                <div className="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200/80 text-xs text-amber-950/85 flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-amber-900 font-semibold">Tratamento de Empate Energético:</strong> Em caso de equivalência exata de pontuação entre Yang e Yin, o sistema bloqueia automaticamente a emissão de laudo e abre um modal informativo solicitando que o participante retome o teste do início, garantindo rigor e eficácia clínica.
                   </div>
                 </div>
               </div>

@@ -64,9 +64,34 @@ export async function POST(req: NextRequest) {
     duracao_minutos,
   } = body;
 
-  if (!slug || !nome) {
+  const cleanSlug = typeof slug === "string"
+    ? slug
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "")
+    : "";
+
+  if (!cleanSlug || !nome) {
     return NextResponse.json(
       { error: "slug e nome são obrigatórios" },
+      { status: 400 }
+    );
+  }
+
+  // Verifica se já existe outro produto com o mesmo slug para evitar colisões
+  const { data: existingSlug } = await supabaseAdmin!
+    .from("produtos")
+    .select("id, nome")
+    .eq("slug", cleanSlug)
+    .maybeSingle();
+
+  if (existingSlug) {
+    return NextResponse.json(
+      { error: `O slug "${cleanSlug}" já está em uso pelo produto "${existingSlug.nome}". Escolha um slug único.` },
       { status: 400 }
     );
   }
@@ -84,7 +109,7 @@ export async function POST(req: NextRequest) {
   const parsedDuracao = parseIntegerSafely(duracao_minutos);
 
   const insertPayload: Record<string, unknown> = {
-    slug,
+    slug: cleanSlug,
     nome,
     descricao: descricao || null,
     descricao_curta: descricao_curta || null,

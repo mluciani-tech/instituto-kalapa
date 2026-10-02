@@ -651,8 +651,33 @@ export default function AdminPage() {
       return;
     }
 
+    const cleanSlug = produtoForm.slug
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+
+    if (!cleanSlug) {
+      setError("O slug do produto é obrigatório.");
+      setSalvandoProduto(false);
+      return;
+    }
+
+    const duplicado = produtos.find(
+      (p) => p.slug?.toLowerCase().trim() === cleanSlug && p.id !== produtoEditando?.id && p.ativo
+    );
+    if (duplicado) {
+      setError(`O slug "${cleanSlug}" já está em uso pelo produto "${duplicado.nome}". Cada produto deve ter um slug único para garantir links de compartilhamento individuais.`);
+      setSalvandoProduto(false);
+      return;
+    }
+
     const payload = {
       ...produtoForm,
+      slug: cleanSlug,
       imagem_url: imagemUrl,
       vagas_maximas: parseVagas(produtoForm.vagas_maximas),
       vagas_ocupadas_manual: vagasOcupadasNum,
@@ -781,8 +806,10 @@ export default function AdminPage() {
   const handleClonarProduto = async (p: Produto) => {
     setSalvandoProduto(true);
     setProdutoSucesso("");
+    const baseSlug = (p.slug || "produto").replace(/-copia(-\d+)?$/, "");
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const payload = {
-      slug: p.slug,
+      slug: `${baseSlug}-copia-${randomSuffix}`,
       nome: `${p.nome} (Cópia)`,
       descricao: p.descricao || "",
       descricao_curta: p.descricao_curta || "",
@@ -1072,6 +1099,27 @@ export default function AdminPage() {
       </div>
     );
   }
+
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+
+  const slugsDuplicados = useMemo(() => {
+    const contagem: Record<string, number> = {};
+    for (const p of produtos) {
+      if (p.slug && p.ativo) {
+        const s = p.slug.toLowerCase().trim();
+        contagem[s] = (contagem[s] || 0) + 1;
+      }
+    }
+    return new Set(Object.keys(contagem).filter((k) => contagem[k] > 1));
+  }, [produtos]);
 
   // Listas filtradas e derivadas
   const produtosFiltrados = produtos.filter((p) => {
@@ -1642,19 +1690,40 @@ export default function AdminPage() {
                     <input
                       id="input-produto-nome"
                       value={produtoForm.nome}
-                      onChange={(e) => setProdutoForm({ ...produtoForm, nome: e.target.value })}
+                      onChange={(e) => {
+                        const novoNome = e.target.value;
+                        const novoSlug =
+                          !produtoEditando &&
+                          (!produtoForm.slug || produtoForm.slug === slugify(produtoForm.nome))
+                            ? slugify(novoNome)
+                            : produtoForm.slug;
+                        setProdutoForm({ ...produtoForm, nome: novoNome, slug: novoSlug });
+                      }}
                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
                       placeholder="Ex: Grupo de Autoconhecimento"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Slug *</label>
-<input
-                       value={produtoForm.slug}
-                       onChange={(e) => setProdutoForm({ ...produtoForm, slug: e.target.value })}
-                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
-                       placeholder="grupo-autoconhecimento"
-                     />
+                    <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">
+                      Slug * <span className="text-brand-charcoal/40 font-normal">(identificador único na URL)</span>
+                    </label>
+                    <input
+                      value={produtoForm.slug}
+                      onChange={(e) => setProdutoForm({ ...produtoForm, slug: e.target.value })}
+                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30 font-mono text-xs"
+                      placeholder="grupo-autoconhecimento"
+                    />
+                    {produtoForm.slug &&
+                      produtos.some(
+                        (p) =>
+                          p.slug?.toLowerCase().trim() === produtoForm.slug.toLowerCase().trim() &&
+                          p.id !== produtoEditando?.id &&
+                          p.ativo
+                      ) && (
+                        <p className="text-[11px] text-red-600 mt-1 font-medium">
+                          ⚠️ Este slug já está em uso por outro produto ativo. Use um slug único (ex: {slugify(produtoForm.nome || "vivencia")}-1).
+                        </p>
+                      )}
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Preço (R$)</label>
@@ -1927,6 +1996,19 @@ export default function AdminPage() {
               </div>
             )}
 
+            {/* Alerta de slugs duplicados */}
+            {slugsDuplicados.size > 0 && (
+              <div className="mb-4 p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2.5">
+                <span className="text-base leading-none">⚠️</span>
+                <div>
+                  <strong>Atenção: Há produtos compartilhando o mesmo slug ({Array.from(slugsDuplicados).join(", ")}).</strong>
+                  <p className="mt-0.5 text-amber-800">
+                    Recomendamos clicar em <strong>Editar</strong> e definir um slug exclusivo para cada um (ex: vivencia-renascimento, vivencia-constelacao). Assim, cada vivência terá seu próprio link exclusivo de acesso e compartilhamento.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Lista de produtos */}
             {produtos.length === 0 ? (
               <div className="bg-white rounded-xl border border-brand-beige p-8 text-center text-brand-charcoal/40 text-sm">
@@ -1945,6 +2027,14 @@ export default function AdminPage() {
                         <span className="font-medium text-brand-charcoal text-sm">{p.nome}</span>
                         {!p.ativo && <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded">Inativo</span>}
                         {p.destaque && <span className="text-xs bg-brand-terracotta/10 text-brand-terracotta px-1.5 py-0.5 rounded">Destaque</span>}
+                        {p.slug && slugsDuplicados.has(p.slug.toLowerCase().trim()) && (
+                          <span
+                            className="text-xs bg-red-100 text-red-700 border border-red-300 px-1.5 py-0.5 rounded font-medium inline-flex items-center gap-1"
+                            title="Outros produtos ativos possuem este mesmo slug. Edite para um slug único para evitar conflito de links."
+                          >
+                            ⚠️ Slug duplicado ({p.slug})
+                          </span>
+                        )}
                         {(p.atendimento_individual || isProdutoAgendamento(p)) && (
                           <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
                             🗓️ Atendimento ({formatDuracao(p.duracao_minutos)})

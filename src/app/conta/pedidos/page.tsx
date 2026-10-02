@@ -413,7 +413,7 @@ export default function MeusPedidosPage() {
                   Você ainda não possui atendimentos individuais marcados. Escolha uma data e horário disponível com a facilitadora.
                 </p>
                 <Link
-                  href="/produtos/atendimentos"
+                  href="/produtos?categoria=atendimentos"
                   className="inline-block px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-brand-terracotta/20 cursor-pointer"
                 >
                   Agendar Atendimento

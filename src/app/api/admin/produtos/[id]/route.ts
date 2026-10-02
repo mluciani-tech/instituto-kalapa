@@ -110,6 +110,20 @@ export async function PUT(
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
+
+    const { data: existingSlug } = await supabaseAdmin!
+      .from("produtos")
+      .select("id, nome")
+      .eq("slug", updates.slug)
+      .neq("id", id)
+      .maybeSingle();
+
+    if (existingSlug) {
+      return NextResponse.json(
+        { error: `O slug "${updates.slug}" já está em uso pelo produto "${existingSlug.nome}". Escolha um slug único.` },
+        { status: 400 }
+      );
+    }
   }
 
   updates.updated_at = new Date().toISOString();

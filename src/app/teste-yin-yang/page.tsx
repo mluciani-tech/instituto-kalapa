@@ -50,6 +50,9 @@ export default function TesteYinYangPage() {
   // Modal do relatório PDF
   const [modalRelatorioAberto, setModalRelatorioAberto] = useState(false);
 
+  // Modal de aviso de empate no teste
+  const [modalEmpateAberto, setModalEmpateAberto] = useState(false);
+
   // Exercício respiratório interativo
   const [respiracaoAtiva, setRespiracaoAtiva] = useState(false);
   const [faseRespiracao, setFaseRespiracao] = useState<"inspira" | "retem" | "expira">("inspira");
@@ -81,16 +84,23 @@ export default function TesteYinYangPage() {
   const pontosYang = Object.values(respostas).filter((r) => r === "yang").length;
   const pontosYin = Object.values(respostas).filter((r) => r === "yin").length;
 
-  let tipoResultado: "yang" | "yin" | "equilibrio" = "equilibrio";
+  // O diagnóstico final é estritamente Yang ou Yin (empates são bloqueados com obrigatoriedade de refazer o teste)
+  let tipoResultado: "yang" | "yin" = "yang";
   if (pontosYang > pontosYin) {
     tipoResultado = "yang";
   } else if (pontosYin > pontosYang) {
     tipoResultado = "yin";
-  } else {
-    tipoResultado = "equilibrio";
   }
 
   const resultadoAtual: ResultadoInfo = RESULTADOS_MAP[tipoResultado];
+
+  // Caso esteja em resultado mas haja empate, redireciona para o teste e abre o aviso
+  useEffect(() => {
+    if (etapa === "resultado" && totalRespondidas > 0 && pontosYang === pontosYin) {
+      setEtapa("teste");
+      setModalEmpateAberto(true);
+    }
+  }, [etapa, totalRespondidas, pontosYang, pontosYin]);
 
   // Resposta selecionada na pergunta atual
   const perguntaAtual: YinYangQuestion = YIN_YANG_PERGUNTAS[perguntaAtualIndex];
@@ -111,8 +121,22 @@ export default function TesteYinYangPage() {
   };
 
   const handleConcluirTeste = () => {
+    // Validação estrita: Não é permitido empate no resultado
+    if (pontosYang === pontosYin) {
+      setModalEmpateAberto(true);
+      return;
+    }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
     setEtapa("resultado");
+  };
+
+  const handleRefazerPorEmpate = () => {
+    setModalEmpateAberto(false);
+    setRespostas({});
+    setPerguntaAtualIndex(0);
+    setEtapa("teste");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleReiniciarTeste = () => {
@@ -971,6 +995,51 @@ export default function TesteYinYangPage() {
         respostas={respostas}
         resultado={resultadoAtual}
       />
+
+      {/* Modal Acolhedor de Aviso de Empate */}
+      {modalEmpateAberto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-[#E8DEC8] text-center my-auto">
+            <div className="w-16 h-16 rounded-full bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center mx-auto mb-5 border border-[#B8965A]/30 shadow-xs">
+              <Scale className="w-8 h-8" />
+            </div>
+
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#B8965A]/15 text-[#B8965A] mb-3">
+              <AlertTriangle className="w-3.5 h-3.5" /> Empate Energético Detectado
+            </span>
+
+            <h3 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mb-3">
+              Equivalência Entre Yin e Yang
+            </h3>
+
+            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-[#F8F4ED] border border-[#E8DEC8] text-xs font-semibold text-[#1A3C4D]/80 mb-5">
+              <span className="text-orange-700">🔥 Yang: {pontosYang}</span>
+              <span className="text-[#B8965A]">•</span>
+              <span className="text-emerald-700">🌊 Yin: {pontosYin}</span>
+            </div>
+
+            <p className="text-sm text-[#1A3C4D]/80 font-light leading-relaxed mb-4">
+              Suas respostas resultaram em uma pontuação <strong>exatamente igual</strong> entre as
+              energias Yang e Yin.
+            </p>
+
+            <p className="text-xs sm:text-sm text-[#1A3C4D]/75 font-light leading-relaxed mb-6 bg-[#FDFBF7] p-4 rounded-xl border border-[#E8DEC8]/80 text-left">
+              Para determinarmos com precisão sua <strong>tendência clínica predominante</strong> e
+              gerarmos seu laudo personalizado (com recomendações específicas de sono, dietoterapia e fitoterapia),
+              <strong> não é permitido empate na avaliação</strong>.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleRefazerPorEmpate}
+              className="w-full py-3.5 px-6 rounded-xl bg-[#1A3C4D] hover:bg-[#15313F] text-white text-sm font-medium transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Retomar Avaliação do Início</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </main>
