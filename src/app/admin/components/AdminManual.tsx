@@ -663,10 +663,13 @@ export default function AdminManual() {
               </div>
 
               {/* Card 4: Conversão para Vivências e Consultas */}
-              <div className="border border-brand-mint/40 bg-brand-mint/10 rounded-xl p-4 text-xs space-y-1.5">
-                <p className="font-bold text-brand-mint">Funil de Conversão Terapêutica do Instituto</p>
+              <div className="border border-brand-mint/40 bg-brand-mint/10 rounded-xl p-4 text-xs space-y-2">
+                <p className="font-bold text-brand-mint">Funil de Conversão Terapêutica & Gestão de Leads no Admin</p>
                 <p className="text-brand-charcoal/80 leading-relaxed">
                   O teste é uma excelente porta de entrada para novos alunos e pacientes. Ao concluir o teste, o usuário é convidado a participar das vivências semanais de grupo (quintas-feiras às 19:30) ou agendar uma consulta individual de Medicina Chinesa com as terapeutas do Instituto.
+                </p>
+                <p className="text-brand-charcoal/80 leading-relaxed pt-1 border-t border-brand-mint/20">
+                  <strong>Aba &ldquo;Avaliações Yin/Yang&rdquo; no Painel Admin:</strong> Todos os testes finalizados são capturados automaticamente com contador em tempo real no menu lateral. O painel disponibiliza métricas gerenciais (Total, % Yang, % Yin), tabela de participantes com link de 1 clique para WhatsApp com mensagem acolhedora pré-formatada, consulta às respostas das 15 perguntas e botão para exportação em planilha CSV.
                 </p>
               </div>
             </div>

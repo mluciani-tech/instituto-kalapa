@@ -10,6 +10,7 @@ import AdminToastNotification from "./components/AdminToastNotification";
 import AdminManual from "./components/AdminManual";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminAlterarSenhaModal from "./components/AdminAlterarSenhaModal";
+import AdminAvaliacoesYinYang from "./components/AdminAvaliacoesYinYang";
 import { FOTO_FACILITADORA_PADRAO } from "@/lib/config";
 
 type Paginated<T> = {
@@ -20,7 +21,27 @@ type Paginated<T> = {
   totalPages: number;
 };
 
-type Tab = "dashboard" | "sobre" | "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios" | "agendamentos" | "manual";
+type Tab =
+  | "dashboard"
+  | "sobre"
+  | "produtos"
+  | "pedidos"
+  | "participantes"
+  | "cupons"
+  | "usuarios"
+  | "agendamentos"
+  | "avaliacoes"
+  | "manual";
+
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 
 const FAQ_PADRAO_ADMIN = [
   {
@@ -179,6 +200,17 @@ export default function AdminPage() {
   const [produtosStatusFiltro, setProdutosStatusFiltro] = useState<"todos" | "ativos" | "inativos">("todos");
   const [produtosSearch, setProdutosSearch] = useState("");
 
+  const slugsDuplicados = useMemo(() => {
+    const contagem: Record<string, number> = {};
+    for (const p of produtos) {
+      if (p.slug && p.ativo) {
+        const s = p.slug.toLowerCase().trim();
+        contagem[s] = (contagem[s] || 0) + 1;
+      }
+    }
+    return new Set(Object.keys(contagem).filter((k) => contagem[k] > 1));
+  }, [produtos]);
+
   // Pedidos
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [pedidosPage, setPedidosPage] = useState(1);
@@ -264,6 +296,38 @@ export default function AdminPage() {
   const [copiadoLinkAdmin, setCopiadoLinkAdmin] = useState(false);
   const [usuarioParaExcluir, setUsuarioParaExcluir] = useState<Usuario | null>(null);
   const [excluindoUsuario, setExcluindoUsuario] = useState(false);
+
+  // Avaliações Yin/Yang & Agendamentos (Contadores do Sidebar)
+  const [avaliacoesTotal, setAvaliacoesTotal] = useState(0);
+  const [agendamentosTotal, setAgendamentosTotal] = useState(0);
+
+  const fetchAvaliacoesTotal = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/avaliacoes-yin-yang?perPage=1");
+      if (res.ok) {
+        const json = await res.json();
+        setAvaliacoesTotal(json.totalGeral ?? json.total ?? 0);
+      }
+    } catch {
+      // Ignora silenciosamente
+    }
+  }, []);
+
+  const fetchAgendamentosTotal = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/agendamentos");
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json)) {
+          setAgendamentosTotal(json.length);
+        } else if (json && json.data && Array.isArray(json.data)) {
+          setAgendamentosTotal(json.total ?? json.data.length);
+        }
+      }
+    } catch {
+      // Ignora silenciosamente
+    }
+  }, []);
 
   const checkAuth = useCallback(async () => {
     const res = await fetch("/api/admin/verify");
@@ -558,9 +622,18 @@ export default function AdminPage() {
   useEffect(() => { checkAuth(); }, [checkAuth]);
   useEffect(() => {
     if (authed) {
-      void Promise.all([fetchConfig(), fetchProdutos(), fetchPedidos(), fetchParticipantes(), fetchCupons(), fetchUsuarios()]);
+      void Promise.all([
+        fetchConfig(),
+        fetchProdutos(),
+        fetchPedidos(),
+        fetchParticipantes(),
+        fetchCupons(),
+        fetchUsuarios(),
+        fetchAvaliacoesTotal(),
+        fetchAgendamentosTotal(),
+      ]);
     }
-  }, [authed, fetchPedidos, fetchParticipantes, fetchCupons, fetchUsuarios]);
+  }, [authed, fetchPedidos, fetchParticipantes, fetchCupons, fetchUsuarios, fetchAvaliacoesTotal, fetchAgendamentosTotal]);
 
 
   // Auth handlers
@@ -576,7 +649,16 @@ export default function AdminPage() {
     if (res.ok) {
       setAuthed(true);
       setPassword("");
-      await Promise.all([fetchConfig(), fetchProdutos(), fetchPedidos(), fetchParticipantes()]);
+      await Promise.all([
+        fetchConfig(),
+        fetchProdutos(),
+        fetchPedidos(),
+        fetchParticipantes(),
+        fetchCupons(),
+        fetchUsuarios(),
+        fetchAvaliacoesTotal(),
+        fetchAgendamentosTotal(),
+      ]);
     } else {
       const data = await res.json();
       setLoginError(data.error || "Senha inválida");
@@ -1100,27 +1182,6 @@ export default function AdminPage() {
     );
   }
 
-  const slugify = (text: string) =>
-    text
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
-
-  const slugsDuplicados = useMemo(() => {
-    const contagem: Record<string, number> = {};
-    for (const p of produtos) {
-      if (p.slug && p.ativo) {
-        const s = p.slug.toLowerCase().trim();
-        contagem[s] = (contagem[s] || 0) + 1;
-      }
-    }
-    return new Set(Object.keys(contagem).filter((k) => contagem[k] > 1));
-  }, [produtos]);
-
   // Listas filtradas e derivadas
   const produtosFiltrados = produtos.filter((p) => {
     if (produtosStatusFiltro === "ativos" && !p.ativo) return false;
@@ -1153,7 +1214,8 @@ export default function AdminPage() {
     { id: "produtos", label: "Produtos", count: produtos.length },
     { id: "pedidos", label: "Pedidos", count: pedidosTotal || pedidos.length },
     { id: "participantes", label: "Inscrições", count: participantesTotal || participantes.length },
-    { id: "agendamentos", label: "🗓️ Agenda & Atendimentos", count: newAppointmentsCount > 0 ? newAppointmentsCount : undefined, highlight: newAppointmentsCount > 0 },
+    { id: "agendamentos", label: "🗓️ Agenda & Atendimentos", count: agendamentosTotal, highlight: newAppointmentsCount > 0 },
+    { id: "avaliacoes", label: "Avaliações Yin/Yang", count: avaliacoesTotal },
     { id: "cupons", label: "Cupons", count: cupons.length },
     { id: "usuarios", label: "Usuários", count: usuariosTotal },
     { id: "manual", label: "📖 Manual do Sistema" },
@@ -1167,7 +1229,13 @@ export default function AdminPage() {
         tabs={tabs}
         onTabChange={(tab) => {
           setActiveTab(tab);
-          if (tab === "agendamentos") setNewAppointmentsCount(0);
+          if (tab === "agendamentos") {
+            setNewAppointmentsCount(0);
+            void fetchAgendamentosTotal();
+          }
+          if (tab === "avaliacoes") {
+            void fetchAvaliacoesTotal();
+          }
         }}
         onLogout={handleLogout}
         onOpenAlterarSenha={() => setModalSenhaOpen(true)}
@@ -3077,6 +3145,8 @@ export default function AdminPage() {
         )}
         {/* Tab: Agenda & Atendimentos */}
         {activeTab === "agendamentos" && <AdminAgenda />}
+        {/* Tab: Avaliações Yin/Yang */}
+        {activeTab === "avaliacoes" && <AdminAvaliacoesYinYang />}
         {/* Tab: Manual do Sistema */}
         {activeTab === "manual" && <AdminManual />}
       </main>

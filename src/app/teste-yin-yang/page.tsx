@@ -127,6 +127,27 @@ export default function TesteYinYangPage() {
       return;
     }
 
+    // Persiste a avaliação no banco de dados e captura o lead para o admin
+    if (usuario) {
+      try {
+        fetch("/api/teste-yin-yang", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            usuario_id: usuario.id,
+            nome: usuario.nome,
+            email: usuario.email,
+            tipo_resultado: tipoResultado,
+            pontos_yang: pontosYang,
+            pontos_yin: pontosYin,
+            respostas,
+          }),
+        }).catch((err) => console.warn("Falha assíncrona ao registrar avaliação:", err));
+      } catch (err) {
+        console.warn("Erro ao despachar avaliação:", err);
+      }
+    }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
     setEtapa("resultado");
   };

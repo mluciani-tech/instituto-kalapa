@@ -14,6 +14,7 @@ import {
   ExternalLink,
   LogOut,
   KeyRound,
+  Sparkles,
 } from "lucide-react";
 
 type Tab =
@@ -25,6 +26,7 @@ type Tab =
   | "cupons"
   | "usuarios"
   | "agendamentos"
+  | "avaliacoes"
   | "manual";
 
 interface TabItem {
@@ -51,6 +53,7 @@ const TAB_ICONS: Record<Tab, React.ElementType> = {
   pedidos: Receipt,
   participantes: Users,
   agendamentos: CalendarDays,
+  avaliacoes: Sparkles,
   cupons: Ticket,
   usuarios: UserCog,
   manual: BookOpen,
@@ -63,6 +66,7 @@ const TAB_LABELS: Record<Tab, string> = {
   pedidos: "Pedidos",
   participantes: "Inscrições",
   agendamentos: "Agenda & Atendimentos",
+  avaliacoes: "Avaliações Yin/Yang",
   cupons: "Cupons",
   usuarios: "Usuários",
   manual: "Manual do Sistema",

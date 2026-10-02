@@ -227,3 +227,17 @@ export interface AppointmentLog {
   created_at: string;
 }
 
+export interface AvaliacaoYinYang {
+  id: string;
+  usuario_id?: string | null;
+  nome: string;
+  email: string;
+  telefone?: string | null;
+  tipo_resultado: "yang" | "yin";
+  pontos_yang: number;
+  pontos_yin: number;
+  respostas: Record<number, "yang" | "yin">;
+  created_at: string;
+  updated_at?: string;
+}
+
