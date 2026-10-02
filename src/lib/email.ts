@@ -67,7 +67,35 @@ export async function getSmtpConfig(): Promise<SmtpConfig | null> {
   return null;
 }
 
-async function sendEmail(to: string, subject: string, html: string): Promise<{ success: boolean; error?: string }> {
+function htmlToText(html: string): string {
+  return html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\n\s*\n\s*\n/g, "\n\n")
+    .trim();
+}
+
+interface SendEmailOptions {
+  fromName?: string;
+  text?: string;
+}
+
+async function sendEmail(
+  to: string,
+  subject: string,
+  html: string,
+  options?: SendEmailOptions
+): Promise<{ success: boolean; error?: string }> {
+  const textContent = options?.text || htmlToText(html);
+
   // A. Prioridade 1: SMTP da Hostinger
   const smtp = await getSmtpConfig();
   if (smtp) {
@@ -81,18 +109,27 @@ async function sendEmail(to: string, subject: string, html: string): Promise<{ s
           user: smtp.user,
           pass: smtp.pass,
         },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
         tls: {
           // Permite conexões seguras sem bloqueios
           rejectUnauthorized: false,
         },
       });
 
-      const sender = `"${smtp.fromName || 'INstituto Kalapa'}" <${smtp.user}>`;
+      const fromName = options?.fromName || smtp.fromName || "Instituto Kalapa";
+      const sender = `"${fromName}" <${smtp.user}>`;
+
       await transporter.sendMail({
         from: sender,
         to,
         subject,
+        text: textContent,
         html,
+        headers: {
+          "X-Entity-Ref-ID": `${Date.now()}`,
+        },
       });
 
       console.log(`[email] E-mail enviado com sucesso via SMTP Hostinger para: ${to}`);
@@ -111,10 +148,12 @@ async function sendEmail(to: string, subject: string, html: string): Promise<{ s
     try {
       const { Resend } = await import("resend");
       const resend = new Resend(apiKey);
+      const fromName = options?.fromName || "Instituto Kalapa";
       const { error } = await resend.emails.send({
-        from: `INstituto Kalapa <${EMAIL_FROM}>`,
+        from: `${fromName} <${EMAIL_FROM}>`,
         to: [to],
         subject,
+        text: textContent,
         html,
       });
       if (error) {
@@ -134,7 +173,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<{ s
   console.log(`Para: ${to}`);
   console.log(`Assunto: ${subject}`);
   console.log("=========================================");
-  return { success: true };
+  return { success: false, error: "Servidor de e-mail SMTP da Hostinger não configurado no sistema." };
 }
 
 const baseStyles = `
@@ -233,11 +272,13 @@ export async function sendPasswordResetEmail(params: {
 }): Promise<{ success: boolean; error?: string }> {
   const { nome, email, resetLink } = params;
 
+  const text = `Olá, ${nome}!\n\nRecebemos uma solicitação para redefinir a senha de acesso da sua conta no Instituto Kalapa.\n\nPara criar uma nova senha, utilize o link seguro abaixo (válido por 1 hora):\n${resetLink}\n\nCaso o link acima não abra, copie e cole o endereço no seu navegador.\n\nSe você não solicitou a alteração de sua senha, desconsidere este e-mail com total segurança. Nenhuma alteração foi realizada na sua conta.\n\nInstituto Kalapa — Transformação Comportamental & Autoconhecimento`;
+
   const html = `
     <div style="${baseStyles}">
       <div style="text-align: center; margin-bottom: 28px;">
         <h1 style="color: #1A3C4D; font-size: 24px; margin: 0; font-weight: 800; letter-spacing: -0.5px;">INstituto Kalapa</h1>
-        <p style="color: #7D8C6E; font-size: 14px; font-weight: 600; margin-top: 6px;">🔐 Recuperação de Senha</p>
+        <p style="color: #7D8C6E; font-size: 14px; font-weight: 600; margin-top: 6px;">Recuperação de Senha</p>
       </div>
       <div style="background: #ffffff; border-radius: 14px; padding: 26px; margin-bottom: 18px; border-left: 4px solid #B8965A; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
         <p style="color: #1A3C4D; font-size: 15px; line-height: 1.6; margin-top: 0;">
@@ -248,7 +289,7 @@ export async function sendPasswordResetEmail(params: {
         </p>
         <div style="background: #FDFBF7; border: 1px solid #EFE8DC; border-radius: 10px; padding: 14px; margin: 18px 0; text-align: center;">
           <p style="color: #8C6D37; font-size: 13px; font-weight: 600; margin: 0 0 14px 0;">
-            ⏰ Este link é seguro e expira em 1 hora.
+            Este link é seguro e expira em 1 hora.
           </p>
           <div style="margin: 8px 0;">
             <a href="${resetLink}" target="_blank" rel="noopener noreferrer" style="background-color: #B8965A; color: #ffffff; padding: 13px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; letter-spacing: 0.3px;">
@@ -262,7 +303,7 @@ export async function sendPasswordResetEmail(params: {
         </p>
         <hr style="border: none; border-top: 1px solid #EAEAEA; margin: 18px 0;" />
         <p style="color: #999999; font-size: 12px; line-height: 1.5; margin-bottom: 0;">
-          🛡️ Se você não solicitou a alteração de sua senha, desconsidere este e-mail com total segurança. Nenhuma alteração foi realizada na sua conta.
+          Se você não solicitou a alteração de sua senha, desconsidere este e-mail com total segurança. Nenhuma alteração foi realizada na sua conta.
         </p>
       </div>
       <p style="text-align: center; color: #7D8C6E; font-size: 12px; margin-top: 24px;">
@@ -271,7 +312,15 @@ export async function sendPasswordResetEmail(params: {
     </div>
   `;
 
-  return await sendEmail(email, "🔐 Redefinição de Senha — INstituto Kalapa", html);
+  return await sendEmail(
+    email,
+    "Recuperação de Senha — Instituto Kalapa",
+    html,
+    {
+      fromName: "Instituto Kalapa",
+      text,
+    }
+  );
 }
 
 /** Notificação para o TERAPEUTA e/ou ADMIN: Novo agendamento confirmado */
