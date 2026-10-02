@@ -22,6 +22,7 @@ import {
   Lock,
   AlertCircle,
   KeyRound,
+  Share2,
 } from "lucide-react";
 
 interface ManualSection {
@@ -88,7 +89,7 @@ export default function AdminManual() {
       title: "8. Histórico & Versões do Sistema",
       icon: Zap,
       summary: "Registro de atualizações contínuas e notas de versão do projeto.",
-      badge: "v2.8",
+      badge: "v2.9",
     },
   ];
 
@@ -439,6 +440,20 @@ export default function AdminManual() {
                     3. Caso você queira ajustar manualmente vagas preenchidas fora do site (ex: transferências bancárias manuais), use o campo de ajuste manual de vagas na edição do produto.
                   </p>
                 </div>
+
+                <div className="border border-brand-purple/20 bg-brand-beige-light/40 rounded-xl p-4 space-y-2">
+                  <h4 className="font-bold text-brand-purple flex items-center gap-2">
+                    <Share2 className="w-4 h-4 text-brand-terracotta" /> Novo Menu de Compartilhamento de Vivências
+                  </h4>
+                  <p className="text-brand-charcoal/70 leading-relaxed">
+                    Tanto nos cards da vitrine quanto na página de detalhes do produto, há agora um botão elegante de compartilhamento com popover escuro flutuante nos tons oficiais da marca:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-brand-charcoal/80 mt-1">
+                    <li><strong>WhatsApp com Prévia:</strong> Abre uma conversa direta com convite acolhedor e link canônico que carrega automaticamente a foto da vivência (OpenGraph).</li>
+                    <li><strong>Copiar Link:</strong> Copia o link direto para a área de transferência com confirmação visual imediata na tela (&ldquo;Link copiado!&rdquo; em verde).</li>
+                    <li><strong>Mais opções...:</strong> Aciona a folha de compartilhamento nativa do smartphone/tablet (Instagram, Telegram, E-mail) ou abre o cliente de e-mail no computador.</li>
+                  </ul>
+                </div>
               </div>
             </div>
           )}
@@ -677,16 +692,35 @@ export default function AdminManual() {
                   </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-mono font-bold text-xs">
-                  Versão Atual: v2.8.0
+                  Versão Atual: v2.9.0
                 </div>
               </div>
 
               <div className="space-y-4">
-                {/* v2.8.0 */}
+                {/* v2.9.0 */}
                 <div className="relative pl-6 border-l-2 border-brand-purple space-y-1.5">
                   <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-purple" />
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-purple">v2.8.0</span>
+                    <span className="font-bold text-xs text-brand-purple">v2.9.0</span>
+                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-brand-charcoal">
+                    Menu Popover de Compartilhamento & Harmonização com a Paleta Oficial
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
+                    <li>Novo botão disparador circular e popover escuro translúcido com cantos arredondados nos cards e página de detalhes.</li>
+                    <li>Compartilhamento direto via WhatsApp com convite acolhedor e prévia automática de foto/título (OpenGraph).</li>
+                    <li>Opção Copiar Link com feedback em tempo real na própria linha (&ldquo;Link copiado!&rdquo; em tom verde).</li>
+                    <li>Opção Mais opções com disparo nativo do sistema operacional (<code>navigator.share</code>) e fallback para e-mail no desktop.</li>
+                    <li>Harmonização visual completa com a paleta oficial da marca Kalapa (Deep Ocean <code>#0D1E28</code>, Terracotta/Dourado <code>#B8965A</code> e Menta/Sage <code>#7D8C6E</code>).</li>
+                  </ul>
+                </div>
+
+                {/* v2.8.0 */}
+                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
+                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-brand-charcoal/70">v2.8.0</span>
                     <span className="text-[10px] text-brand-charcoal/50">Setembro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">
