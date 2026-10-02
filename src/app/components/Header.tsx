@@ -27,7 +27,6 @@ const navLinks = [
   { href: "/produtos?categoria=atendimentos", label: "Atendimentos" },
   { href: "/produtos/empreendedorismo", label: "Empreendedorismo" },
   { href: "/produtos?categoria=calendario", label: "Calendário" },
-  { href: "/teste-yin-yang", label: "Teste Yin/Yang" },
 ];
 
 const contatos = {
