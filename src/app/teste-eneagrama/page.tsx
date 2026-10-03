@@ -245,18 +245,22 @@ export default function TesteEneagramaPage() {
                 Instruções para o Teste
               </h2>
 
-              {/* Box de Instrução da Idade */}
-              <div className="p-5 rounded-2xl bg-[#F8F4ED] border border-[#E8DEC8] text-left mb-6">
-                <p className="text-sm sm:text-base text-[#1A3C4D] leading-relaxed font-normal mb-2">
-                  <strong>Instruções para o Teste:</strong>
+              {/* Box de Orientações Iniciais */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-[#F8F4ED] border border-[#E8DEC8] text-left mb-6 space-y-3">
+                <p className="text-base sm:text-lg font-serif font-semibold text-[#1A3C4D]">
+                  Antes de começar
                 </p>
                 <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
-                  O auge da nossa personalidade (nossa essência) se consolida entre os{" "}
-                  <strong className="text-[#1A3C4D] font-semibold">18 e 25 anos de idade</strong>.
+                  Reserve alguns minutos para estar presente.
                 </p>
-                <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light mt-1.5">
-                  Se você tem mais de 25 anos, responda a estas afirmações descrevendo como você agia e reagia{" "}
-                  <strong className="text-[#1A3C4D] font-semibold">entre seus 18 e 25 anos de idade</strong>.
+                <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
+                  Escolha um ambiente tranquilo e confortável, tenha água por perto e, se possível, esteja em um espaço onde não será interrompido. Respire, desacelere e permita-se responder com honestidade, sem buscar a resposta &ldquo;certa&rdquo;.
+                </p>
+                <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
+                  <strong className="font-semibold text-[#1A3C4D]">O Eneagrama é uma sabedoria ancestral de autoconhecimento.</strong> Mais do que encontrar um tipo, este é um convite para olhar para si com presença, consciência e curiosidade.
+                </p>
+                <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
+                  Não responda como gostaria de ser. Responda como você verdadeiramente se percebe.
                 </p>
               </div>
 
