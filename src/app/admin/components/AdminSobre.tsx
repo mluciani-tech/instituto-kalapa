@@ -33,7 +33,7 @@ export default function AdminSobre({ onError }: Props) {
     if (res.ok) {
       const data = await res.json();
       setFacilitadoraNome(data.facilitadora_nome || "Clatihúcia Capeli");
-      setFacilitadoraTitulo(data.facilitadora_titulo || "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal");
+      setFacilitadoraTitulo(data.facilitadora_titulo || "Fundadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal");
       setFacilitadoraFoto(data.facilitadora_foto || FOTO_FACILITADORA_PADRAO);
       setFacilitadoraCredenciais(data.facilitadora_credenciais || "Constelação Familiar, Vivências em Grupo e Acolhimento do Trauma");
       setFacilitadoraBio(data.facilitadora_bio || "Com mais de 10 anos de dedicação ao cuidado emocional e ao desenvolvimento humano, Clatihúcia Capeli conduz vivências que acolhem a dor sem julgamentos, permitindo que ela se transforme em força e consciência.\n\nSua abordagem integra a sabedoria sistêmica das constelações familiares, a neurobiologia do trauma e a potência curativa da presença em grupo. Cada encontro é cuidadosamente preparado para ser um santuário de respeito, acolhimento genuíno e pertencimento.");
@@ -199,7 +199,7 @@ export default function AdminSobre({ onError }: Props) {
         }
       }
 
-      setSobreSucesso("Informações da Facilitadora, Espaço e FAQ salvas com sucesso!");
+      setSobreSucesso("Informações da Fundadora, Espaço e FAQ salvas com sucesso!");
       await fetchConfig();
       setTimeout(() => setSobreSucesso(""), 4000);
     } catch (err: unknown) {
@@ -218,12 +218,12 @@ export default function AdminSobre({ onError }: Props) {
             )}
 
             <form onSubmit={handleSalvarSobre} className="space-y-6">
-              {/* Bloco 1: A Facilitadora */}
+              {/* Bloco 1: A Fundadora */}
               <div className="bg-white rounded-xl border border-brand-beige p-6 shadow-xs">
                 <div className="flex items-center gap-2 pb-4 mb-6 border-b border-brand-beige">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#B8965A]" />
                   <h2 className="text-base font-semibold text-brand-charcoal">
-                    Perfil da Facilitadora
+                    Perfil da Fundadora
                   </h2>
                 </div>
 

@@ -144,7 +144,7 @@ export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProp
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-4 left-4 right-4 p-4 rounded-2xl bg-white/90 backdrop-blur-md border border-white/60 shadow-sm">
                   <p className="text-xs font-semibold text-brand-terracotta uppercase tracking-wider">
-                    Facilitadora
+                    Fundadora
                   </p>
                   <p className="text-sm font-bold text-brand-charcoal">
                     {dados.nome}
@@ -192,7 +192,7 @@ export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProp
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-brand-purple hover:bg-brand-purple-dark text-white text-xs md:text-sm font-semibold transition-all shadow-md shadow-brand-purple/20"
               >
                 <MessageCircle className="w-4 h-4 text-brand-mint" />
-                Conversar com a Facilitadora
+                Conversar com a Fundadora
               </a>
               <Link
                 href="/produtos?categoria=vivencias"

@@ -41,12 +41,12 @@ export default function QuestionCard({
           }`}
         >
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-orange-100 text-orange-800 border border-orange-200">
-                <Flame className="w-3.5 h-3.5 text-orange-600" /> Tendência Yang
+            <div className="flex items-start justify-between mb-4">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold uppercase tracking-wider bg-orange-100 text-orange-800 border border-orange-200">
+                <Flame className="w-4 h-4 text-orange-600" /> {perguntaAtual.ladoYang.titulo}
               </span>
               <div
-                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
+                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${
                   respostaAtual === "yang"
                     ? "border-[#B8965A] bg-[#B8965A] text-white"
                     : "border-[#E8DEC8]"
@@ -55,10 +55,7 @@ export default function QuestionCard({
                 {respostaAtual === "yang" && <CheckCircle2 className="w-4 h-4" />}
               </div>
             </div>
-            <h3 className="text-lg sm:text-xl font-serif font-medium text-[#1A3C4D] mb-2">
-              {perguntaAtual.ladoYang.titulo}
-            </h3>
-            <p className="text-xs sm:text-sm text-[#1A3C4D]/75 font-light leading-relaxed">
+            <p className="text-sm text-[#1A3C4D]/80 font-light leading-relaxed">
               {perguntaAtual.ladoYang.descricao}
             </p>
           </div>
@@ -79,12 +76,12 @@ export default function QuestionCard({
           }`}
         >
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
-                <Droplets className="w-3.5 h-3.5 text-blue-600" /> Tendência Yin
+            <div className="flex items-start justify-between mb-4">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
+                <Droplets className="w-4 h-4 text-blue-600" /> {perguntaAtual.ladoYin.titulo}
               </span>
               <div
-                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
+                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${
                   respostaAtual === "yin"
                     ? "border-[#7D8C6E] bg-[#7D8C6E] text-white"
                     : "border-[#E8DEC8]"
@@ -93,10 +90,7 @@ export default function QuestionCard({
                 {respostaAtual === "yin" && <CheckCircle2 className="w-4 h-4" />}
               </div>
             </div>
-            <h3 className="text-lg sm:text-xl font-serif font-medium text-[#1A3C4D] mb-2">
-              {perguntaAtual.ladoYin.titulo}
-            </h3>
-            <p className="text-xs sm:text-sm text-[#1A3C4D]/75 font-light leading-relaxed">
+            <p className="text-sm text-[#1A3C4D]/80 font-light leading-relaxed">
               {perguntaAtual.ladoYin.descricao}
             </p>
           </div>

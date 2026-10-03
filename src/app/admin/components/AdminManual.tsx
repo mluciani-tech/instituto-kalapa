@@ -585,7 +585,7 @@ export default function AdminManual() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
                     <span className="font-bold text-brand-purple">1. Acesso na Home</span>
-                    <p className="text-brand-charcoal/70">O visitante clica no botão de destaque <strong>&ldquo;Faça o seu teste&rdquo;</strong> (posicionado ao lado de Calendário na Hero principal).</p>
+                    <p className="text-brand-charcoal/70">O visitante clica no botão de destaque <strong>&ldquo;Teste de Autoconhecimento&rdquo;</strong> (posicionado ao lado de Calendário na Hero principal).</p>
                   </div>
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
                     <span className="font-bold text-brand-purple">2. Login Obrigatório</span>
@@ -814,7 +814,7 @@ export default function AdminManual() {
               <div className="space-y-3">
                 {[
                   {
-                    q: "O que é o teste 'Faça o seu teste' na página inicial e como os clientes participam?",
+                    q: "O que é o teste 'Teste de Autoconhecimento' na página inicial e como os clientes participam?",
                     a: "É uma avaliação energética e clínica baseada na Medicina Tradicional Chinesa (MTC) e no Cânone do Imperador Amarelo. O cliente responde a 15 perguntas práticas e recebe um diagnóstico completo (Yang, Yin ou Equilíbrio), orientações de sono, alimentação, chás, metrônomo de respiração e emissão de laudo A4 em PDF. Para realizar o teste, o cliente deve estar cadastrado/logado na plataforma.",
                   },
                   {
@@ -899,7 +899,7 @@ export default function AdminManual() {
                     Módulo de Autoavaliação Yin/Yang (MTC) & Emissão de Relatório Clínico A4
                   </h4>
                   <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
-                    <li>Novo botão de ação rápida <strong>&ldquo;Faça o seu teste&rdquo;</strong> ao lado de Calendário na Hero da Home e no menu superior.</li>
+                    <li>Novo botão de ação rápida <strong>&ldquo;Teste de Autoconhecimento&rdquo;</strong> ao lado de Calendário na Hero da Home e no menu superior.</li>
                     <li>Questionário clínico interativo com as 15 dimensões fisiológicas e comportamentais do Cânone do Imperador Amarelo (MTC).</li>
                     <li>Exigência amigável de login ou cadastro prévio, ampliando a base de clientes do Instituto com redirecionamento automático.</li>
                     <li>Diagnóstico trifásico (Predominância Yang, Predominância Yin e Equilíbrio) com prescrições de sono, dietoterapia e chás.</li>
