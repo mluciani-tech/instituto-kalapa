@@ -11,6 +11,9 @@ import {
   ShieldCheck,
   Clock,
   ArrowLeft,
+  Lock,
+  UserCheck,
+  BookOpen,
 } from "lucide-react";
 import {
   AFIRMACOES_ENEAGRAMA,
@@ -154,9 +157,82 @@ export default function TesteEneagramaPage() {
 
       {/* Main Content Area */}
       <section className="flex-grow w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* ETAPA 1: INTRODUÇÃO E INSTRUÇÕES */}
-        {etapa === "intro" && (
+        {loadingAuth ? (
+          <div className="py-20 text-center flex flex-col items-center justify-center">
+            <div className="w-10 h-10 border-3 border-[#7D8C6E] border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-sm font-light text-[#1A3C4D]/70">Carregando avaliação de personalidade...</p>
+          </div>
+        ) : !usuario ? (
+          /* Card de Login / Cadastro Obrigatório */
           <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-2xl mx-auto relative overflow-hidden">
+            <div className="w-16 h-16 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] flex items-center justify-center mx-auto mb-6 border border-[#7D8C6E]/30">
+              <Lock className="w-8 h-8" />
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mb-3">
+              Identifique-se para Realizar o Teste do Eneagrama
+            </h2>
+
+            <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
+              Para mapear seu Tipo Dominante com precisão e gerar seu{" "}
+              <strong>Laudo Diagnóstico Completo em PDF personalizado</strong>, é necessário estar
+              conectado ao sistema do INstituto Kalapa.
+            </p>
+
+            <div className="bg-[#F8F4ED] rounded-xl p-5 mb-8 text-left border border-[#E8DEC8]/80">
+              <h4 className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 mb-3">
+                O que você terá acesso após o teste:
+              </h4>
+              <ul className="space-y-2.5 text-xs sm:text-sm text-[#1A3C4D]/85">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#7D8C6E] font-bold">•</span>
+                  <span><strong>Identificação do Tipo Dominante (1 a 9):</strong> Seu padrão arquetípico e motivações profundas.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#7D8C6E] font-bold">•</span>
+                  <span><strong>Principais Feridas Emocionais:</strong> As dores da infância que moldaram suas defesas automáticas.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#7D8C6E] font-bold">•</span>
+                  <span><strong>Medos e Desejos Fundamentais:</strong> A bússola oculta que rege suas decisões e conflitos.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#7D8C6E] font-bold">•</span>
+                  <span><strong>Mensagens Perdidas da Infância:</strong> A verdade curativa necessária para desarmar o ego.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#7D8C6E] font-bold">•</span>
+                  <span><strong>Mapa dos 9 Tipos & Laudo em PDF:</strong> Visão integral da sua personalidade pronta para impressão ou download.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                href="/login?redirect=/teste-eneagrama"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#1A3C4D] text-white text-sm font-medium hover:bg-[#15313F] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Fazer Login</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/cadastro?redirect=/teste-eneagrama"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#7D8C6E] text-white text-sm font-medium hover:bg-[#6C7B5D] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Criar Conta Gratuita</span>
+                <UserCheck className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <p className="text-xs text-[#1A3C4D]/50 mt-5">
+              Leva menos de 1 minuto para criar sua conta. Totalmente seguro e confidencial.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* ETAPA 1: INTRODUÇÃO E INSTRUÇÕES (AUTENTICADO) */}
+            {etapa === "intro" && (
+              <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-3xl mx-auto relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#7D8C6E]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#B8965A]/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
 
@@ -165,20 +241,48 @@ export default function TesteEneagramaPage() {
                 <Clock className="w-4 h-4" /> Duração estimada: ~6 a 8 minutos
               </span>
 
-              <h2 className="text-2xl sm:text-3xl font-serif text-[#1A3C4D] mb-4">
-                Instruções Importantes para o Teste
-              </h2>
+              {/* Seção Sistêmica do Instituto Kalapa */}
+              <div className="text-left mb-8 border-b border-[#E8DEC8]/70 pb-8">
+                <h2 className="text-2xl sm:text-3xl font-serif text-[#1A3C4D] mb-4 text-center sm:text-left">
+                  A Sabedoria do Eneagrama & a Visão Sistêmica do Instituto Kalapa
+                </h2>
 
-              {/* Box de Instrução da Idade (Destaque do Prompt) */}
+                <div className="space-y-4 text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
+                  <p>
+                    O Eneagrama é uma das ferramentas de autoconhecimento e transformação psicoespiritual
+                    mais profundas da psicologia moderna e da sabedoria ancestral.
+                  </p>
+                  <p>
+                    Longe de ser apenas um sistema de rotulagem comportamental, o Eneagrama atua como um mapa
+                    dinâmico da psique humana, revelando a distinção fundamental entre a nossa{" "}
+                    <strong className="font-semibold text-[#1A3C4D]">Essência</strong> (a nossa natureza cristalina, espontânea e incondicionada)
+                    e a estrutura do <strong className="font-semibold text-[#1A3C4D]">Ego</strong> (o conjunto de defesas, fixações mentais e máscaras
+                    adaptativas desenvolvidas na infância para garantir sobrevivência e pertencimento).
+                  </p>
+                  <p>
+                    No Instituto Kalapa, integramos a sabedoria tradicional do Eneagrama com os princípios da{" "}
+                    <strong className="font-semibold text-[#1A3C4D]">Psicologia Transpessoal</strong> e das{" "}
+                    <strong className="font-semibold text-[#1A3C4D]">Constelações Familiares de Bert Hellinger</strong>.
+                    Compreendemos que o eneatipo de uma pessoa não surge no vácuo; ele é moldado na interseção entre
+                    a predisposição biológica do indivíduo e as dinâmicas ocultas do sistema familiar. As fixações
+                    egóicas funcionam como lealdades invisíveis às memórias e dores do sistema de origem.
+                  </p>
+                  <p className="text-[#7D8C6E] font-medium italic pt-2">
+                    Faça seu teste e se autodesenvolva para transformar ainda mais sua vida.
+                  </p>
+                </div>
+              </div>
+
+              {/* Box de Instrução da Idade */}
               <div className="p-5 rounded-2xl bg-[#F8F4ED] border border-[#E8DEC8] text-left mb-6">
-                <p className="text-sm sm:text-base text-[#1A3C4D] leading-relaxed font-normal mb-3">
-                  <strong>Atenção à referência de tempo:</strong>
+                <p className="text-sm sm:text-base text-[#1A3C4D] leading-relaxed font-normal mb-2">
+                  <strong>Instruções para o Teste:</strong>
                 </p>
                 <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
-                  O auge da nossa personalidade (nossa essência e estratégias de defesa) se consolida entre os{" "}
+                  O auge da nossa personalidade (nossa essência) se consolida entre os{" "}
                   <strong className="text-[#1A3C4D] font-semibold">18 e 25 anos de idade</strong>.
                 </p>
-                <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light mt-2">
+                <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light mt-1.5">
                   Se você tem mais de 25 anos, responda a estas afirmações descrevendo como você agia e reagia{" "}
                   <strong className="text-[#1A3C4D] font-semibold">entre seus 18 e 25 anos de idade</strong>.
                 </p>
@@ -187,7 +291,7 @@ export default function TesteEneagramaPage() {
               {/* Escala de Respostas */}
               <div className="text-left mb-8">
                 <h3 className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 mb-3">
-                  Escala de Respostas (atribua uma nota de 0 a 5):
+                  Escala de Respostas (atribua uma nota de 0 a 5 para cada item):
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#1A3C4D]/80">
                   {ESCALA_NOTAS.map((item) => (
@@ -247,6 +351,8 @@ export default function TesteEneagramaPage() {
             onAbrirRelatorio={() => setModalRelatorioAberto(true)}
             usuario={usuario}
           />
+        )}
+          </>
         )}
       </section>
 

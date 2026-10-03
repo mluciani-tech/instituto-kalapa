@@ -11,6 +11,8 @@ import {
   AlertTriangle,
   ChevronRight,
   ChevronLeft,
+  Lock,
+  UserCheck,
 } from "lucide-react";
 import {
   YIN_YANG_PERGUNTAS,
@@ -152,7 +154,78 @@ export default function TesteYinYangPage() {
 
       {/* Main Content Area */}
       <section className="flex-grow w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {etapa === "intro" ? (
+        {loadingAuth ? (
+          <div className="py-20 text-center flex flex-col items-center justify-center">
+            <div className="w-10 h-10 border-3 border-[#B8965A] border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-sm font-light text-[#1A3C4D]/70">Carregando avaliação energética...</p>
+          </div>
+        ) : !usuario ? (
+          /* Card de Login / Cadastro Obrigatório */
+          <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-2xl mx-auto relative overflow-hidden">
+            <div className="w-16 h-16 rounded-full bg-[#B8965A]/10 text-[#B8965A] flex items-center justify-center mx-auto mb-6 border border-[#B8965A]/30">
+              <Lock className="w-8 h-8" />
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mb-3">
+              Identifique-se para Realizar o Teste
+            </h2>
+
+            <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
+              Para calcular suas tendências energéticas com precisão e gerar seu{" "}
+              <strong>Relatório Clínico em PDF personalizado com seu nome</strong>, é necessário estar
+              conectado ao sistema do INstituto Kalapa.
+            </p>
+
+            <div className="bg-[#F8F4ED] rounded-xl p-5 mb-8 text-left border border-[#E8DEC8]/80">
+              <h4 className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 mb-3">
+                O que você terá acesso após o teste:
+              </h4>
+              <ul className="space-y-2 text-xs sm:text-sm text-[#1A3C4D]/85">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#B8965A] font-bold">•</span>
+                  <span><strong>Diagnóstico completo:</strong> Se sua constituição atual é Fogo (Yang), Frio (Yin) ou Equilíbrio Dinâmico.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#B8965A] font-bold">•</span>
+                  <span><strong>Impacto no Sono (Wei Qi):</strong> Entenda a causa profunda de insônias, despertares ou cansaço matinal.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#B8965A] font-bold">•</span>
+                  <span><strong>Dietoterapia & Culinária:</strong> Alimentos benéficos, métodos de preparo ideais e o que evitar.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#B8965A] font-bold">•</span>
+                  <span><strong>Fitoterapia Tradicional:</strong> Receitas de infusões e chás para restabelecer a harmonia.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#B8965A] font-bold">•</span>
+                  <span><strong>PDF com Formato A4:</strong> Baixe ou imprima com apenas um clique para levar ao seu terapeuta ou guardar.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                href="/login?redirect=/teste-yin-yang"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#1A3C4D] text-white text-sm font-medium hover:bg-[#15313F] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Fazer Login</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/cadastro?redirect=/teste-yin-yang"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#B8965A] text-white text-sm font-medium hover:bg-[#A3834C] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Criar Conta Gratuita</span>
+                <UserCheck className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <p className="text-xs text-[#1A3C4D]/50 mt-5">
+              Leva menos de 1 minuto para criar sua conta. Totalmente seguro e sem custos.
+            </p>
+          </div>
+        ) : etapa === "intro" ? (
           <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-2xl mx-auto relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#B8965A]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#7D8C6E]/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />

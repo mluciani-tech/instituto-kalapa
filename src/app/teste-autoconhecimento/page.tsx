@@ -108,27 +108,30 @@ export default function TesteAutoconhecimentoPage() {
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-serif font-medium text-[#1A3C4D] mb-3">
-                Personalidade do Eneagrama
+                A Sabedoria do Eneagrama & a Visão Sistêmica do Instituto Kalapa
               </h2>
 
-              <p className="text-sm text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
-                Descubra qual dos 9 tipos de personalidade do Eneagrama governa suas reações automáticas,
-                suas feridas de infância, crenças inconscientes e o caminho exato para desarmar suas defesas.
-              </p>
-
-              <div className="space-y-2.5 mb-8 text-xs sm:text-sm text-[#1A3C4D]/75">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#7D8C6E]" />
-                  <span>45 afirmações avaliadas em escala de 0 a 5</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#7D8C6E]" />
-                  <span>Mapeamento do auge da essência (18 a 25 anos)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#7D8C6E]" />
-                  <span>Laudo detalhado com feridas, medos e desejos fundamentais</span>
-                </div>
+              <div className="space-y-3 text-xs sm:text-sm text-[#1A3C4D]/80 font-light leading-relaxed mb-6">
+                <p>
+                  O Eneagrama é uma das ferramentas de autoconhecimento e transformação psicoespiritual mais
+                  profundas da psicologia moderna e da sabedoria ancestral.
+                </p>
+                <p>
+                  Longe de ser apenas um sistema de rotulagem comportamental, o Eneagrama atua como um mapa
+                  dinâmico da psique humana, revelando a distinção fundamental entre a nossa Essência (a nossa
+                  natureza cristalina, espontânea e incondicionada) e a estrutura do Ego (o conjunto de defesas,
+                  fixações mentais e máscaras adaptativas desenvolvidas na infância para garantir sobrevivência e pertencimento).
+                </p>
+                <p>
+                  No Instituto Kalapa, integramos a sabedoria tradicional do Eneagrama com os princípios da
+                  Psicologia Transpessoal e Constelações Familiares de Bert Hellinger. Compreendemos que o
+                  eneatipo de uma pessoa não surge no vácuo; ele é moldado na interseção entre a predisposição
+                  biológica do indivíduo e as dinâmicas ocultas do sistema familiar. As fixações egóicas funcionam
+                  como lealdades invisíveis às memórias e dores do sistema de origem.
+                </p>
+                <p className="text-[#7D8C6E] font-medium italic pt-1">
+                  Faça seu teste e se autodesenvolva para transformar ainda mais sua vida.
+                </p>
               </div>
             </div>
 
