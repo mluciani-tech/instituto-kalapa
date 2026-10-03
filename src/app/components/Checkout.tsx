@@ -19,18 +19,12 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import CheckoutLeftColumn from "./checkout/CheckoutLeftColumn";
+import CheckoutRightColumn from "./checkout/CheckoutRightColumn";
 import type { Produto, Usuario } from "@/lib/types";
 import { isProdutoAgendamento } from "@/lib/agendamento";
 
-interface AcompanhanteItem {
-  key: string;
-  produto_id: string;
-  produto_nome: string;
-  indice: number;
-  nome: string;
-  email: string;
-  telefone: string;
-}
+import AcompanhanteForm, { AcompanhanteItem } from "./checkout/AcompanhanteForm";
 
 function formatPhone(val: string): string {
   const digits = val.replace(/\D/g, "").slice(0, 11);
@@ -390,460 +384,41 @@ export default function Checkout() {
         </div>
 
         <div className="grid md:grid-cols-12 gap-8">
-          {/* LADO ESQUERDO: RESUMO DOS PRODUTOS & VALORES (7 cols) */}
-          <div className="md:col-span-7 bg-white border border-brand-charcoal/10 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-md">
-            <div>
-              <div className="flex items-center justify-between pb-4 mb-4 border-b border-brand-charcoal/10">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta">
-                  {isCartCheckout ? `Vivências Selecionadas (${cartItems.length})` : "Vivência Selecionada"}
-                </h2>
-                <Link
-                  href="/produtos"
-                  className="text-xs text-brand-purple hover:text-brand-purple-dark font-medium transition-colors"
-                >
-                  + Adicionar mais
-                </Link>
-              </div>
-
-              {/* Card de Agendamento Pré-Reservado se houver */}
-              {agendamentoInfo && (
-                <div className="mb-4 p-4 rounded-2xl bg-brand-terracotta/10 border border-brand-terracotta/30 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-brand-terracotta/20 flex items-center justify-center text-brand-terracotta shrink-0 mt-0.5">
-                    <Calendar className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-brand-terracotta">
-                        Horário Pré-Reservado (Hold 15 min)
-                      </span>
-                      <span className="text-[10px] bg-brand-terracotta text-white px-2 py-0.5 rounded-full font-bold">
-                        Exclusivo
-                      </span>
-                    </div>
-                    <p className="text-xs font-bold text-brand-charcoal mt-0.5">
-                      Atendimento com {agendamentoInfo.terapeuta}
-                    </p>
-                    <p className="text-xs text-brand-charcoal/80">
-                      🗓️ {agendamentoInfo.data} às {agendamentoInfo.horario} (50 min)
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Alerta de Horário Não Selecionado se for Atendimento */}
-              {agendamentoPendente && (
-                <div className="mb-4 p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
-                    <Calendar className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 block">
-                      Horário não agendado
-                    </span>
-                    <p className="text-xs font-bold text-brand-charcoal mt-0.5">
-                      {atendimentoCartItem?.nome || atendimentoSingle?.nome || "Atendimento Individual"}
-                    </p>
-                    <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
-                      Este atendimento exige a escolha prévia de um dia e horário na agenda antes do pagamento.
-                    </p>
-                    <div className="mt-2.5">
-                      <Link
-                        href={`/produtos/${targetAgendamentoId}#agendamento`}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
-                      >
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span>Abrir Agenda Disponível</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Lista de itens */}
-              <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
-                {isCartCheckout ? (
-                  cartItems.map((item) => (
-                    <div
-                      key={item.produto_id}
-                      className="p-3 bg-brand-offwhite/80 border border-brand-charcoal/10 rounded-xl flex items-center justify-between gap-3"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        {item.imagem_url ? (
-                          <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-brand-charcoal/10">
-                            <Image src={item.imagem_url} alt={item.nome} fill className="object-cover" />
-                          </div>
-                        ) : (
-                          <div className="w-12 h-12 rounded-lg bg-brand-charcoal/5 flex items-center justify-center shrink-0 border border-brand-charcoal/10 text-brand-charcoal/40">
-                            <Package className="w-5 h-5" />
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-brand-charcoal truncate">{item.nome}</p>
-                          <p className="text-[11px] text-brand-charcoal/60">Qtd: {item.quantidade}</p>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-xs font-bold text-brand-terracotta">
-                          R$ {(item.preco * item.quantidade).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  produto && (
-                    <div className="p-4 bg-brand-offwhite/80 border border-brand-charcoal/10 rounded-xl">
-                      <h3 className="text-base font-bold text-brand-charcoal mb-1">{produto.nome}</h3>
-                      {produto.descricao_curta && (
-                        <p className="text-xs text-brand-charcoal/60 mb-3">{produto.descricao_curta}</p>
-                      )}
-                      <p className="text-lg font-bold text-brand-terracotta">
-                        R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                      </p>
-                    </div>
-                  )
-                )}
-              </div>
-
-              {/* PARTICIPANTES ADICIONAIS QUANDO HOUVER COMPRA MÚLTIPLA */}
-              {acompanhantes.length > 0 && (
-                <div className="mt-6 pt-5 border-t border-brand-charcoal/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 rounded-full bg-brand-terracotta/15 flex items-center justify-center text-brand-terracotta shrink-0">
-                      <Users className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta">
-                        Dados dos Participantes Adicionais ({acompanhantes.length})
-                      </h3>
-                      <p className="text-[11px] text-brand-charcoal/60">
-                        Você selecionou mais de uma vaga. Preencha os dados de quem irá participar:
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    {acompanhantes.map((ac) => (
-                      <div
-                        key={ac.key}
-                        className="p-3.5 bg-brand-offwhite rounded-xl border border-brand-charcoal/10 space-y-2.5"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-brand-charcoal">
-                            Participante {ac.indice} — {ac.produto_nome}
-                          </span>
-                          <span className="text-[10px] bg-brand-purple/10 text-brand-purple px-2 py-0.5 rounded-full font-medium">
-                            Vaga Acompanhante
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                          <div>
-                            <label className="text-[11px] font-medium text-brand-charcoal/75 block mb-1">
-                              Nome Completo *
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              value={ac.nome}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setAcompanhantes((prev) =>
-                                  prev.map((item) => (item.key === ac.key ? { ...item, nome: val } : item))
-                                );
-                              }}
-                              placeholder="Nome do participante"
-                              className="w-full bg-white border border-brand-charcoal/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-lg px-3 py-2 text-xs text-brand-charcoal outline-none"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-[11px] font-medium text-brand-charcoal/75 block mb-1">
-                              WhatsApp / Telefone *
-                            </label>
-                            <input
-                              type="tel"
-                              required
-                              value={ac.telefone}
-                              onChange={(e) => {
-                                const val = formatPhone(e.target.value);
-                                setAcompanhantes((prev) =>
-                                  prev.map((item) => (item.key === ac.key ? { ...item, telefone: val } : item))
-                                );
-                              }}
-                              placeholder="(11) 99999-9999"
-                              className="w-full bg-white border border-brand-charcoal/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-lg px-3 py-2 text-xs text-brand-charcoal outline-none"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-[11px] font-medium text-brand-charcoal/75 block mb-1">
-                              E-mail *
-                            </label>
-                            <input
-                              type="email"
-                              required
-                              value={ac.email}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setAcompanhantes((prev) =>
-                                  prev.map((item) => (item.key === ac.key ? { ...item, email: val } : item))
-                                );
-                              }}
-                              placeholder="email@exemplo.com"
-                              className="w-full bg-white border border-brand-charcoal/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-lg px-3 py-2 text-xs text-brand-charcoal outline-none"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* CAMPO DE CUPOM OPCIONAL */}
-              <div className="mt-6 pt-4 border-t border-brand-charcoal/10">
-                <label className="text-xs font-medium text-brand-charcoal/70 block mb-2 flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-brand-terracotta" />
-                  Possui cupom de desconto? (Opcional)
-                </label>
-
-                {cupomAplicado ? (
-                  <div className="p-3 rounded-xl bg-brand-mint/10 border border-brand-mint/30 flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-bold text-brand-mint-dark font-mono">
-                        {cupomAplicado.codigo}
-                      </span>
-                      <span className="text-xs text-brand-mint-dark ml-2">
-                        - R$ {valorDesconto.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} aplicado!
-                      </span>
-                    </div>
-                    <button
-                      onClick={handleRemoverCupom}
-                      className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors cursor-pointer"
-                    >
-                      Remover
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleAplicarCupom} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={cupomInput}
-                      onChange={(e) => setCupomInput(e.target.value.toUpperCase())}
-                      placeholder="Código do cupom"
-                      className="flex-1 bg-brand-offwhite border border-brand-charcoal/15 focus:border-brand-terracotta focus:ring-1 focus:ring-brand-terracotta rounded-xl px-3.5 py-2.5 text-xs text-brand-charcoal uppercase font-mono placeholder-brand-charcoal/35 outline-none"
-                    />
-                    <button
-                      type="submit"
-                      disabled={validandoCupom || !cupomInput.trim()}
-                      className="px-4 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark disabled:opacity-40 text-xs font-semibold text-white rounded-xl transition-colors cursor-pointer"
-                    >
-                      {validandoCupom ? "Validando..." : "Aplicar"}
-                    </button>
-                  </form>
-                )}
-
-                {cupomErro && (
-                  <p className="text-[11px] text-red-500 mt-1.5 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    {cupomErro}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Totalizador */}
-            <div className="mt-6 pt-4 border-t border-brand-charcoal/10 space-y-1.5">
-              <div className="flex justify-between text-xs text-brand-charcoal/65">
-                <span>Subtotal</span>
-                <span>R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-              </div>
-              {valorDesconto > 0 && (
-                <div className="flex justify-between text-xs text-brand-mint-dark font-medium">
-                  <span>Desconto cupom</span>
-                  <span>- R$ {valorDesconto.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-base font-bold text-brand-charcoal pt-2 border-t border-brand-charcoal/10">
-                <span>Total a pagar</span>
-                <span className="text-brand-terracotta font-bold text-lg">
-                  R$ {totalFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* LADO DIREITO: DADOS DO CLIENTE & BOTÃO DE PAGAMENTO (5 cols) */}
-          <div className="md:col-span-5 bg-white border border-brand-charcoal/10 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-md">
-            <div>
-              <h2 className="text-xs font-bold uppercase tracking-wider text-brand-terracotta pb-4 mb-4 border-b border-brand-charcoal/10">
-                Identificação do Pagamento
-              </h2>
-
-              {/* SE USUÁRIO LOGADO: ZERO PREENCHIMENTO MANUAL */}
-              {usuario ? (
-                <div className="space-y-3">
-                  <div className="p-4 bg-brand-offwhite border border-brand-terracotta/30 rounded-xl">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 text-xs font-semibold text-brand-terracotta">
-                        <User className="w-4 h-4" />
-                        Conta Conectada
-                      </div>
-                      <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
-                        Autenticado
-                      </span>
-                    </div>
-                    <p className="text-sm font-bold text-brand-charcoal">{usuario.nome}</p>
-                    <p className="text-xs text-brand-charcoal/70">{usuario.email}</p>
-                    <p className="text-xs text-brand-charcoal/70">Tel: {usuario.telefone}</p>
-                    <p className="text-xs text-brand-charcoal/45 font-mono mt-1">CPF: {usuario.cpf}</p>
-                  </div>
-
-                  <div className="p-4 bg-brand-offwhite border border-brand-charcoal/10 rounded-xl">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-brand-charcoal/80 mb-2">
-                      <MapPin className="w-4 h-4 text-brand-terracotta" />
-                      Endereço de Cadastro
-                    </div>
-                    <p className="text-xs text-brand-charcoal/90">
-                      {usuario.rua}, {usuario.numero} {usuario.complemento ? `(${usuario.complemento})` : ""}
-                    </p>
-                    <p className="text-xs text-brand-charcoal/60">
-                      {usuario.bairro} — {usuario.cidade}/{usuario.uf}
-                    </p>
-                    <p className="text-xs text-brand-charcoal/45 font-mono">CEP: {usuario.cep}</p>
-                  </div>
-
-                  <div className="p-3 bg-brand-mint/10 border border-brand-mint/20 rounded-xl text-[11px] text-brand-mint-dark flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 text-brand-mint mt-0.5" />
-                    <span>
-                      Zero retrabalho: Seus dados estão salvos e serão preenchidos de forma automática na InfinitePay.
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                /* SE VISITANTE NÃO LOGADO: IDENTIFICAÇÃO OBRIGATÓRIA */
-                <div className="space-y-4">
-                  <div className="p-5 bg-brand-purple/5 border border-brand-purple/20 rounded-2xl text-center space-y-3">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple text-xs font-semibold">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      Identificação Obrigatória
-                    </span>
-                    <h3 className="text-sm font-bold text-brand-charcoal">
-                      Conecte-se para finalizar sua compra
-                    </h3>
-                    <p className="text-xs text-brand-charcoal/70 leading-relaxed">
-                      Para emitir seus ingressos com segurança e vincular suas vivências ao seu perfil, é necessário entrar na sua conta ou criar um cadastro rápido.
-                    </p>
-
-                    <div className="space-y-2 pt-2">
-                      <Link
-                        href="/login?redirect=/checkout"
-                        className="inline-flex items-center justify-center gap-2 w-full py-3 bg-brand-purple hover:bg-brand-purple-dark text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-brand-purple/20 cursor-pointer"
-                      >
-                        <LogIn className="w-4 h-4" />
-                        Já tenho conta — Fazer Login
-                      </Link>
-
-                      <Link
-                        href="/cadastro?redirect=/checkout"
-                        className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-brand-purple/30 hover:border-brand-purple text-brand-purple text-xs font-semibold rounded-xl transition-all cursor-pointer"
-                      >
-                        <User className="w-4 h-4" />
-                        Criar cadastro novo (1 minuto)
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-brand-offwhite rounded-xl border border-brand-charcoal/10 space-y-1.5 text-[11px] text-brand-charcoal/65">
-                    <p className="flex items-center gap-1.5 font-medium text-brand-charcoal/80">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-brand-terracotta shrink-0" />
-                      Seus itens continuam salvos no carrinho
-                    </p>
-                    <p className="flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-brand-mint shrink-0" />
-                      Cadastre uma única vez e nunca mais redigite seus dados
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="pt-6">
-              {erro && (
-                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">
-                  {erro}
-                </div>
-              )}
-
-              {agendamentoPendente ? (
-                <div className="space-y-3">
-                  <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-xs">
-                    <p className="font-bold flex items-center gap-1.5 mb-1">
-                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                      Agendamento Obrigatório Antes do Pagamento
-                    </p>
-                    <p className="leading-relaxed">
-                      Para este atendimento terapêutico individual, você deve primeiro escolher o dia e horário na agenda da terapeuta.
-                    </p>
-                  </div>
-                  <Link
-                    href={`/produtos/${targetAgendamentoId}#agendamento`}
-                    className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-brand-terracotta/25 cursor-pointer flex items-center justify-center gap-2 text-center"
-                  >
-                    <Calendar className="w-4 h-4" />
-                    <span>Escolher Data e Horário na Agenda</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              ) : usuario ? (
-                <button
-                  onClick={handleFinalizarPagamento}
-                  disabled={processando}
-                  className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark disabled:opacity-50 text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-brand-terracotta/25 cursor-pointer flex items-center justify-center gap-2"
-                >
-                  {processando ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Gerando pagamento InfinitePay...
-                    </>
-                  ) : (
-                    <>
-                      Pagar R$ {totalFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                      <ExternalLink className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              ) : (
-                <Link
-                  href="/login?redirect=/checkout"
-                  className="w-full py-4 bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-brand-purple/25 cursor-pointer flex items-center justify-center gap-2 text-center"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Entrar para Pagar R$ {totalFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                </Link>
-              )}
-
-              <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-brand-charcoal/60 text-center">
-                <ShieldCheck className="w-4 h-4 text-brand-mint" />
-                <span>Processamento oficial e seguro pela InfinitePay</span>
-              </div>
-
-              {/* Reassurance WhatsApp callout */}
-              <div className="mt-4 pt-3 border-t border-brand-charcoal/10 text-center">
-                <a
-                  href={`https://wa.me/5511917452732?text=${encodeURIComponent(
-                    `Olá! Estou no checkout reservando a vivência "${isCartCheckout ? (cartItems[0]?.nome || "Vivência Kalapa") : (produto?.nome || "Vivência Kalapa")}" e gostaria de tirar uma dúvida.`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-brand-purple hover:text-brand-purple-dark font-medium transition-colors inline-flex items-center gap-1.5"
-                >
-                  <span>Dúvidas sobre a vivência? Fale conosco no WhatsApp</span>
-                </a>
-              </div>
-            </div>
-          </div>
+          <CheckoutLeftColumn
+            isCartCheckout={isCartCheckout}
+            cartItems={cartItems}
+            produto={produto}
+            agendamentoInfo={agendamentoInfo}
+            agendamentoPendente={agendamentoPendente}
+            atendimentoCartItem={atendimentoCartItem}
+            atendimentoSingle={atendimentoSingle}
+            targetAgendamentoId={targetAgendamentoId}
+            subtotal={subtotal}
+            valorDesconto={valorDesconto}
+            totalFinal={totalFinal}
+            acompanhantes={acompanhantes}
+            setAcompanhantes={setAcompanhantes}
+            formatPhone={formatPhone}
+            cupomAplicado={cupomAplicado}
+            cupomInput={cupomInput}
+            setCupomInput={setCupomInput}
+            validandoCupom={validandoCupom}
+            cupomErro={cupomErro}
+            handleAplicarCupom={handleAplicarCupom}
+            handleRemoverCupom={handleRemoverCupom}
+          />
+          <CheckoutRightColumn
+            usuario={usuario}
+            erro={erro}
+            agendamentoPendente={agendamentoPendente}
+            targetAgendamentoId={targetAgendamentoId}
+            handleFinalizarPagamento={handleFinalizarPagamento}
+            processando={processando}
+            totalFinal={totalFinal}
+            isCartCheckout={isCartCheckout}
+            cartItems={cartItems}
+            produto={produto}
+          />
         </div>
       </div>
       {/* Modal de Transição Suave para o Gateway InfinitePay */}
