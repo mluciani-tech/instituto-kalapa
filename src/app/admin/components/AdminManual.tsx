@@ -657,7 +657,7 @@ export default function AdminManual() {
                   <ul className="space-y-1.5 list-disc list-inside">
                     <li><strong>Fitoterapia & Chás:</strong> Prescrições com modo de preparo correto (infusão vs decocção) e melhores horários de ingestão.</li>
                     <li><strong>Metrônomo Respiratório Interativo:</strong> Widget com animação expansiva em tela guiando a respiração terapêutica (4s/8s ou 4s/2s/4s).</li>
-                    <li><strong>Relatório Clínico Formatado (A4):</strong> Emissão com 1 clique com tabela de todas as 15 respostas e cabeçalho oficial do Instituto.</li>
+                    <li><strong>Relatório Clínico Formatado (A4):</strong> Emissão com 1 clique com tabela de todas as 15 respostas e cabeçalho oficial do INstituto.</li>
                   </ul>
                 </div>
               </div>
@@ -666,7 +666,7 @@ export default function AdminManual() {
               <div className="border border-brand-mint/40 bg-brand-mint/10 rounded-xl p-4 text-xs space-y-2">
                 <p className="font-bold text-brand-mint">Funil de Conversão Terapêutica & Gestão de Leads no Admin</p>
                 <p className="text-brand-charcoal/80 leading-relaxed">
-                  O teste é uma excelente porta de entrada para novos alunos e pacientes. Ao concluir o teste, o usuário é convidado a participar das vivências semanais de grupo (quintas-feiras às 19:30) ou agendar uma consulta individual de Medicina Chinesa com as terapeutas do Instituto.
+                  O teste é uma excelente porta de entrada para novos alunos e pacientes. Ao concluir o teste, o usuário é convidado a participar das vivências semanais de grupo (quintas-feiras às 19:30) ou agendar uma consulta individual de Medicina Chinesa com as terapeutas do INstituto.
                 </p>
                 <p className="text-brand-charcoal/80 leading-relaxed pt-1 border-t border-brand-mint/20">
                   <strong>Aba &ldquo;Avaliações Yin/Yang&rdquo; no Painel Admin:</strong> Todos os testes finalizados são capturados automaticamente com contador em tempo real no menu lateral. O painel disponibiliza métricas gerenciais (Total, % Yang, % Yin), tabela de participantes com link de 1 clique para WhatsApp com mensagem acolhedora pré-formatada, consulta às respostas das 15 perguntas e botão para exportação em planilha CSV.
@@ -901,7 +901,7 @@ export default function AdminManual() {
                   <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
                     <li>Novo botão de ação rápida <strong>&ldquo;Teste de Autoconhecimento&rdquo;</strong> ao lado de Calendário na Hero da Home e no menu superior.</li>
                     <li>Questionário clínico interativo com as 15 dimensões fisiológicas e comportamentais do Cânone do Imperador Amarelo (MTC).</li>
-                    <li>Exigência amigável de login ou cadastro prévio, ampliando a base de clientes do Instituto com redirecionamento automático.</li>
+                    <li>Exigência amigável de login ou cadastro prévio, ampliando a base de clientes do INstituto com redirecionamento automático.</li>
                     <li>Diagnóstico trifásico (Predominância Yang, Predominância Yin e Equilíbrio) com prescrições de sono, dietoterapia e chás.</li>
                     <li>Metrônomo visual interativo para guia de respiração terapêutica com tempos de expansão e ancoragem.</li>
                     <li>Emissão com 1 clique de <strong>Relatório Clínico em PDF (formato A4)</strong> para consulta ou impressão pelo paciente.</li>

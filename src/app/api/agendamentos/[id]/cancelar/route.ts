@@ -54,7 +54,7 @@ export async function POST(
     if (diffHours < CANCEL_LIMIT_HOURS) {
       return NextResponse.json(
         {
-          error: `Cancelamentos autônomos só são permitidos com pelo menos ${CANCEL_LIMIT_HOURS} horas de antecedência. Para remarcações emergenciais, por favor entre em contato diretamente pelo WhatsApp do Instituto.`,
+          error: `Cancelamentos autônomos só são permitidos com pelo menos ${CANCEL_LIMIT_HOURS} horas de antecedência. Para remarcações emergenciais, por favor entre em contato diretamente pelo WhatsApp do INstituto.`,
         },
         { status: 400 }
       );

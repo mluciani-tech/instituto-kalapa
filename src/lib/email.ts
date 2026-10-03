@@ -118,7 +118,7 @@ async function sendEmail(
         },
       });
 
-      const fromName = options?.fromName || smtp.fromName || "Instituto Kalapa";
+      const fromName = options?.fromName || smtp.fromName || "INstituto Kalapa";
       const sender = `"${fromName}" <${smtp.user}>`;
 
       await transporter.sendMail({
@@ -148,7 +148,7 @@ async function sendEmail(
     try {
       const { Resend } = await import("resend");
       const resend = new Resend(apiKey);
-      const fromName = options?.fromName || "Instituto Kalapa";
+      const fromName = options?.fromName || "INstituto Kalapa";
       const { error } = await resend.emails.send({
         from: `${fromName} <${EMAIL_FROM}>`,
         to: [to],
@@ -272,7 +272,7 @@ export async function sendPasswordResetEmail(params: {
 }): Promise<{ success: boolean; error?: string }> {
   const { nome, email, resetLink } = params;
 
-  const text = `Olá, ${nome}!\n\nRecebemos uma solicitação para redefinir a senha de acesso da sua conta no Instituto Kalapa.\n\nPara criar uma nova senha, utilize o link seguro abaixo (válido por 1 hora):\n${resetLink}\n\nCaso o link acima não abra, copie e cole o endereço no seu navegador.\n\nSe você não solicitou a alteração de sua senha, desconsidere este e-mail com total segurança. Nenhuma alteração foi realizada na sua conta.\n\nInstituto Kalapa — Transformação Comportamental & Autoconhecimento`;
+  const text = `Olá, ${nome}!\n\nRecebemos uma solicitação para redefinir a senha de acesso da sua conta no INstituto Kalapa.\n\nPara criar uma nova senha, utilize o link seguro abaixo (válido por 1 hora):\n${resetLink}\n\nCaso o link acima não abra, copie e cole o endereço no seu navegador.\n\nSe você não solicitou a alteração de sua senha, desconsidere este e-mail com total segurança. Nenhuma alteração foi realizada na sua conta.\n\nINstituto Kalapa — Transformação Comportamental & Autoconhecimento`;
 
   const html = `
     <div style="${baseStyles}">
@@ -314,10 +314,10 @@ export async function sendPasswordResetEmail(params: {
 
   return await sendEmail(
     email,
-    "Recuperação de Senha — Instituto Kalapa",
+    "Recuperação de Senha — INstituto Kalapa",
     html,
     {
-      fromName: "Instituto Kalapa",
+      fromName: "INstituto Kalapa",
       text,
     }
   );

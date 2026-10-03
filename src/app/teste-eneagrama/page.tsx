@@ -241,37 +241,9 @@ export default function TesteEneagramaPage() {
                 <Clock className="w-4 h-4" /> Duração estimada: ~6 a 8 minutos
               </span>
 
-              {/* Seção Sistêmica do Instituto Kalapa */}
-              <div className="text-left mb-8 border-b border-[#E8DEC8]/70 pb-8">
-                <h2 className="text-2xl sm:text-3xl font-serif text-[#1A3C4D] mb-4 text-center sm:text-left">
-                  A Sabedoria do Eneagrama & a Visão Sistêmica do Instituto Kalapa
-                </h2>
-
-                <div className="space-y-4 text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
-                  <p>
-                    O Eneagrama é uma das ferramentas de autoconhecimento e transformação psicoespiritual
-                    mais profundas da psicologia moderna e da sabedoria ancestral.
-                  </p>
-                  <p>
-                    Longe de ser apenas um sistema de rotulagem comportamental, o Eneagrama atua como um mapa
-                    dinâmico da psique humana, revelando a distinção fundamental entre a nossa{" "}
-                    <strong className="font-semibold text-[#1A3C4D]">Essência</strong> (a nossa natureza cristalina, espontânea e incondicionada)
-                    e a estrutura do <strong className="font-semibold text-[#1A3C4D]">Ego</strong> (o conjunto de defesas, fixações mentais e máscaras
-                    adaptativas desenvolvidas na infância para garantir sobrevivência e pertencimento).
-                  </p>
-                  <p>
-                    No Instituto Kalapa, integramos a sabedoria tradicional do Eneagrama com os princípios da{" "}
-                    <strong className="font-semibold text-[#1A3C4D]">Psicologia Transpessoal</strong> e das{" "}
-                    <strong className="font-semibold text-[#1A3C4D]">Constelações Familiares de Bert Hellinger</strong>.
-                    Compreendemos que o eneatipo de uma pessoa não surge no vácuo; ele é moldado na interseção entre
-                    a predisposição biológica do indivíduo e as dinâmicas ocultas do sistema familiar. As fixações
-                    egóicas funcionam como lealdades invisíveis às memórias e dores do sistema de origem.
-                  </p>
-                  <p className="text-[#7D8C6E] font-medium italic pt-2">
-                    Faça seu teste e se autodesenvolva para transformar ainda mais sua vida.
-                  </p>
-                </div>
-              </div>
+              <h2 className="text-2xl sm:text-3xl font-serif text-[#1A3C4D] mb-4">
+                Instruções para o Teste
+              </h2>
 
               {/* Box de Instrução da Idade */}
               <div className="p-5 rounded-2xl bg-[#F8F4ED] border border-[#E8DEC8] text-left mb-6">

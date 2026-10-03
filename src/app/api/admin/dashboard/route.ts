@@ -229,7 +229,7 @@ export async function GET(req: NextRequest) {
         const prodNome = prodObj?.nome || itemObj?.nome || "Vivência Kalapa";
 
         const msg = encodeURIComponent(
-          `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do Instituto Kalapa. Vimos seu interesse na vivência "${prodNome}". Ficou com alguma dúvida sobre a inscrição ou pagamento? Posso te ajudar!`
+          `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos seu interesse na vivência "${prodNome}". Ficou com alguma dúvida sobre a inscrição ou pagamento? Posso te ajudar!`
         );
 
         return {

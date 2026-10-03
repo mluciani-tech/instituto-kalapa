@@ -460,7 +460,7 @@ export default function AdminUsuarios({
                       <div className="pt-1">
                         <a
                           href={`https://wa.me/55${usuarioParaReset.telefone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                            `Olá, ${usuarioParaReset.nome}! Aqui está o link seguro para você redefinir a sua senha de acesso no Instituto Kalapa (válido por 1 hora):\n\n${linkAdminGerado}\n\nQualquer dúvida, estamos à disposição!`
+                            `Olá, ${usuarioParaReset.nome}! Aqui está o link seguro para você redefinir a sua senha de acesso no INstituto Kalapa (válido por 1 hora):\n\n${linkAdminGerado}\n\nQualquer dúvida, estamos à disposição!`
                           )}`}
                           target="_blank"
                           rel="noopener noreferrer"

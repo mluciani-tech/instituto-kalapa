@@ -364,7 +364,7 @@ export default function TestReportModal({
           <div className="pt-6 border-t-2 border-brand-terracotta/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-brand-charcoal/70">
             <div className="space-y-1 text-center sm:text-left">
               <p className="font-bold text-brand-charcoal">
-                Instituto Kalapa — Espaço Serena (Cotia - SP)
+                INstituto Kalapa — Espaço Serena (Cotia - SP)
               </p>
               <p className="text-[11px] text-brand-charcoal/60">
                 Vivências em Grupo e Atendimentos Terapêuticos Integrativos de MTC

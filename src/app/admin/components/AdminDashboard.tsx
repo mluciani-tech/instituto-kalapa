@@ -293,7 +293,7 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
             </h2>
           </div>
           <p className="text-xs text-brand-charcoal/60 mt-0.5">
-            Métricas em tempo real de vendas, vagas e conversão do Instituto Kalapa
+            Métricas em tempo real de vendas, vagas e conversão do INstituto Kalapa
           </p>
         </div>
 
