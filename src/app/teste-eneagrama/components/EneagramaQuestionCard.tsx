@@ -42,7 +42,7 @@ export default function EneagramaQuestionCard({
           </h2>
 
           <p className="text-xs sm:text-sm text-[#1A3C4D]/60 font-light mb-8 max-w-md mx-auto">
-            Avalie o quanto esta frase descrevia a sua forma habitual de agir e reagir (especialmente entre seus 18 e 25 anos):
+            Avalie o quanto esta frase reflete a sua forma habitual de agir e reagir:
           </p>
 
           {/* Escala de 0 a 5 */}
