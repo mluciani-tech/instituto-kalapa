@@ -21,11 +21,11 @@ import ModalAlterarSenha from "@/components/ModalAlterarSenha";
 import type { Usuario } from "@/lib/types";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/#sobre", label: "A Facilitadora" },
+  { href: "/", label: "Início" },
+  { href: "/#sobre", label: "Sobre a Fundadora" },
   { href: "/produtos?categoria=vivencias", label: "Vivências" },
   { href: "/produtos?categoria=atendimentos", label: "Atendimentos" },
-  { href: "/produtos/empreendedorismo", label: "Empreendedorismo" },
+  { href: "/produtos/empreendedorismo", label: "Prosperidade & Negócio" },
   { href: "/produtos?categoria=calendario", label: "Calendário" },
 ];
 
