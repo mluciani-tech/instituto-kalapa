@@ -61,7 +61,6 @@ export default function QuestionCard({
           </div>
           <div className="mt-4 pt-3 border-t border-[#E8DEC8]/50 flex items-center justify-between text-xs text-[#1A3C4D]/50">
             <span>Natureza: Calor / Atividade</span>
-            <span className="font-semibold text-orange-700">+1 Yang</span>
           </div>
         </button>
 
@@ -96,7 +95,6 @@ export default function QuestionCard({
           </div>
           <div className="mt-4 pt-3 border-t border-[#E8DEC8]/50 flex items-center justify-between text-xs text-[#1A3C4D]/50">
             <span>Natureza: Frio / Repouso</span>
-            <span className="font-semibold text-blue-700">+1 Yin</span>
           </div>
         </button>
       </div>

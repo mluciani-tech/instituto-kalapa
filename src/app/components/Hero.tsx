@@ -88,34 +88,37 @@ export default function Hero() {
           </motion.p>
 
           {/* CTA */}
-          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5">
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-wrap md:flex-nowrap items-center gap-2 sm:gap-2.5 overflow-x-auto md:overflow-visible pb-1 md:pb-0"
+          >
             <Link
               href="/produtos?categoria=vivencias"
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
+              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
             >
               Vivências
             </Link>
             <Link
               href="/produtos?categoria=atendimentos"
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
+              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
             >
               Atendimentos
             </Link>
             <Link
               href="/produtos?categoria=calendario"
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
+              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
             >
               Calendário
             </Link>
             <Link
-              href="/teste-yin-yang"
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 border border-brand-terracotta/40 hover:border-brand-terracotta text-white text-xs sm:text-sm font-semibold rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card bg-brand-terracotta/20 hover:bg-brand-terracotta/30 hover:-translate-y-0.5 shadow-lg shadow-brand-terracotta/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
+              href="/teste-autoconhecimento"
+              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-brand-terracotta/40 hover:border-brand-terracotta text-white text-xs sm:text-sm font-semibold rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card bg-brand-terracotta/20 hover:bg-brand-terracotta/30 hover:-translate-y-0.5 shadow-lg shadow-brand-terracotta/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
             >
               <span>Teste de Autoconhecimento</span>
             </Link>
             <a
               href="#experiencia"
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep"
+              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
             >
               Sobre o INstituto Kalapa
             </a>
