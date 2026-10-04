@@ -68,7 +68,7 @@ export default function TesteAutoconhecimentoPage() {
                 Predominância Energética Yin-Yang
               </h2>
 
-              <p className="text-sm text-[#1A3C4D]/75 font-light leading-relaxed mb-6 text-justify">
+              <p className="text-sm text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
                 Fundamentado na Medicina Tradicional Chinesa, este teste avalia seu padrão corporal,
                 sensações térmicas, digestão, sono e respostas emocionais para identificar sua tendência
                 energética predominante.
@@ -128,7 +128,7 @@ export default function TesteAutoconhecimentoPage() {
                 A Sabedoria do Eneagrama & a Visão Sistêmica do INstituto Kalapa
               </h2>
 
-              <div className="space-y-3 text-xs sm:text-sm text-[#1A3C4D]/80 font-light leading-relaxed mb-6 text-justify">
+              <div className="space-y-3 text-xs sm:text-sm text-[#1A3C4D]/80 font-light leading-relaxed mb-6">
                 <p>
                   O Eneagrama é uma das ferramentas de autoconhecimento e transformação psicoespiritual mais
                   profundas da psicologia moderna e da sabedoria ancestral.

@@ -51,7 +51,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
   const preco = produto.preco ?? 0;
   const isGratuito = preco <= 0;
   const precoFormatado = isGratuito
-    ? ""
+    ? "Acesso Livre"
     : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const vagasEsgotadas = !isTeste && !isAgendamento && vagas && vagas.restantes <= 0;
@@ -190,19 +190,18 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
 
             {/* Preço + CTA */}
             <div className="pt-4 border-t border-brand-charcoal/10">
-              {!isGratuito && (
-                <div className="flex items-end gap-1 mb-3">
-                  <span className="text-3xl font-bold text-brand-charcoal tabular-nums">
-                    {precoFormatado}
-                  </span>
+              <div className="flex items-end gap-1 mb-3">
+                <span className={`font-bold text-brand-charcoal tabular-nums ${isGratuito ? 'text-2xl text-emerald-600' : 'text-3xl'}`}>
+                  {precoFormatado}
+                </span>
+                {!isGratuito && (
                   <span className="text-sm text-brand-charcoal/45 mb-1">
                     {isTeste ? "/ avaliação" : "/ sessão"}
                   </span>
-                </div>
-              )}
+                )}
+              </div>
 
-              {!isGratuito && (
-                <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                   {isAgendamento ? (
                     <Link
                       href={`/produtos/${produto.id}#agendamento`}
@@ -256,7 +255,6 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                     </>
                   )}
                 </div>
-              )}
             </div>
           </div>
         </div>

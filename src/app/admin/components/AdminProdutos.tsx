@@ -365,59 +365,7 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                {/* Botões Filtro Status do Produto */}
-                <div className="bg-brand-beige-light p-1 rounded-xl border border-brand-beige flex flex-wrap items-center text-xs font-medium gap-0.5">
-                  <button
-                    onClick={() => setProdutosStatusFiltro("todos")}
-                    className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
-                      produtosStatusFiltro === "todos"
-                        ? "bg-brand-purple text-white shadow-xs font-semibold"
-                        : "text-brand-charcoal/60 hover:text-brand-charcoal"
-                    }`}
-                  >
-                    Todos ({produtos.length})
-                  </button>
-                  <button
-                    onClick={() => setProdutosStatusFiltro("testes")}
-                    className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
-                      produtosStatusFiltro === "testes"
-                        ? "bg-brand-purple text-white shadow-xs font-semibold"
-                        : "text-brand-charcoal/60 hover:text-brand-charcoal"
-                    }`}
-                  >
-                    🧠 Testes ({produtos.filter((p) => p.is_teste || p.categoria === "testes").length})
-                  </button>
-                  <button
-                    onClick={() => setProdutosStatusFiltro("atendimentos")}
-                    className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
-                      produtosStatusFiltro === "atendimentos"
-                        ? "bg-brand-purple text-white shadow-xs font-semibold"
-                        : "text-brand-charcoal/60 hover:text-brand-charcoal"
-                    }`}
-                  >
-                    🗓️ Atendimentos ({produtos.filter((p) => p.atendimento_individual || isProdutoAgendamento(p)).length})
-                  </button>
-                  <button
-                    onClick={() => setProdutosStatusFiltro("ativos")}
-                    className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
-                      produtosStatusFiltro === "ativos"
-                        ? "bg-brand-purple text-white shadow-xs font-semibold"
-                        : "text-brand-charcoal/60 hover:text-brand-charcoal"
-                    }`}
-                  >
-                    Ativos ({produtos.filter((p) => p.ativo !== false).length})
-                  </button>
-                  <button
-                    onClick={() => setProdutosStatusFiltro("inativos")}
-                    className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
-                      produtosStatusFiltro === "inativos"
-                        ? "bg-brand-purple text-white shadow-xs font-semibold"
-                        : "text-brand-charcoal/60 hover:text-brand-charcoal"
-                    }`}
-                  >
-                    Inativos ({produtos.filter((p) => p.ativo === false).length})
-                  </button>
-                </div>
+
 
                 {/* Dropdown Filtro por Slug com Rolagem */}
                 <div className="flex items-center gap-1.5">

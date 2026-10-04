@@ -92,8 +92,11 @@ export default function TesteEneagramaPage() {
     calcularResultadoEneagrama(respostas);
 
   const precoExibicao = produtoTeste
-    ? produtoTeste.preco_promocional || produtoTeste.preco || 67
+    ? produtoTeste.preco_promocional ?? produtoTeste.preco ?? 67
     : 67;
+
+  const precoFormatado = precoExibicao <= 0 ? "Acesso Livre" : `R$ ${precoExibicao.toFixed(2).replace(".", ",")}`;
+
 
   const handleComprarTeste = () => {
     if (produtoTeste) {
@@ -276,7 +279,7 @@ export default function TesteEneagramaPage() {
                   </span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-serif font-bold text-[#1A3C4D]">
-                      R$ {precoExibicao.toFixed(2).replace(".", ",")}
+                      {precoFormatado}
                     </span>
                     <span className="text-xs text-[#1A3C4D]/60 font-light">/ avaliação online</span>
                   </div>
@@ -317,7 +320,7 @@ export default function TesteEneagramaPage() {
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#7D8C6E] text-white text-sm font-medium hover:bg-[#6C7B5D] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>Comprar Avaliação (R$ {precoExibicao.toFixed(2).replace(".", ",")})</span>
+                <span>Comprar Avaliação ({precoFormatado})</span>
               </button>
               <Link
                 href="/login?redirect=/teste-eneagrama"
@@ -359,7 +362,7 @@ export default function TesteEneagramaPage() {
                   </span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-serif font-bold text-[#1A3C4D]">
-                      R$ {precoExibicao.toFixed(2).replace(".", ",")}
+                      {precoFormatado}
                     </span>
                     <span className="text-xs text-[#1A3C4D]/60 font-light">/ avaliação online</span>
                   </div>
@@ -397,7 +400,7 @@ export default function TesteEneagramaPage() {
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#7D8C6E] text-white text-sm font-medium hover:bg-[#6C7B5D] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4" />
-                <span>Adicionar ao Carrinho (R$ {precoExibicao.toFixed(2).replace(".", ",")})</span>
+                <span>Adicionar ao Carrinho ({precoFormatado})</span>
               </button>
               <Link
                 href="/conta/pedidos"
