@@ -58,11 +58,36 @@ export async function GET(req: NextRequest) {
       slug
     );
 
+    let ultimaAvaliacao = null;
+    if (supabaseAdmin) {
+      let tableName = "";
+      if (slugNormalizado.includes("cronotipo")) tableName = "avaliacoes_cronotipo";
+      else if (slugNormalizado.includes("eneagrama")) tableName = "avaliacoes_eneagrama";
+      else if (slugNormalizado.includes("yin-yang") || slugNormalizado.includes("yinyang")) tableName = "avaliacoes_yin_yang";
+
+      if (tableName) {
+        try {
+          const { data: aval } = await supabaseAdmin
+            .from(tableName)
+            .select("respostas, created_at")
+            .or(`usuario_id.eq.${usuario.id},email.eq.${usuario.email.trim().toLowerCase()}`)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          if (aval) ultimaAvaliacao = aval;
+        } catch (err) {
+          console.warn("[api/testes/credito] Erro ao buscar última avaliação:", err);
+        }
+      }
+    }
+
     return NextResponse.json({
       authenticated: true,
       disponivel,
       creditosRestantes,
       produto: produtoTeste,
+      ultimaAvaliacao,
       usuario: {
         id: usuario.id,
         nome: usuario.nome,

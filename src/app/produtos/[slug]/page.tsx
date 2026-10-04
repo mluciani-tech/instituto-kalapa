@@ -53,6 +53,8 @@ async function getProdutoBySlug(
     atendimentos: "atendimentos",
     calendario: "calendario",
     "terapia-adulto": "atendimentos",
+    teste: "testes",
+    testes: "testes",
   };
   const lowerSlug = slug.toLowerCase();
   if (genericSlugs[lowerSlug]) {

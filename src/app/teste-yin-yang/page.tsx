@@ -80,6 +80,11 @@ export default function TesteYinYangPage() {
         setProdutoTeste(data.produto);
       }
 
+      if (data?.ultimaAvaliacao && creditos === 0) {
+        setRespostas(data.ultimaAvaliacao.respostas);
+        setEtapa("resultado");
+      }
+
       // Se o usuário veio com ?iniciar=1 ou ?sucesso=1 e possui créditos, avança direto para o teste!
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search);
