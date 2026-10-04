@@ -277,3 +277,17 @@ export interface AvaliacaoEneagrama {
   updated_at?: string;
 }
 
+export interface AvaliacaoCronotipo {
+  id: string;
+  usuario_id?: string | null;
+  nome: string;
+  email: string;
+  telefone?: string | null;
+  pontuacao_total: number;
+  cronotipo: "matutino" | "intermediario" | "vespertino";
+  nome_cronotipo: string;
+  respostas: Record<string, { opcao: string; pontos: number; resposta: string }>;
+  created_at: string;
+  updated_at?: string;
+}
+

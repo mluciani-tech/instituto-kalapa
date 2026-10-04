@@ -82,9 +82,9 @@ export default function AdminManual() {
     },
     {
       id: "teste-yin-yang",
-      title: "6. Avaliações & Laudos PDF (Yin/Yang & Eneagrama)",
+      title: "6. Avaliações & Laudos PDF (Yin/Yang, Eneagrama & Cronotipo)",
       icon: Sparkles,
-      summary: "Módulos de Yin/Yang e Eneagrama, captação de leads, diagnósticos, laudos A4 e métricas gerenciais.",
+      summary: "Módulos de Yin/Yang, Eneagrama e Cronotipo circadiano, captação de leads, laudos A4 e métricas gerenciais.",
       badge: "Novo",
     },
     {
@@ -563,10 +563,10 @@ export default function AdminManual() {
                   <span>Novo Módulo Clínico de Autoconhecimento</span>
                 </div>
                 <h2 className="text-lg font-bold text-brand-charcoal">
-                  6. Avaliações Clínicas (Yin/Yang & Eneagrama) & Laudos em PDF
+                  6. Avaliações Clínicas (Yin/Yang, Eneagrama & Cronotipo) & Laudos em PDF
                 </h2>
                 <p className="text-xs text-brand-charcoal/70 mt-1">
-                  Módulos de diagnóstico e autoconhecimento integrando a Medicina Tradicional Chinesa (Yin/Yang) e o Eneagrama com Constelações Familiares, com relatórios em PDF formatados para folha A4, compartilhamento e controle administrativo unificado.
+                  Módulos de diagnóstico e autoconhecimento integrando a Medicina Tradicional Chinesa (Yin/Yang), o Eneagrama com Constelações Familiares e a Cronobiologia (Ritmo Biológico), com relatórios em PDF formatados para folha A4, compartilhamento e controle administrativo unificado.
                 </p>
               </div>
 
@@ -634,10 +634,37 @@ export default function AdminManual() {
                   </div>
                 </div>
 
+                {/* Cronotipo Biológico */}
+                <div className="pt-2 border-t border-brand-beige">
+                  <p className="text-[11px] font-bold text-brand-charcoal/70 uppercase tracking-wider mb-2">
+                    Cronobiologia & Perfis Circadianos (Escala de 6 a 18 Pontos)
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+                    <div className="bg-amber-50/60 p-3 rounded-xl border border-amber-200">
+                      <span className="font-bold text-amber-900 block mb-1">Cotovia • Matutino (15-18 pts)</span>
+                      <p className="text-amber-950/80 leading-relaxed text-[11px]">
+                        Pico cognitivo matutino (08h às 12h), despertar precoce e sono antecipado (21h30). Dificuldade em turnos noturnos.
+                      </p>
+                    </div>
+                    <div className="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200">
+                      <span className="font-bold text-emerald-900 block mb-1">Urso • Intermediário (10-14 pts)</span>
+                      <p className="text-emerald-950/80 leading-relaxed text-[11px]">
+                        Ritmo da adaptação biológica, distribuição equilibrada de energia e pico entre 10h e 16h. Maior flexibilidade horária.
+                      </p>
+                    </div>
+                    <div className="bg-slate-100/80 p-3 rounded-xl border border-slate-300">
+                      <span className="font-bold text-slate-900 block mb-1">Coruja • Vespertino (6-9 pts)</span>
+                      <p className="text-slate-950/80 leading-relaxed text-[11px]">
+                        Pico de atenção ao entardecer/noite (16h às 22h). Maior vulnerabilidade ao jetlag social e privação crônica de sono matinal.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200/80 text-xs text-amber-950/85 flex items-start gap-2.5">
                   <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-amber-900 font-semibold">Tratamento de Empate Energético:</strong> Em caso de equivalência exata de pontuação entre Yang e Yin, o sistema bloqueia automaticamente a emissão de laudo e abre um modal informativo solicitando que o participante retome o teste do início, garantindo rigor e eficácia clínica.
+                    <strong className="text-amber-900 font-semibold">Tratamento de Empate Energético no Yin-Yang:</strong> Em caso de equivalência exata de pontuação entre Yang e Yin, o sistema bloqueia automaticamente a emissão de laudo e abre um modal informativo solicitando que o participante retome o teste do início, garantindo rigor e eficácia clínica.
                   </div>
                 </div>
               </div>
@@ -666,10 +693,10 @@ export default function AdminManual() {
               <div className="border border-brand-mint/40 bg-brand-mint/10 rounded-xl p-4 text-xs space-y-2">
                 <p className="font-bold text-brand-mint">Funil de Conversão Terapêutica & Gestão de Leads no Admin</p>
                 <p className="text-brand-charcoal/80 leading-relaxed">
-                  Os testes de autoconhecimento (Yin/Yang e Eneagrama) são portas de entrada estratégicas para novos alunos e pacientes. Ao concluir o teste, o usuário é convidado a participar das vivências semanais de grupo (quintas-feiras às 19:30) ou agendar uma consulta individual com as terapeutas do INstituto.
+                  Os testes de autoconhecimento (Yin/Yang, Eneagrama e Cronotipo) são portas de entrada estratégicas para novos alunos e pacientes. Ao concluir o teste, o usuário é convidado a participar das vivências semanais de grupo (quintas-feiras às 19:30) ou agendar uma consulta individual com as terapeutas do INstituto.
                 </p>
                 <p className="text-brand-charcoal/80 leading-relaxed pt-1 border-t border-brand-mint/20">
-                  <strong>Aba &ldquo;Avaliações&rdquo; no Painel Admin:</strong> Centraliza todos os diagnósticos gerados com seletor triplo (<strong>Todos</strong>, <strong>Yin/Yang</strong> e <strong>Eneagrama</strong>). Disponibiliza métricas gerenciais em tempo real, comparativo de tendências (últimos 7 e 30 dias), identificação de leads únicos e participantes que fizeram ambos os testes, distribuição por perfis clínicos, botões diretos de contato via WhatsApp com mensagens personalizadas, exportação de relatórios em CSV e botões de compartilhamento rápido em redes sociais.
+                  <strong>Aba &ldquo;Avaliações&rdquo; no Painel Admin:</strong> Centraliza todos os diagnósticos gerados com seletor quádruplo (<strong>Todos</strong>, <strong>Yin/Yang</strong>, <strong>Eneagrama</strong> e <strong>Cronotipo</strong>). Disponibiliza métricas gerenciais em tempo real, comparativo de tendências (últimos 7 e 30 dias), identificação de leads únicos e participantes que realizaram múltiplos testes, distribuição por perfis clínicos (Cotovia, Urso e Coruja), botões diretos de contato via WhatsApp com mensagens personalizadas, exportação de relatórios em CSV e botões de compartilhamento rápido em redes sociais.
                 </p>
               </div>
             </div>

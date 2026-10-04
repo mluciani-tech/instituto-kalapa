@@ -32,9 +32,7 @@ export async function GET(req: NextRequest) {
       try {
         const { data: prod } = await supabaseAdmin
           .from("produtos")
-          .select(
-            "id, nome, slug, preco, preco_promocional, imagem_url, rota_teste, orientacoes_pre_teste, inclui_laudo_pdf, ativo"
-          )
+          .select("*")
           .or(`slug.eq.${slugNormalizado},slug.eq.${slugVariante},rota_teste.ilike.%${slugVariante}%`)
           .limit(1)
           .maybeSingle();

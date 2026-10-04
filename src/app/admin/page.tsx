@@ -73,9 +73,10 @@ export default function AdminPage() {
 
   const fetchAvaliacoesTotal = useCallback(async () => {
     try {
-      const [yy, en] = await Promise.all([
+      const [yy, en, cr] = await Promise.all([
         fetch("/api/admin/avaliacoes-yin-yang?perPage=1"),
         fetch("/api/admin/avaliacoes-eneagrama?perPage=1"),
+        fetch("/api/admin/avaliacoes-cronotipo?perPage=1"),
       ]);
       let soma = 0;
       if (yy.ok) {
@@ -84,6 +85,10 @@ export default function AdminPage() {
       }
       if (en.ok) {
         const json = await en.json();
+        soma += json.totalGeral ?? json.total ?? 0;
+      }
+      if (cr.ok) {
+        const json = await cr.json();
         soma += json.totalGeral ?? json.total ?? 0;
       }
       setAvaliacoesTotal(soma);

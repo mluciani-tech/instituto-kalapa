@@ -15,15 +15,20 @@ import {
   Calendar,
   Mail,
   Repeat,
+  Clock,
+  Sunrise,
+  SunMedium,
+  Moon,
 } from "lucide-react";
 import AdminAvaliacoesYinYang from "./AdminAvaliacoesYinYang";
 import AdminAvaliacoesEneagrama from "./AdminAvaliacoesEneagrama";
+import AdminAvaliacoesCronotipo from "./AdminAvaliacoesCronotipo";
 
-type Visao = "todos" | "yinyang" | "eneagrama";
+type Visao = "todos" | "yinyang" | "eneagrama" | "cronotipo";
 
 interface LinhaCombinada {
   id: string;
-  teste: "yinyang" | "eneagrama";
+  teste: "yinyang" | "eneagrama" | "cronotipo";
   nome: string;
   email: string;
   telefone: string | null;
@@ -52,9 +57,25 @@ interface Insights {
     ultimos30: number;
     anteriores30: number;
   };
-  combinado: { leadsUnicos: number; fizeramAmbos: number; comTelefoneUnicos: number };
+  cronotipo: {
+    total: number;
+    matutino: number;
+    intermediario: number;
+    vespertino: number;
+    comTelefone: number;
+    ultimos7: number;
+    ultimos30: number;
+    anteriores30: number;
+  };
+  combinado: {
+    leadsUnicos: number;
+    fizeramAmbos: number;
+    fizeramMultiplos?: number;
+    comTelefoneUnicos: number;
+  };
   recentes: LinhaCombinada[];
   eneagramaDisponivel: boolean;
+  cronotipoDisponivel: boolean;
 }
 
 function Tendencia({ atual, anterior }: { atual: number; anterior: number }) {
@@ -99,7 +120,7 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [testeFiltro, setTesteFiltro] = useState<"todos" | "yinyang" | "eneagrama">("todos");
+  const [testeFiltro, setTesteFiltro] = useState<"todos" | "yinyang" | "eneagrama" | "cronotipo">("todos");
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -122,10 +143,25 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
     return () => clearTimeout(t);
   }, [carregar, search]);
 
-  const totalAvaliacoes = (dados?.yinyang.total || 0) + (dados?.eneagrama.total || 0);
-  const ultimos30 = (dados?.yinyang.ultimos30 || 0) + (dados?.eneagrama.ultimos30 || 0);
-  const anteriores30 = (dados?.yinyang.anteriores30 || 0) + (dados?.eneagrama.anteriores30 || 0);
-  const ultimos7 = (dados?.yinyang.ultimos7 || 0) + (dados?.eneagrama.ultimos7 || 0);
+  const totalAvaliacoes =
+    (dados?.yinyang.total || 0) +
+    (dados?.eneagrama.total || 0) +
+    (dados?.cronotipo?.total || 0);
+
+  const ultimos30 =
+    (dados?.yinyang.ultimos30 || 0) +
+    (dados?.eneagrama.ultimos30 || 0) +
+    (dados?.cronotipo?.ultimos30 || 0);
+
+  const anteriores30 =
+    (dados?.yinyang.anteriores30 || 0) +
+    (dados?.eneagrama.anteriores30 || 0) +
+    (dados?.cronotipo?.anteriores30 || 0);
+
+  const ultimos7 =
+    (dados?.yinyang.ultimos7 || 0) +
+    (dados?.eneagrama.ultimos7 || 0) +
+    (dados?.cronotipo?.ultimos7 || 0);
 
   const linhas = (dados?.recentes || []).filter(
     (r) => testeFiltro === "todos" || r.teste === testeFiltro
@@ -140,17 +176,6 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
         </div>
       )}
 
-      {dados && !dados.eneagramaDisponivel && (
-        <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 text-xs sm:text-sm flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>
-            A tabela <code className="font-mono">avaliacoes_eneagrama</code> ainda não existe. Execute o script{" "}
-            <code className="font-mono">supabase/migrate-avaliacoes-eneagrama.sql</code> no SQL Editor do Supabase para
-            começar a registrar os testes do Eneagrama.
-          </span>
-        </div>
-      )}
-
       {/* KPIs gerais */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-beige shadow-xs">
@@ -162,7 +187,8 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
           </div>
           <p className="text-2xl sm:text-3xl font-bold text-brand-purple">{totalAvaliacoes}</p>
           <p className="text-[11px] text-brand-charcoal/50 mt-1">
-            {dados?.yinyang.total || 0} Yin/Yang · {dados?.eneagrama.total || 0} Eneagrama
+            {dados?.yinyang.total || 0} Yin/Yang · {dados?.eneagrama.total || 0} Eneagrama ·{" "}
+            {dados?.cronotipo?.total || 0} Cronotipo
           </p>
         </div>
 
@@ -173,22 +199,30 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-brand-charcoal">{dados?.combinado.leadsUnicos || 0}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-brand-charcoal">
+            {dados?.combinado.leadsUnicos || 0}
+          </p>
           <p className="text-[11px] text-brand-charcoal/50 mt-1">Pessoas distintas (por e-mail)</p>
         </div>
 
         <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-beige shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-brand-charcoal/60">Fizeram os 2 testes</span>
+            <span className="text-xs font-medium text-brand-charcoal/60">Fizeram + de 1 teste</span>
             <div className="w-8 h-8 rounded-xl bg-brand-purple/10 text-brand-purple flex items-center justify-center">
               <Repeat className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <p className="text-2xl sm:text-3xl font-bold text-brand-charcoal">{dados?.combinado.fizeramAmbos || 0}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-brand-charcoal">
+              {dados?.combinado.fizeramMultiplos ?? dados?.combinado.fizeramAmbos ?? 0}
+            </p>
             <span className="text-xs font-semibold text-brand-purple">
               {dados && dados.combinado.leadsUnicos > 0
-                ? `${Math.round((dados.combinado.fizeramAmbos / dados.combinado.leadsUnicos) * 100)}%`
+                ? `${Math.round(
+                    ((dados.combinado.fizeramMultiplos ?? dados.combinado.fizeramAmbos) /
+                      dados.combinado.leadsUnicos) *
+                      100
+                  )}%`
                 : "0%"}
             </span>
           </div>
@@ -208,7 +242,9 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
             </p>
             <span className="text-xs font-semibold text-emerald-700">
               {dados && dados.combinado.leadsUnicos > 0
-                ? `${Math.round((dados.combinado.comTelefoneUnicos / dados.combinado.leadsUnicos) * 100)}%`
+                ? `${Math.round(
+                    (dados.combinado.comTelefoneUnicos / dados.combinado.leadsUnicos) * 100
+                  )}%`
                 : "0%"}
             </span>
           </div>
@@ -217,7 +253,8 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
       </div>
 
       {/* Comparativo por teste + tendência */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Card Yin/Yang */}
         <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-beige shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-brand-charcoal flex items-center gap-1.5">
@@ -241,9 +278,13 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
               <strong className="text-emerald-900 text-lg">{dados?.yinyang.yin || 0}</strong>
             </div>
           </div>
-          <Tendencia atual={dados?.yinyang.ultimos30 || 0} anterior={dados?.yinyang.anteriores30 || 0} />
+          <Tendencia
+            atual={dados?.yinyang.ultimos30 || 0}
+            anterior={dados?.yinyang.anteriores30 || 0}
+          />
         </div>
 
+        {/* Card Eneagrama */}
         <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-beige shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-brand-charcoal flex items-center gap-1.5">
@@ -265,16 +306,60 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
               </strong>
             </div>
             <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-100">
-              <span className="text-amber-900/70 block">Empates técnicos</span>
+              <span className="text-amber-900/70 block">Empates</span>
               <strong className="text-amber-900 text-lg">{dados?.eneagrama.empates || 0}</strong>
             </div>
           </div>
-          <Tendencia atual={dados?.eneagrama.ultimos30 || 0} anterior={dados?.eneagrama.anteriores30 || 0} />
+          <Tendencia
+            atual={dados?.eneagrama.ultimos30 || 0}
+            anterior={dados?.eneagrama.anteriores30 || 0}
+          />
         </div>
 
+        {/* Card Cronotipo */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-beige shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-brand-charcoal flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-[#B8965A]" /> Cronotipo
+            </h3>
+            <button
+              type="button"
+              onClick={() => onAbrirTeste("cronotipo")}
+              className="text-[11px] font-semibold text-brand-purple hover:underline"
+            >
+              Ver detalhes →
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 text-xs text-center">
+            <div className="p-2 rounded-xl bg-amber-50 border border-amber-100">
+              <span className="text-amber-900/70 block text-[10px]">Cotovia</span>
+              <strong className="text-amber-900 text-sm">
+                {dados?.cronotipo?.matutino || 0}
+              </strong>
+            </div>
+            <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-100">
+              <span className="text-emerald-900/70 block text-[10px]">Urso</span>
+              <strong className="text-emerald-900 text-sm">
+                {dados?.cronotipo?.intermediario || 0}
+              </strong>
+            </div>
+            <div className="p-2 rounded-xl bg-slate-100 border border-slate-200">
+              <span className="text-slate-900/70 block text-[10px]">Coruja</span>
+              <strong className="text-slate-900 text-sm">
+                {dados?.cronotipo?.vespertino || 0}
+              </strong>
+            </div>
+          </div>
+          <Tendencia
+            atual={dados?.cronotipo?.ultimos30 || 0}
+            anterior={dados?.cronotipo?.anteriores30 || 0}
+          />
+        </div>
+
+        {/* Card Tendência de Entrada */}
         <div className="bg-white p-4 sm:p-5 rounded-2xl border border-brand-beige shadow-xs space-y-3">
           <h3 className="text-sm font-semibold text-brand-charcoal flex items-center gap-1.5">
-            <TrendingUp className="w-4 h-4 text-emerald-600" /> Tendência de Entrada
+            <TrendingUp className="w-4 h-4 text-emerald-600" /> Tendência Geral
           </h3>
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="p-2.5 rounded-xl bg-brand-beige-light border border-brand-beige/70">
@@ -302,27 +387,32 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
             className="w-full pl-9 pr-3.5 py-2 border border-brand-beige rounded-xl text-xs sm:text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/20 focus-visible:border-brand-purple"
           />
         </div>
-        <div className="relative shrink-0 self-start sm:self-auto w-full sm:w-40">
+        <div className="relative shrink-0 self-start sm:self-auto w-full sm:w-44">
           <select
             value={testeFiltro}
-            onChange={(e) => setTesteFiltro(e.target.value as Visao)}
+            onChange={(e) => setTesteFiltro(e.target.value as any)}
             className="w-full appearance-none bg-brand-beige-light border border-brand-beige text-brand-charcoal text-xs sm:text-sm font-medium py-2 pl-3 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple cursor-pointer transition-colors hover:bg-brand-beige"
             aria-label="Filtrar por teste"
           >
-            {(
-              [
-                ["todos", "Todos"],
-                ["yinyang", "Yin/Yang"],
-                ["eneagrama", "Eneagrama"],
-              ] as const
-            ).map(([id, label]) => (
+            {[
+              ["todos", "Todos os Testes"],
+              ["yinyang", "Yin/Yang"],
+              ["eneagrama", "Eneagrama"],
+              ["cronotipo", "Cronotipo"],
+            ].map(([id, label]) => (
               <option key={id} value={id}>
                 {label}
               </option>
             ))}
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-brand-charcoal/50">
-            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            <svg
+              className="fill-current h-4 w-4"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+            >
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
           </div>
         </div>
       </div>
@@ -336,7 +426,9 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
         ) : linhas.length === 0 ? (
           <div className="py-16 text-center text-brand-charcoal/50 space-y-2">
             <Layers className="w-8 h-8 mx-auto text-brand-beige mb-1" />
-            <p className="text-sm font-medium text-brand-charcoal/70">Nenhuma avaliação encontrada</p>
+            <p className="text-sm font-medium text-brand-charcoal/70">
+              Nenhuma avaliação encontrada
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -352,7 +444,10 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
               </thead>
               <tbody className="divide-y divide-brand-beige/50">
                 {linhas.map((r) => (
-                  <tr key={`${r.teste}-${r.id}`} className="hover:bg-brand-beige-light/30 transition-colors">
+                  <tr
+                    key={`${r.teste}-${r.id}`}
+                    className="hover:bg-brand-beige-light/30 transition-colors"
+                  >
                     <td className="py-3.5 px-4 text-xs text-brand-charcoal/70 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-brand-charcoal/40" />
@@ -376,7 +471,9 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
                       </a>
                     </td>
                     <td className="py-3.5 px-4 whitespace-nowrap text-xs text-brand-charcoal/70">
-                      {r.telefone || <span className="italic text-brand-charcoal/40">Não informado</span>}
+                      {r.telefone || (
+                        <span className="italic text-brand-charcoal/40">Não informado</span>
+                      )}
                     </td>
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       <button
@@ -385,21 +482,31 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border cursor-pointer ${
                           r.teste === "yinyang"
                             ? "bg-brand-terracotta/10 text-brand-terracotta border-brand-terracotta/25"
+                            : r.teste === "cronotipo"
+                            ? "bg-amber-100/70 text-amber-900 border-amber-200"
                             : "bg-brand-purple/10 text-brand-purple border-brand-purple/20"
                         }`}
                         title="Abrir a lista completa deste teste"
                       >
                         {r.teste === "yinyang" ? (
                           <Sparkles className="w-3.5 h-3.5" />
+                        ) : r.teste === "cronotipo" ? (
+                          <Clock className="w-3.5 h-3.5 text-[#B8965A]" />
                         ) : (
                           <Compass className="w-3.5 h-3.5" />
                         )}
-                        {r.teste === "yinyang" ? "Yin/Yang" : "Eneagrama"}
+                        {r.teste === "yinyang"
+                          ? "Yin/Yang"
+                          : r.teste === "cronotipo"
+                          ? "Cronotipo"
+                          : "Eneagrama"}
                       </button>
                     </td>
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       <span className="font-semibold text-brand-charcoal">{r.resultado}</span>
-                      <span className="block text-[11px] text-brand-charcoal/50">{r.detalhe}</span>
+                      <span className="block text-[11px] text-brand-charcoal/50">
+                        {r.detalhe}
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -409,7 +516,8 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
         )}
         {dados && dados.recentes.length >= 100 && (
           <div className="p-3 border-t border-brand-beige text-[11px] text-brand-charcoal/50 text-center">
-            Exibindo os 100 registros mais recentes. Use as abas Yin/Yang ou Eneagrama para ver a lista completa.
+            Exibindo os 100 registros mais recentes. Use as abas específicas para ver a lista
+            completa.
           </div>
         )}
       </div>
@@ -424,6 +532,7 @@ export default function AdminAvaliacoes() {
     { id: "todos", label: "Todos", icon: Layers },
     { id: "yinyang", label: "Yin/Yang", icon: Sparkles },
     { id: "eneagrama", label: "Eneagrama", icon: Compass },
+    { id: "cronotipo", label: "Cronotipo", icon: Clock },
   ];
 
   return (
@@ -437,11 +546,12 @@ export default function AdminAvaliacoes() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-brand-charcoal/60 mt-0.5">
-            Analise cada teste separadamente ou veja a visão geral com insights de todos os participantes.
+            Analise cada teste separadamente ou veja a visão geral com insights de todos os
+            participantes.
           </p>
         </div>
 
-        <div className="relative self-start sm:self-auto shrink-0 w-full sm:w-48">
+        <div className="relative self-start sm:self-auto shrink-0 w-full sm:w-52">
           <select
             value={visao}
             onChange={(e) => setVisao(e.target.value as Visao)}
@@ -455,7 +565,13 @@ export default function AdminAvaliacoes() {
             ))}
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-brand-charcoal/50">
-            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            <svg
+              className="fill-current h-4 w-4"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+            >
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+            </svg>
           </div>
         </div>
       </div>
@@ -463,6 +579,7 @@ export default function AdminAvaliacoes() {
       {visao === "todos" && <VisaoGeral onAbrirTeste={setVisao} />}
       {visao === "yinyang" && <AdminAvaliacoesYinYang />}
       {visao === "eneagrama" && <AdminAvaliacoesEneagrama />}
+      {visao === "cronotipo" && <AdminAvaliacoesCronotipo />}
     </div>
   );
 }

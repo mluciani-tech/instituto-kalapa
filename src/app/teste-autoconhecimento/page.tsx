@@ -6,7 +6,7 @@ import TestShareMenu from "../components/TestShareMenu";
 export const metadata = {
   title: "Testes de Autoconhecimento — INstituto Kalapa",
   description:
-    "Explore testes gratuitos de autoconhecimento: Predominância Yin-Yang da Medicina Tradicional Chinesa e Teste de Personalidade do Eneagrama.",
+    "Explore testes gratuitos de autoconhecimento: Predominância Yin-Yang da Medicina Tradicional Chinesa, Teste de Personalidade do Eneagrama e Teste de Cronotipo & Ritmo Biológico.",
 };
 
 export default function TesteAutoconhecimentoPage() {
@@ -38,8 +38,8 @@ export default function TesteAutoconhecimentoPage() {
       </section>
 
       {/* Grid de Escolha dos Testes */}
-      <section className="flex-grow w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+      <section className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Card 1: Teste Yin-Yang */}
           <div className="bg-white rounded-3xl p-7 sm:p-9 shadow-lg shadow-[#E8DEC8]/20 border border-[#E8DEC8] flex flex-col justify-between hover:shadow-xl hover:border-[#B8965A]/50 transition-all duration-300 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-48 h-48 bg-[#B8965A]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 group-hover:bg-[#B8965A]/10 transition-colors" />
@@ -65,28 +65,28 @@ export default function TesteAutoconhecimentoPage() {
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-serif font-medium text-[#1A3C4D] mb-3">
-                Predominância Energética Yin-Yang
+                A Sabedoria do Yin-Yang & o Equilíbrio Energético
               </h2>
 
-              <p className="text-sm text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
-                Fundamentado na Medicina Tradicional Chinesa, este teste avalia seu padrão corporal,
-                sensações térmicas, digestão, sono e respostas emocionais para identificar sua tendência
-                energética predominante.
-              </p>
-
-              <div className="space-y-2.5 mb-8 text-xs sm:text-sm text-[#1A3C4D]/75">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#B8965A]" />
-                  <span>15 perguntas diretas e sem respostas certas ou erradas</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#B8965A]" />
-                  <span>Diagnóstico de excesso ou deficiência de Yin ou Yang</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#B8965A]" />
-                  <span>Práticas de respiração guiada e fitoterapia integrativa</span>
-                </div>
+              <div className="space-y-3 text-xs sm:text-sm text-[#1A3C4D]/80 font-light leading-relaxed mb-6">
+                <p>
+                  Fundamentado nos princípios da Medicina Tradicional Chinesa, o Yin-Yang representa a dinâmica de forças complementares que se expressam no corpo, nas emoções, nos comportamentos e na forma como nos relacionamos com a vida.
+                </p>
+                <p>
+                  Este teste observa aspectos como temperatura corporal, digestão, sono, disposição, metabolismo, emoções e respostas diante dos desafios, identificando tendências de predominância Yin ou Yang e possíveis padrões de desequilíbrio energético.
+                </p>
+                <p>
+                  Nosso padrão energético pode se manifestar em diferentes dimensões da vida: na disposição para agir e realizar, na relação com o descanso, na vitalidade, no controle do peso e na busca por realizações pessoais e profissionais. Também podemos apresentar maior sensibilidade a determinadas condições ambientais ou perceber mudanças no bem-estar conforme as estações do ano.
+                </p>
+                <p>
+                  Na perspectiva da Medicina Tradicional Chinesa, o equilíbrio não é um estado fixo, mas um processo dinâmico de autorregulação. Yin e Yang estão em constante movimento, ajustando-se às transformações do organismo, das emoções, dos ciclos da natureza e das circunstâncias da vida. Equilibrar não significa eliminar as diferenças, mas reconhecer quando uma força predomina e favorecer a harmonia entre elas.
+                </p>
+                <p>
+                  Mais do que classificar, este teste é um convite à observação de si: reconhecer padrões, compreender necessidades e identificar possibilidades de cuidado que favoreçam uma relação mais consciente entre corpo, mente e ambiente.
+                </p>
+                <p className="text-[#B8965A] font-medium italic pt-1 text-left">
+                  Faça seu teste e descubra sua predominância energética. Conhecer o seu padrão é o primeiro passo para compreender o seu momento e cultivar um equilíbrio que se transforma junto com você.
+                </p>
               </div>
             </div>
 
@@ -158,6 +158,60 @@ export default function TesteAutoconhecimentoPage() {
                 className="w-full py-4 px-6 rounded-2xl bg-[#7D8C6E] hover:bg-[#6C7B5D] text-white text-sm font-semibold transition-all duration-200 shadow-md shadow-[#7D8C6E]/20 flex items-center justify-center gap-2 group-hover:gap-3 cursor-pointer"
               >
                 <span>Iniciar Teste do Eneagrama</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Card 3: Teste Cronotipo */}
+          <div className="bg-white rounded-3xl p-7 sm:p-9 shadow-lg shadow-[#E8DEC8]/20 border border-[#E8DEC8] flex flex-col justify-between hover:shadow-xl hover:border-[#B8965A]/60 transition-all duration-300 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-[#B8965A]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 group-hover:bg-[#B8965A]/15 transition-colors" />
+
+            <div>
+              <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-amber-100/70 text-amber-900 border border-amber-200">
+                    <Clock className="w-3.5 h-3.5 text-[#B8965A]" />
+                    Cronobiologia • 6 Dimensões
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-xs text-[#1A3C4D]/60 font-light">
+                    <Clock className="w-3.5 h-3.5" /> ~2 min
+                  </span>
+                </div>
+                <TestShareMenu
+                  variant="circle"
+                  titulo="Teste de Cronotipo"
+                  path="/teste-cronotipo"
+                  convite="Descubra seu Cronotipo e ritmo biológico (Cotovia, Urso ou Coruja) no INstituto Kalapa:"
+                />
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-serif font-medium text-[#1A3C4D] mb-3">
+                A Sabedoria do Cronotipo & o Ritmo Biológico
+              </h2>
+
+              <div className="space-y-3 text-xs sm:text-sm text-[#1A3C4D]/80 font-light leading-relaxed mb-6">
+                <p>
+                  O cronotipo é uma expressão individual do nosso relógio biológico, revelando tendências naturais em relação aos horários de sono, vigília, energia, atenção e desempenho ao longo do dia.
+                </p>
+                <p>
+                  Mais do que definir se alguém é “diurno” ou “noturno”, compreender o cronotipo é reconhecer que cada organismo possui um ritmo próprio. Esse ritmo resulta da interação entre nossa biologia, a luz, os hábitos e os horários impostos pela vida social e profissional.
+                </p>
+                <p>
+                  Quando conhecemos esse funcionamento, podemos compreender melhor padrões de disposição, produtividade, sono e até de regulação emocional — transformando uma característica que muitas vezes é julgada como falta de disciplina em uma oportunidade de autoconhecimento e consciência corporal.
+                </p>
+                <p className="text-[#B8965A] font-medium italic pt-1 text-left">
+                  Faça seu teste e descubra o seu cronotipo. Conhecer o seu ritmo é também aprender a viver em maior sintonia com você.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <Link
+                href="/teste-cronotipo"
+                className="w-full py-4 px-6 rounded-2xl bg-[#1A3C4D] hover:bg-[#15313F] text-white text-sm font-semibold transition-all duration-200 shadow-md shadow-[#1A3C4D]/15 flex items-center justify-center gap-2 group-hover:gap-3 cursor-pointer"
+              >
+                <span>Iniciar Teste do Cronotipo</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>

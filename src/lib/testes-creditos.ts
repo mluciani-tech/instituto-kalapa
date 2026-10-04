@@ -31,13 +31,13 @@ export async function isTesteGratuito(slugOuRota: string): Promise<boolean> {
   try {
     const { data } = await supabaseAdmin
       .from("produtos")
-      .select("preco_promocional, preco")
+      .select("*")
       .or(`slug.eq.${slugNormalizado},slug.eq.${slugVariante},rota_teste.ilike.%${slugVariante}%`)
       .limit(1)
       .maybeSingle();
 
     if (data) {
-      const preco = data.preco_promocional ?? data.preco ?? 67; // default 67 if null
+      const preco = (data as any).preco_promocional ?? data.preco ?? 67;
       return preco <= 0;
     }
   } catch (err) {

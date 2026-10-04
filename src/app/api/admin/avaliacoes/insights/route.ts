@@ -28,6 +28,17 @@ interface LinhaEneagrama {
   created_at: string;
 }
 
+interface LinhaCronotipo {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string | null;
+  cronotipo: string;
+  nome_cronotipo: string;
+  pontuacao_total: number;
+  created_at: string;
+}
+
 function temTelefone(t: string | null | undefined) {
   return !!t && t.trim().length >= 8;
 }
@@ -59,9 +70,20 @@ export async function GET(req: NextRequest) {
       ultimos30: 0,
       anteriores30: 0,
     },
-    combinado: { leadsUnicos: 0, fizeramAmbos: 0, comTelefoneUnicos: 0 },
+    cronotipo: {
+      total: 0,
+      matutino: 0,
+      intermediario: 0,
+      vespertino: 0,
+      comTelefone: 0,
+      ultimos7: 0,
+      ultimos30: 0,
+      anteriores30: 0,
+    },
+    combinado: { leadsUnicos: 0, fizeramMultiplos: 0, comTelefoneUnicos: 0 },
     recentes: [],
     eneagramaDisponivel: true,
+    cronotipoDisponivel: true,
   };
 
   if (!isAdminConfigured()) {
@@ -71,7 +93,7 @@ export async function GET(req: NextRequest) {
   try {
     const search = (req.nextUrl.searchParams.get("search") || "").trim().toLowerCase();
 
-    const [yyRes, enRes] = await Promise.all([
+    const [yyRes, enRes, crRes] = await Promise.all([
       supabaseAdmin!
         .from("avaliacoes_yin_yang")
         .select("id, nome, email, telefone, tipo_resultado, pontos_yang, pontos_yin, created_at")
@@ -82,19 +104,23 @@ export async function GET(req: NextRequest) {
         .select("id, nome, email, telefone, tipos_principais, created_at")
         .order("created_at", { ascending: false })
         .limit(LIMITE_REGISTROS),
+      supabaseAdmin!
+        .from("avaliacoes_cronotipo")
+        .select("id, nome, email, telefone, cronotipo, nome_cronotipo, pontuacao_total, created_at")
+        .order("created_at", { ascending: false })
+        .limit(LIMITE_REGISTROS),
     ]);
 
-    // A tabela do Eneagrama pode ainda não existir (migration pendente): não derruba o painel.
     const eneagramaDisponivel = !enRes.error;
-    if (yyRes.error) {
-      console.warn("Aviso insights Yin/Yang:", yyRes.error.message);
-    }
-    if (enRes.error) {
-      console.warn("Aviso insights Eneagrama (migration pendente?):", enRes.error.message);
-    }
+    const cronotipoDisponivel = !crRes.error;
+
+    if (yyRes.error) console.warn("Aviso insights Yin/Yang:", yyRes.error.message);
+    if (enRes.error) console.warn("Aviso insights Eneagrama:", enRes.error.message);
+    if (crRes.error) console.warn("Aviso insights Cronotipo:", crRes.error.message);
 
     const yy = (yyRes.data || []) as LinhaYinYang[];
     const en = (enRes.data || []) as LinhaEneagrama[];
+    const cr = (crRes.data || []) as LinhaCronotipo[];
 
     // ---- Yin/Yang ----
     const yyDatas = yy.map((r) => r.created_at);
@@ -131,20 +157,44 @@ export async function GET(req: NextRequest) {
       anteriores30: contarPeriodo(enDatas, 30, 30),
     };
 
+    // ---- Cronotipo ----
+    const crDatas = cr.map((r) => r.created_at);
+    const cronotipo = {
+      total: cr.length,
+      matutino: cr.filter((r) => String(r.cronotipo).toLowerCase() === "matutino").length,
+      intermediario: cr.filter((r) => String(r.cronotipo).toLowerCase() === "intermediario").length,
+      vespertino: cr.filter((r) => String(r.cronotipo).toLowerCase() === "vespertino").length,
+      comTelefone: cr.filter((r) => temTelefone(r.telefone)).length,
+      ultimos7: contarPeriodo(crDatas, 7),
+      ultimos30: contarPeriodo(crDatas, 30),
+      anteriores30: contarPeriodo(crDatas, 30, 30),
+    };
+
     // ---- Combinado (leads únicos por e-mail) ----
     const emailsYY = new Set(yy.map((r) => r.email.toLowerCase()));
     const emailsEN = new Set(en.map((r) => r.email.toLowerCase()));
-    const todosEmails = new Set([...emailsYY, ...emailsEN]);
-    const fizeramAmbos = [...emailsYY].filter((e) => emailsEN.has(e)).length;
+    const emailsCR = new Set(cr.map((r) => r.email.toLowerCase()));
+    const todosEmails = new Set([...emailsYY, ...emailsEN, ...emailsCR]);
+
+    // Participantes que realizaram 2 ou mais testes distintos
+    let fizeramMultiplos = 0;
+    todosEmails.forEach((email) => {
+      let count = 0;
+      if (emailsYY.has(email)) count++;
+      if (emailsEN.has(email)) count++;
+      if (emailsCR.has(email)) count++;
+      if (count >= 2) fizeramMultiplos++;
+    });
 
     const telefonePorEmail = new Map<string, boolean>();
-    for (const r of [...yy, ...en]) {
+    for (const r of [...yy, ...en, ...cr]) {
       const k = r.email.toLowerCase();
       telefonePorEmail.set(k, telefonePorEmail.get(k) || temTelefone(r.telefone));
     }
     const combinado = {
       leadsUnicos: todosEmails.size,
-      fizeramAmbos,
+      fizeramAmbos: fizeramMultiplos, // compatibilidade com interface existente
+      fizeramMultiplos,
       comTelefoneUnicos: [...telefonePorEmail.values()].filter(Boolean).length,
     };
 
@@ -170,6 +220,21 @@ export async function GET(req: NextRequest) {
         resultado: (r.tipos_principais || []).map((t) => `Tipo ${t}`).join(" / "),
         detalhe: (r.tipos_principais?.length || 0) > 1 ? "Empate técnico" : "Tipo dominante",
       })),
+      ...cr.map((r) => ({
+        id: r.id,
+        teste: "cronotipo" as const,
+        nome: r.nome,
+        email: r.email,
+        telefone: r.telefone,
+        created_at: r.created_at,
+        resultado:
+          r.cronotipo === "matutino"
+            ? "Cotovia (Matutino)"
+            : r.cronotipo === "vespertino"
+            ? "Coruja (Vespertino)"
+            : "Urso (Intermediário)",
+        detalhe: `${r.pontuacao_total} / 18 pts`,
+      })),
     ];
 
     const recentes = recentesBrutos
@@ -178,7 +243,8 @@ export async function GET(req: NextRequest) {
           ? true
           : r.nome.toLowerCase().includes(search) ||
             r.email.toLowerCase().includes(search) ||
-            (r.telefone || "").toLowerCase().includes(search)
+            (r.telefone && r.telefone.includes(search)) ||
+            r.resultado.toLowerCase().includes(search)
       )
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, LIMITE_RECENTES);
@@ -186,14 +252,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       yinyang,
       eneagrama,
+      cronotipo,
       combinado,
       recentes,
       eneagramaDisponivel,
+      cronotipoDisponivel,
     });
   } catch (err: unknown) {
     console.error("Exceção na rota GET /api/admin/avaliacoes/insights:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Erro ao carregar insights" },
+      { error: err instanceof Error ? err.message : "Erro interno do servidor" },
       { status: 500 }
     );
   }
