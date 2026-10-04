@@ -63,6 +63,40 @@ export function isProdutoAgendamento(p?: {
   return false;
 }
 
+/**
+ * Verifica se um produto é da categoria ou slug de Calendário (programação/evento informativo).
+ */
+export function isProdutoCalendario(p?: {
+  slug?: string | null;
+  categoria?: string | null;
+} | null): boolean {
+  if (!p) return false;
+  const norm = (s?: string | null) =>
+    (s || "")
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  const cat = norm(p.categoria);
+  const slug = norm(p.slug);
+  return cat === "calendario" || slug.startsWith("calendario");
+}
+
+/**
+ * Determina se o produto deve permitir checkout / carrinho de compras.
+ * Produtos informativos (como Calendário ou com permite_checkout === false) não têm checkout nem carrinho.
+ */
+export function permiteCheckoutProduto(p?: {
+  slug?: string | null;
+  categoria?: string | null;
+  permite_checkout?: boolean | null;
+} | null): boolean {
+  if (!p) return true;
+  if (p.permite_checkout === false) return false;
+  if (isProdutoCalendario(p)) return false;
+  return true;
+}
+
 /** Converte data (YYYY-MM-DD) e hora (HH:mm ou HH:mm:ss) para Date UTC considerando o fuso de Brasília */
 export function parseLocalToUtc(dateStr: string, timeStr: string): Date {
   const normalizedTime = timeStr.length === 5 ? `${timeStr}:00` : timeStr;

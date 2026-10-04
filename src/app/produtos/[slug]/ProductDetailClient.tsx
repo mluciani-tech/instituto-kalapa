@@ -17,7 +17,7 @@ import {
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
 import ProductAppointmentSection from "@/components/agendamento/ProductAppointmentSection";
-import { isProdutoAgendamento } from "@/lib/agendamento";
+import { isProdutoAgendamento, isProdutoCalendario, permiteCheckoutProduto } from "@/lib/agendamento";
 import ProductShareMenu from "@/app/components/ProductShareMenu";
 
 interface ProductDetailClientProps {
@@ -52,8 +52,12 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
     : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const isTeste = Boolean(produto.is_teste);
-  const vagasEsgotadas = !isTeste && !isAgendamento && vagas && vagas.restantes <= 0;
-  const vagasQuaseEsgotadas = !isTeste && !isAgendamento && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
+  const isCalendario = isProdutoCalendario(produto);
+  const permiteCheckout = permiteCheckoutProduto(produto);
+
+  const temVagasExibiveis = !isTeste && !isAgendamento && permiteCheckout && Boolean(vagas);
+  const vagasEsgotadas = temVagasExibiveis && vagas && vagas.restantes <= 0;
+  const vagasQuaseEsgotadas = temVagasExibiveis && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
 
   const handleComprarAgora = () => {
     clearCart();
@@ -197,7 +201,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                 {produto.orientacoes_pre_teste || "Acesso liberado imediatamente após a confirmação do pagamento. O teste pode ser realizado no seu próprio ritmo com relatório salvo permanentemente no seu histórico."}
               </p>
             </div>
-          ) : !isAgendamento && vagas && (
+          ) : !isAgendamento && temVagasExibiveis && vagas && (
             <div className="mb-6 p-4 rounded-xl bg-brand-offwhite border border-brand-charcoal/10">
               <div className="flex items-center justify-between text-xs sm:text-sm mb-1.5">
                 <span className="text-brand-charcoal/70 font-medium">
@@ -276,86 +280,113 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
             </div>
           )}
 
-          {/* Preço e Ações de Compra */}
-          <div className="pt-6 border-t border-brand-charcoal/10">
-            <div className="flex items-baseline gap-2 mb-5">
-              <span className="text-3xl sm:text-4xl font-bold text-brand-charcoal tabular-nums">
-                {precoFormatado}
-              </span>
-              {!isGratuito && (
-                <span className="text-sm text-brand-charcoal/50">
-                  {isTeste ? "/ avaliação" : "/ sessão"}
+          {/* Preço e Ações de Compra ou Bloco Informativo */}
+          {permiteCheckout ? (
+            <div className="pt-6 border-t border-brand-charcoal/10">
+              <div className="flex items-baseline gap-2 mb-5">
+                <span className="text-3xl sm:text-4xl font-bold text-brand-charcoal tabular-nums">
+                  {precoFormatado}
                 </span>
-              )}
-            </div>
+                {!isGratuito && (
+                  <span className="text-sm text-brand-charcoal/50">
+                    {isTeste ? "/ avaliação" : "/ sessão"}
+                  </span>
+                )}
+              </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              {isAgendamento ? (
+              <div className="flex flex-col sm:flex-row gap-3">
+                {isAgendamento ? (
+                  <a
+                    href="#agendamento"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const el = document.getElementById("agendamento") || document.getElementById("agendamento-section");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="flex-1 py-3.5 px-4 sm:px-5 font-bold text-xs sm:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
+                  >
+                    <Calendar className="w-4 h-4 text-white shrink-0" />
+                    <span className="truncate">Escolher Data e Horário na Agenda</span>
+                    <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
+                  </a>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addItem({
+                          id: produto.id,
+                          slug: produto.slug,
+                          nome: produto.nome,
+                          preco: produto.preco,
+                          imagem_url: produto.imagem_url,
+                          categoria: produto.categoria,
+                          is_teste: isTeste,
+                          rota_teste: produto.rota_teste,
+                        });
+                        openDrawer();
+                      }}
+                      disabled={!!vagasEsgotadas}
+                      className="flex-1 py-3.5 px-4 font-semibold text-sm rounded-xl border border-brand-purple/30 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                      {isTeste ? "Adicionar ao Carrinho" : "Adicionar à Reserva"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleComprarAgora}
+                      disabled={!!vagasEsgotadas}
+                      className={`flex-1 py-3.5 px-5 font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer ${
+                        vagasEsgotadas
+                          ? "bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed"
+                          : "bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-brand-terracotta/25 hover:-translate-y-0.5"
+                      }`}
+                    >
+                      {vagasEsgotadas ? (
+                        "Turma Lotada"
+                      ) : (
+                        <>
+                          <span>{isTeste ? "Comprar Avaliação" : "Garantir Vaga"}</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <div className="flex items-center justify-center gap-2 text-xs text-brand-charcoal/50 mt-4">
+                <ShieldCheck className="w-4 h-4 text-brand-mint" />
+                <span>Pagamento seguro e confirmação imediata</span>
+              </div>
+            </div>
+          ) : (
+            <div className="pt-6 border-t border-brand-charcoal/10">
+              <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 mb-5">
+                <div className="flex items-center gap-2 text-amber-900 font-bold text-sm mb-1.5">
+                  <Calendar className="w-4 h-4 text-amber-800 shrink-0" />
+                  <span>Programação / Evento Informativo</span>
+                </div>
+                <p className="text-xs text-amber-900/80 leading-relaxed">
+                  Este item faz parte da programação especial do INstituto Kalapa e tem caráter exclusivamente informativo. Não há cobrança direta pelo site nem carrinho de compras. Para mais orientações e detalhes sobre a participação, converse diretamente com nossa equipe via WhatsApp.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
                 <a
-                  href="#agendamento"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const el = document.getElementById("agendamento") || document.getElementById("agendamento-section");
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="flex-1 py-3.5 px-4 sm:px-5 font-bold text-xs sm:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
+                  href={`https://wa.me/5511917452732?text=${encodeURIComponent(`Olá! Gostaria de mais informações sobre a programação do evento: ${produto.nome}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-3.5 px-5 font-bold text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Calendar className="w-4 h-4 text-white shrink-0" />
-                  <span className="truncate">Escolher Data e Horário na Agenda</span>
+                  <MessageCircle className="w-4 h-4 shrink-0" />
+                  <span>Tirar Dúvidas via WhatsApp</span>
                   <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
                 </a>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      addItem({
-                        id: produto.id,
-                        slug: produto.slug,
-                        nome: produto.nome,
-                        preco: produto.preco,
-                        imagem_url: produto.imagem_url,
-                        categoria: produto.categoria,
-                        is_teste: isTeste,
-                        rota_teste: produto.rota_teste,
-                      });
-                      openDrawer();
-                    }}
-                    disabled={!!vagasEsgotadas}
-                    className="flex-1 py-3.5 px-4 font-semibold text-sm rounded-xl border border-brand-purple/30 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <ShoppingBag className="w-4 h-4" />
-                    {isTeste ? "Adicionar ao Carrinho" : "Adicionar à Reserva"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleComprarAgora}
-                    disabled={!!vagasEsgotadas}
-                    className={`flex-1 py-3.5 px-5 font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer ${
-                      vagasEsgotadas
-                        ? "bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed"
-                        : "bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-brand-terracotta/25 hover:-translate-y-0.5"
-                    }`}
-                  >
-                    {vagasEsgotadas ? (
-                      "Turma Lotada"
-                    ) : (
-                      <>
-                        <span>{isTeste ? "Comprar Avaliação" : "Garantir Vaga"}</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </>
-              )}
+              </div>
             </div>
-
-            <div className="flex items-center justify-center gap-2 text-xs text-brand-charcoal/50 mt-4">
-              <ShieldCheck className="w-4 h-4 text-brand-mint" />
-              <span>Pagamento seguro e confirmação imediata</span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

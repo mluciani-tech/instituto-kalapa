@@ -135,6 +135,10 @@ export async function PUT(
     updates.orientacoes_pre_teste = updates.orientacoes_pre_teste ? String(updates.orientacoes_pre_teste).trim() : null;
   }
 
+  if (updates.permite_checkout !== undefined) {
+    updates.permite_checkout = Boolean(updates.permite_checkout);
+  }
+
   let { data, error } = await supabaseAdmin!
     .from("produtos")
     .update(updates)
@@ -148,7 +152,8 @@ export async function PUT(
     error.message?.includes("is_teste") ||
     error.message?.includes("rota_teste") ||
     error.message?.includes("orientacoes_pre_teste") ||
-    error.message?.includes("inclui_laudo_pdf")
+    error.message?.includes("inclui_laudo_pdf") ||
+    error.message?.includes("permite_checkout")
   )) {
     console.warn("[admin/produtos] Coluna nova não encontrada no banco ao atualizar. Tentando fallback defensivo.");
     if (error.message?.includes("duracao_minutos")) delete updates.duracao_minutos;
@@ -157,6 +162,7 @@ export async function PUT(
     if (error.message?.includes("rota_teste")) delete updates.rota_teste;
     if (error.message?.includes("orientacoes_pre_teste")) delete updates.orientacoes_pre_teste;
     if (error.message?.includes("inclui_laudo_pdf")) delete updates.inclui_laudo_pdf;
+    if (error.message?.includes("permite_checkout")) delete updates.permite_checkout;
     const retry = await supabaseAdmin!
       .from("produtos")
       .update(updates)

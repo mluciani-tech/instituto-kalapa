@@ -46,6 +46,7 @@ export default function TesteCronotipoPage() {
     slug: string;
     preco: number;
     preco_promocional?: number | null;
+    categoria?: string | null;
     imagem_url?: string | null;
     rota_teste?: string | null;
     orientacoes_pre_teste?: string | null;

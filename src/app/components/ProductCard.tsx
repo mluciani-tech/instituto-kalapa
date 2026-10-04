@@ -8,7 +8,7 @@ import { Check, ArrowRight, ShoppingBag, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
-import { isProdutoAgendamento } from "@/lib/agendamento";
+import { isProdutoAgendamento, isProdutoCalendario, permiteCheckoutProduto } from "@/lib/agendamento";
 
 export type { Produto };
 
@@ -26,6 +26,8 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
 
   const isAgendamento = isProdutoAgendamento(produto);
   const isTeste = Boolean(produto.is_teste);
+  const isCalendario = isProdutoCalendario(produto);
+  const permiteCheckout = permiteCheckoutProduto(produto);
 
   const handleEscolher = () => {
     if (isAgendamento) {
@@ -54,8 +56,9 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
     ? "Acesso Livre"
     : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const vagasEsgotadas = !isTeste && !isAgendamento && vagas && vagas.restantes <= 0;
-  const vagasQuaseEsgotadas = !isTeste && !isAgendamento && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
+  const temVagasExibiveis = !isTeste && !isAgendamento && permiteCheckout && Boolean(vagas);
+  const vagasEsgotadas = temVagasExibiveis && vagas && vagas.restantes <= 0;
+  const vagasQuaseEsgotadas = temVagasExibiveis && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
 
   return (
     <motion.div
@@ -159,7 +162,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                   </span>
                 )}
               </div>
-            ) : vagas && (
+            ) : temVagasExibiveis && vagas && (
               <div className="mb-4">
                 <div className="flex items-center justify-between text-sm mb-1.5">
                   <span className="text-brand-charcoal/60">
@@ -188,73 +191,88 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
               </div>
             )}
 
-            {/* Preço + CTA */}
+            {/* Preço + CTA ou Modo Informativo */}
             <div className="pt-4 border-t border-brand-charcoal/10">
-              <div className="flex items-end gap-1 mb-3">
-                <span className={`font-bold text-brand-charcoal tabular-nums ${isGratuito ? 'text-2xl text-emerald-600' : 'text-3xl'}`}>
-                  {precoFormatado}
-                </span>
-                {!isGratuito && (
-                  <span className="text-sm text-brand-charcoal/45 mb-1">
-                    {isTeste ? "/ avaliação" : "/ sessão"}
-                  </span>
-                )}
-              </div>
+              {permiteCheckout ? (
+                <>
+                  <div className="flex items-end gap-1 mb-3">
+                    <span className={`font-bold text-brand-charcoal tabular-nums ${isGratuito ? 'text-2xl text-emerald-600' : 'text-3xl'}`}>
+                      {precoFormatado}
+                    </span>
+                    {!isGratuito && (
+                      <span className="text-sm text-brand-charcoal/45 mb-1">
+                        {isTeste ? "/ avaliação" : "/ sessão"}
+                      </span>
+                    )}
+                  </div>
 
-              <div className="flex flex-col sm:flex-row gap-2">
-                  {isAgendamento ? (
-                    <Link
-                      href={`/produtos/${produto.id}#agendamento`}
-                      className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
-                    >
-                      <Calendar className="w-4 h-4 text-white shrink-0" />
-                      <span>Ver Agenda & Horários</span>
-                      <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
-                    </Link>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          addItem({
-                            id: produto.id,
-                            slug: produto.slug,
-                            nome: produto.nome,
-                            preco: produto.preco,
-                            imagem_url: produto.imagem_url,
-                            categoria: produto.categoria,
-                            is_teste: isTeste,
-                            rota_teste: produto.rota_teste,
-                          });
-                          openDrawer();
-                        }}
-                        disabled={!!vagasEsgotadas}
-                        className="flex-1 py-3 px-3 font-medium text-xs md:text-sm rounded-xl border border-brand-purple/20 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
-                        title={isTeste ? "Adicionar ao carrinho" : "Adicionar à sua lista de reserva"}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    {isAgendamento ? (
+                      <Link
+                        href={`/produtos/${produto.id}#agendamento`}
+                        className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
                       >
-                        <ShoppingBag aria-hidden="true" className="w-4 h-4" />
-                        {isTeste ? "Carrinho" : "Reservar"}
-                      </button>
+                        <Calendar className="w-4 h-4 text-white shrink-0" />
+                        <span>Ver Agenda & Horários</span>
+                        <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
+                      </Link>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            addItem({
+                              id: produto.id,
+                              slug: produto.slug,
+                              nome: produto.nome,
+                              preco: produto.preco,
+                              imagem_url: produto.imagem_url,
+                              categoria: produto.categoria,
+                              is_teste: isTeste,
+                              rota_teste: produto.rota_teste,
+                            });
+                            openDrawer();
+                          }}
+                          disabled={!!vagasEsgotadas}
+                          className="flex-1 py-3 px-3 font-medium text-xs md:text-sm rounded-xl border border-brand-purple/20 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
+                          title={isTeste ? "Adicionar ao carrinho" : "Adicionar à sua lista de reserva"}
+                        >
+                          <ShoppingBag aria-hidden="true" className="w-4 h-4" />
+                          {isTeste ? "Carrinho" : "Reservar"}
+                        </button>
 
-                      <button
-                        onClick={handleEscolher}
-                        disabled={!!vagasEsgotadas}
-                        className={`flex-1 py-3 px-4 font-semibold text-xs md:text-sm rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
-                          vagasEsgotadas
-                            ? 'bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed'
-                            : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
-                        }`}
-                      >
-                        {vagasEsgotadas ? 'Turma lotada' : (
-                          <>
-                            {isTeste ? "Comprar Agora" : "Garantir Vaga"}
-                            <ArrowRight aria-hidden="true" className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
-                    </>
-                  )}
+                        <button
+                          onClick={handleEscolher}
+                          disabled={!!vagasEsgotadas}
+                          className={`flex-1 py-3 px-4 font-semibold text-xs md:text-sm rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
+                            vagasEsgotadas
+                              ? 'bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed'
+                              : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
+                          }`}
+                        >
+                          {vagasEsgotadas ? 'Turma lotada' : (
+                            <>
+                              {isTeste ? "Comprar Agora" : "Garantir Vaga"}
+                              <ArrowRight aria-hidden="true" className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href={`/produtos/${produto.id}`}
+                    className="w-full py-3 px-4 font-semibold text-xs md:text-sm rounded-xl border border-brand-terracotta/40 bg-brand-terracotta/5 hover:bg-brand-terracotta/15 text-brand-terracotta hover:text-brand-terracotta-dark transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:-translate-y-0.5 active:scale-[0.98]"
+                  >
+                    <Calendar className="w-4 h-4 text-brand-terracotta shrink-0" />
+                    <span>Ver Detalhes do Evento</span>
+                    <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
+                  </Link>
                 </div>
+              )}
             </div>
           </div>
         </div>

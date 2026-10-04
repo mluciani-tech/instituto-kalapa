@@ -35,6 +35,7 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
     rota_teste: "",
     orientacoes_pre_teste: "",
     inclui_laudo_pdf: true,
+    permite_checkout: true,
     destaque: false,
     ativo: true,
     ordem: "0",
@@ -90,6 +91,7 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       rota_teste: "",
       orientacoes_pre_teste: "",
       inclui_laudo_pdf: true,
+      permite_checkout: true,
       destaque: false, ativo: true, ordem: "0",
     });
     setProdutoImagemFile(null);
@@ -173,6 +175,7 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       rota_teste: produtoForm.is_teste ? (produtoForm.rota_teste.trim() || `/teste-${cleanSlug.replace(/^teste-/, "")}`) : null,
       orientacoes_pre_teste: produtoForm.is_teste ? (produtoForm.orientacoes_pre_teste.trim() || null) : null,
       inclui_laudo_pdf: produtoForm.is_teste ? produtoForm.inclui_laudo_pdf : false,
+      permite_checkout: Boolean(produtoForm.permite_checkout),
     };
 
     const url = produtoEditando
@@ -219,6 +222,7 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       rota_teste: p.rota_teste || (p.is_teste ? `/teste-${p.slug.replace(/^teste-/, "")}` : ""),
       orientacoes_pre_teste: p.orientacoes_pre_teste || "",
       inclui_laudo_pdf: p.inclui_laudo_pdf !== false,
+      permite_checkout: p.permite_checkout !== false && !(p.categoria?.toLowerCase() === "calendario" || p.slug?.startsWith("calendario")),
       destaque: p.destaque ?? false,
       ativo: p.ativo ?? true,
       ordem: (p.ordem ?? 0).toString(),
@@ -504,13 +508,21 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Categoria <span className="text-brand-charcoal/30">(opcional)</span></label>
-<input
-                       value={produtoForm.categoria}
-                       onChange={(e) => setProdutoForm({ ...produtoForm, categoria: e.target.value })}
-                       className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
-                       placeholder="Ex: atendimentos, vivencias"
-                     />
-                    <p className="text-xs text-brand-charcoal/30 mt-1">Agrupa produtos na página inicial.</p>
+                    <input
+                      value={produtoForm.categoria}
+                      onChange={(e) => {
+                        const cat = e.target.value;
+                        const isCal = cat.toLowerCase().trim() === "calendario";
+                        setProdutoForm((prev) => ({
+                          ...prev,
+                          categoria: cat,
+                          permite_checkout: isCal ? false : prev.permite_checkout,
+                        }));
+                      }}
+                      className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                      placeholder="Ex: atendimentos, vivencias, calendario"
+                    />
+                    <p className="text-xs text-brand-charcoal/30 mt-1">Agrupa produtos na página inicial (ex: calendario, atendimentos, vivencias).</p>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Forma de Pagamento</label>
@@ -687,6 +699,27 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                           </div>
                         </div>
                       )}
+                    </div>
+
+                    {/* Seção Modo Informativo / Permitir Checkout */}
+                    <div className="sm:col-span-2 p-4 rounded-xl border border-amber-300/60 bg-amber-50/50 flex flex-col gap-2 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id="input-permite-checkout"
+                          checked={produtoForm.permite_checkout}
+                          onChange={(e) => setProdutoForm((prev) => ({ ...prev, permite_checkout: e.target.checked }))}
+                          className="mt-1 w-4 h-4 rounded border-amber-400 text-amber-600 focus:ring-amber-400/30 cursor-pointer"
+                        />
+                        <label htmlFor="input-permite-checkout" className="cursor-pointer select-none">
+                          <span className="text-xs sm:text-sm font-bold text-brand-charcoal flex items-center gap-1.5">
+                            🛒 Habilitar Checkout & Carrinho de Compras
+                          </span>
+                          <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
+                            Quando ativado, o produto segue o fluxo de vendas normal com carrinho, valores e checkout. Se desativado, o produto opera em <strong>modo estritamente informativo</strong> (recomendado para eventos do <strong>Calendário</strong>): nenhum valor ou taxa é cobrado, não há carrinho de compras nem botão de reserva, e o participante visualiza a programação com opção de tirar dúvidas via WhatsApp.
+                          </p>
+                        </label>
+                      </div>
                     </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Limite de Pessoas <span className="text-brand-charcoal/30">(opcional)</span></label>
@@ -872,6 +905,11 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                         {p.is_teste && (
                           <span className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
                             🧠 Teste ({p.rota_teste || `/teste-${p.slug.replace(/^teste-/, "")}`})
+                          </span>
+                        )}
+                        {(p.permite_checkout === false || p.categoria?.toLowerCase() === "calendario" || p.slug?.startsWith("calendario")) && (
+                          <span className="text-xs bg-purple-50 text-purple-800 border border-purple-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
+                            📢 Informativo (Sem Checkout)
                           </span>
                         )}
                       </div>

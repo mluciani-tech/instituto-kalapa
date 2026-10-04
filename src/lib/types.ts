@@ -7,6 +7,7 @@ export interface Produto {
   descricao: string | null;
   descricao_curta: string | null;
   preco?: number | null;
+  preco_promocional?: number | null;
   imagem_url: string | null;
   beneficios: string[];
   destaque?: boolean;
@@ -22,6 +23,7 @@ export interface Produto {
   rota_teste?: string | null;
   orientacoes_pre_teste?: string | null;
   inclui_laudo_pdf?: boolean;
+  permite_checkout?: boolean;
   created_at?: string;
 }
 

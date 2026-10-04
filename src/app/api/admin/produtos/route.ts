@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
     rota_teste,
     orientacoes_pre_teste,
     inclui_laudo_pdf,
+    permite_checkout,
   } = body;
 
   const cleanSlug = typeof slug === "string"
@@ -119,6 +120,7 @@ export async function POST(req: NextRequest) {
     rota_teste: rota_teste ? String(rota_teste).trim() : (Boolean(is_teste) ? `/teste-${cleanSlug.replace(/^teste-/, "")}` : null),
     orientacoes_pre_teste: orientacoes_pre_teste ? String(orientacoes_pre_teste).trim() : null,
     inclui_laudo_pdf: inclui_laudo_pdf !== false,
+    permite_checkout: permite_checkout !== false,
   };
 
   let { data, error } = await supabaseAdmin!
@@ -134,7 +136,8 @@ export async function POST(req: NextRequest) {
     error.message?.includes("is_teste") ||
     error.message?.includes("rota_teste") ||
     error.message?.includes("orientacoes_pre_teste") ||
-    error.message?.includes("inclui_laudo_pdf")
+    error.message?.includes("inclui_laudo_pdf") ||
+    error.message?.includes("permite_checkout")
   )) {
     console.warn("[admin/produtos] Coluna nova não encontrada no banco. Tentando fallback defensivo.");
     if (error.message?.includes("duracao_minutos")) delete insertPayload.duracao_minutos;
@@ -143,6 +146,7 @@ export async function POST(req: NextRequest) {
     if (error.message?.includes("rota_teste")) delete insertPayload.rota_teste;
     if (error.message?.includes("orientacoes_pre_teste")) delete insertPayload.orientacoes_pre_teste;
     if (error.message?.includes("inclui_laudo_pdf")) delete insertPayload.inclui_laudo_pdf;
+    if (error.message?.includes("permite_checkout")) delete insertPayload.permite_checkout;
     const retry = await supabaseAdmin!
       .from("produtos")
       .insert(insertPayload)
