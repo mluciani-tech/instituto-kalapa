@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle, Calendar, Clock, Phone } from "lucide-react";
+import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle, Calendar, Clock, Phone, Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
 import Footer from "../../components/Footer";
 import ModalAlterarSenha from "@/components/ModalAlterarSenha";
 import { useCart } from "@/context/CartContext";
@@ -25,7 +25,8 @@ export default function MeusPedidosPage() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [agendamentos, setAgendamentos] = useState<Appointment[]>([]);
-  const [activeTab, setActiveTab] = useState<"pedidos" | "consultas">("pedidos");
+  const [testesCreditos, setTestesCreditos] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"pedidos" | "testes" | "consultas">("pedidos");
   const [loading, setLoading] = useState(true);
   const [cancelandoId, setCancelandoId] = useState<string | null>(null);
   const [cancelandoApptId, setCancelandoApptId] = useState<string | null>(null);
@@ -48,9 +49,10 @@ export default function MeusPedidosPage() {
       }
       setUsuario(authData.usuario);
 
-      const [pedidosRes, apptsRes] = await Promise.all([
+      const [pedidosRes, apptsRes, testesRes] = await Promise.all([
         fetch("/api/cliente/pedidos"),
         fetch("/api/agendamentos"),
+        fetch("/api/testes/credito"),
       ]);
 
       if (pedidosRes.ok) {
@@ -61,6 +63,11 @@ export default function MeusPedidosPage() {
       if (apptsRes.ok) {
         const apptData = await apptsRes.json();
         setAgendamentos(apptData || []);
+      }
+
+      if (testesRes.ok) {
+        const testesData = await testesRes.json();
+        setTestesCreditos(testesData.creditos || []);
       }
     } catch {
       // ignore
@@ -216,8 +223,8 @@ export default function MeusPedidosPage() {
             </p>
           </div>
 
-          {/* Sub-Tabs: Pedidos vs Consultas */}
-          <div className="flex gap-2 mb-6 border-b border-white/10 pb-3">
+          {/* Sub-Tabs: Pedidos vs Testes vs Consultas */}
+          <div className="flex flex-wrap gap-2 mb-6 border-b border-white/10 pb-3">
             <button
               type="button"
               onClick={() => setActiveTab("pedidos")}
@@ -229,6 +236,18 @@ export default function MeusPedidosPage() {
             >
               <Package className="w-3.5 h-3.5" />
               <span>Meus Pedidos ({pedidos.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("testes")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === "testes"
+                  ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/20"
+                  : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Meus Testes ({testesCreditos.length})</span>
             </button>
             <button
               type="button"
@@ -280,6 +299,8 @@ export default function MeusPedidosPage() {
                       nome: p.produtos?.nome || "Vivência Terapêutica",
                       quantidade: 1,
                       preco: p.valor,
+                      is_teste: (p.produtos as any)?.is_teste,
+                      rota_teste: (p.produtos as any)?.rota_teste,
                     }];
 
                 return (
@@ -319,11 +340,35 @@ export default function MeusPedidosPage() {
 
                     {/* Linha intermediária: Relação de itens */}
                     <div className="py-3 border-t border-white/10 space-y-2">
-                      {itens.map((item, i) => (
-                        <p key={i} className="text-sm text-white/80">
-                          {item.nome} × {item.quantidade} — <span className="font-semibold text-white">R$ {(item.preco * item.quantidade).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-                        </p>
-                      ))}
+                      {itens.map((item, i) => {
+                        const isItemTeste = (item as any).is_teste || (item as any).slug?.startsWith("teste-") || (item as any).rota_teste;
+                        const rotaItemTeste = (item as any).rota_teste || ((item as any).slug ? `/${(item as any).slug}` : "/teste-autoconhecimento");
+
+                        return (
+                          <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm text-white/80">
+                            <div>
+                              <span>{item.nome} × {item.quantidade}</span>
+                              {isItemTeste && (
+                                <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                                  <Sparkles className="w-3 h-3 text-amber-300" />
+                                  Teste Online
+                                </span>
+                              )}
+                              <span className="font-semibold text-white ml-2">
+                                R$ {((item.preco || 0) * (item.quantidade || 1)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                            {isPago && isItemTeste && (
+                              <Link
+                                href={rotaItemTeste}
+                                className="inline-flex items-center gap-1 text-xs text-amber-300 hover:text-amber-200 underline font-medium self-start sm:self-center"
+                              >
+                                Iniciar Teste <ArrowRight className="w-3 h-3" />
+                              </Link>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
 
                     {/* Linha inferior: Total em terracota/gold + Ações */}
@@ -400,6 +445,122 @@ export default function MeusPedidosPage() {
                 );
               })}
             </div>
+            )
+          ) : activeTab === "testes" ? (
+            /* Lista de Testes do Cliente */
+            testesCreditos.length === 0 ? (
+              <div className="glass-card border border-white/10 rounded-2xl p-12 text-center shadow-xl">
+                <Sparkles className="w-14 h-14 text-white/25 mx-auto mb-4" />
+                <h2 className="text-base font-semibold text-white mb-1">
+                  Nenhum teste de autoconhecimento disponível
+                </h2>
+                <p className="text-xs text-white/50 max-w-sm mx-auto mb-6">
+                  Você ainda não possui avaliações cadastradas. Conheça nossos testes online com laudo clínico completo em PDF no INstituto Kalapa.
+                </p>
+                <Link
+                  href="/produtos?categoria=testes"
+                  className="inline-block px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-brand-terracotta/20 cursor-pointer"
+                >
+                  Conhecer Testes de Autoconhecimento
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {testesCreditos.map((cred) => {
+                  const isDisponivel = cred.status === "disponivel";
+                  const nomeTeste =
+                    cred.produtos?.nome ||
+                    (cred.slug_teste?.includes("yin-yang")
+                      ? "Teste Yin ou Yang?"
+                      : cred.slug_teste?.includes("eneagrama")
+                      ? "Teste de Personalidade do Eneagrama"
+                      : "Teste de Autoconhecimento");
+
+                  const rotaTeste =
+                    cred.produtos?.rota_teste ||
+                    (cred.slug_teste?.includes("yin-yang")
+                      ? "/teste-yin-yang"
+                      : cred.slug_teste?.includes("eneagrama")
+                      ? "/teste-eneagrama"
+                      : `/${cred.slug_teste}`);
+
+                  const isBeneficiarioOutro =
+                    cred.email_beneficiario &&
+                    usuario?.email &&
+                    cred.email_beneficiario.toLowerCase() !== usuario.email.toLowerCase();
+
+                  return (
+                    <div
+                      key={cred.id}
+                      className="glass-card border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl transition-all hover:border-white/20"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+                        <div>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-brand-terracotta block">
+                            Avaliação Online • INstituto Kalapa
+                          </span>
+                          <h3 className="text-base font-bold text-white mt-0.5">
+                            {nomeTeste}
+                          </h3>
+                          {isBeneficiarioOutro && (
+                            <p className="text-xs text-amber-300/90 mt-1">
+                              Destinado ao beneficiário: <span className="font-mono">{cred.email_beneficiario}</span>
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          {isDisponivel ? (
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              Disponível para Iniciar
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-white/10 text-white/60 border border-white/10">
+                              Concluído
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs text-white/70">
+                        <div className="space-y-1">
+                          <p>
+                            Liberado em: <span className="font-mono text-white/90">{formatDate(cred.created_at)}</span>
+                          </p>
+                          {cred.utilizado_em && (
+                            <p>
+                              Realizado em: <span className="font-mono text-white/90">{formatDate(cred.utilizado_em)}</span>
+                            </p>
+                          )}
+                          <p className="text-white/50 text-[11px]">
+                            Laudo Clínico em PDF personalizado com seu nome incluso.
+                          </p>
+                        </div>
+
+                        <div>
+                          {isDisponivel ? (
+                            <Link
+                              href={rotaTeste}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#B8965A] hover:from-amber-600 hover:to-[#A3834C] text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
+                            >
+                              <span>Iniciar Avaliação</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </Link>
+                          ) : (
+                            <Link
+                              href={rotaTeste}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 text-xs font-medium border border-white/10 transition-all cursor-pointer"
+                            >
+                              <span>Ver Página do Teste</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )
           ) : (
             /* Lista de Consultas do Cliente */

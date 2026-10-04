@@ -14,9 +14,19 @@ interface PedidoPublico {
   metodo_pagamento: string | null;
   capture_method: string | null;
   receipt_url: string | null;
+  itens?: {
+    produto_id: string;
+    nome: string;
+    slug?: string;
+    quantidade: number;
+    is_teste?: boolean;
+    rota_teste?: string | null;
+  }[];
   produtos: {
     nome: string;
     slug: string;
+    is_teste?: boolean;
+    rota_teste?: string | null;
   } | null;
 }
 
@@ -84,6 +94,20 @@ function SucessoContent() {
   const valor = pedido?.valor || 0;
   const nomeProduto = pedido?.produtos?.nome || "Serviço";
   const pago = pedido?.status === "pago";
+
+  // Verificar se o pedido possui teste de autoconhecimento
+  const itensTeste = pedido?.itens?.filter(
+    (it) => it.is_teste || it.slug?.startsWith("teste-") || it.rota_teste
+  ) || [];
+
+  const primeiroTeste = itensTeste[0] || (pedido?.produtos?.is_teste ? {
+    nome: pedido.produtos.nome,
+    slug: pedido.produtos.slug,
+    rota_teste: pedido.produtos.rota_teste,
+    is_teste: true,
+  } : null);
+
+  const rotaTesteDestino = primeiroTeste?.rota_teste || (primeiroTeste?.slug ? `/${primeiroTeste.slug}` : "/teste-autoconhecimento");
 
   return (
     <section className="relative min-h-screen pt-28 pb-16 md:pt-36 md:pb-24 bg-brand-charcoal overflow-hidden flex items-center justify-center">
@@ -187,10 +211,34 @@ function SucessoContent() {
             </div>
           </div>
 
+          {/* Card Especial de Teste Disponível */}
+          {pago && primeiroTeste && (
+            <div className="mt-6 p-6 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#B8965A]/20 to-emerald-500/15 border border-[#B8965A]/40 text-center shadow-lg">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#B8965A]/20 flex items-center justify-center text-[#B8965A]">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <p className="text-lg font-serif font-bold text-white mb-1">
+                Sua Avaliação Está Liberada!
+              </p>
+              <p className="text-xs sm:text-sm text-white/80 mb-4 max-w-md mx-auto">
+                Seu crédito para <strong>{primeiroTeste.nome}</strong> já foi liberado no sistema do INstituto Kalapa. Você já pode iniciar sua avaliação e emitir seu laudo em PDF.
+              </p>
+              <Link
+                href={rotaTesteDestino}
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-[#B8965A] to-[#A3834C] hover:from-[#A3834C] hover:to-[#8E713F] text-white text-sm font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] cursor-pointer"
+              >
+                <span>Iniciar Teste Agora</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
+
           <p className="text-white/40 text-sm mt-6 leading-relaxed">
             {pago
-              ? "Sua vaga está garantida. Nossa equipe entrará em contato pelo WhatsApp em breve."
-              : "Assim que o pagamento for confirmado, você receberá um e-mail e nossa equipe entrará em contato."}
+              ? primeiroTeste
+                ? "Seus créditos de avaliação foram adicionados à sua conta no INstituto Kalapa. Você pode realizar o teste imediatamente ou quando for mais conveniente."
+                : "Sua vaga está garantida. Nossa equipe entrará em contato pelo WhatsApp em breve."
+              : "Assim que o pagamento for confirmado, você receberá um e-mail e seu acesso será liberado."}
           </p>
 
           {/* Card Acompanhar Pedido */}

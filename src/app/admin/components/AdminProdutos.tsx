@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { Produto } from "@/lib/types";
 import { isProdutoAgendamento } from "@/lib/agendamento";
 import { slugify, DURACAO_CHIPS, formatDuracao } from "../lib/format";
@@ -31,6 +31,10 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
     forma_pagamento_disponivel: "ambos",
     atendimento_individual: false,
     duracao_minutos: "90",
+    is_teste: false,
+    rota_teste: "",
+    orientacoes_pre_teste: "",
+    inclui_laudo_pdf: true,
     destaque: false,
     ativo: true,
     ordem: "0",
@@ -41,15 +45,28 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
   const [produtoSucesso, setProdutoSucesso] = useState("");
   const [ajustandoContador, setAjustandoContador] = useState<{ produto: Produto; valor: string } | null>(null);
   const [salvandoContador, setSalvandoContador] = useState(false);
-  const [produtosStatusFiltro, setProdutosStatusFiltro] = useState<"todos" | "ativos" | "inativos">("todos");
+  const [produtosStatusFiltro, setProdutosStatusFiltro] = useState<"todos" | "ativos" | "inativos" | "testes" | "atendimentos">("todos");
+  const [produtosSlugFiltro, setProdutosSlugFiltro] = useState<string>("");
   const [produtosSearch, setProdutosSearch] = useState("");
   const [formProdutoDestacado, setFormProdutoDestacado] = useState(false);
   const [produtoParaApagar, setProdutoParaApagar] = useState<Produto | null>(null);
   const [apagandoProduto, setApagandoProduto] = useState(false);
 
+  const slugsDisponiveis = useMemo(() => {
+    const counts: Record<string, number> = {};
+    produtos.forEach((p) => {
+      const s = p.slug?.trim() || "sem-slug";
+      counts[s] = (counts[s] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [produtos]);
+
   const produtosFiltrados = produtos.filter((p) => {
     if (produtosStatusFiltro === "ativos" && !p.ativo) return false;
     if (produtosStatusFiltro === "inativos" && p.ativo) return false;
+    if (produtosStatusFiltro === "testes" && !p.is_teste && p.categoria !== "testes") return false;
+    if (produtosStatusFiltro === "atendimentos" && !p.atendimento_individual && !isProdutoAgendamento(p)) return false;
+    if (produtosSlugFiltro && (p.slug?.trim() || "sem-slug") !== produtosSlugFiltro) return false;
     if (produtosSearch.trim()) {
       const q = produtosSearch.trim().toLowerCase();
       const matchNome = (p.nome || "").toLowerCase().includes(q);
@@ -69,6 +86,10 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       categoria: "", forma_pagamento_disponivel: "ambos",
       atendimento_individual: false,
       duracao_minutos: "90",
+      is_teste: false,
+      rota_teste: "",
+      orientacoes_pre_teste: "",
+      inclui_laudo_pdf: true,
       destaque: false, ativo: true, ordem: "0",
     });
     setProdutoImagemFile(null);
@@ -141,13 +162,17 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       ...produtoForm,
       slug: cleanSlug,
       imagem_url: imagemUrl,
-      vagas_maximas: parseVagas(produtoForm.vagas_maximas),
-      vagas_ocupadas_manual: vagasOcupadasNum,
-      categoria: produtoForm.categoria.trim() || null,
+      vagas_maximas: produtoForm.is_teste ? null : parseVagas(produtoForm.vagas_maximas),
+      vagas_ocupadas_manual: produtoForm.is_teste ? null : vagasOcupadasNum,
+      categoria: produtoForm.categoria.trim() || (produtoForm.is_teste ? "testes" : null),
       preco: parseFloat(produtoForm.preco.replace(",", ".")) || 0,
       ordem: parseInt(produtoForm.ordem) || 0,
       duracao_minutos: parseInt(produtoForm.duracao_minutos, 10) || 90,
       beneficios: produtoForm.beneficios.split("\n").filter((b) => b.trim()),
+      is_teste: produtoForm.is_teste,
+      rota_teste: produtoForm.is_teste ? (produtoForm.rota_teste.trim() || `/teste-${cleanSlug.replace(/^teste-/, "")}`) : null,
+      orientacoes_pre_teste: produtoForm.is_teste ? (produtoForm.orientacoes_pre_teste.trim() || null) : null,
+      inclui_laudo_pdf: produtoForm.is_teste ? produtoForm.inclui_laudo_pdf : false,
     };
 
     const url = produtoEditando
@@ -190,6 +215,10 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       forma_pagamento_disponivel: p.forma_pagamento_disponivel || "ambos",
       atendimento_individual: p.atendimento_individual ?? isProdutoAgendamento(p),
       duracao_minutos: (p.duracao_minutos != null ? p.duracao_minutos : 90).toString(),
+      is_teste: Boolean(p.is_teste),
+      rota_teste: p.rota_teste || (p.is_teste ? `/teste-${p.slug.replace(/^teste-/, "")}` : ""),
+      orientacoes_pre_teste: p.orientacoes_pre_teste || "",
+      inclui_laudo_pdf: p.inclui_laudo_pdf !== false,
       destaque: p.destaque ?? false,
       ativo: p.ativo ?? true,
       ordem: (p.ordem ?? 0).toString(),
@@ -282,6 +311,10 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       forma_pagamento_disponivel: p.forma_pagamento_disponivel || "ambos",
       atendimento_individual: p.atendimento_individual,
       duracao_minutos: p.duracao_minutos ?? 90,
+      is_teste: p.is_teste ?? false,
+      rota_teste: p.rota_teste || null,
+      orientacoes_pre_teste: p.orientacoes_pre_teste || null,
+      inclui_laudo_pdf: p.inclui_laudo_pdf !== false,
       destaque: p.destaque ?? false,
       ativo: false,
       ordem: p.ordem ?? 0,
@@ -333,10 +366,10 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {/* Botões Filtro Status do Produto */}
-                <div className="bg-brand-beige-light p-1 rounded-xl border border-brand-beige flex items-center text-xs font-medium">
+                <div className="bg-brand-beige-light p-1 rounded-xl border border-brand-beige flex flex-wrap items-center text-xs font-medium gap-0.5">
                   <button
                     onClick={() => setProdutosStatusFiltro("todos")}
-                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                    className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
                       produtosStatusFiltro === "todos"
                         ? "bg-brand-purple text-white shadow-xs font-semibold"
                         : "text-brand-charcoal/60 hover:text-brand-charcoal"
@@ -345,8 +378,28 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                     Todos ({produtos.length})
                   </button>
                   <button
+                    onClick={() => setProdutosStatusFiltro("testes")}
+                    className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      produtosStatusFiltro === "testes"
+                        ? "bg-brand-purple text-white shadow-xs font-semibold"
+                        : "text-brand-charcoal/60 hover:text-brand-charcoal"
+                    }`}
+                  >
+                    🧠 Testes ({produtos.filter((p) => p.is_teste || p.categoria === "testes").length})
+                  </button>
+                  <button
+                    onClick={() => setProdutosStatusFiltro("atendimentos")}
+                    className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      produtosStatusFiltro === "atendimentos"
+                        ? "bg-brand-purple text-white shadow-xs font-semibold"
+                        : "text-brand-charcoal/60 hover:text-brand-charcoal"
+                    }`}
+                  >
+                    🗓️ Atendimentos ({produtos.filter((p) => p.atendimento_individual || isProdutoAgendamento(p)).length})
+                  </button>
+                  <button
                     onClick={() => setProdutosStatusFiltro("ativos")}
-                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                    className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
                       produtosStatusFiltro === "ativos"
                         ? "bg-brand-purple text-white shadow-xs font-semibold"
                         : "text-brand-charcoal/60 hover:text-brand-charcoal"
@@ -356,7 +409,7 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                   </button>
                   <button
                     onClick={() => setProdutosStatusFiltro("inativos")}
-                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                    className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
                       produtosStatusFiltro === "inativos"
                         ? "bg-brand-purple text-white shadow-xs font-semibold"
                         : "text-brand-charcoal/60 hover:text-brand-charcoal"
@@ -364,6 +417,40 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                   >
                     Inativos ({produtos.filter((p) => p.ativo === false).length})
                   </button>
+                </div>
+
+                {/* Dropdown Filtro por Slug com Rolagem */}
+                <div className="flex items-center gap-1.5">
+                  <select
+                    value={produtosSlugFiltro}
+                    onChange={(e) => setProdutosSlugFiltro(e.target.value)}
+                    className={`px-3 py-2 border rounded-lg text-xs font-medium cursor-pointer shadow-2xs max-w-[210px] truncate transition-colors ${
+                      produtosSlugFiltro
+                        ? "bg-brand-purple text-white border-brand-purple font-semibold"
+                        : "bg-white text-brand-charcoal border-brand-beige hover:border-brand-purple/40"
+                    }`}
+                    aria-label="Filtrar produtos por slug"
+                  >
+                    <option value="" className="bg-white text-brand-charcoal">
+                      Todos os Slugs ({produtos.length})
+                    </option>
+                    {slugsDisponiveis.map(([slug, count]) => (
+                      <option key={slug} value={slug} className="bg-white text-brand-charcoal">
+                        {slug} ({count})
+                      </option>
+                    ))}
+                  </select>
+
+                  {produtosSlugFiltro && (
+                    <button
+                      type="button"
+                      onClick={() => setProdutosSlugFiltro("")}
+                      title="Limpar filtro de slug"
+                      className="px-2.5 py-2 text-xs text-brand-charcoal/70 hover:text-brand-charcoal bg-brand-beige-light hover:bg-brand-beige border border-brand-beige rounded-lg transition-colors cursor-pointer font-bold"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
 
                 {/* Campo de Busca */}
@@ -489,77 +576,170 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                       <option value="cartao">Apenas Cartão</option>
                     </select>
                   </div>
-                  <div className="sm:col-span-2 p-4 rounded-xl border border-brand-terracotta/30 bg-brand-terracotta/5 flex flex-col gap-3 transition-colors">
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        id="input-atendimento-individual"
-                        checked={produtoForm.atendimento_individual}
-                        onChange={(e) => setProdutoForm({ ...produtoForm, atendimento_individual: e.target.checked })}
-                        className="mt-1 w-4 h-4 rounded border-brand-terracotta text-brand-terracotta focus:ring-brand-terracotta/30 cursor-pointer"
-                      />
-                      <label htmlFor="input-atendimento-individual" className="cursor-pointer select-none">
-                        <span className="text-xs sm:text-sm font-bold text-brand-charcoal flex items-center gap-1.5">
-                          🗓️ Atendimento Individual (Exige seleção de data/horário na agenda)
-                        </span>
-                        <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
-                          Marque esta opção para atendimentos terapêuticos individuais. O paciente será direcionado para selecionar data e horário na agenda antes do pagamento. Este produto também aparecerá no filtro de <strong>Atendimentos</strong>.
-                        </p>
-                      </label>
+                    {/* Seção Atendimento Individual */}
+                    <div className="sm:col-span-2 p-4 rounded-xl border border-brand-terracotta/30 bg-brand-terracotta/5 flex flex-col gap-3 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id="input-atendimento-individual"
+                          checked={produtoForm.atendimento_individual}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setProdutoForm((prev) => ({
+                              ...prev,
+                              atendimento_individual: checked,
+                              is_teste: checked ? false : prev.is_teste,
+                            }));
+                          }}
+                          className="mt-1 w-4 h-4 rounded border-brand-terracotta text-brand-terracotta focus:ring-brand-terracotta/30 cursor-pointer"
+                        />
+                        <label htmlFor="input-atendimento-individual" className="cursor-pointer select-none">
+                          <span className="text-xs sm:text-sm font-bold text-brand-charcoal flex items-center gap-1.5">
+                            🗓️ Atendimento Individual (Exige seleção de data/horário na agenda)
+                          </span>
+                          <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
+                            Marque esta opção para atendimentos terapêuticos individuais. O paciente será direcionado para selecionar data e horário na agenda antes do pagamento. Este produto também aparecerá no filtro de <strong>Atendimentos</strong>.
+                          </p>
+                        </label>
+                      </div>
+
+                      {produtoForm.atendimento_individual && (
+                        <div className="mt-1 pt-3 border-t border-brand-terracotta/20 bg-white/80 rounded-xl p-3.5 space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <label className="block text-xs font-bold text-brand-charcoal">
+                              ⏱️ Tempo de Consulta / Atendimento (já inclui o intervalo)
+                            </label>
+                            <span className="text-xs font-bold text-brand-purple">
+                              {formatDuracao(parseInt(produtoForm.duracao_minutos, 10))}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-brand-charcoal/60 leading-relaxed">
+                            Define a duração de cada bloco de horário deste serviço na agenda. O valor inicial padrão é de <strong>1:30hs (90 min)</strong>.
+                          </p>
+
+                          <div className="flex items-center gap-2 flex-wrap pt-1">
+                            {DURACAO_CHIPS.map((chip) => {
+                              const isSelected = produtoForm.duracao_minutos === chip.value;
+                              return (
+                                <button
+                                  key={chip.value}
+                                  type="button"
+                                  aria-pressed={isSelected}
+                                  onClick={() => setProdutoForm({ ...produtoForm, duracao_minutos: chip.value })}
+                                  className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
+                                    isSelected
+                                      ? "bg-brand-purple text-white border-brand-purple shadow-xs"
+                                      : "bg-white text-brand-charcoal/80 border-brand-beige hover:border-brand-purple/40"
+                                  }`}
+                                >
+                                  {chip.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2 pt-1">
+                            <label htmlFor="duracao-minutos-input" className="text-xs text-brand-charcoal/70 font-medium">Ou digite em minutos:</label>
+                            <input
+                              id="duracao-minutos-input"
+                              type="number"
+                              min="15"
+                              step="5"
+                              value={produtoForm.duracao_minutos}
+                              onChange={(e) => setProdutoForm({ ...produtoForm, duracao_minutos: e.target.value })}
+                              className="w-24 px-2.5 py-2 sm:py-1 text-xs border border-brand-beige rounded-md bg-white focus-visible:ring-2 focus-visible:ring-brand-purple/30 font-bold text-brand-charcoal min-h-[44px] sm:min-h-0"
+                              placeholder="90"
+                            />
+                            <span className="text-xs text-brand-charcoal/50">minutos por sessão</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    {produtoForm.atendimento_individual && (
-                      <div className="mt-1 pt-3 border-t border-brand-terracotta/20 bg-white/80 rounded-xl p-3.5 space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <label className="block text-xs font-bold text-brand-charcoal">
-                            ⏱️ Tempo de Consulta / Atendimento (já inclui o intervalo)
-                          </label>
-                          <span className="text-xs font-bold text-brand-purple">
-                            {formatDuracao(parseInt(produtoForm.duracao_minutos, 10))}
+                    {/* Seção Teste de Autoconhecimento */}
+                    <div className="sm:col-span-2 p-4 rounded-xl border border-brand-mint/40 bg-brand-mint/5 flex flex-col gap-3 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id="input-is-teste"
+                          checked={produtoForm.is_teste}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            const currentSlug = produtoForm.slug || slugify(produtoForm.nome);
+                            const autoRota = currentSlug ? `/teste-${currentSlug.replace(/^teste-/, "")}` : "";
+                            setProdutoForm((prev) => ({
+                              ...prev,
+                              is_teste: checked,
+                              atendimento_individual: checked ? false : prev.atendimento_individual,
+                              rota_teste: checked ? (prev.rota_teste || autoRota) : prev.rota_teste,
+                              categoria: checked && (!prev.categoria || prev.categoria === "atendimentos" || prev.categoria === "vivencias") ? "testes" : prev.categoria,
+                            }));
+                          }}
+                          className="mt-1 w-4 h-4 rounded border-brand-mint text-brand-mint focus:ring-brand-mint/30 cursor-pointer"
+                        />
+                        <label htmlFor="input-is-teste" className="cursor-pointer select-none">
+                          <span className="text-xs sm:text-sm font-bold text-brand-charcoal flex items-center gap-1.5">
+                            🧠 Teste de Autoconhecimento (Avaliação Clínica com Laudo)
                           </span>
-                        </div>
-                        <p className="text-[11px] text-brand-charcoal/60 leading-relaxed">
-                          Define a duração de cada bloco de horário deste serviço na agenda. O valor inicial padrão é de <strong>1:30hs (90 min)</strong>.
-                        </p>
-
-                        <div className="flex items-center gap-2 flex-wrap pt-1">
-                          {DURACAO_CHIPS.map((chip) => {
-                            const isSelected = produtoForm.duracao_minutos === chip.value;
-                            return (
-                              <button
-                                key={chip.value}
-                                type="button"
-                                aria-pressed={isSelected}
-                                onClick={() => setProdutoForm({ ...produtoForm, duracao_minutos: chip.value })}
-                                className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
-                                  isSelected
-                                    ? "bg-brand-purple text-white border-brand-purple shadow-xs"
-                                    : "bg-white text-brand-charcoal/80 border-brand-beige hover:border-brand-purple/40"
-                                }`}
-                              >
-                                {chip.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-2 pt-1">
-                          <label htmlFor="duracao-minutos-input" className="text-xs text-brand-charcoal/70 font-medium">Ou digite em minutos:</label>
-                          <input
-                            id="duracao-minutos-input"
-                            type="number"
-                            min="15"
-                            step="5"
-                            value={produtoForm.duracao_minutos}
-                            onChange={(e) => setProdutoForm({ ...produtoForm, duracao_minutos: e.target.value })}
-                            className="w-24 px-2.5 py-2 sm:py-1 text-xs border border-brand-beige rounded-md bg-white focus-visible:ring-2 focus-visible:ring-brand-purple/30 font-bold text-brand-charcoal min-h-[44px] sm:min-h-0"
-                            placeholder="90"
-                          />
-                          <span className="text-xs text-brand-charcoal/50">minutos por sessão</span>
-                        </div>
+                          <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
+                            Marque esta opção para testes e avaliações online. O cliente passa pelo fluxo de checkout e pagamento via InfinitePay, recebendo o crédito de acesso liberado automaticamente após a aprovação para preenchimento e emissão do laudo.
+                          </p>
+                        </label>
                       </div>
-                    )}
-                  </div>
+
+                      {produtoForm.is_teste && (
+                        <div className="mt-1 pt-3 border-t border-brand-mint/20 bg-white/80 rounded-xl p-3.5 space-y-3">
+                          <div>
+                            <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                              🔗 Rota / Caminho do Teste
+                            </label>
+                            <input
+                              value={produtoForm.rota_teste}
+                              onChange={(e) => setProdutoForm({ ...produtoForm, rota_teste: e.target.value })}
+                              className="w-full px-3 py-2 border border-brand-beige rounded-lg text-sm font-mono focus-visible:ring-2 focus-visible:ring-brand-purple/30 bg-white"
+                              placeholder="/teste-yin-yang ou /teste-eneagrama"
+                            />
+                            <p className="text-[11px] text-brand-charcoal/60 mt-1">
+                              Caminho da aplicação web do teste para onde o participante é direcionado ao iniciar a avaliação.
+                            </p>
+                          </div>
+
+                          <div className="flex items-start gap-2 pt-1">
+                            <input
+                              type="checkbox"
+                              id="input-inclui-laudo-pdf"
+                              checked={produtoForm.inclui_laudo_pdf}
+                              onChange={(e) => setProdutoForm({ ...produtoForm, inclui_laudo_pdf: e.target.checked })}
+                              className="mt-0.5 w-4 h-4 rounded border-brand-mint text-brand-mint focus:ring-brand-mint/30 cursor-pointer"
+                            />
+                            <label htmlFor="input-inclui-laudo-pdf" className="cursor-pointer select-none">
+                              <span className="text-xs font-semibold text-brand-charcoal flex items-center gap-1">
+                                📄 Selo de Laudo Clínico em PDF Incluso
+                              </span>
+                              <p className="text-[11px] text-brand-charcoal/60">
+                                Exibe o selo de emissão instantânea de Relatório Clínico A4 com impressão em 1 clique na página e checkout.
+                              </p>
+                            </label>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                              📝 Orientações e Notas Pré-Teste (Opcional)
+                            </label>
+                            <textarea
+                              value={produtoForm.orientacoes_pre_teste}
+                              onChange={(e) => setProdutoForm({ ...produtoForm, orientacoes_pre_teste: e.target.value })}
+                              rows={2}
+                              className="w-full px-3 py-2 border border-brand-beige rounded-lg text-xs focus-visible:ring-2 focus-visible:ring-brand-purple/30 bg-white resize-y"
+                              placeholder="Ex: Reserve de 5 a 10 minutos em ambiente silencioso. Responda com sinceridade observando seu estado habitual..."
+                            />
+                            <p className="text-[11px] text-brand-charcoal/60 mt-0.5">
+                              Instruções exibidas ao participante na tela de acolhimento antes de iniciar as questões.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   <div>
                     <label className="block text-xs font-medium text-brand-charcoal/70 mb-1">Limite de Pessoas <span className="text-brand-charcoal/30">(opcional)</span></label>
 <input
@@ -739,6 +919,11 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                         {(p.atendimento_individual || isProdutoAgendamento(p)) && (
                           <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
                             🗓️ Atendimento ({formatDuracao(p.duracao_minutos)})
+                          </span>
+                        )}
+                        {p.is_teste && (
+                          <span className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
+                            🧠 Teste ({p.rota_teste || `/teste-${p.slug.replace(/^teste-/, "")}`})
                           </span>
                         )}
                       </div>

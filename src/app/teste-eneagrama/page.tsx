@@ -14,6 +14,8 @@ import {
   Lock,
   UserCheck,
   BookOpen,
+  ShoppingBag,
+  CheckCircle2,
 } from "lucide-react";
 import {
   AFIRMACOES_ENEAGRAMA,
@@ -30,13 +32,27 @@ import EneagramaResultView from "./components/EneagramaResultView";
 import EneagramaReportModal from "./components/EneagramaReportModal";
 import Footer from "../components/Footer";
 import TestShareMenu from "../components/TestShareMenu";
+import { useCart } from "@/context/CartContext";
 
 export default function TesteEneagramaPage() {
+  const { addItem, openDrawer } = useCart();
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [usuario, setUsuario] = useState<{
     id: string;
     nome: string;
     email?: string;
+  } | null>(null);
+  const [creditosRestantes, setCreditosRestantes] = useState<number>(0);
+  const [produtoTeste, setProdutoTeste] = useState<{
+    id: string;
+    nome: string;
+    slug: string;
+    preco: number;
+    preco_promocional?: number | null;
+    imagem_url?: string | null;
+    rota_teste?: string | null;
+    orientacoes_pre_teste?: string | null;
+    inclui_laudo_pdf?: boolean;
   } | null>(null);
 
   const [etapa, setEtapa] = useState<"intro" | "teste" | "resultado">("intro");
@@ -45,23 +61,27 @@ export default function TesteEneagramaPage() {
   const [modalRelatorioAberto, setModalRelatorioAberto] = useState(false);
 
   useEffect(() => {
-    async function checkAuth() {
+    async function carregarStatus() {
       try {
-        const res = await fetch("/api/auth/me", { cache: "no-store" });
+        setLoadingAuth(true);
+        const res = await fetch("/api/testes/credito?slug=teste-eneagrama", { cache: "no-store" });
         const data = await res.json();
         if (data?.authenticated && data.usuario) {
           setUsuario(data.usuario);
         } else {
           setUsuario(null);
         }
+        setCreditosRestantes(data?.creditosRestantes || 0);
+        if (data?.produto) {
+          setProdutoTeste(data.produto);
+        }
       } catch (err) {
-        console.error("Erro ao verificar autenticação:", err);
-        setUsuario(null);
+        console.error("Erro ao verificar créditos do Eneagrama:", err);
       } finally {
         setLoadingAuth(false);
       }
     }
-    checkAuth();
+    carregarStatus();
   }, []);
 
   const totalQuestoes = AFIRMACOES_ENEAGRAMA.length;
@@ -71,13 +91,33 @@ export default function TesteEneagramaPage() {
   const resultadoCalculado: ResultadoEneagramaCalculado =
     calcularResultadoEneagrama(respostas);
 
+  const precoExibicao = produtoTeste
+    ? produtoTeste.preco_promocional || produtoTeste.preco || 67
+    : 67;
+
+  const handleComprarTeste = () => {
+    if (produtoTeste) {
+      addItem({
+        id: produtoTeste.id,
+        slug: produtoTeste.slug || "teste-eneagrama",
+        nome: produtoTeste.nome || "Teste de Personalidade do Eneagrama",
+        preco: precoExibicao,
+        imagem_url: produtoTeste.imagem_url,
+        is_teste: true,
+        rota_teste: produtoTeste.rota_teste || "/teste-eneagrama",
+      });
+      openDrawer();
+    } else {
+      window.location.href = "/produtos/teste-eneagrama";
+    }
+  };
+
   const handleSelecionarNota = (nota: number) => {
     setRespostas((prev) => ({
       ...prev,
       [afirmacaoAtual.id]: nota,
     }));
 
-    // Avanço automático suave após seleção
     if (afirmacaoAtualIndex < totalQuestoes - 1) {
       setTimeout(() => {
         setAfirmacaoAtualIndex((prev) => prev + 1);
@@ -117,7 +157,21 @@ export default function TesteEneagramaPage() {
           pontuacoes,
           respostas,
         }),
-      }).catch((err) => console.error("Erro ao registrar avaliação do Eneagrama:", err));
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            const errData = await res.json();
+            if (errData.sem_credito) {
+              alert(
+                errData.error ||
+                  "Você não possui créditos para realizar este teste no INstituto Kalapa."
+              );
+            }
+          } else {
+            setCreditosRestantes((prev) => Math.max(0, prev - 1));
+          }
+        })
+        .catch((err) => console.error("Erro ao registrar avaliação do Eneagrama:", err));
     }
 
     setEtapa("resultado");
@@ -138,6 +192,10 @@ export default function TesteEneagramaPage() {
   };
 
   const iniciarTeste = () => {
+    if (creditosRestantes <= 0) {
+      handleComprarTeste();
+      return;
+    }
     setRespostas({});
     setAfirmacaoAtualIndex(0);
     setEtapa("teste");
@@ -194,25 +252,43 @@ export default function TesteEneagramaPage() {
             <p className="text-sm font-light text-[#1A3C4D]/70">Carregando avaliação de personalidade...</p>
           </div>
         ) : !usuario ? (
-          /* Card de Login / Cadastro Obrigatório */
+          /* Card para Usuário Não Autenticado: Apresentação + CTA de Compra / Login */
           <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-2xl mx-auto relative overflow-hidden">
             <div className="w-16 h-16 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] flex items-center justify-center mx-auto mb-6 border border-[#7D8C6E]/30">
               <Lock className="w-8 h-8" />
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mb-3">
-              Identifique-se para Realizar o Teste do Eneagrama
+              Avaliação de Personalidade do Eneagrama
             </h2>
 
             <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
-              Para mapear seu Tipo Dominante com precisão e gerar seu{" "}
-              <strong>Laudo Diagnóstico Completo em PDF personalizado</strong>, é necessário estar
-              conectado ao sistema do INstituto Kalapa.
+              Para mapear seu Tipo Dominante com precisão, acessar seu dossiê comportamental e emitir seu{" "}
+              <strong>Laudo Diagnóstico Completo em PDF personalizado</strong> no INstituto Kalapa, adquira sua avaliação abaixo:
             </p>
 
-            <div className="bg-[#F8F4ED] rounded-xl p-5 mb-8 text-left border border-[#E8DEC8]/80">
-              <h4 className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 mb-3">
-                O que você terá acesso após o teste:
+            {/* Box de Preço e Benefícios */}
+            <div className="bg-[#F8F4ED] rounded-2xl p-6 mb-8 text-left border border-[#E8DEC8]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#E8DEC8]">
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 block mb-1">
+                    Investimento por avaliação
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-serif font-bold text-[#1A3C4D]">
+                      R$ {precoExibicao.toFixed(2).replace(".", ",")}
+                    </span>
+                    <span className="text-xs text-[#1A3C4D]/60 font-light">/ avaliação online</span>
+                  </div>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] text-xs font-semibold border border-[#7D8C6E]/20 self-start sm:self-center">
+                  <CheckCircle2 className="w-4 h-4 text-[#7D8C6E]" />
+                  <span>Laudo PDF Incluso</span>
+                </div>
+              </div>
+
+              <h4 className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/70 mt-5 mb-3">
+                O que você terá acesso:
               </h4>
               <ul className="space-y-2.5 text-xs sm:text-sm text-[#1A3C4D]/85">
                 <li className="flex items-start gap-2">
@@ -229,136 +305,227 @@ export default function TesteEneagramaPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#7D8C6E] font-bold">•</span>
-                  <span><strong>Mensagens Perdidas da Infância:</strong> A verdade curativa necessária para desarmar o ego.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#7D8C6E] font-bold">•</span>
-                  <span><strong>Mapa dos 9 Tipos & Laudo em PDF:</strong> Visão integral da sua personalidade pronta para impressão ou download.</span>
+                  <span><strong>Laudo Clínico em PDF A4:</strong> Documento visual completo pronto para download ou impressão.</span>
                 </li>
               </ul>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href="/login?redirect=/teste-eneagrama"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#1A3C4D] text-white text-sm font-medium hover:bg-[#15313F] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Fazer Login</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/cadastro?redirect=/teste-eneagrama"
+              <button
+                type="button"
+                onClick={handleComprarTeste}
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#7D8C6E] text-white text-sm font-medium hover:bg-[#6C7B5D] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Criar Conta Gratuita</span>
-                <UserCheck className="w-4 h-4" />
+                <ShoppingBag className="w-4 h-4" />
+                <span>Comprar Avaliação (R$ {precoExibicao.toFixed(2).replace(".", ",")})</span>
+              </button>
+              <Link
+                href="/login?redirect=/teste-eneagrama"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl border border-[#1A3C4D]/30 text-[#1A3C4D] text-sm font-medium hover:bg-[#F8F4ED] transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Já comprou? Fazer Login</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
             <p className="text-xs text-[#1A3C4D]/50 mt-5">
-              Leva menos de 1 minuto para criar sua conta. Totalmente seguro e confidencial.
+              Pagamento 100% seguro via InfinitePay (Pix ou Cartão de Crédito).
+            </p>
+          </div>
+        ) : creditosRestantes === 0 ? (
+          /* Card Paywall para Usuário Logado Sem Créditos */
+          <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-2xl mx-auto relative overflow-hidden">
+            <div className="w-16 h-16 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] flex items-center justify-center mx-auto mb-6 border border-[#7D8C6E]/30">
+              <ShoppingBag className="w-8 h-8" />
+            </div>
+
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#7D8C6E]/15 text-[#7D8C6E] mb-3">
+              Crédito de Avaliação Necessário
+            </span>
+
+            <h2 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mb-3">
+              Olá, {usuario.nome}
+            </h2>
+
+            <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
+              Você ainda não possui créditos disponíveis para iniciar o teste do Eneagrama. Para desbloquear o questionário e emitir seu Laudo Diagnóstico Completo em PDF, adquira sua avaliação abaixo:
+            </p>
+
+            <div className="bg-[#F8F4ED] rounded-2xl p-6 mb-8 text-left border border-[#E8DEC8]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E8DEC8]">
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 block mb-1">
+                    Investimento por avaliação
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-serif font-bold text-[#1A3C4D]">
+                      R$ {precoExibicao.toFixed(2).replace(".", ",")}
+                    </span>
+                    <span className="text-xs text-[#1A3C4D]/60 font-light">/ avaliação online</span>
+                  </div>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] text-xs font-semibold border border-[#7D8C6E]/20 self-start sm:self-center">
+                  <CheckCircle2 className="w-4 h-4 text-[#7D8C6E]" />
+                  <span>Laudo PDF Incluso</span>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#1A3C4D]/80">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
+                  <span>Acesso liberado imediatamente</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
+                  <span>45 Afirmações com análise analítica</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
+                  <span>Laudo Clínico em PDF A4</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
+                  <span>Histórico permanente em sua conta</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={handleComprarTeste}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#7D8C6E] text-white text-sm font-medium hover:bg-[#6C7B5D] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>Adicionar ao Carrinho (R$ {precoExibicao.toFixed(2).replace(".", ",")})</span>
+              </button>
+              <Link
+                href="/conta/pedidos"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-[#1A3C4D]/30 text-[#1A3C4D] text-sm font-medium hover:bg-[#F8F4ED] transition-all flex items-center justify-center gap-2"
+              >
+                <span>Meus Pedidos</span>
+              </Link>
+            </div>
+            <p className="text-xs text-[#1A3C4D]/50 mt-5">
+              Já realizou o pagamento? O crédito é liberado automaticamente após a confirmação do pagamento via InfinitePay.
             </p>
           </div>
         ) : (
           <>
-            {/* ETAPA 1: INTRODUÇÃO E INSTRUÇÕES (AUTENTICADO) */}
+            {/* ETAPA 1: INTRODUÇÃO E INSTRUÇÕES (COM CRÉDITO DISPONÍVEL) */}
             {etapa === "intro" && (
               <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-3xl mx-auto relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#7D8C6E]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#B8965A]/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#7D8C6E]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#B8965A]/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
 
-            <div className="relative">
-              <span className="inline-flex items-center gap-1 text-xs text-[#7D8C6E] font-semibold uppercase tracking-wider mb-2">
-                <Clock className="w-4 h-4" /> Duração estimada: ~6 a 8 minutos
-              </span>
+                <div className="relative">
+                  {/* Badge de Créditos Disponíveis */}
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium mb-5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>
+                      Você possui <strong>{creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""}</strong> disponível{creditosRestantes > 1 ? "is" : ""} para esta avaliação
+                    </span>
+                  </div>
 
-              <h2 className="text-2xl sm:text-3xl font-serif text-[#1A3C4D] mb-4">
-                Instruções para o Teste
-              </h2>
+                  <div className="flex items-center justify-center gap-1 text-xs text-[#7D8C6E] font-semibold uppercase tracking-wider mb-2">
+                    <Clock className="w-4 h-4" /> Duração estimada: ~6 a 8 minutos
+                  </div>
 
-              {/* Box de Orientações Iniciais */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-[#F8F4ED] border border-[#E8DEC8] text-left mb-6 space-y-3">
-                <p className="text-base sm:text-lg font-serif font-semibold text-[#1A3C4D]">
-                  Antes de começar
-                </p>
-                <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
-                  Reserve alguns minutos para estar presente.
-                </p>
-                <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
-                  Escolha um ambiente tranquilo e confortável, tenha água por perto e, se possível, esteja em um espaço onde não será interrompido. Respire, desacelere e permita-se responder com honestidade, sem buscar a resposta &ldquo;certa&rdquo;.
-                </p>
-                <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
-                  <strong className="font-semibold text-[#1A3C4D]">O Eneagrama é uma sabedoria ancestral de autoconhecimento.</strong> Mais do que encontrar um tipo, este é um convite para olhar para si com presença, consciência e curiosidade.
-                </p>
-                <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
-                  Não responda como gostaria de ser. Responda como você verdadeiramente se percebe.
-                </p>
-              </div>
+                  <h2 className="text-2xl sm:text-3xl font-serif text-[#1A3C4D] mb-4">
+                    Instruções para o Teste
+                  </h2>
 
-              {/* Escala de Respostas */}
-              <div className="text-left mb-8">
-                <h3 className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 mb-3">
-                  Escala de Respostas (atribua uma nota de 0 a 5 para cada item):
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#1A3C4D]/80">
-                  {ESCALA_NOTAS.map((item) => (
-                    <div
-                      key={item.valor}
-                      className="flex items-center gap-2.5 p-2 rounded-lg bg-[#FDFBF7] border border-[#E8DEC8]/60"
-                    >
-                      <span className="w-6 h-6 rounded-md bg-[#7D8C6E]/15 text-[#7D8C6E] font-bold flex items-center justify-center shrink-0">
-                        {item.valor}
-                      </span>
-                      <span>{item.descricao}</span>
+                  {/* Box de Orientações Customizadas do Admin ou Padrão */}
+                  {produtoTeste?.orientacoes_pre_teste ? (
+                    <div className="p-4 rounded-xl bg-[#F8F4ED] border border-[#E8DEC8] text-left mb-6 text-sm text-[#1A3C4D]/85 leading-relaxed">
+                      <p className="font-semibold text-[#1A3C4D] mb-1">Orientações do INstituto Kalapa:</p>
+                      <p className="whitespace-pre-line">{produtoTeste.orientacoes_pre_teste}</p>
                     </div>
-                  ))}
+                  ) : null}
+
+                  {/* Box de Orientações Iniciais */}
+                  <div className="p-5 sm:p-6 rounded-2xl bg-[#F8F4ED] border border-[#E8DEC8] text-left mb-6 space-y-3">
+                    <p className="text-base sm:text-lg font-serif font-semibold text-[#1A3C4D]">
+                      Antes de começar
+                    </p>
+                    <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
+                      Reserve alguns minutos para estar presente.
+                    </p>
+                    <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
+                      Escolha um ambiente tranquilo e confortável, tenha água por perto e, se possível, esteja em um espaço onde não será interrompido. Respire, desacelere e permita-se responder com honestidade, sem buscar a resposta &ldquo;certa&rdquo;.
+                    </p>
+                    <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
+                      <strong className="font-semibold text-[#1A3C4D]">O Eneagrama é uma sabedoria ancestral de autoconhecimento.</strong> Mais do que encontrar um tipo, este é um convite para olhar para si com presença, consciência e curiosidade.
+                    </p>
+                    <p className="text-xs sm:text-sm text-[#1A3C4D]/85 leading-relaxed font-light">
+                      Não responda como gostaria de ser. Responda como você verdadeiramente se percebe.
+                    </p>
+                  </div>
+
+                  {/* Escala de Respostas */}
+                  <div className="text-left mb-8">
+                    <h3 className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 mb-3">
+                      Escala de Respostas (atribua uma nota de 0 a 5 para cada item):
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#1A3C4D]/80">
+                      {ESCALA_NOTAS.map((item) => (
+                        <div
+                          key={item.valor}
+                          className="flex items-center gap-2.5 p-2 rounded-lg bg-[#FDFBF7] border border-[#E8DEC8]/60"
+                        >
+                          <span className="w-6 h-6 rounded-md bg-[#7D8C6E]/15 text-[#7D8C6E] font-bold flex items-center justify-center shrink-0">
+                            {item.valor}
+                          </span>
+                          <span>{item.descricao}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={iniciarTeste}
+                    className="w-full py-4 px-8 rounded-2xl bg-[#7D8C6E] hover:bg-[#6C7B5D] text-white text-base font-semibold transition-all shadow-lg shadow-[#7D8C6E]/20 flex items-center justify-center gap-2 cursor-pointer hover:gap-3"
+                  >
+                    <span>Começar Avaliação (45 Afirmações)</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
+            )}
 
-              <button
-                type="button"
-                onClick={iniciarTeste}
-                className="w-full py-4 px-8 rounded-2xl bg-[#7D8C6E] hover:bg-[#6C7B5D] text-white text-base font-semibold transition-all shadow-lg shadow-[#7D8C6E]/20 flex items-center justify-center gap-2 cursor-pointer hover:gap-3"
-              >
-                <span>Começar Avaliação (45 Afirmações)</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        )}
+            {/* ETAPA 2: QUESTIONÁRIO INTERATIVO */}
+            {etapa === "teste" && (
+              <div>
+                <EneagramaProgressIndicator
+                  atual={afirmacaoAtualIndex}
+                  total={totalQuestoes}
+                  onReiniciar={handleReiniciarTeste}
+                />
 
-        {/* ETAPA 2: QUESTIONÁRIO INTERATIVO */}
-        {etapa === "teste" && (
-          <div>
-            <EneagramaProgressIndicator
-              atual={afirmacaoAtualIndex}
-              total={totalQuestoes}
-              onReiniciar={handleReiniciarTeste}
-            />
+                <EneagramaQuestionCard
+                  afirmacaoAtual={afirmacaoAtual}
+                  notaAtual={notaAtual}
+                  onSelecionarNota={handleSelecionarNota}
+                  onVoltar={handleVoltar}
+                  onAvancar={handleAvancar}
+                  podeVoltar={afirmacaoAtualIndex > 0}
+                  podeAvancar={afirmacaoAtualIndex < totalQuestoes - 1}
+                  isUltima={afirmacaoAtualIndex === totalQuestoes - 1}
+                  onConcluir={handleConcluirTeste}
+                />
+              </div>
+            )}
 
-            <EneagramaQuestionCard
-              afirmacaoAtual={afirmacaoAtual}
-              notaAtual={notaAtual}
-              onSelecionarNota={handleSelecionarNota}
-              onVoltar={handleVoltar}
-              onAvancar={handleAvancar}
-              podeVoltar={afirmacaoAtualIndex > 0}
-              podeAvancar={afirmacaoAtualIndex < totalQuestoes - 1}
-              isUltima={afirmacaoAtualIndex === totalQuestoes - 1}
-              onConcluir={handleConcluirTeste}
-            />
-          </div>
-        )}
-
-        {/* ETAPA 3: LAUDO E DIAGNÓSTICO FINAL */}
-        {etapa === "resultado" && (
-          <EneagramaResultView
-            resultado={resultadoCalculado}
-            onReiniciar={iniciarTeste}
-            onAbrirRelatorio={() => setModalRelatorioAberto(true)}
-            usuario={usuario}
-          />
-        )}
+            {/* ETAPA 3: LAUDO E DIAGNÓSTICO FINAL */}
+            {etapa === "resultado" && (
+              <EneagramaResultView
+                resultado={resultadoCalculado}
+                onReiniciar={iniciarTeste}
+                onAbrirRelatorio={() => setModalRelatorioAberto(true)}
+                usuario={usuario}
+              />
+            )}
           </>
         )}
       </section>

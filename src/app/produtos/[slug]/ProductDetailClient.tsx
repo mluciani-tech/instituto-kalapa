@@ -51,8 +51,9 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
     ? "Gratuito"
     : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const vagasEsgotadas = !isAgendamento && vagas && vagas.restantes <= 0;
-  const vagasQuaseEsgotadas = !isAgendamento && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
+  const isTeste = Boolean(produto.is_teste);
+  const vagasEsgotadas = !isTeste && !isAgendamento && vagas && vagas.restantes <= 0;
+  const vagasQuaseEsgotadas = !isTeste && !isAgendamento && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
 
   const handleComprarAgora = () => {
     clearCart();
@@ -64,6 +65,8 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
         preco: produto.preco,
         imagem_url: produto.imagem_url,
         categoria: produto.categoria,
+        is_teste: isTeste,
+        rota_teste: produto.rota_teste,
       },
       1
     );
@@ -176,8 +179,25 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
             </div>
           )}
 
-          {/* Contador de vagas se aplicável */}
-          {!isAgendamento && vagas && (
+          {/* Informações do Teste ou Contador de Vagas */}
+          {isTeste ? (
+            <div className="mb-6 p-4 rounded-xl bg-emerald-50/80 border border-emerald-200/80">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <span className="text-xs uppercase tracking-wider font-semibold text-emerald-900 flex items-center gap-1.5">
+                  <span>🧠</span>
+                  <span>Avaliação de Autoconhecimento Online</span>
+                </span>
+                {produto.inclui_laudo_pdf !== false && (
+                  <span className="text-[11px] font-semibold text-emerald-800 bg-white px-2.5 py-0.5 rounded-full border border-emerald-300">
+                    Laudo Clínico em PDF Incluso
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-emerald-950/80 leading-relaxed">
+                {produto.orientacoes_pre_teste || "Acesso liberado imediatamente após a confirmação do pagamento. O teste pode ser realizado no seu próprio ritmo com relatório salvo permanentemente no seu histórico."}
+              </p>
+            </div>
+          ) : !isAgendamento && vagas && (
             <div className="mb-6 p-4 rounded-xl bg-brand-offwhite border border-brand-charcoal/10">
               <div className="flex items-center justify-between text-xs sm:text-sm mb-1.5">
                 <span className="text-brand-charcoal/70 font-medium">
@@ -263,7 +283,9 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                 {precoFormatado}
               </span>
               {!isGratuito && (
-                <span className="text-sm text-brand-charcoal/50">/ sessão</span>
+                <span className="text-sm text-brand-charcoal/50">
+                  {isTeste ? "/ avaliação" : "/ sessão"}
+                </span>
               )}
             </div>
 
@@ -294,6 +316,8 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                         preco: produto.preco,
                         imagem_url: produto.imagem_url,
                         categoria: produto.categoria,
+                        is_teste: isTeste,
+                        rota_teste: produto.rota_teste,
                       });
                       openDrawer();
                     }}
@@ -301,7 +325,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                     className="flex-1 py-3.5 px-4 font-semibold text-sm rounded-xl border border-brand-purple/30 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ShoppingBag className="w-4 h-4" />
-                    Adicionar à Reserva
+                    {isTeste ? "Adicionar ao Carrinho" : "Adicionar à Reserva"}
                   </button>
 
                   <button
@@ -318,7 +342,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                       "Turma Lotada"
                     ) : (
                       <>
-                        <span>Garantir Vaga</span>
+                        <span>{isTeste ? "Comprar Avaliação" : "Garantir Vaga"}</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}

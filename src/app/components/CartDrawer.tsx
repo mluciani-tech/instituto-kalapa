@@ -109,7 +109,7 @@ export default function CartDrawer() {
                 Sua Reserva
               </h2>
               <span className="text-xs bg-brand-terracotta/20 text-brand-terracotta border border-brand-terracotta/30 px-2 py-0.5 rounded-full font-medium">
-                {totalItems} {totalItems === 1 ? "vivência" : "vivências"}
+                {totalItems} {totalItems === 1 ? "item" : "itens"}
               </span>
             </div>
             <button
@@ -191,10 +191,10 @@ export default function CartDrawer() {
                       <ShoppingBag className="w-8 h-8" />
                     </div>
                     <p className="text-sm font-semibold text-white/90 mb-1">
-                      Nenhuma vivência selecionada
+                      Nenhuma vivência ou teste selecionado
                     </p>
                     <p className="text-xs text-white/50 max-w-xs mb-6">
-                      Explore nossas vivências e atendimentos para reservar sua vaga.
+                      Explore nossas vivências, atendimentos e testes de autoconhecimento.
                     </p>
                     <Link
                       href="/produtos"
@@ -231,9 +231,16 @@ export default function CartDrawer() {
                     <h3 className="text-xs font-semibold text-white truncate">
                       {item.nome}
                     </h3>
-                    <p className="text-xs text-brand-terracotta font-bold mt-0.5">
-                      R$ {item.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-xs text-brand-terracotta font-bold">
+                        R$ {item.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </p>
+                      {item.is_teste && (
+                        <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded font-medium">
+                          🧠 Teste Online
+                        </span>
+                      )}
+                    </div>
 
                     {/* Quantity controls with accessible min 44x44px touch targets */}
                     <div className="flex items-center gap-2 mt-2">

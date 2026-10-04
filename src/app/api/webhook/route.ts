@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     // 1. Buscar pedido pelo order_nsu
     const { data: pedido, error: pedidoError } = await supabaseAdmin!
       .from("pedidos")
-      .select("id, status, cliente_nome, cliente_email, cliente_telefone, usuario_id, cupom_id, valor_desconto, beneficiarios, agendamento_id, produtos(nome)")
+      .select("id, status, cliente_nome, cliente_email, cliente_telefone, usuario_id, cupom_id, valor_desconto, beneficiarios, agendamento_id, itens, produto_id, produtos(nome, slug, is_teste, rota_teste)")
       .eq("order_nsu", order_nsu)
       .single();
 
@@ -207,6 +207,35 @@ export async function POST(req: NextRequest) {
     }
 
     console.log("[webhook] Pedido atualizado:", pedido.id);
+
+    // 2.3 Liberar créditos de testes se houver produtos do tipo teste no pedido
+    try {
+      const { liberarCreditosPedido } = await import("@/lib/testes-creditos");
+      const itensDoPedido = Array.isArray(pedido.itens) && pedido.itens.length > 0
+        ? pedido.itens
+        : pedido.produto_id
+        ? [{
+            produto_id: pedido.produto_id,
+            nome: (pedido.produtos as any)?.nome || "Produto",
+            slug: (pedido.produtos as any)?.slug,
+            quantidade: 1,
+            is_teste: (pedido.produtos as any)?.is_teste,
+            rota_teste: (pedido.produtos as any)?.rota_teste
+          }]
+        : [];
+
+      if (itensDoPedido.length > 0) {
+        await liberarCreditosPedido({
+          pedidoId: pedido.id,
+          usuarioId: pedido.usuario_id || null,
+          clienteEmail: customerData.email || pedido.cliente_email,
+          itens: itensDoPedido,
+          beneficiarios: pedido.beneficiarios || [],
+        });
+      }
+    } catch (testCredErr) {
+      console.error("[webhook] Erro ao liberar créditos de teste:", testCredErr);
+    }
 
 
     // 3. Atualizar inscrição vinculada

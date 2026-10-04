@@ -32,7 +32,8 @@ export async function GET(req: NextRequest) {
       capture_method,
       receipt_url,
       created_at,
-      produtos (nome, slug)
+      itens,
+      produtos (nome, slug, is_teste, rota_teste)
     `)
     .eq("order_nsu", orderNsu)
     .single();

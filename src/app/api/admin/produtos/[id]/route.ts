@@ -52,6 +52,7 @@ export async function PUT(
   const allowedFields = [
     "slug", "nome", "descricao", "descricao_curta", "preco",
     "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "vagas_ocupadas_manual", "categoria", "forma_pagamento_disponivel", "atendimento_individual", "duracao_minutos",
+    "is_teste", "rota_teste", "orientacoes_pre_teste", "inclui_laudo_pdf",
   ];
 
   for (const field of allowedFields) {
@@ -118,6 +119,22 @@ export async function PUT(
     updates.atendimento_individual = Boolean(updates.atendimento_individual);
   }
 
+  if (updates.is_teste !== undefined) {
+    updates.is_teste = Boolean(updates.is_teste);
+  }
+
+  if (updates.inclui_laudo_pdf !== undefined) {
+    updates.inclui_laudo_pdf = Boolean(updates.inclui_laudo_pdf);
+  }
+
+  if (updates.rota_teste !== undefined) {
+    updates.rota_teste = updates.rota_teste ? String(updates.rota_teste).trim() : null;
+  }
+
+  if (updates.orientacoes_pre_teste !== undefined) {
+    updates.orientacoes_pre_teste = updates.orientacoes_pre_teste ? String(updates.orientacoes_pre_teste).trim() : null;
+  }
+
   let { data, error } = await supabaseAdmin!
     .from("produtos")
     .update(updates)
@@ -125,10 +142,21 @@ export async function PUT(
     .select()
     .single();
 
-  if (error && (error.message?.includes("duracao_minutos") || error.message?.includes("atendimento_individual"))) {
+  if (error && (
+    error.message?.includes("duracao_minutos") ||
+    error.message?.includes("atendimento_individual") ||
+    error.message?.includes("is_teste") ||
+    error.message?.includes("rota_teste") ||
+    error.message?.includes("orientacoes_pre_teste") ||
+    error.message?.includes("inclui_laudo_pdf")
+  )) {
     console.warn("[admin/produtos] Coluna nova não encontrada no banco ao atualizar. Tentando fallback defensivo.");
     if (error.message?.includes("duracao_minutos")) delete updates.duracao_minutos;
     if (error.message?.includes("atendimento_individual")) delete updates.atendimento_individual;
+    if (error.message?.includes("is_teste")) delete updates.is_teste;
+    if (error.message?.includes("rota_teste")) delete updates.rota_teste;
+    if (error.message?.includes("orientacoes_pre_teste")) delete updates.orientacoes_pre_teste;
+    if (error.message?.includes("inclui_laudo_pdf")) delete updates.inclui_laudo_pdf;
     const retry = await supabaseAdmin!
       .from("produtos")
       .update(updates)

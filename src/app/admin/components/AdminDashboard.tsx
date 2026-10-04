@@ -16,7 +16,57 @@ import {
   PieChart as PieIcon,
   BarChart3,
   Flame,
+  Brain,
+  Calendar,
+  Compass,
+  Copy,
+  Check,
+  Bot,
+  Zap,
+  Tag,
+  Lightbulb,
 } from "lucide-react";
+
+interface LinhaNegocioItem {
+  receita: number;
+  count: number;
+  ticketMedio: number;
+  percentualReceita: number;
+}
+
+interface MonitorTestesData {
+  totalCreditosVendidos: number;
+  totalCreditosUtilizados: number;
+  totalCreditosDisponiveis: number;
+  taxaAtivacao: number;
+}
+
+interface AICombo {
+  titulo: string;
+  descricao: string;
+  preco_combo: string;
+  economia_estimada: string;
+  justificativa: string;
+}
+
+interface AICopy {
+  publico_alvo: string;
+  mensagem: string;
+}
+
+interface AICupom {
+  codigo: string;
+  desconto: string;
+  objetivo: string;
+}
+
+export interface AIInsightData {
+  diagnostico: string;
+  combos_sugeridos: AICombo[];
+  copys_whatsapp: AICopy[];
+  cupons_recomendados: AICupom[];
+  acoes_prioritarias: string[];
+}
 
 interface DashboardData {
   periodo: string;
@@ -32,6 +82,12 @@ interface DashboardData {
     totalDescontoPeriodo: number;
     cuponsUsadosPeriodo: number;
   };
+  linhasNegocio?: {
+    testes: LinhaNegocioItem;
+    atendimentos: LinhaNegocioItem;
+    vivencias: LinhaNegocioItem;
+  };
+  monitorTestes?: MonitorTestesData;
   timeline: {
     date: string;
     label: string;
@@ -63,6 +119,7 @@ interface DashboardData {
     telefone_whatsapp: string | null;
     valor: number;
     produto_nome: string;
+    categoria?: "testes" | "atendimentos" | "vivencias";
     created_at: string;
   }[];
   totaisGerais: {
@@ -90,6 +147,13 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
     valor: number;
     pedidos: number;
   } | null>(null);
+
+  // Estados de IA & Monetização (Gemini)
+  const [aiInsights, setAiInsights] = useState<AIInsightData | null>(null);
+  const [aiSource, setAiSource] = useState<"gemini" | "fallback" | null>(null);
+  const [loadingAi, setLoadingAi] = useState(false);
+  const [errorAi, setErrorAi] = useState("");
+  const [copiadoIdx, setCopiadoIdx] = useState<number | null>(null);
 
   const totalProdutos = data?.produtosRanking.length || 0;
   const totalAtivos = data?.produtosRanking.filter((p) => p.ativo !== false).length || 0;
@@ -145,6 +209,32 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
     } catch {
       return iso;
     }
+  };
+
+  // Disparo da IA Gemini para análise de monetização
+  const handleGerarInsightsAI = async () => {
+    setLoadingAi(true);
+    setErrorAi("");
+    try {
+      const res = await fetch("/api/admin/insights/ai", { method: "POST" });
+      const json = await res.json();
+      if (res.ok && json.insights) {
+        setAiInsights(json.insights);
+        setAiSource(json.source || "gemini");
+      } else {
+        setErrorAi(json.error || "Não foi possível gerar os insights no momento.");
+      }
+    } catch {
+      setErrorAi("Erro de comunicação ao gerar consultoria com IA.");
+    } finally {
+      setLoadingAi(false);
+    }
+  };
+
+  const handleCopiarTexto = (texto: string, idx: number) => {
+    navigator.clipboard.writeText(texto);
+    setCopiadoIdx(idx);
+    setTimeout(() => setCopiadoIdx(null), 2500);
   };
 
   // Coordenadas para o gráfico SVG de linha/área
@@ -449,6 +539,165 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
         </div>
       </div>
 
+      {/* Seção: Desempenho por Linha de Negócio & Monitor de Ativação de Testes */}
+      {data?.linhasNegocio && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-brand-purple flex items-center gap-2">
+                <Compass className="w-4 h-4 text-brand-purple" />
+                Mix de Linhas de Negócio & Comercialização
+              </h3>
+              <p className="text-xs text-brand-charcoal/50 mt-0.5">
+                Comparativo de faturamento entre Testes Online, Atendimentos e Vivências
+              </p>
+            </div>
+            {data.monitorTestes && (
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-purple/10 text-brand-purple border border-brand-purple/20">
+                <Brain className="w-3.5 h-3.5" />
+                {data.monitorTestes.taxaAtivacao}% dos testes ativados
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card Linha 1: Testes Online */}
+            <div className="bg-gradient-to-br from-purple-50/80 to-white p-5 rounded-2xl border border-purple-100 shadow-xs relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-purple-800 uppercase tracking-wider flex items-center gap-1">
+                    <Brain className="w-3.5 h-3.5" />
+                    Testes Online
+                  </span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200">
+                    {data.linhasNegocio.testes.percentualReceita}% da receita
+                  </span>
+                </div>
+                <div className="text-xl font-bold text-brand-purple mt-3">
+                  {formatMoney(data.linhasNegocio.testes.receita)}
+                </div>
+                <div className="mt-2 space-y-1 text-xs text-brand-charcoal/70">
+                  <div className="flex justify-between">
+                    <span>Vendas no período:</span>
+                    <strong className="text-brand-purple font-semibold">{data.linhasNegocio.testes.count}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Ticket Médio:</span>
+                    <strong className="text-brand-purple font-semibold">{formatMoney(data.linhasNegocio.testes.ticketMedio)}</strong>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-2.5 border-t border-purple-100 text-[11px] text-purple-800/80 font-medium">
+                🎯 Autonomia & Escala digital 24/7
+              </div>
+            </div>
+
+            {/* Card Linha 2: Atendimentos Individuais */}
+            <div className="bg-gradient-to-br from-amber-50/70 to-white p-5 rounded-2xl border border-amber-100 shadow-xs relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Atendimentos
+                  </span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                    {data.linhasNegocio.atendimentos.percentualReceita}% da receita
+                  </span>
+                </div>
+                <div className="text-xl font-bold text-brand-purple mt-3">
+                  {formatMoney(data.linhasNegocio.atendimentos.receita)}
+                </div>
+                <div className="mt-2 space-y-1 text-xs text-brand-charcoal/70">
+                  <div className="flex justify-between">
+                    <span>Vendas no período:</span>
+                    <strong className="text-brand-purple font-semibold">{data.linhasNegocio.atendimentos.count}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Ticket Médio:</span>
+                    <strong className="text-brand-purple font-semibold">{formatMoney(data.linhasNegocio.atendimentos.ticketMedio)}</strong>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-2.5 border-t border-amber-100 text-[11px] text-amber-800/80 font-medium">
+                🌿 Terapias & acompanhamentos 1 a 1
+              </div>
+            </div>
+
+            {/* Card Linha 3: Vivências & Cursos */}
+            <div className="bg-gradient-to-br from-emerald-50/70 to-white p-5 rounded-2xl border border-emerald-100 shadow-xs relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
+                    <Flame className="w-3.5 h-3.5" />
+                    Vivências & Cursos
+                  </span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    {data.linhasNegocio.vivencias.percentualReceita}% da receita
+                  </span>
+                </div>
+                <div className="text-xl font-bold text-brand-purple mt-3">
+                  {formatMoney(data.linhasNegocio.vivencias.receita)}
+                </div>
+                <div className="mt-2 space-y-1 text-xs text-brand-charcoal/70">
+                  <div className="flex justify-between">
+                    <span>Inscrições no período:</span>
+                    <strong className="text-brand-purple font-semibold">{data.linhasNegocio.vivencias.count}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Ticket Médio:</span>
+                    <strong className="text-brand-purple font-semibold">{formatMoney(data.linhasNegocio.vivencias.ticketMedio)}</strong>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-2.5 border-t border-emerald-100 text-[11px] text-emerald-800/80 font-medium">
+                ✨ Encontros em grupo e imersões
+              </div>
+            </div>
+
+            {/* Card Monitor de Ativação de Testes */}
+            {data.monitorTestes ? (
+              <div className="bg-white p-5 rounded-2xl border border-brand-beige shadow-xs relative overflow-hidden flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-brand-charcoal uppercase tracking-wider flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5 text-brand-terracotta" />
+                      Ativação de Testes
+                    </span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brand-mint/20 text-brand-mint-dark">
+                      {data.monitorTestes.taxaAtivacao}% realizada
+                    </span>
+                  </div>
+                  <div className="mt-3">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xl font-bold text-brand-purple">
+                        {data.monitorTestes.totalCreditosUtilizados} / {data.monitorTestes.totalCreditosVendidos}
+                      </span>
+                      <span className="text-[11px] text-brand-charcoal/50">testes feitos</span>
+                    </div>
+                    {/* Barra de Ativação */}
+                    <div className="w-full bg-brand-beige rounded-full h-2 mt-2 overflow-hidden">
+                      <div
+                        className="bg-brand-purple h-full rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(data.monitorTestes.taxaAtivacao, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3 flex justify-between text-xs text-brand-charcoal/70">
+                    <span>Disponíveis para uso:</span>
+                    <strong className="text-brand-purple font-semibold">
+                      {data.monitorTestes.totalCreditosDisponiveis} crédito(s)
+                    </strong>
+                  </div>
+                </div>
+                <div className="mt-3 pt-2 border-t border-brand-beige text-[11px] text-brand-charcoal/60">
+                  💡 Clientes com créditos pendentes podem ser convidados a responder via WhatsApp.
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+
       {/* Seção Principal de Gráficos e Ocupação */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Gráfico de Evolução Temporal (2 colunas) */}
@@ -588,6 +837,257 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Seção Especial: Kalapa Growth AI — Consultoria de Monetização com Gemini */}
+      <div className="bg-gradient-to-br from-[#1A3C4D] via-[#224458] to-[#122b37] text-white rounded-3xl p-6 sm:p-7 shadow-sm border border-brand-purple/20 space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                <Sparkles className="w-3.5 h-3.5" />
+                Kalapa Growth AI
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/10 text-white/80 border border-white/15">
+                <Bot className="w-3 h-3 text-cyan-300" />
+                Google Gemini 2.5 Flash
+              </span>
+              {aiSource && (
+                <span className="text-[10px] text-white/50">
+                  ({aiSource === "gemini" ? "API Conectada" : "Modo Analítico Integrado"})
+                </span>
+              )}
+            </div>
+            <h3 className="text-lg font-bold text-white mt-2">
+              Consultoria Estratégica de Monetização & Vendas
+            </h3>
+            <p className="text-xs text-white/70 max-w-2xl mt-1 leading-relaxed">
+              Inteligência Artificial aplicada aos seus dados reais: diagnóstico comercial da esteira de produtos, combos sugeridos de alta conversão, copys acolhedoras de WhatsApp e campanhas de cupons.
+            </p>
+          </div>
+
+          <button
+            onClick={handleGerarInsightsAI}
+            disabled={loadingAi}
+            className="px-5 py-3 rounded-xl font-bold text-xs bg-[#B8965A] hover:bg-[#a6864c] text-white shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer shrink-0 self-start lg:self-center"
+          >
+            {loadingAi ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                <span>Consultando Gemini...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 text-amber-200" />
+                <span>{aiInsights ? "Atualizar Estratégias de IA" : "Gerar Estratégias de Monetização"}</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {errorAi && (
+          <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-xs text-red-200 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorAi}</span>
+          </div>
+        )}
+
+        {/* Estado sem insights gerados ainda */}
+        {!aiInsights && !loadingAi && (
+          <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center space-y-2">
+            <Bot className="w-8 h-8 text-amber-300 mx-auto opacity-80" />
+            <h4 className="text-xs font-bold text-white">Nenhuma consultoria gerada nesta sessão</h4>
+            <p className="text-[11px] text-white/60 max-w-md mx-auto">
+              Clique no botão dourado acima para que o Gemini analise suas vendas, testes realizados e turmas, cruzando os dados para sugerir ações imediatas de receita.
+            </p>
+          </div>
+        )}
+
+        {/* Estado carregando */}
+        {loadingAi && (
+          <div className="p-8 rounded-2xl bg-white/5 border border-white/10 text-center space-y-3">
+            <div className="w-10 h-10 border-2 border-amber-300 border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-xs font-semibold text-white">
+              Analisando checkouts, testes Yin/Yang, Eneagrama e vivências...
+            </p>
+            <p className="text-[11px] text-white/50 max-w-md mx-auto">
+              O Gemini está identificando oportunidades de cross-sell, precificação de pacotes e redigindo copys humanizadas para o INstituto Kalapa.
+            </p>
+          </div>
+        )}
+
+        {/* Conteúdo com os Insights da IA */}
+        {aiInsights && !loadingAi && (
+          <div className="space-y-6 pt-2">
+            {/* Bloco 1: Diagnóstico Comercial */}
+            <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-5 border border-white/15">
+              <div className="flex items-center gap-2 mb-2">
+                <Lightbulb className="w-4 h-4 text-amber-300 shrink-0" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">
+                  Diagnóstico Comercial & Posicionamento
+                </h4>
+              </div>
+              <p className="text-xs text-white/90 leading-relaxed whitespace-pre-line">
+                {aiInsights.diagnostico}
+              </p>
+            </div>
+
+            {/* Bloco 2: Combos & Produtos Estratégicos */}
+            {aiInsights.combos_sugeridos && aiInsights.combos_sugeridos.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-amber-300" />
+                    Combos & Pacotes Sugeridos de Alta Conversão
+                  </h4>
+                  <span className="text-[10px] text-white/60">Cruzamento de Testes + Atendimentos</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {aiInsights.combos_sugeridos.map((combo, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white text-brand-charcoal p-4 rounded-2xl border border-brand-beige shadow-xs flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <h5 className="text-xs font-bold text-brand-purple leading-snug">{combo.titulo}</h5>
+                          {combo.economia_estimada && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 whitespace-nowrap shrink-0">
+                              {combo.economia_estimada}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-2 mb-2 text-sm font-bold text-brand-terracotta">
+                          {combo.preco_combo}
+                        </div>
+                        <p className="text-xs text-brand-charcoal/70 leading-relaxed">
+                          {combo.descricao}
+                        </p>
+                      </div>
+                      <div className="mt-3 pt-2.5 border-t border-brand-beige/80 text-[11px] text-brand-charcoal/60 italic">
+                        💡 {combo.justificativa}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Bloco 3: Copys de WhatsApp Prontas para Envio */}
+            {aiInsights.copys_whatsapp && aiInsights.copys_whatsapp.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4 text-emerald-400" />
+                    Scripts de Conversão para WhatsApp (Tom Acolhedor Kalapa)
+                  </h4>
+                  <span className="text-[10px] text-white/60">Copie e envie diretamente</span>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {aiInsights.copys_whatsapp.map((copy, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white text-brand-charcoal p-4 rounded-2xl border border-brand-beige shadow-xs flex flex-col justify-between"
+                    >
+                      <div>
+                        <span className="text-[10px] font-bold text-brand-purple uppercase tracking-wider block mb-2">
+                          🎯 {copy.publico_alvo}
+                        </span>
+                        <div className="bg-brand-beige-light/70 p-3 rounded-xl text-xs text-brand-charcoal/80 leading-relaxed whitespace-pre-wrap font-sans border border-brand-beige">
+                          {copy.mensagem}
+                        </div>
+                      </div>
+                      <div className="mt-3 flex justify-end">
+                        <button
+                          onClick={() => handleCopiarTexto(copy.mensagem, idx)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer bg-brand-purple hover:bg-brand-purple-dark text-white"
+                        >
+                          {copiadoIdx === idx ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-300" />
+                              <span>Copiado!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Copiar Mensagem</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Bloco 4: Cupons Recomendados & Ações Prioritárias */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Cupons */}
+              {aiInsights.cupons_recomendados && aiInsights.cupons_recomendados.length > 0 && (
+                <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-5 border border-white/15">
+                  <h4 className="text-xs font-bold text-amber-300 mb-3 flex items-center gap-2">
+                    <Tag className="w-4 h-4" />
+                    Campanhas de Cupons Recomendadas
+                  </h4>
+                  <div className="space-y-2.5">
+                    {aiInsights.cupons_recomendados.map((cupom, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-white text-brand-charcoal p-3 rounded-xl border border-brand-beige shadow-xs flex items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-brand-purple/10 text-brand-purple">
+                              {cupom.codigo}
+                            </span>
+                            <span className="text-xs font-bold text-emerald-700">
+                              {cupom.desconto} OFF
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-brand-charcoal/60 mt-1 truncate">
+                            {cupom.objetivo}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => onNavigateTab("cupons")}
+                          className="text-[11px] text-brand-purple font-semibold hover:underline shrink-0 flex items-center gap-0.5"
+                        >
+                          Criar <ArrowUpRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Ações Prioritárias */}
+              {aiInsights.acoes_prioritarias && aiInsights.acoes_prioritarias.length > 0 && (
+                <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-5 border border-white/15 flex flex-col justify-between">
+                  <div>
+                    <h4 className="text-xs font-bold text-amber-300 mb-3 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Ações Prioritárias da Semana (Plano Tático)
+                    </h4>
+                    <div className="space-y-2">
+                      {aiInsights.acoes_prioritarias.map((acao, idx) => (
+                        <div key={idx} className="flex items-start gap-2.5 text-xs text-white/90">
+                          <span className="w-5 h-5 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                            {idx + 1}
+                          </span>
+                          <span className="leading-snug">{acao}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-white/15 text-[11px] text-white/60">
+                    ✨ Dica: Aplique pelo menos 2 ações acima para acelerar a monetização do INstituto Kalapa.
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Grid Inferior: Ocupação das Turmas & Central de Recuperação WhatsApp */}
@@ -772,9 +1272,24 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
                     className="p-3.5 rounded-xl border border-brand-beige/80 bg-brand-beige-light/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white hover:border-brand-purple/20 transition-all"
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <p className="text-xs font-bold text-brand-charcoal break-words">{ped.cliente_nome}</p>
                         <span className="text-[10px] text-brand-charcoal/40 whitespace-nowrap">· {formatDateShort(ped.created_at)}</span>
+                        {ped.categoria === "testes" && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-purple-100 text-purple-700 border border-purple-200">
+                            🧠 Teste Online
+                          </span>
+                        )}
+                        {ped.categoria === "atendimentos" && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                            🗓️ Atendimento
+                          </span>
+                        )}
+                        {ped.categoria === "vivencias" && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            🌿 Vivência
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-brand-charcoal/70 break-words mt-1 leading-relaxed">
                         {ped.produto_nome} · <strong className="text-brand-purple font-semibold">{formatMoney(ped.valor)}</strong>

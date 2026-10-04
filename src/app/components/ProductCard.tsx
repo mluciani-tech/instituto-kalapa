@@ -25,6 +25,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
   const { addItem, clearCart, openDrawer } = useCart();
 
   const isAgendamento = isProdutoAgendamento(produto);
+  const isTeste = Boolean(produto.is_teste);
 
   const handleEscolher = () => {
     if (isAgendamento) {
@@ -40,6 +41,8 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
       preco: produto.preco,
       imagem_url: produto.imagem_url,
       categoria: produto.categoria,
+      is_teste: isTeste,
+      rota_teste: produto.rota_teste,
     }, 1);
     sessionStorage.setItem("produto_selecionado", produto.id);
     router.push("/checkout");
@@ -51,8 +54,8 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
     ? ""
     : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const vagasEsgotadas = vagas && vagas.restantes <= 0;
-  const vagasQuaseEsgotadas = vagas && vagas.restantes > 0 && vagas.restantes <= 3;
+  const vagasEsgotadas = !isTeste && !isAgendamento && vagas && vagas.restantes <= 0;
+  const vagasQuaseEsgotadas = !isTeste && !isAgendamento && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
 
   return (
     <motion.div
@@ -138,11 +141,23 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
               </ul>
             )}
 
-            {/* Indicador de agendamento ou contador de vagas */}
+            {/* Indicador de agendamento, teste ou contador de vagas */}
             {isAgendamento ? (
               <div className="mb-4 flex items-center gap-2 text-xs text-brand-charcoal/70 bg-brand-terracotta/10 px-3.5 py-2.5 rounded-xl border border-brand-terracotta/25">
                 <Calendar className="w-4 h-4 text-brand-terracotta shrink-0" />
                 <span className="font-medium text-brand-charcoal">Sessão individual · Escolha seu horário na agenda</span>
+              </div>
+            ) : isTeste ? (
+              <div className="mb-4 flex items-center justify-between text-xs text-brand-charcoal/80 bg-emerald-50 px-3.5 py-2.5 rounded-xl border border-emerald-200/60">
+                <div className="flex items-center gap-1.5 font-medium text-emerald-950">
+                  <span>🧠</span>
+                  <span>Avaliação Online</span>
+                </div>
+                {produto.inclui_laudo_pdf !== false && (
+                  <span className="text-[11px] font-semibold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+                    Laudo PDF Incluso
+                  </span>
+                )}
               </div>
             ) : vagas && (
               <div className="mb-4">
@@ -180,7 +195,9 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                   <span className="text-3xl font-bold text-brand-charcoal tabular-nums">
                     {precoFormatado}
                   </span>
-                  <span className="text-sm text-brand-charcoal/45 mb-1">/ sessão</span>
+                  <span className="text-sm text-brand-charcoal/45 mb-1">
+                    {isTeste ? "/ avaliação" : "/ sessão"}
+                  </span>
                 </div>
               )}
 
@@ -207,15 +224,17 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                             preco: produto.preco,
                             imagem_url: produto.imagem_url,
                             categoria: produto.categoria,
+                            is_teste: isTeste,
+                            rota_teste: produto.rota_teste,
                           });
                           openDrawer();
                         }}
                         disabled={!!vagasEsgotadas}
                         className="flex-1 py-3 px-3 font-medium text-xs md:text-sm rounded-xl border border-brand-purple/20 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
-                        title="Adicionar à sua lista de reserva"
+                        title={isTeste ? "Adicionar ao carrinho" : "Adicionar à sua lista de reserva"}
                       >
                         <ShoppingBag aria-hidden="true" className="w-4 h-4" />
-                        Reservar
+                        {isTeste ? "Carrinho" : "Reservar"}
                       </button>
 
                       <button
@@ -229,7 +248,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                       >
                         {vagasEsgotadas ? 'Turma lotada' : (
                           <>
-                            Garantir Vaga
+                            {isTeste ? "Comprar Agora" : "Garantir Vaga"}
                             <ArrowRight aria-hidden="true" className="w-4 h-4" />
                           </>
                         )}

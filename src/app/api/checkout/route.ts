@@ -43,11 +43,14 @@ export async function POST(req: NextRequest) {
     // 1. Determinar lista de itens do pedido
     const itensProcessados: {
       produto_id: string;
+      slug: string;
       nome: string;
       quantidade: number;
       precoUnitario: number;
       vagasMaximas: number | null;
       imagem_url?: string | null;
+      is_teste?: boolean;
+      rota_teste?: string | null;
     }[] = [];
 
     if (Array.isArray(cartItens) && cartItens.length > 0) {
@@ -55,7 +58,7 @@ export async function POST(req: NextRequest) {
       for (const item of cartItens) {
         const { data: prod } = await supabaseAdmin!
           .from("produtos")
-          .select("id, nome, preco, vagas_maximas, ativo, imagem_url")
+          .select("id, slug, nome, preco, vagas_maximas, ativo, imagem_url, is_teste, rota_teste")
           .eq("id", item.produto_id)
           .eq("ativo", true)
           .single();
@@ -63,11 +66,14 @@ export async function POST(req: NextRequest) {
         if (prod) {
           itensProcessados.push({
             produto_id: prod.id,
+            slug: prod.slug,
             nome: prod.nome,
             quantidade: Number(item.quantidade) || 1,
             precoUnitario: Number(prod.preco) || 0,
             vagasMaximas: prod.vagas_maximas,
             imagem_url: prod.imagem_url,
+            is_teste: Boolean(prod.is_teste),
+            rota_teste: prod.rota_teste,
           });
         }
       }
@@ -75,7 +81,7 @@ export async function POST(req: NextRequest) {
       // Modo Produto Único / Legado
       const { data: prod, error: produtoError } = await supabaseAdmin!
         .from("produtos")
-        .select("id, nome, preco, vagas_maximas, ativo, imagem_url")
+        .select("id, slug, nome, preco, vagas_maximas, ativo, imagem_url, is_teste, rota_teste")
         .eq("id", produto_id)
         .eq("ativo", true)
         .single();
@@ -89,11 +95,14 @@ export async function POST(req: NextRequest) {
 
       itensProcessados.push({
         produto_id: prod.id,
+        slug: prod.slug,
         nome: prod.nome,
         quantidade: 1,
         precoUnitario: Number(prod.preco) || 0,
         vagasMaximas: prod.vagas_maximas,
         imagem_url: prod.imagem_url,
+        is_teste: Boolean(prod.is_teste),
+        rota_teste: prod.rota_teste,
       });
     }
 
@@ -178,12 +187,15 @@ export async function POST(req: NextRequest) {
     const orderNsu = `kalapa-${crypto.randomUUID()}`;
     const turmaAtual = await getTurmaAtual();
 
-    const pedidoItensData: PedidoItem[] = itensProcessados.map((item) => ({
+    const pedidoItensData = itensProcessados.map((item) => ({
       produto_id: item.produto_id,
+      slug: item.slug,
       nome: item.nome,
       quantidade: item.quantidade,
       preco: item.precoUnitario,
       imagem_url: item.imagem_url || null,
+      is_teste: item.is_teste || false,
+      rota_teste: item.rota_teste || null,
     }));
 
     // 6. Criar pedido no banco com usuario_id garantido
@@ -351,6 +363,20 @@ export async function POST(req: NextRequest) {
         });
       } catch (emailErr) {
         console.error("[checkout] Erro ao enviar e-mails de confirmação gratuita:", emailErr);
+      }
+
+      // Liberar créditos de testes se houver itens do tipo teste no pedido gratuito
+      try {
+        const { liberarCreditosPedido } = await import("@/lib/testes-creditos");
+        await liberarCreditosPedido({
+          pedidoId: pedido.id,
+          usuarioId: clienteLogado.id,
+          clienteEmail: clienteEmail,
+          itens: itensProcessados,
+          beneficiarios: Array.isArray(beneficiarios) ? beneficiarios : [],
+        });
+      } catch (credErr) {
+        console.error("[checkout] Erro ao liberar créditos para pedido gratuito:", credErr);
       }
 
       return NextResponse.json({

@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Buscar dados em paralelo
-    const [pedidosRes, produtosRes, usuariosRes] = await Promise.all([
+    const [pedidosRes, produtosRes, usuariosRes, testesCreditosRes] = await Promise.all([
       supabaseAdmin!
         .from("pedidos")
         .select(`
@@ -56,18 +56,23 @@ export async function GET(req: NextRequest) {
           produto_id,
           itens,
           created_at,
-          produtos (id, nome, slug)
+          produtos (id, nome, slug, is_teste, atendimento_individual, categoria)
         `)
         .order("created_at", { ascending: false }),
 
       supabaseAdmin!
         .from("produtos")
-        .select("id, nome, slug, preco, vagas_maximas, vagas_ocupadas_manual, ativo")
+        .select("id, nome, slug, preco, vagas_maximas, vagas_ocupadas_manual, ativo, is_teste, rota_teste, atendimento_individual, categoria")
         .order("ordem", { ascending: true }),
 
       supabaseAdmin!
         .from("usuarios")
         .select("id", { count: "exact", head: true }),
+
+      supabaseAdmin!
+        .from("testes_creditos")
+        .select("id, status, slug_teste, created_at, utilizado_em, produto_id, pedido_id, email_beneficiario")
+        .order("created_at", { ascending: false }),
     ]);
 
     if (pedidosRes.error || produtosRes.error) {
@@ -78,6 +83,25 @@ export async function GET(req: NextRequest) {
     const allPedidos = pedidosRes.data || [];
     const allProdutos = produtosRes.data || [];
     const totalUsuarios = usuariosRes.count || 0;
+
+    // Helper para categorização de item
+    const getCategoriaItem = (
+      item: { is_teste?: boolean; slug?: string; categoria?: string | null; atendimento_individual?: boolean } | null | undefined
+    ): "testes" | "atendimentos" | "vivencias" => {
+      if (!item) return "vivencias";
+      if (item.is_teste || item.slug?.startsWith("teste-") || item.categoria === "testes") {
+        return "testes";
+      }
+      if (
+        item.atendimento_individual ||
+        item.categoria === "atendimentos" ||
+        item.slug === "terapia-adulto" ||
+        item.slug === "terapia-infantil"
+      ) {
+        return "atendimentos";
+      }
+      return "vivencias";
+    };
 
     // Filtrar pedidos no período
     const pedidosPeriodo = sinceDate
@@ -129,6 +153,51 @@ export async function GET(req: NextRequest) {
       outros: { count: outrosCount, valor: outrosValor, percentual: Math.round((outrosCount / totalMetodos) * 100) },
     };
 
+    // Linhas de Negócio no período (Testes vs Atendimentos vs Vivências)
+    const linhasNegocio = {
+      testes: { receita: 0, pedidos: 0, ticketMedio: 0, percentualReceita: 0 },
+      atendimentos: { receita: 0, pedidos: 0, ticketMedio: 0, percentualReceita: 0 },
+      vivencias: { receita: 0, pedidos: 0, ticketMedio: 0, percentualReceita: 0 },
+    };
+
+    for (const p of pedidosPagosPeriodo) {
+      const v = Number(p.valor) || 0;
+      let cat: "testes" | "atendimentos" | "vivencias" = "vivencias";
+
+      const itens = Array.isArray(p.itens) ? p.itens : [];
+      if (itens.length > 0) {
+        const firstItem = itens[0] as any;
+        cat = getCategoriaItem(firstItem);
+      } else {
+        const prod = p.produtos as any;
+        cat = getCategoriaItem(prod);
+      }
+
+      linhasNegocio[cat].receita += v;
+      linhasNegocio[cat].pedidos += 1;
+    }
+
+    const totalReceitaLinhas = faturamentoPeriodo || 1;
+    for (const k of ["testes", "atendimentos", "vivencias"] as const) {
+      const l = linhasNegocio[k];
+      l.ticketMedio = l.pedidos > 0 ? Math.round(l.receita / l.pedidos) : 0;
+      l.percentualReceita = Math.round((l.receita / totalReceitaLinhas) * 100);
+    }
+
+    // Monitor de Ativação de Testes
+    const allCreditos = testesCreditosRes?.data || [];
+    const totalCreditos = allCreditos.length;
+    const creditosUtilizados = allCreditos.filter((c: any) => c.status === "utilizado").length;
+    const creditosDisponiveis = allCreditos.filter((c: any) => c.status === "disponivel").length;
+    const taxaAtivacao = totalCreditos > 0 ? Math.round((creditosUtilizados / totalCreditos) * 100) : 0;
+
+    const monitorTestes = {
+      totalVendidos: totalCreditos,
+      utilizados: creditosUtilizados,
+      disponiveis: creditosDisponiveis,
+      taxaAtivacao,
+    };
+
     // Timeline diária (agrupada por dia)
     const timelineMap: Record<string, { valor: number; pedidos: number }> = {};
     const timelineDays = periodo === "total" ? 30 : daysCount;
@@ -159,7 +228,6 @@ export async function GET(req: NextRequest) {
       });
 
     // Desempenho e Lotação de Vagas por Produto
-    // Mapear vendas por produto_id
     const vendasPorProduto: Record<string, { receita: number; ingressos: number }> = {};
     for (const p of pedidosPagosTotal) {
       const v = Number(p.valor) || 0;
@@ -198,11 +266,15 @@ export async function GET(req: NextRequest) {
         else if (percentual !== null && percentual >= 80) statusOcupacao = "quase_lotada";
       }
 
+      const categoriaProd = getCategoriaItem(prod);
+
       return {
         id: prod.id,
         nome: prod.nome,
         slug: prod.slug,
         ativo: prod.ativo ?? true,
+        categoria: categoriaProd,
+        is_teste: prod.is_teste,
         receita: vInfo.receita,
         vagas_maximas: maximas,
         vagas_preenchidas: preenchidas,
@@ -211,26 +283,33 @@ export async function GET(req: NextRequest) {
       };
     }).sort((a, b) => b.receita - a.receita);
 
-    // Pedidos Pendentes Recentes (para recuperação de vendas via WhatsApp)
+    // Pedidos Pendentes Recentes com categorização e mensagens dedicadas
     const pedidosPendentesRecentes = allPedidos
       .filter((p) => p.status === "pendente")
-      .slice(0, 6)
+      .slice(0, 8)
       .map((p) => {
         let telefoneLimpo = (p.cliente_telefone || "").replace(/\D/g, "");
         if (telefoneLimpo.length === 10 || telefoneLimpo.length === 11) {
           telefoneLimpo = `55${telefoneLimpo}`;
         }
 
-        const produtosData = p.produtos as unknown as { nome?: string } | { nome?: string }[] | null;
+        const produtosData = p.produtos as unknown as { nome?: string; is_teste?: boolean; slug?: string; categoria?: string } | null;
         const prodObj = Array.isArray(produtosData) ? produtosData[0] : produtosData;
-        const itensData = p.itens as unknown as Array<{ nome?: string }> | null;
+        const itensData = p.itens as unknown as Array<{ nome?: string; is_teste?: boolean; slug?: string; categoria?: string }> | null;
         const itemObj = Array.isArray(itensData) ? itensData[0] : null;
 
         const prodNome = prodObj?.nome || itemObj?.nome || "Vivência Kalapa";
+        const categoria = getCategoriaItem(itemObj || prodObj);
 
-        const msg = encodeURIComponent(
-          `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos seu interesse na vivência "${prodNome}". Ficou com alguma dúvida sobre a inscrição ou pagamento? Posso te ajudar!`
-        );
+        let msgTexto = `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos seu interesse na vivência "${prodNome}". Ficou com alguma dúvida sobre a inscrição ou pagamento? Posso te ajudar!`;
+
+        if (categoria === "testes") {
+          msgTexto = `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos seu interesse na avaliação online "${prodNome}". Ficou com alguma dúvida sobre o teste ou laudo clínico em PDF? Posso te ajudar!`;
+        } else if (categoria === "atendimentos") {
+          msgTexto = `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos seu interesse no atendimento individual com a Clatihúcia ("${prodNome}"). Precisa de alguma ajuda com horários ou pagamento?`;
+        }
+
+        const msg = encodeURIComponent(msgTexto);
 
         return {
           id: p.id,
@@ -241,6 +320,7 @@ export async function GET(req: NextRequest) {
           telefone_whatsapp: telefoneLimpo ? `https://wa.me/${telefoneLimpo}?text=${msg}` : null,
           valor: Number(p.valor) || 0,
           produto_nome: prodNome,
+          categoria,
           created_at: p.created_at,
         };
       });
@@ -269,6 +349,8 @@ export async function GET(req: NextRequest) {
         totalDescontoPeriodo,
         cuponsUsadosPeriodo,
       },
+      linhasNegocio,
+      monitorTestes,
       timeline,
       metodosPagamento,
       produtosRanking,

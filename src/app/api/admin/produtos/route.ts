@@ -62,6 +62,10 @@ export async function POST(req: NextRequest) {
     forma_pagamento_disponivel,
     atendimento_individual,
     duracao_minutos,
+    is_teste,
+    rota_teste,
+    orientacoes_pre_teste,
+    inclui_laudo_pdf,
   } = body;
 
   const cleanSlug = typeof slug === "string"
@@ -111,6 +115,10 @@ export async function POST(req: NextRequest) {
     forma_pagamento_disponivel: forma_pagamento_disponivel || "ambos",
     atendimento_individual: Boolean(atendimento_individual),
     duracao_minutos: parsedDuracao !== null ? parsedDuracao : (Boolean(atendimento_individual) ? 90 : null),
+    is_teste: Boolean(is_teste),
+    rota_teste: rota_teste ? String(rota_teste).trim() : (Boolean(is_teste) ? `/teste-${cleanSlug.replace(/^teste-/, "")}` : null),
+    orientacoes_pre_teste: orientacoes_pre_teste ? String(orientacoes_pre_teste).trim() : null,
+    inclui_laudo_pdf: inclui_laudo_pdf !== false,
   };
 
   let { data, error } = await supabaseAdmin!
@@ -120,10 +128,21 @@ export async function POST(req: NextRequest) {
     .single();
 
   // Se alguma coluna ainda não existir no Postgres, tenta fallback defensivo
-  if (error && (error.message?.includes("duracao_minutos") || error.message?.includes("atendimento_individual"))) {
+  if (error && (
+    error.message?.includes("duracao_minutos") ||
+    error.message?.includes("atendimento_individual") ||
+    error.message?.includes("is_teste") ||
+    error.message?.includes("rota_teste") ||
+    error.message?.includes("orientacoes_pre_teste") ||
+    error.message?.includes("inclui_laudo_pdf")
+  )) {
     console.warn("[admin/produtos] Coluna nova não encontrada no banco. Tentando fallback defensivo.");
     if (error.message?.includes("duracao_minutos")) delete insertPayload.duracao_minutos;
     if (error.message?.includes("atendimento_individual")) delete insertPayload.atendimento_individual;
+    if (error.message?.includes("is_teste")) delete insertPayload.is_teste;
+    if (error.message?.includes("rota_teste")) delete insertPayload.rota_teste;
+    if (error.message?.includes("orientacoes_pre_teste")) delete insertPayload.orientacoes_pre_teste;
+    if (error.message?.includes("inclui_laudo_pdf")) delete insertPayload.inclui_laudo_pdf;
     const retry = await supabaseAdmin!
       .from("produtos")
       .insert(insertPayload)

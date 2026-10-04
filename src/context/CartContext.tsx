@@ -16,6 +16,8 @@ interface CartContextType {
     agendamento_inicio?: string | null;
     agendamento_fim?: string | null;
     terapeuta_nome?: string | null;
+    is_teste?: boolean;
+    rota_teste?: string | null;
   }, quantidade?: number) => void;
   removeItem: (produto_id: string) => void;
   updateQuantity: (produto_id: string, quantidade: number) => void;
@@ -96,6 +98,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       agendamento_inicio?: string | null;
       agendamento_fim?: string | null;
       terapeuta_nome?: string | null;
+      is_teste?: boolean;
+      rota_teste?: string | null;
     },
     quantidade = 1
   ) => {
@@ -123,6 +127,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           agendamento_inicio: produto.agendamento_inicio || null,
           agendamento_fim: produto.agendamento_fim || null,
           terapeuta_nome: produto.terapeuta_nome || null,
+          is_teste: produto.is_teste || false,
+          rota_teste: produto.rota_teste || null,
         },
       ];
     });

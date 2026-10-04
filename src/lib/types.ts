@@ -18,6 +18,10 @@ export interface Produto {
   forma_pagamento_disponivel?: string | null;
   atendimento_individual?: boolean;
   duracao_minutos?: number | null;
+  is_teste?: boolean;
+  rota_teste?: string | null;
+  orientacoes_pre_teste?: string | null;
+  inclui_laudo_pdf?: boolean;
   created_at?: string;
 }
 
@@ -148,6 +152,23 @@ export interface ItemCarrinho {
   agendamento_inicio?: string | null;
   agendamento_fim?: string | null;
   terapeuta_nome?: string | null;
+  is_teste?: boolean;
+  rota_teste?: string | null;
+}
+
+export interface TesteCredito {
+  id: string;
+  pedido_id?: string | null;
+  produto_id: string;
+  usuario_id?: string | null;
+  email_beneficiario: string;
+  slug_teste: string;
+  status: "disponivel" | "utilizado" | "expirado";
+  avaliacao_id?: string | null;
+  utilizado_em?: string | null;
+  created_at: string;
+  updated_at?: string;
+  produtos?: Produto | null;
 }
 
 export interface Therapist {

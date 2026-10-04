@@ -13,6 +13,10 @@ import {
   ChevronLeft,
   Lock,
   UserCheck,
+  ShoppingBag,
+  CheckCircle2,
+  FileText,
+  CreditCard,
 } from "lucide-react";
 import {
   YIN_YANG_PERGUNTAS,
@@ -27,10 +31,24 @@ import TestShareMenu from "../components/TestShareMenu";
 import ProgressIndicator from "./components/ProgressIndicator";
 import QuestionCard from "./components/QuestionCard";
 import ResultView from "./components/ResultView";
+import { useCart } from "@/context/CartContext";
 
 export default function TesteYinYangPage() {
+  const { addItem, openDrawer } = useCart();
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [usuario, setUsuario] = useState<{ id: string; nome: string; email?: string } | null>(null);
+  const [creditosRestantes, setCreditosRestantes] = useState<number>(0);
+  const [produtoTeste, setProdutoTeste] = useState<{
+    id: string;
+    nome: string;
+    slug: string;
+    preco: number;
+    preco_promocional?: number | null;
+    imagem_url?: string | null;
+    rota_teste?: string | null;
+    orientacoes_pre_teste?: string | null;
+    inclui_laudo_pdf?: boolean;
+  } | null>(null);
 
   const [etapa, setEtapa] = useState<"intro" | "teste" | "resultado">("intro");
   const [perguntaAtualIndex, setPerguntaAtualIndex] = useState(0);
@@ -40,23 +58,27 @@ export default function TesteYinYangPage() {
   const [modalEmpateAberto, setModalEmpateAberto] = useState(false);
 
   useEffect(() => {
-    async function checkAuth() {
+    async function carregarStatus() {
       try {
-        const res = await fetch("/api/auth/me", { cache: "no-store" });
+        setLoadingAuth(true);
+        const res = await fetch("/api/testes/credito?slug=teste-yin-yang", { cache: "no-store" });
         const data = await res.json();
         if (data?.authenticated && data.usuario) {
           setUsuario(data.usuario);
         } else {
           setUsuario(null);
         }
+        setCreditosRestantes(data?.creditosRestantes || 0);
+        if (data?.produto) {
+          setProdutoTeste(data.produto);
+        }
       } catch (err) {
-        console.error("Erro ao verificar autenticação:", err);
-        setUsuario(null);
+        console.error("Erro ao verificar créditos do teste:", err);
       } finally {
         setLoadingAuth(false);
       }
     }
-    checkAuth();
+    carregarStatus();
   }, []);
 
   const { totalRespondidas, pontosYang, pontosYin, tipoResultado } = calcularPontuacaoYinYang(respostas);
@@ -71,6 +93,28 @@ export default function TesteYinYangPage() {
 
   const perguntaAtual: YinYangQuestion = YIN_YANG_PERGUNTAS[perguntaAtualIndex];
   const respostaAtual = respostas[perguntaAtual?.id];
+
+  const precoExibicao = produtoTeste
+    ? produtoTeste.preco_promocional || produtoTeste.preco || 47
+    : 47;
+
+  const handleComprarTeste = () => {
+    if (produtoTeste) {
+      addItem({
+        id: produtoTeste.id,
+        slug: produtoTeste.slug || "teste-yin-yang",
+        nome: produtoTeste.nome || "Teste Yin ou Yang?",
+        preco: precoExibicao,
+        imagem_url: produtoTeste.imagem_url,
+        is_teste: true,
+        rota_teste: produtoTeste.rota_teste || "/teste-yin-yang",
+      });
+      openDrawer();
+    } else {
+      // Fallback para abrir página de produtos
+      window.location.href = "/produtos/teste-yin-yang";
+    }
+  };
 
   const handleSelecionarResposta = (opcao: "yang" | "yin") => {
     setRespostas((prev) => ({
@@ -104,7 +148,21 @@ export default function TesteYinYangPage() {
           pontos_yin: pontosYin,
           respostas,
         }),
-      }).catch((err) => console.error("Erro ao registrar avaliação Yin/Yang:", err));
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            const errData = await res.json();
+            if (errData.sem_credito) {
+              alert(
+                errData.error ||
+                  "Você não possui créditos para realizar este teste no INstituto Kalapa."
+              );
+            }
+          } else {
+            setCreditosRestantes((prev) => Math.max(0, prev - 1));
+          }
+        })
+        .catch((err) => console.error("Erro ao registrar avaliação Yin/Yang:", err));
     }
 
     setEtapa("resultado");
@@ -129,6 +187,10 @@ export default function TesteYinYangPage() {
   };
 
   const iniciarTeste = () => {
+    if (creditosRestantes <= 0) {
+      handleComprarTeste();
+      return;
+    }
     setEtapa("teste");
     setRespostas({});
     setPerguntaAtualIndex(0);
@@ -186,78 +248,188 @@ export default function TesteYinYangPage() {
             <p className="text-sm font-light text-[#1A3C4D]/70">Carregando avaliação energética...</p>
           </div>
         ) : !usuario ? (
-          /* Card de Login / Cadastro Obrigatório */
+          /* Card para Usuário Não Autenticado: Apresentação + CTA de Compra / Login */
           <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-2xl mx-auto relative overflow-hidden">
             <div className="w-16 h-16 rounded-full bg-[#B8965A]/10 text-[#B8965A] flex items-center justify-center mx-auto mb-6 border border-[#B8965A]/30">
               <Lock className="w-8 h-8" />
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mb-3">
-              Identifique-se para Realizar o Teste
+              Avaliação Energética Yin & Yang
             </h2>
 
             <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
-              Para calcular suas tendências energéticas com precisão e gerar seu{" "}
-              <strong>Relatório Clínico em PDF personalizado com seu nome</strong>, é necessário estar
-              conectado ao sistema do INstituto Kalapa.
+              Esta avaliação clínica personalizada inclui o cálculo minucioso das suas tendências, orientações terapêuticas de Medicina Tradicional Chinesa e emissão do{" "}
+              <strong>Laudo Clínico Completo em PDF para download</strong> no INstituto Kalapa.
             </p>
 
-            <div className="bg-[#F8F4ED] rounded-xl p-5 mb-8 text-left border border-[#E8DEC8]/80">
-              <h4 className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 mb-3">
-                O que você terá acesso após o teste:
+            {/* Box de Preço e Benefícios */}
+            <div className="bg-[#F8F4ED] rounded-2xl p-6 mb-8 text-left border border-[#E8DEC8]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#E8DEC8]">
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 block mb-1">
+                    Investimento por avaliação
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-serif font-bold text-[#1A3C4D]">
+                      R$ {precoExibicao.toFixed(2).replace(".", ",")}
+                    </span>
+                    <span className="text-xs text-[#1A3C4D]/60 font-light">/ avaliação online</span>
+                  </div>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] text-xs font-semibold border border-[#7D8C6E]/20 self-start sm:self-center">
+                  <CheckCircle2 className="w-4 h-4 text-[#7D8C6E]" />
+                  <span>Laudo PDF Incluso</span>
+                </div>
+              </div>
+
+              <h4 className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/70 mt-5 mb-3">
+                O que você terá acesso:
               </h4>
-              <ul className="space-y-2 text-xs sm:text-sm text-[#1A3C4D]/85">
+              <ul className="space-y-2.5 text-xs sm:text-sm text-[#1A3C4D]/85">
                 <li className="flex items-start gap-2">
                   <span className="text-[#B8965A] font-bold">•</span>
-                  <span><strong>Diagnóstico completo:</strong> Se sua constituição atual é Fogo (Yang), Frio (Yin) ou Equilíbrio Dinâmico.</span>
+                  <span><strong>Diagnóstico MTC Completo:</strong> Tendência Fogo (Yang), Frio (Yin) ou Equilíbrio Dinâmico.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#B8965A] font-bold">•</span>
-                  <span><strong>Impacto no Sono (Wei Qi):</strong> Entenda a causa profunda de insônias, despertares ou cansaço matinal.</span>
+                  <span><strong>Impacto no Sono (Wei Qi):</strong> Análise da circulação de energia e causas de despertares.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#B8965A] font-bold">•</span>
-                  <span><strong>Dietoterapia & Culinária:</strong> Alimentos benéficos, métodos de preparo ideais e o que evitar.</span>
+                  <span><strong>Dietoterapia & Fitoterapia:</strong> Alimentos e chás terapêuticos específicos para o seu padrão.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#B8965A] font-bold">•</span>
-                  <span><strong>Fitoterapia Tradicional:</strong> Receitas de infusões e chás para restabelecer a harmonia.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#B8965A] font-bold">•</span>
-                  <span><strong>PDF com Formato A4:</strong> Baixe ou imprima com apenas um clique para levar ao seu terapeuta ou guardar.</span>
+                  <span><strong>Laudo Clínico em PDF:</strong> Documento completo para download e impressão em formato A4.</span>
                 </li>
               </ul>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href="/login?redirect=/teste-yin-yang"
+              <button
+                type="button"
+                onClick={handleComprarTeste}
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#1A3C4D] text-white text-sm font-medium hover:bg-[#15313F] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Fazer Login</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+                <ShoppingBag className="w-4 h-4" />
+                <span>Comprar Avaliação (R$ {precoExibicao.toFixed(2).replace(".", ",")})</span>
+              </button>
               <Link
-                href="/cadastro?redirect=/teste-yin-yang"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#B8965A] text-white text-sm font-medium hover:bg-[#A3834C] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                href="/login?redirect=/teste-yin-yang"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl border border-[#1A3C4D]/30 text-[#1A3C4D] text-sm font-medium hover:bg-[#F8F4ED] transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Criar Conta Gratuita</span>
-                <UserCheck className="w-4 h-4" />
+                <span>Já comprou? Fazer Login</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
             <p className="text-xs text-[#1A3C4D]/50 mt-5">
-              Leva menos de 1 minuto para criar sua conta. Totalmente seguro e sem custos.
+              Pagamento 100% seguro via InfinitePay (Pix ou Cartão de Crédito).
+            </p>
+          </div>
+        ) : creditosRestantes === 0 ? (
+          /* Card Paywall para Usuário Logado Sem Créditos */
+          <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-2xl mx-auto relative overflow-hidden">
+            <div className="w-16 h-16 rounded-full bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center mx-auto mb-6 border border-[#B8965A]/30">
+              <ShoppingBag className="w-8 h-8" />
+            </div>
+
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#B8965A]/15 text-[#B8965A] mb-3">
+              Crédito de Avaliação Necessário
+            </span>
+
+            <h2 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mb-3">
+              Olá, {usuario.nome}
+            </h2>
+
+            <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
+              Você ainda não possui créditos disponíveis para iniciar o teste Yin/Yang. Para desbloquear o questionário e emitir seu Laudo Clínico em PDF, adquira sua avaliação abaixo:
+            </p>
+
+            <div className="bg-[#F8F4ED] rounded-2xl p-6 mb-8 text-left border border-[#E8DEC8]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E8DEC8]">
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 block mb-1">
+                    Investimento por avaliação
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-serif font-bold text-[#1A3C4D]">
+                      R$ {precoExibicao.toFixed(2).replace(".", ",")}
+                    </span>
+                    <span className="text-xs text-[#1A3C4D]/60 font-light">/ avaliação online</span>
+                  </div>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] text-xs font-semibold border border-[#7D8C6E]/20 self-start sm:self-center">
+                  <CheckCircle2 className="w-4 h-4 text-[#7D8C6E]" />
+                  <span>Laudo PDF Incluso</span>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#1A3C4D]/80">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
+                  <span>Acesso imediato após pagamento</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
+                  <span>Laudo Clínico em PDF A4</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
+                  <span>Dietoterapia & Fitoterapia MTC</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
+                  <span>Histórico salvo na sua conta</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={handleComprarTeste}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#1A3C4D] text-white text-sm font-medium hover:bg-[#15313F] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>Adicionar ao Carrinho (R$ {precoExibicao.toFixed(2).replace(".", ",")})</span>
+              </button>
+              <Link
+                href="/conta/pedidos"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-[#1A3C4D]/30 text-[#1A3C4D] text-sm font-medium hover:bg-[#F8F4ED] transition-all flex items-center justify-center gap-2"
+              >
+                <span>Meus Pedidos</span>
+              </Link>
+            </div>
+            <p className="text-xs text-[#1A3C4D]/50 mt-5">
+              Já realizou o pagamento? O crédito é liberado automaticamente após a confirmação do pagamento via InfinitePay.
             </p>
           </div>
         ) : etapa === "intro" ? (
+          /* Card de Introdução para Usuário com Crédito Disponível */
           <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-2xl mx-auto relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#B8965A]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#7D8C6E]/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
 
             <div className="relative">
+              {/* Badge de Créditos Disponíveis */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium mb-5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>
+                  Você possui <strong>{creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""}</strong> disponível{creditosRestantes > 1 ? "is" : ""} para esta avaliação
+                </span>
+              </div>
+
               <h2 className="text-2xl font-serif text-[#1A3C4D] mb-4">Instruções para o Teste</h2>
+
+              {produtoTeste?.orientacoes_pre_teste ? (
+                <div className="p-4 rounded-xl bg-[#F8F4ED] border border-[#E8DEC8] text-left mb-6 text-sm text-[#1A3C4D]/85 leading-relaxed">
+                  <p className="font-semibold text-[#1A3C4D] mb-1">Orientações do INstituto Kalapa:</p>
+                  <p className="whitespace-pre-line">{produtoTeste.orientacoes_pre_teste}</p>
+                </div>
+              ) : null}
+
               <ul className="text-left space-y-4 text-sm sm:text-base text-[#1A3C4D]/80 mb-8 max-w-lg mx-auto">
                 <li className="flex gap-3">
                   <span className="text-[#B8965A] font-bold mt-0.5">•</span>
@@ -273,16 +445,15 @@ export default function TesteYinYangPage() {
                 <li className="flex gap-3">
                   <span className="text-[#B8965A] font-bold mt-0.5">•</span>
                   <span>
-                    Ao final, você receberá um laudo gratuito e personalizado com orientações para
-                    equilibrar suas energias.
+                    Ao final, você receberá seu Laudo Clínico em PDF personalizado para download com orientações completas para equilibrar suas energias.
                   </span>
                 </li>
               </ul>
               <button
                 onClick={iniciarTeste}
-                className="w-full sm:w-auto px-10 py-4 rounded-xl bg-[#1A3C4D] text-white font-medium hover:bg-[#15313F] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 mx-auto"
+                className="w-full sm:w-auto px-10 py-4 rounded-xl bg-[#1A3C4D] text-white font-medium hover:bg-[#15313F] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 mx-auto cursor-pointer"
               >
-                <span>Começar Avaliação Kalapa</span>
+                <span>Iniciar Avaliação Kalapa</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
