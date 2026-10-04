@@ -21,6 +21,32 @@ export function normalizarSlugTeste(slugOuRota: string): string {
 }
 
 /**
+ * Verifica se o teste é gratuito (preço <= 0)
+ */
+export async function isTesteGratuito(slugOuRota: string): Promise<boolean> {
+  if (!supabaseAdmin) return false;
+  const slugNormalizado = normalizarSlugTeste(slugOuRota);
+  const slugVariante = slugNormalizado.replace(/^teste-/, "");
+
+  try {
+    const { data } = await supabaseAdmin
+      .from("produtos")
+      .select("preco_promocional, preco")
+      .or(`slug.eq.${slugNormalizado},slug.eq.${slugVariante},rota_teste.ilike.%${slugVariante}%`)
+      .limit(1)
+      .maybeSingle();
+
+    if (data) {
+      const preco = data.preco_promocional ?? data.preco ?? 67; // default 67 if null
+      return preco <= 0;
+    }
+  } catch (err) {
+    console.warn("[testes-creditos] Erro ao verificar se teste é gratuito:", err);
+  }
+  return false;
+}
+
+/**
  * Libera os créditos de teste para o pedido aprovado/pago.
  * Distribui entre o comprador e os beneficiários informados (quando quantidade >= 2).
  */

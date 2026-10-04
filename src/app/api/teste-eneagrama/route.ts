@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 import { getClienteFromRequest } from "@/lib/cliente-auth";
-import { verificarCreditoDisponivel, consumirCreditoTeste } from "@/lib/testes-creditos";
+import { verificarCreditoDisponivel, consumirCreditoTeste, isTesteGratuito } from "@/lib/testes-creditos";
 
 export const dynamic = "force-dynamic";
 
@@ -49,22 +49,26 @@ export async function POST(req: NextRequest) {
     const activeUserId = clienteLogado?.id || usuario_id || null;
     const activeEmail = clienteLogado?.email || email;
 
-    // Verificar se o usuário possui crédito disponível para realizar o teste Eneagrama
-    const { disponivel } = await verificarCreditoDisponivel(
-      activeUserId,
-      activeEmail,
-      "teste-eneagrama"
-    );
+    const gratuito = await isTesteGratuito("teste-eneagrama");
 
-    if (!disponivel) {
-      return NextResponse.json(
-        {
-          error:
-            "Você não possui créditos disponíveis para realizar esta avaliação no INstituto Kalapa. Por favor, adquira o teste em nossa loja antes de enviar as respostas.",
-          sem_credito: true,
-        },
-        { status: 403 }
+    if (!gratuito) {
+      // Verificar se o usuário possui crédito disponível para realizar o teste Eneagrama
+      const { disponivel } = await verificarCreditoDisponivel(
+        activeUserId,
+        activeEmail,
+        "teste-eneagrama"
       );
+
+      if (!disponivel) {
+        return NextResponse.json(
+          {
+            error:
+              "Você não possui créditos disponíveis para realizar esta avaliação no INstituto Kalapa. Por favor, adquira o teste em nossa loja antes de enviar as respostas.",
+            sem_credito: true,
+          },
+          { status: 403 }
+        );
+      }
     }
 
     let telefone = telefoneInput || "";
@@ -104,8 +108,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 200 });
     }
 
-    // Consumir 1 crédito do teste vinculado a esta avaliação
-    if (data?.id) {
+    // Consumir 1 crédito do teste vinculado a esta avaliação (se não for gratuito)
+    if (data?.id && !gratuito) {
       await consumirCreditoTeste(activeUserId, activeEmail, "teste-eneagrama", data.id);
     }
 

@@ -302,27 +302,28 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
             className="w-full pl-9 pr-3.5 py-2 border border-brand-beige rounded-xl text-xs sm:text-sm focus-visible:ring-2 focus-visible:ring-brand-purple/20 focus-visible:border-brand-purple"
           />
         </div>
-        <div className="flex items-center gap-1.5 bg-brand-beige-light p-1 rounded-xl shrink-0 self-start sm:self-auto">
-          {(
-            [
-              ["todos", "Todos"],
-              ["yinyang", "Yin/Yang"],
-              ["eneagrama", "Eneagrama"],
-            ] as const
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setTesteFiltro(id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                testeFiltro === id
-                  ? "bg-white text-brand-purple shadow-xs font-bold"
-                  : "text-brand-charcoal/70 hover:text-brand-charcoal"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="relative shrink-0 self-start sm:self-auto w-full sm:w-40">
+          <select
+            value={testeFiltro}
+            onChange={(e) => setTesteFiltro(e.target.value as Visao)}
+            className="w-full appearance-none bg-brand-beige-light border border-brand-beige text-brand-charcoal text-xs sm:text-sm font-medium py-2 pl-3 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple cursor-pointer transition-colors hover:bg-brand-beige"
+            aria-label="Filtrar por teste"
+          >
+            {(
+              [
+                ["todos", "Todos"],
+                ["yinyang", "Yin/Yang"],
+                ["eneagrama", "Eneagrama"],
+              ] as const
+            ).map(([id, label]) => (
+              <option key={id} value={id}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-brand-charcoal/50">
+            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+          </div>
         </div>
       </div>
 
@@ -440,28 +441,22 @@ export default function AdminAvaliacoes() {
           </p>
         </div>
 
-        <div
-          role="tablist"
-          aria-label="Selecionar teste"
-          className="flex items-center gap-1 bg-brand-beige-light p-1 rounded-xl self-start sm:self-auto"
-        >
-          {abas.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={visao === id}
-              onClick={() => setVisao(id)}
-              className={`px-3.5 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                visao === id
-                  ? "bg-white text-brand-purple shadow-xs font-bold"
-                  : "text-brand-charcoal/70 hover:text-brand-charcoal"
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{label}</span>
-            </button>
-          ))}
+        <div className="relative self-start sm:self-auto shrink-0 w-full sm:w-48">
+          <select
+            value={visao}
+            onChange={(e) => setVisao(e.target.value as Visao)}
+            className="w-full appearance-none bg-brand-beige-light border border-brand-beige text-brand-charcoal text-sm font-semibold py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple cursor-pointer transition-colors hover:bg-brand-beige"
+            aria-label="Selecionar teste"
+          >
+            {abas.map(({ id, label }) => (
+              <option key={id} value={id}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-brand-charcoal/50">
+            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+          </div>
         </div>
       </div>
 

@@ -190,7 +190,7 @@ export default function TesteYinYangPage() {
   };
 
   const iniciarTeste = () => {
-    if (creditosRestantes <= 0) {
+    if (precoExibicao > 0 && creditosRestantes <= 0) {
       handleComprarTeste();
       return;
     }
@@ -417,12 +417,14 @@ export default function TesteYinYangPage() {
 
             <div className="relative">
               {/* Badge de Créditos Disponíveis */}
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium mb-5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>
-                  Você possui <strong>{creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""}</strong> disponível{creditosRestantes > 1 ? "is" : ""} para esta avaliação
-                </span>
-              </div>
+              {precoExibicao > 0 && (
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium mb-5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>
+                    Você possui <strong>{creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""}</strong> disponível{creditosRestantes > 1 ? "is" : ""} para esta avaliação
+                  </span>
+                </div>
+              )}
 
               <h2 className="text-2xl font-serif text-[#1A3C4D] mb-4">Instruções para o Teste</h2>
 

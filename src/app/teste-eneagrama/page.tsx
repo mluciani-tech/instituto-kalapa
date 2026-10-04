@@ -195,7 +195,7 @@ export default function TesteEneagramaPage() {
   };
 
   const iniciarTeste = () => {
-    if (creditosRestantes <= 0) {
+    if (precoExibicao > 0 && creditosRestantes <= 0) {
       handleComprarTeste();
       return;
     }
@@ -423,12 +423,14 @@ export default function TesteEneagramaPage() {
 
                 <div className="relative">
                   {/* Badge de Créditos Disponíveis */}
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium mb-5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>
-                      Você possui <strong>{creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""}</strong> disponível{creditosRestantes > 1 ? "is" : ""} para esta avaliação
-                    </span>
-                  </div>
+                  {precoExibicao > 0 && (
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium mb-5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>
+                        Você possui <strong>{creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""}</strong> disponível{creditosRestantes > 1 ? "is" : ""} para esta avaliação
+                      </span>
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-center gap-1 text-xs text-[#7D8C6E] font-semibold uppercase tracking-wider mb-2">
                     <Clock className="w-4 h-4" /> Duração estimada: ~6 a 8 minutos
