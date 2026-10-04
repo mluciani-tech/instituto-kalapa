@@ -384,7 +384,7 @@ export default function TesteEneagramaPage() {
               Pagamento 100% seguro via InfinitePay (Pix ou Cartão de Crédito).
             </p>
           </div>
-        ) : creditosRestantes === 0 ? (
+        ) : creditosRestantes === 0 && etapa === "intro" ? (
           /* Card Paywall para Usuário Logado Sem Créditos */
           <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-2xl mx-auto relative overflow-hidden">
             <div className="w-16 h-16 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] flex items-center justify-center mx-auto mb-6 border border-[#7D8C6E]/30">
