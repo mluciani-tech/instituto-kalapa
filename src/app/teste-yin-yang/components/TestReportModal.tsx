@@ -169,11 +169,13 @@ export default function TestReportModal({
             </div>
 
             {/* Imagem Editorial Artística (no relatório impresso ou na tela) */}
-            <div className="relative rounded-2xl overflow-hidden border border-brand-beige min-h-[160px] md:min-h-full print:rounded-xl">
+            <div className="relative rounded-2xl overflow-hidden border border-brand-beige min-h-[160px] md:min-h-full print:min-h-[180px] print:h-44 print:w-full print:rounded-xl">
               <Image
                 src={resultado.imagem}
                 alt={resultado.titulo}
                 fill
+                unoptimized
+                priority
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 300px"
               />

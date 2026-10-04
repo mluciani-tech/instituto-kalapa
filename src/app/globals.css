@@ -115,6 +115,13 @@ body {
     margin: 10mm 12mm;
   }
 
+  /* Garante cores de fundo, gradientes e bordas exatas no PDF */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
   /* Reset de layout e fundo na impressão */
   html,
   body {
@@ -123,6 +130,8 @@ body {
     height: auto !important;
     min-height: auto !important;
     overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   /* Isola a impressão: oculta tudo no body exceto o portal do relatório */
@@ -134,7 +143,7 @@ body {
     display: none !important;
   }
 
-  /* Garante que o container do relatório e seus modais ocupem a folha inteira sem cortes ou telas pretas */
+  /* Garante que o container do relatório ocupe a folha inteira sem cortes ou telas pretas */
   .modal-impressao-backdrop {
     position: static !important;
     inset: auto !important;
@@ -175,14 +184,26 @@ body {
     background: #ffffff !important;
   }
 
-  tr {
+  tr,
+  .print-avoid-break {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
 
-  .page-break {
+  .print-page-break,
+  .page-break,
+  .relatorio-pagina {
     page-break-after: always !important;
     break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .relatorio-pagina-final {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Sparkles, ArrowRight, Compass, HeartHandshake, ShieldCheck, Flame, Droplets, BookOpen, Clock, Users } from "lucide-react";
 import Footer from "../components/Footer";
+import TestShareMenu from "../components/TestShareMenu";
 
 export const metadata = {
   title: "Testes de Autoconhecimento — INstituto Kalapa",
@@ -44,15 +45,23 @@ export default function TesteAutoconhecimentoPage() {
             <div className="absolute top-0 right-0 w-48 h-48 bg-[#B8965A]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 group-hover:bg-[#B8965A]/10 transition-colors" />
 
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-orange-100/70 text-orange-900 border border-orange-200">
-                  <Flame className="w-3.5 h-3.5 text-orange-600" />
-                  <Droplets className="w-3.5 h-3.5 text-blue-600 -ml-0.5" />
-                  MTC • 15 Dimensões
-                </span>
-                <span className="inline-flex items-center gap-1 text-xs text-[#1A3C4D]/60 font-light">
-                  <Clock className="w-3.5 h-3.5" /> ~3 min
-                </span>
+              <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-orange-100/70 text-orange-900 border border-orange-200">
+                    <Flame className="w-3.5 h-3.5 text-orange-600" />
+                    <Droplets className="w-3.5 h-3.5 text-blue-600 -ml-0.5" />
+                    MTC • 15 Dimensões
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-xs text-[#1A3C4D]/60 font-light">
+                    <Clock className="w-3.5 h-3.5" /> ~3 min
+                  </span>
+                </div>
+                <TestShareMenu
+                  variant="circle"
+                  titulo="Teste Yin ou Yang?"
+                  path="/teste-yin-yang"
+                  convite="Faça o teste de autoconhecimento Yin ou Yang? da Medicina Chinesa no INstituto Kalapa:"
+                />
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-serif font-medium text-[#1A3C4D] mb-3">
@@ -97,14 +106,22 @@ export default function TesteAutoconhecimentoPage() {
             <div className="absolute top-0 right-0 w-48 h-48 bg-[#7D8C6E]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 group-hover:bg-[#7D8C6E]/15 transition-colors" />
 
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-100/70 text-emerald-900 border border-emerald-200">
-                  <Compass className="w-3.5 h-3.5 text-emerald-700" />
-                  Eneagrama • 45 Afirmações
-                </span>
-                <span className="inline-flex items-center gap-1 text-xs text-[#1A3C4D]/60 font-light">
-                  <Clock className="w-3.5 h-3.5" /> ~6 min
-                </span>
+              <div className="flex items-center justify-between mb-4 relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-100/70 text-emerald-900 border border-emerald-200">
+                    <Compass className="w-3.5 h-3.5 text-emerald-700" />
+                    Eneagrama • 45 Afirmações
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-xs text-[#1A3C4D]/60 font-light">
+                    <Clock className="w-3.5 h-3.5" /> ~6 min
+                  </span>
+                </div>
+                <TestShareMenu
+                  variant="circle"
+                  titulo="Teste do Eneagrama"
+                  path="/teste-eneagrama"
+                  convite="Descubra seu Eneatipo e perfil sistêmico com o teste do Eneagrama no INstituto Kalapa:"
+                />
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-serif font-medium text-[#1A3C4D] mb-3">

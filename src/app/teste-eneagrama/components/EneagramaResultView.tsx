@@ -28,7 +28,6 @@ import {
 } from "lucide-react";
 import { ResultadoEneagramaCalculado } from "../lib/calculo-eneagrama";
 import { ENEAGRAMA_REPORTS_MAP, EneagramaReportData } from "../data/eneagrama-reports-data";
-import TestShareMenu from "../../components/TestShareMenu";
 
 interface EneagramaResultViewProps {
   resultado: ResultadoEneagramaCalculado;
@@ -653,14 +652,6 @@ export default function EneagramaResultView({
             <Printer className="w-4 h-4" />
             <span>Imprimir / Salvar Laudo Completo (A4)</span>
           </button>
-
-          <TestShareMenu
-            variant="button"
-            direction="up"
-            titulo="Eneagrama"
-            path="/teste-eneagrama"
-            convite="Descubra seu Eneatipo com o teste de personalidade do Eneagrama do INstituto Kalapa:"
-          />
 
           <Link
             href="/servicos"
