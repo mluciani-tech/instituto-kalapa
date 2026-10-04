@@ -32,6 +32,7 @@ import {
   Scale,
   Utensils,
   Coffee,
+  Database,
 } from "lucide-react";
 
 interface ManualSection {
@@ -598,6 +599,34 @@ export default function AdminManual() {
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
                     <span className="font-bold text-brand-purple">4. Relatório em PDF</span>
                     <p className="text-brand-charcoal/70">O sistema calcula o placar, entrega o diagnóstico detalhado e gera o documento A4 profissional para download ou impressão.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card de Regras e Banco de Dados */}
+              <div className="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                    <Database className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-emerald-900">Configuração de Banco & Laudos Históricos</h3>
+                    <p className="text-xs text-emerald-950/70">Padrões obrigatórios no Supabase para correta vinculação dos testes.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-emerald-800 block">Slug Padronizado</span>
+                    <p className="text-brand-charcoal/70">Todos os produtos de teste devem possuir <strong>slug = "teste"</strong>. O sistema agrupará as vendas corretamente e redirecionará acessos para o catálogo unificado.</p>
+                  </div>
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-emerald-800 block">Rota de Teste Obrigatória</span>
+                    <p className="text-brand-charcoal/70">A coluna <strong>rota_teste</strong> (ex: <code className="bg-brand-beige/30 px-1 py-0.5 rounded">/teste-cronotipo</code>) é OBRIGATÓRIA. É por meio dela que a página carrega o preço e o sistema rastreia qual teste exato foi comprado.</p>
+                  </div>
+                  <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
+                    <span className="font-bold text-emerald-800 block">Acesso Histórico</span>
+                    <p className="text-brand-charcoal/70">O sistema checa <strong>avaliacoes_...</strong> (ex: avaliacoes_cronotipo). Se o usuário tem 0 créditos mas já respondeu no passado, o PDF é liberado sem nova cobrança.</p>
                   </div>
                 </div>
               </div>
