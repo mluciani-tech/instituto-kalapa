@@ -36,7 +36,6 @@ function SucessoContent() {
   const { clearCart, closeDrawer } = useCart();
   const [pedido, setPedido] = useState<PedidoPublico | null>(null);
   const [naoEncontrado, setNaoEncontrado] = useState(false);
-  const [countdown, setCountdown] = useState<number | null>(null);
 
   // Garantir que o carrinho e drawer estejam sempre limpos/fechados ao chegar na tela de sucesso
   useEffect(() => {
@@ -118,24 +117,9 @@ function SucessoContent() {
 
   const rotaTesteDestino = primeiroTeste?.rota_teste || (primeiroTeste?.slug ? `/${primeiroTeste.slug}` : "/teste-autoconhecimento");
 
-  // Redirecionamento automático em 2 segundos para o fluxo do teste
-  useEffect(() => {
-    if (!pago || !primeiroTeste) return;
-
-    setCountdown(2);
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev === null || prev <= 1) {
-          clearInterval(timer);
-          router.push(`${rotaTesteDestino}?iniciar=1`);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [pago, primeiroTeste, rotaTesteDestino, router]);
+  const handleClickIniciar = () => {
+    router.push(`${rotaTesteDestino}?iniciar=1`);
+  };
 
   return (
     <section className="relative min-h-screen pt-28 pb-16 md:pt-36 md:pb-24 bg-brand-charcoal overflow-hidden flex items-center justify-center">
@@ -252,12 +236,6 @@ function SucessoContent() {
                 Seu crédito para <strong>{primeiroTeste.nome}</strong> já foi liberado no sistema do INstituto Kalapa.
               </p>
 
-              {countdown !== null && countdown > 0 ? (
-                <div className="mb-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-medium border border-emerald-500/30">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span>Redirecionando para sua avaliação em <strong>{countdown}s</strong>...</span>
-                </div>
-              ) : null}
 
               <div className="flex justify-center">
                 <Link

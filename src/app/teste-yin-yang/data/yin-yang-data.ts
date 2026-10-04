@@ -248,7 +248,7 @@ export const RESULTADOS_MAP: Record<"yang" | "yin" | "equilibrio", ResultadoInfo
     tipo: "yang",
     titulo: "Predominância Yang (Excesso de Fogo & Aceleração)",
     subtitulo: "Compreendendo e Acalmando o Excesso de Yang para o seu Bem-Estar",
-    imagem: "/images/yin-yang/yang-cooling.jpg",
+    imagem: "/Yin-yang.png",
     compreensao: [
       "Possivelmente você sente uma necessidade constante de estar em movimento, urgência nas ações, sensação de pressa interna e de estar 'ligado(a) na tomada' mesmo quando o corpo dá sinais de cansaço.",
       "É comum sentir a mente muito acelerada, ter pouca paciência com a lentidão dos outros, agir por impulso e perceber uma sensação frequente de calor no corpo, na face ou na cabeça.",
@@ -344,7 +344,7 @@ export const RESULTADOS_MAP: Record<"yang" | "yin" | "equilibrio", ResultadoInfo
     tipo: "yin",
     titulo: "Predominância Yin (Excesso de Frio & Estagnação)",
     subtitulo: "Compreendendo e Acolhendo o Excesso de Yin para o seu Bem-Estar",
-    imagem: "/images/yin-yang/yin-warming.jpg",
+    imagem: "/Yin-yang.png",
     compreensao: [
       "Possivelmente você sente uma tendência a se recolher, lentidão física, cansaço frequente ou preguiça, e facilidade para sentir frio (especialmente nas mãos, nos pés e na região lombar).",
       "É comum perceber o metabolismo mais lento, ter atitudes mais contidas ou introvertidas, sentir insegurança ou tristeza em alguns momentos, procrastinar decisões e guardar sentimentos ('engolir sapos') em vez de colocá-los para fora.",
@@ -440,7 +440,7 @@ export const RESULTADOS_MAP: Record<"yang" | "yin" | "equilibrio", ResultadoInfo
     tipo: "equilibrio",
     titulo: "Equilíbrio Dinâmico Yin-Yang (Harmonia Vital)",
     subtitulo: "Parabéns! Sua balança energética está em ressonância e harmonia",
-    imagem: "/images/yin-yang/banner.jpg",
+    imagem: "/Yin-yang.png",
     compreensao: [
       "Suas respostas demonstram uma excelente alternância entre os ritmos de atividade (Yang) e descanso (Yin).",
       "Na filosofia taoista, a saúde não é um ponto estático, mas uma dança contínua: saber agir no momento oportuno e saber recolher-se em silêncio quando o corpo pede pausa.",
