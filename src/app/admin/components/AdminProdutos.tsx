@@ -370,6 +370,23 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
               </div>
               <div className="flex flex-wrap items-center gap-2">
 
+                {/* Dropdown Filtro por Status */}
+                <select
+                  value={produtosStatusFiltro}
+                  onChange={(e) => setProdutosStatusFiltro(e.target.value as any)}
+                  className={`px-3 py-2 border rounded-lg text-xs font-medium cursor-pointer shadow-2xs transition-colors ${
+                    produtosStatusFiltro !== "todos"
+                      ? "bg-brand-purple text-white border-brand-purple font-semibold"
+                      : "bg-white text-brand-charcoal border-brand-beige hover:border-brand-purple/40"
+                  }`}
+                  aria-label="Filtrar produtos por status"
+                >
+                  <option value="todos" className="bg-white text-brand-charcoal">Todos os Status</option>
+                  <option value="ativos" className="bg-white text-brand-charcoal">Ativos</option>
+                  <option value="inativos" className="bg-white text-brand-charcoal">Inativos</option>
+                  <option value="testes" className="bg-white text-brand-charcoal">Somente Testes</option>
+                  <option value="atendimentos" className="bg-white text-brand-charcoal">Somente Atendimentos</option>
+                </select>
 
                 {/* Dropdown Filtro por Slug com Rolagem */}
                 <div className="flex items-center gap-1.5">
