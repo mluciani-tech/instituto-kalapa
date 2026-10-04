@@ -5,6 +5,7 @@ import type { ItemCarrinho } from "@/lib/types";
 
 interface CartContextType {
   items: ItemCarrinho[];
+  lastRemovedItem: ItemCarrinho | null;
   addItem: (produto: {
     id: string;
     slug?: string;
@@ -34,9 +35,11 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "kalapa_cart_items_v1";
+const LAST_REMOVED_STORAGE_KEY = "kalapa_last_removed_item_v1";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<ItemCarrinho[]>([]);
+  const [lastRemovedItem, setLastRemovedItem] = useState<ItemCarrinho | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -46,6 +49,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
       if (stored) {
         setItems(JSON.parse(stored));
+      }
+      const storedLast = localStorage.getItem(LAST_REMOVED_STORAGE_KEY);
+      if (storedLast) {
+        setLastRemovedItem(JSON.parse(storedLast));
       }
     } catch {
       // ignore
@@ -81,6 +88,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setItems([]);
         }
       }
+      if (e.key === LAST_REMOVED_STORAGE_KEY) {
+        try {
+          if (e.newValue) {
+            setLastRemovedItem(JSON.parse(e.newValue));
+          }
+        } catch {
+          // ignore
+        }
+      }
     };
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
@@ -104,6 +120,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     quantidade = 1
   ) => {
     const precoNum = produto.preco ?? 0;
+    const itemObj: ItemCarrinho = {
+      produto_id: produto.id,
+      slug: produto.slug || produto.id,
+      nome: produto.nome,
+      preco: precoNum,
+      quantidade,
+      imagem_url: produto.imagem_url || null,
+      categoria: produto.categoria || null,
+      agendamento_id: produto.agendamento_id || null,
+      agendamento_inicio: produto.agendamento_inicio || null,
+      agendamento_fim: produto.agendamento_fim || null,
+      terapeuta_nome: produto.terapeuta_nome || null,
+      is_teste: produto.is_teste || false,
+      rota_teste: produto.rota_teste || null,
+    };
+
+    setLastRemovedItem(itemObj);
+    try {
+      localStorage.setItem(LAST_REMOVED_STORAGE_KEY, JSON.stringify(itemObj));
+    } catch {
+      // ignore
+    }
+
     setItems((prev) => {
       const existing = prev.find((item) => item.produto_id === produto.id && item.agendamento_id === produto.agendamento_id);
       if (existing) {
@@ -113,35 +152,40 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             : item
         );
       }
-      return [
-        ...prev,
-        {
-          produto_id: produto.id,
-          slug: produto.slug || produto.id,
-          nome: produto.nome,
-          preco: precoNum,
-          quantidade,
-          imagem_url: produto.imagem_url || null,
-          categoria: produto.categoria || null,
-          agendamento_id: produto.agendamento_id || null,
-          agendamento_inicio: produto.agendamento_inicio || null,
-          agendamento_fim: produto.agendamento_fim || null,
-          terapeuta_nome: produto.terapeuta_nome || null,
-          is_teste: produto.is_teste || false,
-          rota_teste: produto.rota_teste || null,
-        },
-      ];
+      return [...prev, itemObj];
     });
     setIsDrawerOpen(true);
   }, []);
 
   const removeItem = useCallback((produto_id: string) => {
-    setItems((prev) => prev.filter((item) => item.produto_id !== produto_id));
+    setItems((prev) => {
+      const removed = prev.find((item) => item.produto_id === produto_id);
+      if (removed) {
+        setLastRemovedItem(removed);
+        try {
+          localStorage.setItem(LAST_REMOVED_STORAGE_KEY, JSON.stringify(removed));
+        } catch {
+          // ignore
+        }
+      }
+      return prev.filter((item) => item.produto_id !== produto_id);
+    });
   }, []);
 
   const updateQuantity = useCallback((produto_id: string, quantidade: number) => {
     if (quantidade <= 0) {
-      setItems((prev) => prev.filter((item) => item.produto_id !== produto_id));
+      setItems((prev) => {
+        const removed = prev.find((item) => item.produto_id === produto_id);
+        if (removed) {
+          setLastRemovedItem(removed);
+          try {
+            localStorage.setItem(LAST_REMOVED_STORAGE_KEY, JSON.stringify(removed));
+          } catch {
+            // ignore
+          }
+        }
+        return prev.filter((item) => item.produto_id !== produto_id);
+      });
       return;
     }
     setItems((prev) =>
@@ -152,7 +196,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clearCart = useCallback(() => {
-    setItems((prev) => (prev.length === 0 ? prev : []));
+    setItems((prev) => {
+      if (prev.length > 0) {
+        const last = prev[prev.length - 1];
+        setLastRemovedItem(last);
+        try {
+          localStorage.setItem(LAST_REMOVED_STORAGE_KEY, JSON.stringify(last));
+        } catch {
+          // ignore
+        }
+      }
+      return [];
+    });
     setIsDrawerOpen(false);
     try {
       localStorage.removeItem(CART_STORAGE_KEY);
@@ -181,6 +236,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       items,
+      lastRemovedItem,
       addItem,
       removeItem,
       updateQuantity,
@@ -195,6 +251,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       items,
+      lastRemovedItem,
       addItem,
       removeItem,
       updateQuantity,

@@ -13,6 +13,7 @@ export default function CartDrawer() {
   const router = useRouter();
   const {
     items,
+    lastRemovedItem,
     removeItem,
     updateQuantity,
     isDrawerOpen,
@@ -25,6 +26,33 @@ export default function CartDrawer() {
   const [pedidoPendente, setPedidoPendente] = useState<Pedido | null>(null);
   const [retomandoId, setRetomandoId] = useState<string | null>(null);
   const [erroRetomada, setErroRetomada] = useState("");
+
+  const isUltimoTeste = Boolean(
+    lastRemovedItem?.is_teste ||
+    lastRemovedItem?.categoria === "testes" ||
+    lastRemovedItem?.slug?.startsWith("teste-")
+  );
+
+  const catalogoHref = useMemo(() => {
+    if (!lastRemovedItem) return "/produtos";
+    if (isUltimoTeste) {
+      return (
+        lastRemovedItem.rota_teste ||
+        (lastRemovedItem.slug ? `/${lastRemovedItem.slug}` : "/teste-autoconhecimento")
+      );
+    }
+    if (lastRemovedItem.categoria) {
+      const cat = lastRemovedItem.categoria.toLowerCase();
+      if (cat === "testes" || cat === "teste") {
+        return (
+          lastRemovedItem.rota_teste ||
+          (lastRemovedItem.slug ? `/${lastRemovedItem.slug}` : "/teste-autoconhecimento")
+        );
+      }
+      return `/produtos?categoria=${encodeURIComponent(cat)}`;
+    }
+    return "/produtos";
+  }, [lastRemovedItem, isUltimoTeste]);
 
   // Buscar pedidos pendentes caso o carrinho esteja vazio
   useEffect(() => {
@@ -197,12 +225,21 @@ export default function CartDrawer() {
                       Explore nossas vivências, atendimentos e testes de autoconhecimento.
                     </p>
                     <Link
-                      href="/produtos"
+                      href={catalogoHref}
                       onClick={closeDrawer}
-                      className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-brand-terracotta/20"
+                      className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-brand-terracotta/20 cursor-pointer"
                     >
                       Explorar Catálogo
                     </Link>
+                    {isUltimoTeste && (
+                      <Link
+                        href="/teste-autoconhecimento"
+                        onClick={closeDrawer}
+                        className="mt-3 text-[11px] text-white/50 hover:text-white underline decoration-dotted transition-colors"
+                      >
+                        Ver todos os testes de autoconhecimento
+                      </Link>
+                    )}
                   </>
                 )}
               </div>

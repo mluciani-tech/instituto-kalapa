@@ -91,8 +91,8 @@ export default function TesteCronotipoPage() {
     calcularResultadoCronotipo(respostas);
 
   const precoExibicao = produtoTeste
-    ? produtoTeste.preco_promocional ?? produtoTeste.preco ?? 67
-    : 0; // Default livre se não cadastrado produto pago
+    ? produtoTeste.preco_promocional ?? produtoTeste.preco ?? 10
+    : 10;
 
   const precoFormatado =
     precoExibicao <= 0
@@ -107,6 +107,7 @@ export default function TesteCronotipoPage() {
         nome: produtoTeste.nome || "A Sabedoria do Cronotipo & o Ritmo Biológico",
         preco: precoExibicao,
         imagem_url: produtoTeste.imagem_url,
+        categoria: produtoTeste.categoria || "testes",
         is_teste: true,
         rota_teste: produtoTeste.rota_teste || "/teste-cronotipo",
       });
@@ -341,126 +342,230 @@ export default function TesteCronotipoPage() {
               </Link>
             </div>
           </div>
-        ) : etapa === "intro" ? (
-          /* Tela de Introdução e Início */
-          <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] max-w-2xl mx-auto">
-            {usuario && (
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#F8F4ED] border border-[#E8DEC8] mb-6">
-                <div className="w-10 h-10 rounded-full bg-[#1A3C4D] text-white flex items-center justify-center text-sm font-bold shrink-0">
-                  {usuario.nome?.charAt(0)?.toUpperCase() || "U"}
+        ) : creditosRestantes === 0 && precoExibicao > 0 ? (
+          /* Card Paywall para Usuário Logado Sem Créditos */
+          <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] text-center max-w-2xl mx-auto relative overflow-hidden">
+            <div className="w-16 h-16 rounded-full bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center mx-auto mb-6 border border-[#B8965A]/30">
+              <ShoppingBag className="w-8 h-8" />
+            </div>
+
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#B8965A]/15 text-[#B8965A] mb-3">
+              Crédito de Avaliação Necessário
+            </span>
+
+            <h2 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mb-3">
+              Olá, {usuario?.nome}
+            </h2>
+
+            <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
+              Você ainda não possui créditos disponíveis para iniciar o teste do Cronotipo &amp; Ritmo Biológico. Para desbloquear o questionário e emitir seu Laudo Diagnóstico Completo em PDF, adquira sua avaliação abaixo:
+            </p>
+
+            <div className="bg-[#F8F4ED] rounded-2xl p-6 mb-8 text-left border border-[#E8DEC8]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E8DEC8]">
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-semibold text-[#1A3C4D]/60 block mb-1">
+                    Investimento por avaliação
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-serif font-bold text-[#1A3C4D]">
+                      {precoFormatado}
+                    </span>
+                    <span className="text-xs text-[#1A3C4D]/60 font-light">/ avaliação online</span>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-[#1A3C4D] truncate">
-                      {usuario.nome}
-                    </p>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#B8965A] bg-[#B8965A]/15 px-2 py-0.5 rounded-full">
-                      <UserCheck className="w-3 h-3" /> Conectado
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#B8965A]/15 text-[#B8965A] text-xs font-semibold border border-[#B8965A]/20 self-start sm:self-center">
+                  <CheckCircle2 className="w-4 h-4 text-[#B8965A]" />
+                  <span>Laudo PDF Incluso</span>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#1A3C4D]/80">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#B8965A] shrink-0" />
+                  <span>Acesso liberado imediatamente</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#B8965A] shrink-0" />
+                  <span>Mapeamento circadiano e 6 dimensões</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#B8965A] shrink-0" />
+                  <span>Laudo Clínico em PDF A4</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#B8965A] shrink-0" />
+                  <span>Histórico permanente em sua conta</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={handleComprarTeste}
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#1A3C4D] text-white text-sm font-medium hover:bg-[#15313F] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <ShoppingBag className="w-4 h-4 text-[#B8965A]" />
+                <span>Adicionar ao Carrinho ({precoFormatado})</span>
+              </button>
+              <Link
+                href="/conta/pedidos"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-[#1A3C4D]/30 text-[#1A3C4D] text-sm font-medium hover:bg-[#FDFBF7] transition-all flex items-center justify-center gap-2"
+              >
+                <span>Meus Pedidos</span>
+              </Link>
+            </div>
+            <p className="text-xs text-[#1A3C4D]/50 mt-5">
+              Já realizou o pagamento? O crédito é liberado automaticamente após a confirmação do pagamento via InfinitePay.
+            </p>
+          </div>
+        ) : (
+          <>
+            {etapa === "intro" && (
+              /* Tela de Introdução e Início */
+              <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8] max-w-2xl mx-auto">
+                {/* Badge de Créditos Disponíveis */}
+                {precoExibicao > 0 && creditosRestantes > 0 && (
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium mb-5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>
+                      Você possui <strong>{creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""}</strong> disponível{creditosRestantes > 1 ? "is" : ""} para esta avaliação
                     </span>
                   </div>
-                  <p className="text-xs text-[#1A3C4D]/60 truncate">{usuario.email}</p>
+                )}
+
+                {usuario && (
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#F8F4ED] border border-[#E8DEC8] mb-6">
+                    <div className="w-10 h-10 rounded-full bg-[#1A3C4D] text-white flex items-center justify-center text-sm font-bold shrink-0">
+                      {usuario.nome?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-[#1A3C4D] truncate">
+                          {usuario.nome}
+                        </p>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#B8965A] bg-[#B8965A]/15 px-2 py-0.5 rounded-full">
+                          <UserCheck className="w-3 h-3" /> Conectado
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#1A3C4D]/60 truncate">{usuario.email}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Box de Orientações Customizadas do Admin ou Padrão */}
+                {produtoTeste?.orientacoes_pre_teste && (
+                  <div className="p-4 rounded-xl bg-[#F8F4ED] border border-[#E8DEC8] text-left mb-6 text-sm text-[#1A3C4D]/85 leading-relaxed">
+                    <p className="font-semibold text-[#1A3C4D] mb-1">Orientações do INstituto Kalapa:</p>
+                    <p className="whitespace-pre-line">{produtoTeste.orientacoes_pre_teste}</p>
+                  </div>
+                )}
+
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mb-3">
+                    Orientações para o Teste
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#1A3C4D]/75 font-light leading-relaxed">
+                    Responda pensando em como seu organismo funciona de forma espontânea — especialmente em dias livres ou sem a interferência de alarmes e obrigações sociais rígidas.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                  <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E8DEC8] text-center">
+                    <div className="w-10 h-10 rounded-full bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center mx-auto mb-2 font-bold text-sm">
+                      1
+                    </div>
+                    <h4 className="text-xs font-semibold text-[#1A3C4D] mb-1">
+                      6 Perguntas
+                    </h4>
+                    <p className="text-[11px] text-[#1A3C4D]/70 font-light">
+                      Diretas e focadas na sua rotina biológica.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E8DEC8] text-center">
+                    <div className="w-10 h-10 rounded-full bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center mx-auto mb-2 font-bold text-sm">
+                      2
+                    </div>
+                    <h4 className="text-xs font-semibold text-[#1A3C4D] mb-1">
+                      ~2 Minutos
+                    </h4>
+                    <p className="text-[11px] text-[#1A3C4D]/70 font-light">
+                      Avaliação rápida, dinâmica e precisa.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E8DEC8] text-center">
+                    <div className="w-10 h-10 rounded-full bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center mx-auto mb-2 font-bold text-sm">
+                      3
+                    </div>
+                    <h4 className="text-xs font-semibold text-[#1A3C4D] mb-1">
+                      Laudo 30 Tópicos
+                    </h4>
+                    <p className="text-[11px] text-[#1A3C4D]/70 font-light">
+                      Dossiê completo para download e impressão.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <button
+                    type="button"
+                    onClick={iniciarTeste}
+                    className="w-full py-4 px-6 rounded-2xl bg-[#1A3C4D] hover:bg-[#15313F] text-white text-sm font-semibold transition-all duration-200 shadow-md shadow-[#1A3C4D]/15 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>Iniciar Avaliação do Cronotipo</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+
+                  {!usuario && (
+                    <div className="text-center">
+                      <Link
+                        href="/login?redirect=/teste-cronotipo"
+                        className="text-xs text-[#1A3C4D]/60 hover:text-[#1A3C4D] underline decoration-dotted"
+                      >
+                        Deseja salvar seu histórico na sua conta? Faça login antes de começar.
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            <div className="text-center mb-8">
-              <h2 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mb-3">
-                Orientações para o Teste
-              </h2>
-              <p className="text-xs sm:text-sm text-[#1A3C4D]/75 font-light leading-relaxed">
-                Responda pensando em como seu organismo funciona de forma espontânea — especialmente em dias livres ou sem a interferência de alarmes e obrigações sociais rígidas.
-              </p>
-            </div>
+            {etapa === "teste" && (
+              /* Tela das Questões */
+              <div>
+                <CronotipoProgressIndicator
+                  atual={questaoAtualIndex}
+                  total={totalQuestoes}
+                  onReiniciar={handleReiniciarTeste}
+                />
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E8DEC8] text-center">
-                <div className="w-10 h-10 rounded-full bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center mx-auto mb-2 font-bold text-sm">
-                  1
+                <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8]">
+                  <CronotipoQuestionCard
+                    questao={questaoAtual}
+                    respostaSelecionada={respostaAtual}
+                    onSelecionar={handleSelecionarOpcao}
+                    onVoltar={handleVoltar}
+                    onAvancar={handleAvancar}
+                    isUltima={questaoAtualIndex === totalQuestoes - 1}
+                    isPrimeira={questaoAtualIndex === 0}
+                  />
                 </div>
-                <h4 className="text-xs font-semibold text-[#1A3C4D] mb-1">
-                  6 Perguntas
-                </h4>
-                <p className="text-[11px] text-[#1A3C4D]/70 font-light">
-                  Diretas e focadas na sua rotina biológica.
-                </p>
               </div>
+            )}
 
-              <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E8DEC8] text-center">
-                <div className="w-10 h-10 rounded-full bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center mx-auto mb-2 font-bold text-sm">
-                  2
-                </div>
-                <h4 className="text-xs font-semibold text-[#1A3C4D] mb-1">
-                  ~2 Minutos
-                </h4>
-                <p className="text-[11px] text-[#1A3C4D]/70 font-light">
-                  Avaliação rápida, dinâmica e precisa.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E8DEC8] text-center">
-                <div className="w-10 h-10 rounded-full bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center mx-auto mb-2 font-bold text-sm">
-                  3
-                </div>
-                <h4 className="text-xs font-semibold text-[#1A3C4D] mb-1">
-                  Laudo 30 Tópicos
-                </h4>
-                <p className="text-[11px] text-[#1A3C4D]/70 font-light">
-                  Dossiê completo para download e impressão.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <button
-                type="button"
-                onClick={iniciarTeste}
-                className="w-full py-4 px-6 rounded-2xl bg-[#1A3C4D] hover:bg-[#15313F] text-white text-sm font-semibold transition-all duration-200 shadow-md shadow-[#1A3C4D]/15 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Iniciar Avaliação do Cronotipo</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-
-              {!usuario && (
-                <div className="text-center">
-                  <Link
-                    href="/login?redirect=/teste-cronotipo"
-                    className="text-xs text-[#1A3C4D]/60 hover:text-[#1A3C4D] underline decoration-dotted"
-                  >
-                    Deseja salvar seu histórico na sua conta? Faça login antes de começar.
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : etapa === "teste" ? (
-          /* Tela das Questões */
-          <div>
-            <CronotipoProgressIndicator
-              atual={questaoAtualIndex}
-              total={totalQuestoes}
-              onReiniciar={handleReiniciarTeste}
-            />
-
-            <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/20 border border-[#E8DEC8]">
-              <CronotipoQuestionCard
-                questao={questaoAtual}
-                respostaSelecionada={respostaAtual}
-                onSelecionar={handleSelecionarOpcao}
-                onVoltar={handleVoltar}
-                onAvancar={handleAvancar}
-                isUltima={questaoAtualIndex === totalQuestoes - 1}
-                isPrimeira={questaoAtualIndex === 0}
+            {etapa === "resultado" && (
+              /* Tela de Resultado */
+              <CronotipoResultView
+                resultado={resultadoCalculado}
+                onReiniciar={handleReiniciarTeste}
+                onAbrirRelatorio={() => setModalRelatorioAberto(true)}
+                usuario={usuario}
               />
-            </div>
-          </div>
-        ) : (
-          /* Tela de Resultado */
-          <CronotipoResultView
-            resultado={resultadoCalculado}
-            onReiniciar={handleReiniciarTeste}
-            onAbrirRelatorio={() => setModalRelatorioAberto(true)}
-            usuario={usuario}
-          />
+            )}
+          </>
         )}
       </section>
 
