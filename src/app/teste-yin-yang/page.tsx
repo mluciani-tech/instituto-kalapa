@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   FileText,
   CreditCard,
+  RefreshCw,
 } from "lucide-react";
 import {
   YIN_YANG_PERGUNTAS,
@@ -34,7 +35,7 @@ import ResultView from "./components/ResultView";
 import { useCart } from "@/context/CartContext";
 
 export default function TesteYinYangPage() {
-  const { addItem, openDrawer } = useCart();
+  const { clearCart, addItem, openDrawer } = useCart();
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [usuario, setUsuario] = useState<{ id: string; nome: string; email?: string } | null>(null);
   const [creditosRestantes, setCreditosRestantes] = useState<number>(0);
@@ -57,30 +58,69 @@ export default function TesteYinYangPage() {
 
   const [modalRelatorioAberto, setModalRelatorioAberto] = useState(false);
   const [modalEmpateAberto, setModalEmpateAberto] = useState(false);
+  const [verificandoManual, setVerificandoManual] = useState(false);
+
+  const carregarStatus = useCallback(async (isManual = false) => {
+    try {
+      if (isManual) setVerificandoManual(true);
+      else if (!usuario) setLoadingAuth(true);
+
+      const res = await fetch("/api/testes/credito?slug=teste-yin-yang", {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      if (data?.authenticated && data.usuario) {
+        setUsuario(data.usuario);
+      } else {
+        setUsuario(null);
+      }
+      const creditos = data?.creditosRestantes || 0;
+      setCreditosRestantes(creditos);
+      if (data?.produto) {
+        setProdutoTeste(data.produto);
+      }
+
+      // Se o usuário veio com ?iniciar=1 ou ?sucesso=1 e possui créditos, avança direto para o teste!
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if ((params.get("iniciar") === "1" || params.get("sucesso") === "1") && creditos > 0) {
+          setEtapa("teste");
+        }
+      }
+    } catch (err) {
+      console.error("Erro ao verificar créditos do teste:", err);
+    } finally {
+      setLoadingAuth(false);
+      if (isManual) setVerificandoManual(false);
+    }
+  }, [usuario]);
 
   useEffect(() => {
-    async function carregarStatus() {
-      try {
-        setLoadingAuth(true);
-        const res = await fetch("/api/testes/credito?slug=teste-yin-yang", { cache: "no-store" });
-        const data = await res.json();
-        if (data?.authenticated && data.usuario) {
-          setUsuario(data.usuario);
-        } else {
-          setUsuario(null);
-        }
-        setCreditosRestantes(data?.creditosRestantes || 0);
-        if (data?.produto) {
-          setProdutoTeste(data.produto);
-        }
-      } catch (err) {
-        console.error("Erro ao verificar créditos do teste:", err);
-      } finally {
-        setLoadingAuth(false);
-      }
-    }
     carregarStatus();
-  }, []);
+
+    // Revalidação em tempo real ao retornar para a aba (ex: volta do InfinitePay)
+    const onFocus = () => carregarStatus();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [carregarStatus]);
+
+  // Se o usuário está logado mas sem créditos, faz checagem breve periódica caso o webhook esteja processando
+  useEffect(() => {
+    if (!usuario || creditosRestantes > 0) return;
+
+    let tentativas = 0;
+    const maxTentativas = 5;
+    const interval = setInterval(() => {
+      tentativas++;
+      if (tentativas > maxTentativas) {
+        clearInterval(interval);
+        return;
+      }
+      carregarStatus();
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [usuario, creditosRestantes, carregarStatus]);
 
   const { totalRespondidas, pontosYang, pontosYin, tipoResultado } = calcularPontuacaoYinYang(respostas);
   const resultadoAtual: ResultadoInfo = RESULTADOS_MAP[tipoResultado];
@@ -99,21 +139,29 @@ export default function TesteYinYangPage() {
     ? produtoTeste.preco_promocional ?? produtoTeste.preco ?? 47
     : 47;
 
-  const precoFormatado = precoExibicao <= 0 ? "Acesso Livre" : `R$ ${precoExibicao.toFixed(2).replace(".", ",")}`;
-
+  const precoFormatado =
+    precoExibicao <= 0
+      ? "Acesso Livre"
+      : `R$ ${precoExibicao.toFixed(2).replace(".", ",")}`;
 
   const handleComprarTeste = () => {
     if (produtoTeste) {
-      addItem({
-        id: produtoTeste.id,
-        slug: produtoTeste.slug || "teste-yin-yang",
-        nome: produtoTeste.nome || "Teste Yin ou Yang?",
-        preco: precoExibicao,
-        imagem_url: produtoTeste.imagem_url,
-        is_teste: true,
-        rota_teste: produtoTeste.rota_teste || "/teste-yin-yang",
-      });
-      openDrawer();
+      clearCart();
+      addItem(
+        {
+          id: produtoTeste.id,
+          slug: produtoTeste.slug || "teste-yin-yang",
+          nome: produtoTeste.nome || "Teste Yin ou Yang?",
+          preco: precoExibicao,
+          imagem_url: produtoTeste.imagem_url,
+          categoria: produtoTeste.categoria || "testes",
+          is_teste: true,
+          rota_teste: produtoTeste.rota_teste || "/teste-yin-yang",
+        },
+        1
+      );
+      sessionStorage.setItem("produto_selecionado", produtoTeste.id);
+      window.location.href = "/checkout";
     } else {
       // Fallback para abrir página de produtos
       window.location.href = "/produtos/teste-yin-yang";
@@ -396,8 +444,17 @@ export default function TesteYinYangPage() {
                 onClick={handleComprarTeste}
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#1A3C4D] text-white text-sm font-medium hover:bg-[#15313F] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
-                <ShoppingBag className="w-4 h-4" />
-                <span>Adicionar ao Carrinho ({precoFormatado})</span>
+                <ShoppingBag className="w-4 h-4 text-[#B8965A]" />
+                <span>Ir para o Pagamento ({precoFormatado})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => carregarStatus(true)}
+                disabled={verificandoManual}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-[#B8965A] text-[#1A3C4D] hover:bg-[#B8965A]/10 text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 text-[#B8965A] ${verificandoManual ? "animate-spin" : ""}`} />
+                <span>{verificandoManual ? "Verificando..." : "Já paguei • Verificar liberação"}</span>
               </button>
               <Link
                 href="/conta/pedidos"

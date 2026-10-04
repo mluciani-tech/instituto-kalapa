@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
@@ -31,10 +31,12 @@ interface PedidoPublico {
 }
 
 function SucessoContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { clearCart, closeDrawer } = useCart();
   const [pedido, setPedido] = useState<PedidoPublico | null>(null);
   const [naoEncontrado, setNaoEncontrado] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   // Garantir que o carrinho e drawer estejam sempre limpos/fechados ao chegar na tela de sucesso
   useEffect(() => {
@@ -52,11 +54,13 @@ function SucessoContent() {
   const orderNsu = searchParams.get("order_nsu");
   const captureMethod = searchParams.get("capture_method");
   const transactionNsu = searchParams.get("transaction_nsu");
+  const rotaTesteQuery = searchParams.get("rota_teste");
+  const isTesteQuery = searchParams.get("is_teste") === "1";
 
   const fetchPedido = useCallback(() => {
     if (!orderNsu) return;
 
-    fetch(`/api/pedido?order_nsu=${orderNsu}`)
+    fetch(`/api/pedido?order_nsu=${encodeURIComponent(orderNsu)}`)
       .then((r) => {
         if (!r.ok) {
           setNaoEncontrado(true);
@@ -76,13 +80,13 @@ function SucessoContent() {
     fetchPedido();
   }, [fetchPedido]);
 
-  // Enquanto pendente, re-verifica a cada 5s (webhook pode demorar)
+  // Enquanto pendente, re-verifica a cada 1.5s para reação instantânea ao retorno da InfinitePay
   useEffect(() => {
-    if (!pedido || pedido.status !== "pendente") return;
+    if (!orderNsu || (pedido && pedido.status !== "pendente")) return;
 
-    const interval = setInterval(fetchPedido, 5000);
+    const interval = setInterval(fetchPedido, 1500);
     return () => clearInterval(interval);
-  }, [pedido, fetchPedido]);
+  }, [pedido, orderNsu, fetchPedido]);
 
   const metodoLabel =
     pedido?.metodo_pagamento === "pix"
@@ -92,8 +96,8 @@ function SucessoContent() {
       : "Pagamento";
 
   const valor = pedido?.valor || 0;
-  const nomeProduto = pedido?.produtos?.nome || "Serviço";
-  const pago = pedido?.status === "pago";
+  const nomeProduto = pedido?.produtos?.nome || (isTesteQuery ? "Avaliação de Autoconhecimento" : "Serviço");
+  const pago = pedido?.status === "pago" || Boolean(transactionNsu && receiptUrl);
 
   // Verificar se o pedido possui teste de autoconhecimento
   const itensTeste = pedido?.itens?.filter(
@@ -105,9 +109,33 @@ function SucessoContent() {
     slug: pedido.produtos.slug,
     rota_teste: pedido.produtos.rota_teste,
     is_teste: true,
+  } : isTesteQuery ? {
+    nome: "Avaliação de Autoconhecimento",
+    slug: (rotaTesteQuery || "").replace(/^\//, ""),
+    rota_teste: rotaTesteQuery || "/teste-cronotipo",
+    is_teste: true,
   } : null);
 
   const rotaTesteDestino = primeiroTeste?.rota_teste || (primeiroTeste?.slug ? `/${primeiroTeste.slug}` : "/teste-autoconhecimento");
+
+  // Redirecionamento automático em 2 segundos para o fluxo do teste
+  useEffect(() => {
+    if (!pago || !primeiroTeste) return;
+
+    setCountdown(2);
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(timer);
+          router.push(`${rotaTesteDestino}?iniciar=1`);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [pago, primeiroTeste, rotaTesteDestino, router]);
 
   return (
     <section className="relative min-h-screen pt-28 pb-16 md:pt-36 md:pb-24 bg-brand-charcoal overflow-hidden flex items-center justify-center">
@@ -213,23 +241,33 @@ function SucessoContent() {
 
           {/* Card Especial de Teste Disponível */}
           {pago && primeiroTeste && (
-            <div className="mt-6 p-6 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#B8965A]/20 to-emerald-500/15 border border-[#B8965A]/40 text-center shadow-lg">
+            <div className="mt-6 p-6 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#B8965A]/20 to-emerald-500/15 border border-[#B8965A]/40 text-center shadow-lg animate-in fade-in duration-300">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#B8965A]/20 flex items-center justify-center text-[#B8965A]">
-                <Sparkles className="w-6 h-6" />
+                <Sparkles className="w-6 h-6 animate-pulse" />
               </div>
               <p className="text-lg font-serif font-bold text-white mb-1">
                 Sua Avaliação Está Liberada!
               </p>
-              <p className="text-xs sm:text-sm text-white/80 mb-4 max-w-md mx-auto">
-                Seu crédito para <strong>{primeiroTeste.nome}</strong> já foi liberado no sistema do INstituto Kalapa. Você já pode iniciar sua avaliação e emitir seu laudo em PDF.
+              <p className="text-xs sm:text-sm text-white/80 mb-3 max-w-md mx-auto">
+                Seu crédito para <strong>{primeiroTeste.nome}</strong> já foi liberado no sistema do INstituto Kalapa.
               </p>
-              <Link
-                href={rotaTesteDestino}
-                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-[#B8965A] to-[#A3834C] hover:from-[#A3834C] hover:to-[#8E713F] text-white text-sm font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] cursor-pointer"
-              >
-                <span>Iniciar Teste Agora</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+
+              {countdown !== null && countdown > 0 ? (
+                <div className="mb-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-medium border border-emerald-500/30">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span>Redirecionando para sua avaliação em <strong>{countdown}s</strong>...</span>
+                </div>
+              ) : null}
+
+              <div className="flex justify-center">
+                <Link
+                  href={`${rotaTesteDestino}?iniciar=1`}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-[#B8965A] to-[#A3834C] hover:from-[#A3834C] hover:to-[#8E713F] text-white text-sm font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] cursor-pointer"
+                >
+                  <span>Iniciar Teste Agora</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
           )}
 

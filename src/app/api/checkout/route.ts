@@ -379,8 +379,12 @@ export async function POST(req: NextRequest) {
         console.error("[checkout] Erro ao liberar créditos para pedido gratuito:", credErr);
       }
 
+      const itemTesteGratuito = itensProcessados.find((i) => i.is_teste || i.slug?.startsWith("teste-") || i.rota_teste);
+      const rotaTesteParamGratuito = itemTesteGratuito?.rota_teste || (itemTesteGratuito?.slug ? `/${itemTesteGratuito.slug}` : "");
+      const urlSucessoGratuito = `${SITE_URL}/checkout/sucesso?order_nsu=${encodeURIComponent(orderNsu)}${itemTesteGratuito ? `&is_teste=1&rota_teste=${encodeURIComponent(rotaTesteParamGratuito)}` : ""}`;
+
       return NextResponse.json({
-        url: `${SITE_URL}/checkout/sucesso`,
+        url: urlSucessoGratuito,
         order_nsu: orderNsu,
         gratuito: true,
       });
@@ -413,11 +417,15 @@ export async function POST(req: NextRequest) {
       ? `${SITE_URL}/api/webhook?token=${webhookToken}`
       : `${SITE_URL}/api/webhook`;
 
+    const itemTeste = itensProcessados.find((i) => i.is_teste || i.slug?.startsWith("teste-") || i.rota_teste);
+    const rotaTesteParam = itemTeste?.rota_teste || (itemTeste?.slug ? `/${itemTeste.slug}` : "");
+    const redirectUrl = `${SITE_URL}/checkout/sucesso?order_nsu=${encodeURIComponent(orderNsu)}${itemTeste ? `&is_teste=1&rota_teste=${encodeURIComponent(rotaTesteParam)}` : ""}`;
+
     const payload: Record<string, unknown> = {
       handle: INFINITEPAY_HANDLE,
       items: infinitePayItems,
       order_nsu: orderNsu,
-      redirect_url: `${SITE_URL}/checkout/sucesso`,
+      redirect_url: redirectUrl,
       webhook_url: webhookUrl,
     };
 

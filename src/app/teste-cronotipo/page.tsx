@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Clock,
@@ -17,6 +17,7 @@ import {
   Sunrise,
   SunMedium,
   Moon,
+  RefreshCw,
 } from "lucide-react";
 import { QUESTOES_CRONOTIPO, CronotipoQuestion } from "./data/cronotipo-data";
 import {
@@ -32,7 +33,7 @@ import TestShareMenu from "../components/TestShareMenu";
 import { useCart } from "@/context/CartContext";
 
 export default function TesteCronotipoPage() {
-  const { addItem, openDrawer } = useCart();
+  const { clearCart, addItem, openDrawer } = useCart();
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [usuario, setUsuario] = useState<{
     id: string;
@@ -57,32 +58,68 @@ export default function TesteCronotipoPage() {
   const [questaoAtualIndex, setQuestaoAtualIndex] = useState(0);
   const [respostas, setRespostas] = useState<Record<number, string>>({});
   const [modalRelatorioAberto, setModalRelatorioAberto] = useState(false);
+  const [verificandoManual, setVerificandoManual] = useState(false);
+
+  const carregarStatus = useCallback(async (isManual = false) => {
+    try {
+      if (isManual) setVerificandoManual(true);
+      else if (!usuario) setLoadingAuth(true);
+
+      const res = await fetch("/api/testes/credito?slug=teste-cronotipo", {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      if (data?.authenticated && data.usuario) {
+        setUsuario(data.usuario);
+      } else {
+        setUsuario(null);
+      }
+      const creditos = data?.creditosRestantes || 0;
+      setCreditosRestantes(creditos);
+      if (data?.produto) {
+        setProdutoTeste(data.produto);
+      }
+
+      // Se o usuário veio com ?iniciar=1 ou ?sucesso=1 e possui créditos, avança direto para o teste!
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if ((params.get("iniciar") === "1" || params.get("sucesso") === "1") && creditos > 0) {
+          setEtapa("teste");
+        }
+      }
+    } catch (err) {
+      console.error("Erro ao verificar créditos do Cronotipo:", err);
+    } finally {
+      setLoadingAuth(false);
+      if (isManual) setVerificandoManual(false);
+    }
+  }, [usuario]);
 
   useEffect(() => {
-    async function carregarStatus() {
-      try {
-        setLoadingAuth(true);
-        const res = await fetch("/api/testes/credito?slug=teste-cronotipo", {
-          cache: "no-store",
-        });
-        const data = await res.json();
-        if (data?.authenticated && data.usuario) {
-          setUsuario(data.usuario);
-        } else {
-          setUsuario(null);
-        }
-        setCreditosRestantes(data?.creditosRestantes || 0);
-        if (data?.produto) {
-          setProdutoTeste(data.produto);
-        }
-      } catch (err) {
-        console.error("Erro ao verificar créditos do Cronotipo:", err);
-      } finally {
-        setLoadingAuth(false);
-      }
-    }
     carregarStatus();
-  }, []);
+
+    // Re-checar quando a janela ganhar foco (ex: usuário voltou da aba do InfinitePay)
+    const handleFocus = () => carregarStatus();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [carregarStatus]);
+
+  // Se o usuário estiver conectado mas ainda sem créditos, tenta re-verificar por até 5 tentativas curtas
+  useEffect(() => {
+    if (!usuario || creditosRestantes > 0) return;
+
+    let tentativas = 0;
+    const interval = setInterval(() => {
+      tentativas++;
+      if (tentativas > 5) {
+        clearInterval(interval);
+        return;
+      }
+      carregarStatus();
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [usuario, creditosRestantes, carregarStatus]);
 
   const totalQuestoes = QUESTOES_CRONOTIPO.length;
   const questaoAtual: CronotipoQuestion = QUESTOES_CRONOTIPO[questaoAtualIndex];
@@ -102,17 +139,22 @@ export default function TesteCronotipoPage() {
 
   const handleComprarTeste = () => {
     if (produtoTeste) {
-      addItem({
-        id: produtoTeste.id,
-        slug: produtoTeste.slug || "teste-cronotipo",
-        nome: produtoTeste.nome || "A Sabedoria do Cronotipo & o Ritmo Biológico",
-        preco: precoExibicao,
-        imagem_url: produtoTeste.imagem_url,
-        categoria: produtoTeste.categoria || "testes",
-        is_teste: true,
-        rota_teste: produtoTeste.rota_teste || "/teste-cronotipo",
-      });
-      openDrawer();
+      clearCart();
+      addItem(
+        {
+          id: produtoTeste.id,
+          slug: produtoTeste.slug || "teste-cronotipo",
+          nome: produtoTeste.nome || "A Sabedoria do Cronotipo & o Ritmo Biológico",
+          preco: precoExibicao,
+          imagem_url: produtoTeste.imagem_url,
+          categoria: produtoTeste.categoria || "testes",
+          is_teste: true,
+          rota_teste: produtoTeste.rota_teste || "/teste-cronotipo",
+        },
+        1
+      );
+      sessionStorage.setItem("produto_selecionado", produtoTeste.id);
+      window.location.href = "/checkout";
     } else {
       window.location.href = "/produtos/teste-cronotipo";
     }
@@ -408,7 +450,16 @@ export default function TesteCronotipoPage() {
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#1A3C4D] text-white text-sm font-medium hover:bg-[#15313F] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ShoppingBag className="w-4 h-4 text-[#B8965A]" />
-                <span>Adicionar ao Carrinho ({precoFormatado})</span>
+                <span>Ir para o Pagamento ({precoFormatado})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => carregarStatus(true)}
+                disabled={verificandoManual}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl border border-[#B8965A] text-[#1A3C4D] hover:bg-[#B8965A]/10 text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 text-[#B8965A] ${verificandoManual ? "animate-spin" : ""}`} />
+                <span>{verificandoManual ? "Verificando..." : "Já paguei • Verificar liberação"}</span>
               </button>
               <Link
                 href="/conta/pedidos"

@@ -47,6 +47,29 @@ export async function isTesteGratuito(slugOuRota: string): Promise<boolean> {
 }
 
 /**
+ * Extrai o slug padronizado do teste priorizando rota e palavras-chave
+ */
+export function extrairSlugNormalizadoTeste(item: ItemLiberacao): string {
+  if (item.rota_teste && item.rota_teste.trim() && item.rota_teste !== "/teste") {
+    return normalizarSlugTeste(item.rota_teste);
+  }
+  if (item.slug && item.slug.trim() && item.slug !== "teste" && item.slug !== "testes") {
+    return normalizarSlugTeste(item.slug);
+  }
+  const nomeLower = (item.nome || "").toLowerCase();
+  if (nomeLower.includes("cronotipo") || nomeLower.includes("ritmo")) {
+    return "teste-cronotipo";
+  }
+  if (nomeLower.includes("eneagrama")) {
+    return "teste-eneagrama";
+  }
+  if (nomeLower.includes("yin") || nomeLower.includes("yang")) {
+    return "teste-yin-yang";
+  }
+  return normalizarSlugTeste(item.slug || "teste");
+}
+
+/**
  * Libera os créditos de teste para o pedido aprovado/pago.
  * Distribui entre o comprador e os beneficiários informados (quando quantidade >= 2).
  */
@@ -75,13 +98,14 @@ export async function liberarCreditosPedido({
       try {
         const { data: prod } = await supabaseAdmin
           .from("produtos")
-          .select("id, slug, is_teste, rota_teste")
+          .select("id, slug, is_teste, rota_teste, nome")
           .eq("id", item.produto_id)
           .maybeSingle();
 
-        if (prod && (prod.is_teste || prod.slug?.startsWith("teste-"))) {
+        if (prod && (prod.is_teste || prod.slug?.startsWith("teste-") || prod.rota_teste?.startsWith("/teste-"))) {
           testItens.push({
             ...item,
+            nome: prod.nome || item.nome,
             slug: prod.slug,
             is_teste: true,
             rota_teste: prod.rota_teste,
@@ -113,7 +137,7 @@ export async function liberarCreditosPedido({
   let creditosGerados = 0;
 
   for (const item of testItens) {
-    const slugTeste = normalizarSlugTeste(item.slug || item.rota_teste || "teste");
+    const slugTeste = extrairSlugNormalizadoTeste(item);
     const qtd = Math.max(1, Number(item.quantidade) || 1);
 
     // Filtrar beneficiários específicos deste produto
@@ -206,11 +230,31 @@ export async function verificarCreditoDisponivel(
   const slugVariante = slugPrincipal.replace(/^teste-/, "");
 
   try {
+    // 1. Localiza o produto no banco para obter seu ID e slugs válidos
+    const { data: prodDb } = await supabaseAdmin
+      .from("produtos")
+      .select("id, slug, rota_teste, nome")
+      .or(`slug.eq.${slugPrincipal},slug.eq.${slugVariante},rota_teste.ilike.%${slugVariante}%`)
+      .limit(1)
+      .maybeSingle();
+
+    const produtoId = prodDb?.id;
+    const slugsValidos = Array.from(
+      new Set(
+        [
+          slugPrincipal,
+          slugVariante,
+          prodDb?.slug ? normalizarSlugTeste(prodDb.slug) : null,
+          prodDb?.rota_teste ? normalizarSlugTeste(prodDb.rota_teste) : null,
+        ].filter(Boolean) as string[]
+      )
+    );
+
+    // 2. Busca créditos disponíveis do usuário
     let query = supabaseAdmin
       .from("testes_creditos")
-      .select("id, status, slug_teste")
-      .eq("status", "disponivel")
-      .or(`slug_teste.eq.${slugPrincipal},slug_teste.eq.${slugVariante}`);
+      .select("id, status, slug_teste, produto_id")
+      .eq("status", "disponivel");
 
     if (usuarioId && email) {
       const emailNorm = email.trim().toLowerCase();
@@ -226,10 +270,22 @@ export async function verificarCreditoDisponivel(
       return { disponivel: false, creditosRestantes: 0 };
     }
 
+    // Filtra os créditos do teste específico (por produto_id ou por slug do teste)
+    const creditosFiltrados = data.filter((c) => {
+      if (produtoId && c.produto_id === produtoId) return true;
+      if (c.slug_teste && slugsValidos.includes(normalizarSlugTeste(c.slug_teste))) return true;
+      if (c.slug_teste && slugsValidos.includes(c.slug_teste.replace(/^teste-/, ""))) return true;
+      return false;
+    });
+
+    if (creditosFiltrados.length === 0) {
+      return { disponivel: false, creditosRestantes: 0 };
+    }
+
     return {
       disponivel: true,
-      creditosRestantes: data.length,
-      creditoId: data[0].id,
+      creditosRestantes: creditosFiltrados.length,
+      creditoId: creditosFiltrados[0].id,
     };
   } catch (err) {
     console.error("[testes-creditos] Erro ao verificar crédito:", err);
