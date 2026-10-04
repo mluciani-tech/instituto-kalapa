@@ -23,6 +23,7 @@ import {
 import { calcularPontuacaoYinYang } from "./lib/calculo-mtc";
 import TestReportModal from "./components/TestReportModal";
 import Footer from "../components/Footer";
+import TestShareMenu from "../components/TestShareMenu";
 import ProgressIndicator from "./components/ProgressIndicator";
 import QuestionCard from "./components/QuestionCard";
 import ResultView from "./components/ResultView";
@@ -89,6 +90,23 @@ export default function TesteYinYangPage() {
       setModalEmpateAberto(true);
       return;
     }
+
+    if (usuario && usuario.email) {
+      fetch("/api/teste-yin-yang", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          usuario_id: usuario.id,
+          nome: usuario.nome,
+          email: usuario.email,
+          tipo_resultado: tipoResultado,
+          pontos_yang: pontosYang,
+          pontos_yin: pontosYin,
+          respostas,
+        }),
+      }).catch((err) => console.error("Erro ao registrar avaliação Yin/Yang:", err));
+    }
+
     setEtapa("resultado");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -120,7 +138,7 @@ export default function TesteYinYangPage() {
   return (
     <main className="min-h-screen bg-[#FDFBF7] text-[#1A3C4D] flex flex-col justify-between pt-24 sm:pt-28">
       {/* Top Banner Hero */}
-      <section className="relative w-full border-b border-[#E8DEC8]/60 bg-gradient-to-b from-[#F7F3E9] to-[#FDFBF7] py-10 sm:py-16 overflow-hidden">
+      <section className="relative w-full border-b border-[#E8DEC8]/60 bg-gradient-to-b from-[#F7F3E9] to-[#FDFBF7] py-10 sm:py-16">
         <div className="absolute inset-0 opacity-15 pointer-events-none">
           <Image
             src="/images/yin-yang/banner.jpg"
@@ -128,6 +146,14 @@ export default function TesteYinYangPage() {
             fill
             className="object-cover object-center"
             priority
+          />
+        </div>
+
+        <div className="absolute top-4 right-4 sm:right-8 z-20">
+          <TestShareMenu
+            titulo="Yin ou Yang?"
+            path="/teste-yin-yang"
+            convite="Descubra sua tendência energética com o teste Yin ou Yang? do INstituto Kalapa:"
           />
         </div>
 

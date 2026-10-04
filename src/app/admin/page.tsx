@@ -9,7 +9,7 @@ import AdminToastNotification from "./components/AdminToastNotification";
 import AdminManual from "./components/AdminManual";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminAlterarSenhaModal from "./components/AdminAlterarSenhaModal";
-import AdminAvaliacoesYinYang from "./components/AdminAvaliacoesYinYang";
+import AdminAvaliacoes from "./components/AdminAvaliacoes";
 import AdminSobre from "./components/AdminSobre";
 import AdminProdutos from "./components/AdminProdutos";
 import AdminPedidos from "./components/AdminPedidos";
@@ -73,11 +73,20 @@ export default function AdminPage() {
 
   const fetchAvaliacoesTotal = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/avaliacoes-yin-yang?perPage=1");
-      if (res.ok) {
-        const json = await res.json();
-        setAvaliacoesTotal(json.totalGeral ?? json.total ?? 0);
+      const [yy, en] = await Promise.all([
+        fetch("/api/admin/avaliacoes-yin-yang?perPage=1"),
+        fetch("/api/admin/avaliacoes-eneagrama?perPage=1"),
+      ]);
+      let soma = 0;
+      if (yy.ok) {
+        const json = await yy.json();
+        soma += json.totalGeral ?? json.total ?? 0;
       }
+      if (en.ok) {
+        const json = await en.json();
+        soma += json.totalGeral ?? json.total ?? 0;
+      }
+      setAvaliacoesTotal(soma);
     } catch {
       // Ignora silenciosamente
     }
@@ -302,7 +311,7 @@ export default function AdminPage() {
     { id: "pedidos", label: "Pedidos", count: pedidosTotal || pedidos.length },
     { id: "participantes", label: "Inscrições", count: participantesTotal || participantes.length },
     { id: "agendamentos", label: "🗓️ Agenda & Atendimentos", count: agendamentosTotal, highlight: newAppointmentsCount > 0 },
-    { id: "avaliacoes", label: "Avaliações Yin/Yang", count: avaliacoesTotal },
+    { id: "avaliacoes", label: "Avaliações", count: avaliacoesTotal },
     { id: "cupons", label: "Cupons", count: cupons.length },
     { id: "usuarios", label: "Usuários", count: usuariosTotal },
     { id: "manual", label: "📖 Manual do Sistema" },
@@ -443,8 +452,8 @@ export default function AdminPage() {
           {/* Tab: Agenda & Atendimentos */}
           {activeTab === "agendamentos" && <AdminAgenda />}
 
-          {/* Tab: Avaliações Yin/Yang */}
-          {activeTab === "avaliacoes" && <AdminAvaliacoesYinYang />}
+          {/* Tab: Avaliações (Yin/Yang, Eneagrama e visão geral) */}
+          {activeTab === "avaliacoes" && <AdminAvaliacoes />}
 
           {/* Tab: Manual do Sistema */}
           {activeTab === "manual" && <AdminManual />}

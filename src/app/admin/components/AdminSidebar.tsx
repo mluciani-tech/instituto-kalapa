@@ -66,7 +66,7 @@ const TAB_LABELS: Record<Tab, string> = {
   pedidos: "Pedidos",
   participantes: "Inscrições",
   agendamentos: "Agenda & Atendimentos",
-  avaliacoes: "Avaliações Yin/Yang",
+  avaliacoes: "Avaliações",
   cupons: "Cupons",
   usuarios: "Usuários",
   manual: "Manual do Sistema",

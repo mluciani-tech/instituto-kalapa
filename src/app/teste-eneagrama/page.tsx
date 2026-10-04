@@ -29,6 +29,7 @@ import EneagramaQuestionCard from "./components/EneagramaQuestionCard";
 import EneagramaResultView from "./components/EneagramaResultView";
 import EneagramaReportModal from "./components/EneagramaReportModal";
 import Footer from "../components/Footer";
+import TestShareMenu from "../components/TestShareMenu";
 
 export default function TesteEneagramaPage() {
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -97,6 +98,28 @@ export default function TesteEneagramaPage() {
   };
 
   const handleConcluirTeste = () => {
+    if (usuario) {
+      const tiposPrincipais = resultadoCalculado.empates.length
+        ? resultadoCalculado.empates.map((t) => t.numero)
+        : [resultadoCalculado.tipoDominante.numero];
+      const pontuacoes = Object.fromEntries(
+        resultadoCalculado.ranking.map((r) => [r.tipo.numero, r.pontos])
+      );
+
+      fetch("/api/teste-eneagrama", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          usuario_id: usuario.id,
+          nome: usuario.nome,
+          email: usuario.email,
+          tipos_principais: tiposPrincipais,
+          pontuacoes,
+          respostas,
+        }),
+      }).catch((err) => console.error("Erro ao registrar avaliação do Eneagrama:", err));
+    }
+
     setEtapa("resultado");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -124,8 +147,16 @@ export default function TesteEneagramaPage() {
   return (
     <main className="min-h-screen bg-[#FDFBF7] text-[#1A3C4D] flex flex-col justify-between pt-24 sm:pt-28">
       {/* Top Banner Hero */}
-      <section className="relative w-full border-b border-[#E8DEC8]/60 bg-gradient-to-b from-[#F7F3E9] to-[#FDFBF7] py-10 sm:py-16 overflow-hidden">
+      <section className="relative w-full border-b border-[#E8DEC8]/60 bg-gradient-to-b from-[#F7F3E9] to-[#FDFBF7] py-10 sm:py-16">
         <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_50%_50%,#7D8C6E_1px,transparent_1px)] bg-[length:32px_32px] pointer-events-none" />
+
+        <div className="absolute top-4 right-4 sm:right-8 z-20">
+          <TestShareMenu
+            titulo="Eneagrama"
+            path="/teste-eneagrama"
+            convite="Descubra seu Eneatipo com o teste de personalidade do Eneagrama do INstituto Kalapa:"
+          />
+        </div>
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-4">

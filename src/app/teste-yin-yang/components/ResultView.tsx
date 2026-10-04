@@ -19,6 +19,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import { ResultadoInfo } from "../data/yin-yang-data";
+import TestShareMenu from "../../components/TestShareMenu";
 
 interface ResultViewProps {
   pontosYang: number;
@@ -187,6 +188,14 @@ export default function ResultView({
                       <RotateCcw className="w-4 h-4" />
                       <span>Refazer Teste</span>
                     </button>
+                    <TestShareMenu
+                      variant="button"
+                      align="left"
+                      direction="up"
+                      titulo="Yin ou Yang?"
+                      path="/teste-yin-yang"
+                      convite="Descubra sua tendência energética com o teste Yin ou Yang? do INstituto Kalapa:"
+                    />
                   </div>
                 </div>
               </div>

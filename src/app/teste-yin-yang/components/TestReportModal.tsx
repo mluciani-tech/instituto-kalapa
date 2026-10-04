@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { X, Printer, Download, Sparkles, CheckCircle2, HeartHandshake, ShieldCheck } from "lucide-react";
 import { YIN_YANG_PERGUNTAS, ResultadoInfo } from "../data/yin-yang-data";
@@ -55,12 +56,17 @@ export default function TestReportModal({
     window.print();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:static print:overflow-visible">
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      id="relatorio-impressao-container"
+      className="modal-impressao-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:static print:overflow-visible"
+    >
       {/* Container Principal */}
-      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col print:max-h-none print:shadow-none print:rounded-none print:border-none print:w-full">
+      <div className="modal-impressao-card relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col print:max-h-none print:shadow-none print:rounded-none print:border-none print:w-full">
         {/* Barra Superior de Ações (Oculta na Impressão) */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-brand-charcoal text-white border-b border-white/10 print:hidden shrink-0">
+        <div className="no-print sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-brand-charcoal text-white border-b border-white/10 print:hidden shrink-0">
           <div className="flex items-center gap-2">
             <span className="p-1.5 rounded-lg bg-brand-terracotta/20 text-brand-terracotta">
               <Sparkles className="w-4 h-4" />
@@ -94,8 +100,9 @@ export default function TestReportModal({
 
         {/* Conteúdo do Relatório Formatado para Impressão */}
         <div
+          id="relatorio-impressao"
           ref={reportRef}
-          className="p-6 md:p-10 space-y-8 overflow-y-auto text-brand-charcoal font-sans print:p-0 print:overflow-visible print:space-y-6"
+          className="relatorio-impressao-conteudo p-6 md:p-10 space-y-8 overflow-y-auto text-brand-charcoal font-sans print:p-0 print:overflow-visible print:space-y-6"
         >
           {/* Cabeçalho Oficial do Relatório */}
           <div className="border-b-2 border-brand-terracotta/30 pb-6 print:pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -387,6 +394,7 @@ export default function TestReportModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

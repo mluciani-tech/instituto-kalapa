@@ -82,9 +82,9 @@ export default function AdminManual() {
     },
     {
       id: "teste-yin-yang",
-      title: "6. Autoavaliação Yin/Yang & Relatório PDF",
+      title: "6. Avaliações & Laudos PDF (Yin/Yang & Eneagrama)",
       icon: Sparkles,
-      summary: "Módulo de Medicina Tradicional Chinesa, captação de clientes, diagnóstico e emissão de laudo A4.",
+      summary: "Módulos de Yin/Yang e Eneagrama, captação de leads, diagnósticos, laudos A4 e métricas gerenciais.",
       badge: "Novo",
     },
     {
@@ -563,10 +563,10 @@ export default function AdminManual() {
                   <span>Novo Módulo Clínico de Autoconhecimento</span>
                 </div>
                 <h2 className="text-lg font-bold text-brand-charcoal">
-                  6. Autoavaliação Energética Yin/Yang & Emissão de Relatório PDF
+                  6. Avaliações Clínicas (Yin/Yang & Eneagrama) & Laudos em PDF
                 </h2>
                 <p className="text-xs text-brand-charcoal/70 mt-1">
-                  Ferramenta de engajamento baseada no Cânone do Imperador Amarelo (<em>Huangdi Neijing</em>) da Medicina Tradicional Chinesa (MTC), com diagnóstico personalizado, metrônomo respiratório e geração de laudo A4 para impressão.
+                  Módulos de diagnóstico e autoconhecimento integrando a Medicina Tradicional Chinesa (Yin/Yang) e o Eneagrama com Constelações Familiares, com relatórios em PDF formatados para folha A4, compartilhamento e controle administrativo unificado.
                 </p>
               </div>
 
@@ -666,10 +666,10 @@ export default function AdminManual() {
               <div className="border border-brand-mint/40 bg-brand-mint/10 rounded-xl p-4 text-xs space-y-2">
                 <p className="font-bold text-brand-mint">Funil de Conversão Terapêutica & Gestão de Leads no Admin</p>
                 <p className="text-brand-charcoal/80 leading-relaxed">
-                  O teste é uma excelente porta de entrada para novos alunos e pacientes. Ao concluir o teste, o usuário é convidado a participar das vivências semanais de grupo (quintas-feiras às 19:30) ou agendar uma consulta individual de Medicina Chinesa com as terapeutas do INstituto.
+                  Os testes de autoconhecimento (Yin/Yang e Eneagrama) são portas de entrada estratégicas para novos alunos e pacientes. Ao concluir o teste, o usuário é convidado a participar das vivências semanais de grupo (quintas-feiras às 19:30) ou agendar uma consulta individual com as terapeutas do INstituto.
                 </p>
                 <p className="text-brand-charcoal/80 leading-relaxed pt-1 border-t border-brand-mint/20">
-                  <strong>Aba &ldquo;Avaliações Yin/Yang&rdquo; no Painel Admin:</strong> Todos os testes finalizados são capturados automaticamente com contador em tempo real no menu lateral. O painel disponibiliza métricas gerenciais (Total, % Yang, % Yin), tabela de participantes com link de 1 clique para WhatsApp com mensagem acolhedora pré-formatada, consulta às respostas das 15 perguntas e botão para exportação em planilha CSV.
+                  <strong>Aba &ldquo;Avaliações&rdquo; no Painel Admin:</strong> Centraliza todos os diagnósticos gerados com seletor triplo (<strong>Todos</strong>, <strong>Yin/Yang</strong> e <strong>Eneagrama</strong>). Disponibiliza métricas gerenciais em tempo real, comparativo de tendências (últimos 7 e 30 dias), identificação de leads únicos e participantes que fizeram ambos os testes, distribuição por perfis clínicos, botões diretos de contato via WhatsApp com mensagens personalizadas, exportação de relatórios em CSV e botões de compartilhamento rápido em redes sociais.
                 </p>
               </div>
             </div>

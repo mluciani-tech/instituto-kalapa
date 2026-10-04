@@ -241,3 +241,18 @@ export interface AvaliacaoYinYang {
   updated_at?: string;
 }
 
+export interface AvaliacaoEneagrama {
+  id: string;
+  usuario_id?: string | null;
+  nome: string;
+  email: string;
+  telefone?: string | null;
+  /** Tipos (1-9) com a pontuação máxima; mais de um indica empate técnico */
+  tipos_principais: number[];
+  /** Pontuação por tipo, ex.: { "1": 18, ..., "9": 20 } */
+  pontuacoes: Record<string, number>;
+  respostas?: Record<string, number>;
+  created_at: string;
+  updated_at?: string;
+}
+

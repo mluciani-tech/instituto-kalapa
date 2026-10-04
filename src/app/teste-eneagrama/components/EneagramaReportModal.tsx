@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { X, Printer, Compass, Sparkles } from "lucide-react";
 import { ResultadoEneagramaCalculado } from "../lib/calculo-eneagrama";
@@ -54,11 +55,16 @@ export default function EneagramaReportModal({
   const relatorio: EneagramaReportData =
     ENEAGRAMA_REPORTS_MAP[tipoDominante.numero] || ENEAGRAMA_REPORTS_MAP[1];
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:static print:overflow-visible">
-      <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-[#E8DEC8] my-auto max-h-[94vh] flex flex-col print:max-h-none print:shadow-none print:rounded-none print:border-none print:w-full">
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      id="relatorio-impressao-container"
+      className="modal-impressao-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:static print:overflow-visible"
+    >
+      <div className="modal-impressao-card relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-[#E8DEC8] my-auto max-h-[94vh] flex flex-col print:max-h-none print:shadow-none print:rounded-none print:border-none print:w-full">
         {/* Barra Superior de Ações (Oculta na Impressão) */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-[#1A3C4D] text-white border-b border-white/10 print:hidden shrink-0 rounded-t-3xl">
+        <div className="no-print sticky top-0 z-20 flex items-center justify-between px-6 py-4 bg-[#1A3C4D] text-white border-b border-white/10 print:hidden shrink-0 rounded-t-3xl">
           <div className="flex items-center gap-2">
             <span className="p-1.5 rounded-lg bg-[#7D8C6E]/30 text-[#7D8C6E]">
               <Sparkles className="w-4 h-4 text-emerald-300" />
@@ -94,8 +100,9 @@ export default function EneagramaReportModal({
 
         {/* Conteúdo Completo do Relatório Formatado para Visualização e Impressão (5 Páginas A4) */}
         <div
+          id="relatorio-impressao"
           ref={reportRef}
-          className="p-6 md:p-12 space-y-12 overflow-y-auto text-[#1A3C4D] font-sans print:p-0 print:overflow-visible print:space-y-0"
+          className="relatorio-impressao-conteudo p-6 md:p-12 space-y-12 overflow-y-auto text-[#1A3C4D] font-sans print:p-0 print:overflow-visible print:space-y-0"
         >
           {/* ============================================================ */}
           {/* PÁGINA 1: SÍNTESE, CONSTELAÇÕES E LUGAR SISTÊMICO            */}
@@ -575,6 +582,7 @@ export default function EneagramaReportModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
