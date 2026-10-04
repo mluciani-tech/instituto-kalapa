@@ -34,7 +34,7 @@ export async function GET(
     .from("pedidos")
     .select("id, order_nsu, valor, status, metodo_pagamento, itens, created_at, receipt_url, produtos(nome)");
 
-  if (usuario.email.toLowerCase() === "contato@institutokalapa.com.br") {
+  if (usuario.email.toLowerCase() === "clatihucia.capeli@institutokalapa.com.br") {
     queryPedidos = queryPedidos.eq("usuario_id", id);
   } else {
     queryPedidos = queryPedidos.or(`usuario_id.eq.${id},cliente_email.ilike.${usuario.email}`);

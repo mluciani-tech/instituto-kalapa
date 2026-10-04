@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || "";
 
 // Placeholders usados quando o comprador não preencheu o formulário
-const PLACEHOLDERS = new Set(["N/A", "Participante", "contato@institutokalapa.com.br", "Não informado"]);
+const PLACEHOLDERS = new Set(["N/A", "Participante", "clatihucia.capeli@institutokalapa.com.br", "Não informado"]);
 
 function isPlaceholder(value: string | null | undefined): boolean {
   return !value || PLACEHOLDERS.has(value);

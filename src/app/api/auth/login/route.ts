@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     // Vincular retroativamente pedidos e inscrições anteriores deste e-mail que estavam sem usuario_id
     try {
-      if (emailNorm !== "contato@institutokalapa.com.br") {
+      if (emailNorm !== "clatihucia.capeli@institutokalapa.com.br") {
         await supabaseAdmin!
           .from("pedidos")
           .update({ usuario_id: usuario.id })

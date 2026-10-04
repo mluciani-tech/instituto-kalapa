@@ -1,8 +1,8 @@
 // Envio de e-mails via SMTP Hostinger (ou fallback Resend / Mock)
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase";
 
-const EMAIL_FROM = process.env.KALAPA_EMAIL_FROM || "contato@institutokalapa.com.br";
-const EMAIL_TO = process.env.KALAPA_EMAIL_TO || "contato@institutokalapa.com.br";
+const EMAIL_FROM = process.env.KALAPA_EMAIL_FROM || "clatihucia.capeli@institutokalapa.com.br";
+const EMAIL_TO = process.env.KALAPA_EMAIL_TO || "clatihucia.capeli@institutokalapa.com.br";
 
 export const formatCurrency = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

@@ -33,7 +33,7 @@ const contatos = {
   endereco: "Alameda Tangara, 500 - Cotia - SP",
   instagram: "https://instagram.com/institutoKalapa",
   instagramLabel: "@institutoKalapa",
-  email: "contato@institutokalapa.com.br",
+  email: "clatihucia.capeli@institutokalapa.com.br",
   whatsapp: "https://wa.me/5511917452732",
   whatsappLabel: "(11) 91745-2732",
   erp: "https://espaco-serena-clinica.web.app/?return_url=https%3A%2F%2Fwww.institutokalapa.com.br&redirect_url=https%3A%2F%2Fwww.institutokalapa.com.br",

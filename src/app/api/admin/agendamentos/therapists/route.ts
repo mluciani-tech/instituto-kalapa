@@ -9,7 +9,7 @@ const TERAPEUTA_PADRAO = {
   id: "e7f53a4e-1288-4e89-b051-5b7415444b01",
   nome: "Clatihúcia Capeli",
   titulo: "Facilitadora, Psicóloga, Psicogenealogista, Terapeuta Sistêmica e Transpessoal",
-  email: "contato@institutokalapa.com.br",
+  email: "clatihucia.capeli@institutokalapa.com.br",
   telefone: "(11) 99999-9999",
   foto_url: FOTO_FACILITADORA_PADRAO,
   bio: "Com mais de 10 anos de dedicação ao cuidado emocional e ao desenvolvimento humano, Clatihúcia Capeli conduz vivências e atendimentos que acolhem a dor sem julgamentos.",
