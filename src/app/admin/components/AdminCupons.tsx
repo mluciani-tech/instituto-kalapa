@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import type { Cupom } from "@/lib/types";
+import type { Cupom, Produto } from "@/lib/types";
 import { formatDate } from "../lib/format";
 
 type Props = {
   cupons: Cupom[];
+  produtos: Produto[];
   onReload: () => Promise<void>;
   onError: (message: string) => void;
 };
 
-export default function AdminCupons({ cupons, onReload, onError }: Props) {
+export default function AdminCupons({ cupons, produtos, onReload, onError }: Props) {
   const [showCupomModal, setShowCupomModal] = useState(false);
   const [cupomEditando, setCupomEditando] = useState<Cupom | null>(null);
   const [cupomForm, setCupomForm] = useState({
@@ -21,6 +22,7 @@ export default function AdminCupons({ cupons, onReload, onError }: Props) {
     valor_minimo_pedido: "",
     validade: "",
     ativo: true,
+    produto_id: null as string | null,
   });
   const [salvandoCupom, setSalvandoCupom] = useState(false);
   const [cupomSucesso, setCupomSucesso] = useState("");
@@ -179,6 +181,7 @@ export default function AdminCupons({ cupons, onReload, onError }: Props) {
                                       valor_minimo_pedido: c.valor_minimo_pedido ? c.valor_minimo_pedido.toString() : "",
                                       validade: c.validade ? c.validade.slice(0, 16) : "",
                                       ativo: c.ativo,
+                                      produto_id: c.produto_id || null,
                                     });
                                     setShowCupomModal(true);
                                   }}
@@ -275,6 +278,21 @@ export default function AdminCupons({ cupons, onReload, onError }: Props) {
                     className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus-visible:border-brand-purple"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Produto (Opcional)</label>
+                <select
+                  value={cupomForm.produto_id || ""}
+                  onChange={(e) => setCupomForm({ ...cupomForm, produto_id: e.target.value || null })}
+                  className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus-visible:border-brand-purple"
+                >
+                  <option value="">Aplicável a todos os produtos</option>
+                  {produtos.map(p => (
+                    <option key={p.id} value={p.id}>{p.nome}</option>
+                  ))}
+                </select>
+                <span className="text-[10px] text-brand-charcoal/40 mt-0.5 block">Atrele o cupom a um produto específico</span>
               </div>
 
               <div>

@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
       valor_minimo_pedido,
       validade,
       ativo,
+      produto_id,
     } = body;
 
     if (!codigo?.trim()) {
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
         valor_minimo_pedido: valor_minimo_pedido ? Number(valor_minimo_pedido) : 0,
         validade: validade ? new Date(validade).toISOString() : null,
         ativo: ativo ?? true,
+        produto_id: produto_id ? produto_id : null,
       })
       .select("*")
       .single();

@@ -297,18 +297,39 @@ export async function POST(req: NextRequest) {
     // 7. Criar inscrição vinculada se for serviço/vivência
     if (inscricao || itensProcessados.some((i) => i.vagasMaximas != null)) {
       try {
-        const { error: inscricaoError } = await supabaseAdmin!.from("inscricoes").insert({
-          turma_id: turmaAtual,
-          order_nsu: orderNsu,
-          pedido_id: pedido.id,
-          nome: clienteNome,
-          email: clienteEmail,
-          telefone: clienteTelefone || "Não informado",
-          motivacao: inscricao?.motivacao || "Compra via E-commerce",
-          metodo_pagamento: ehGratuito ? "cupom_gratuito" : (inscricao?.metodoPagamento || "infinitepay"),
-          valor: valorFinal,
-          status: ehGratuito ? "confirmado" : "pendente",
-        });
+        const inscricoesParaInserir = [
+          {
+            turma_id: turmaAtual,
+            order_nsu: orderNsu,
+            pedido_id: pedido.id,
+            nome: clienteNome,
+            email: clienteEmail,
+            telefone: clienteTelefone || "Não informado",
+            motivacao: inscricao?.motivacao || "Compra via E-commerce",
+            metodo_pagamento: ehGratuito ? "cupom_gratuito" : (inscricao?.metodoPagamento || "infinitepay"),
+            valor: valorFinal,
+            status: ehGratuito ? "confirmado" : "pendente",
+          }
+        ];
+
+        if (Array.isArray(beneficiarios) && beneficiarios.length > 0) {
+          beneficiarios.forEach((b: any) => {
+            inscricoesParaInserir.push({
+              turma_id: turmaAtual,
+              order_nsu: orderNsu,
+              pedido_id: pedido.id,
+              nome: b.nome,
+              email: b.email,
+              telefone: b.telefone || "Não informado",
+              motivacao: `Acompanhante de ${clienteNome} - E-commerce`,
+              metodo_pagamento: ehGratuito ? "cupom_gratuito" : (inscricao?.metodoPagamento || "infinitepay"),
+              valor: 0, // valor já computado no pedido principal
+              status: ehGratuito ? "confirmado" : "pendente",
+            });
+          });
+        }
+
+        const { error: inscricaoError } = await supabaseAdmin!.from("inscricoes").insert(inscricoesParaInserir);
 
         if (inscricaoError) {
           console.error("[checkout] Erro ao registrar inscricao:", inscricaoError);

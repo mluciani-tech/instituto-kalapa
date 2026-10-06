@@ -255,7 +255,7 @@ export async function GET(req: NextRequest) {
     const produtosRanking = allProdutos.map((prod) => {
       const vInfo = vendasPorProduto[prod.id] || { receita: 0, ingressos: 0 };
       const preenchidasReais = vInfo.ingressos;
-      const preenchidas = prod.vagas_ocupadas_manual != null ? prod.vagas_ocupadas_manual : preenchidasReais;
+      const preenchidas = (prod.vagas_ocupadas_manual || 0) + preenchidasReais;
       totalVagasOcupadasGeral += preenchidas;
 
       const maximas = prod.vagas_maximas || null;

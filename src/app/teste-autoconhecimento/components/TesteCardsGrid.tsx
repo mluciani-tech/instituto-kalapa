@@ -77,7 +77,7 @@ const TESTES_DEFINICOES: TesteInfo[] = [
     slug: "teste-eneagrama",
     rota: "/teste-eneagrama",
     titulo: "A Sabedoria do Eneagrama & a Visão Sistêmica",
-    badgeCategoria: "Eneagrama • 45 Afirmações",
+    badgeCategoria: "Eneagrama • 45 Dimensões",
     badgeCor: "bg-emerald-100/80 text-emerald-950",
     badgeBorda: "border-emerald-200",
     iconeCategoria: <Compass className="w-3.5 h-3.5 text-emerald-700 shrink-0" />,

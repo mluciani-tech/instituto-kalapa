@@ -35,6 +35,9 @@ export async function PATCH(
   if (body.validade !== undefined) {
     updateData.validade = body.validade ? new Date(body.validade).toISOString() : null;
   }
+  if (body.produto_id !== undefined) {
+    updateData.produto_id = body.produto_id ? body.produto_id : null;
+  }
   if (body.ativo !== undefined) updateData.ativo = Boolean(body.ativo);
 
   const { data, error } = await supabaseAdmin!

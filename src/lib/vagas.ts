@@ -196,7 +196,7 @@ export async function getVagasInfo(produtoId?: string | null): Promise<VagasCalc
 
     const reais = await countInscricoesPagas(produtoId);
     const isManual = manualOcupadas !== null;
-    const preenchidas = manualOcupadas !== null ? manualOcupadas : reais;
+    const preenchidas = (manualOcupadas || 0) + reais;
     const restantes = Math.max(maximas - preenchidas, 0);
 
     return {

@@ -434,7 +434,7 @@ export default function TesteEneagramaPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
-                  <span>45 Afirmações com análise analítica</span>
+                  <span>45 Dimensões com análise analítica</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
@@ -555,7 +555,7 @@ export default function TesteEneagramaPage() {
                     onClick={iniciarTeste}
                     className="w-full py-4 px-8 rounded-2xl bg-[#7D8C6E] hover:bg-[#6C7B5D] text-white text-base font-semibold transition-all shadow-lg shadow-[#7D8C6E]/20 flex items-center justify-center gap-2 cursor-pointer hover:gap-3"
                   >
-                    <span>Começar Avaliação (45 Afirmações)</span>
+                    <span>Começar Avaliação (45 Dimensões)</span>
                     <ArrowRight className="w-5 h-5" />
                   </button>
                 </div>

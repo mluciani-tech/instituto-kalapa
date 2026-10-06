@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const { codigo, subtotal } = await req.json();
+    const { codigo, subtotal, itens } = await req.json();
 
     if (!codigo || typeof codigo !== "string" || !codigo.trim()) {
       return NextResponse.json(
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     const { data: cupom, error } = await supabaseAdmin!
       .from("cupons")
-      .select("id, codigo, tipo, valor, quantidade_maxima, quantidade_utilizada, valor_minimo_pedido, validade, ativo")
+      .select("id, codigo, tipo, valor, quantidade_maxima, quantidade_utilizada, valor_minimo_pedido, validade, ativo, produto_id")
       .eq("codigo", codigoNorm)
       .single();
 
@@ -57,6 +57,17 @@ export async function POST(req: NextRequest) {
         { error: "Este cupom expirou." },
         { status: 400 }
       );
+    }
+
+    // Checar vinculação com produto
+    if (cupom.produto_id && Array.isArray(itens)) {
+      const temProduto = itens.some((item: any) => item.produto_id === cupom.produto_id);
+      if (!temProduto) {
+        return NextResponse.json(
+          { error: "Este cupom não é válido para os produtos no seu carrinho." },
+          { status: 400 }
+        );
+      }
     }
 
     // Checar limite de utilizações

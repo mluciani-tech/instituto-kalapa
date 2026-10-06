@@ -437,7 +437,7 @@ export default function AdminPage() {
 
           {/* Tab: Cupons */}
           {activeTab === "cupons" && (
-            <AdminCupons cupons={cupons} onReload={fetchCupons} onError={setError} />
+            <AdminCupons cupons={cupons} produtos={produtos} onReload={fetchCupons} onError={setError} />
           )}
 
           {/* Tab: Usuários */}

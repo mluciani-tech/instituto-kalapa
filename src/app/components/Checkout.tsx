@@ -196,6 +196,7 @@ export default function Checkout() {
         body: JSON.stringify({
           codigo: cupomInput.trim(),
           subtotal,
+          itens: cartItems,
         }),
       });
 

@@ -138,6 +138,7 @@ export interface Cupom {
   valor_minimo_pedido: number;
   validade: string | null;
   ativo: boolean;
+  produto_id?: string | null;
   created_at: string;
   updated_at?: string;
 }
