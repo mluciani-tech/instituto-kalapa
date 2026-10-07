@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
   FileText,
+  Heart,
 } from "lucide-react";
 import TestShareMenu from "@/app/components/TestShareMenu";
 import type { Produto } from "@/lib/types";
@@ -133,6 +134,33 @@ const TESTES_DEFINICOES: TesteInfo[] = [
     corBotaoHover: "shadow-[#1A3C4D]/15",
     precoDefault: 10,
   },
+  {
+    slug: "teste-lealdades-invisiveis",
+    rota: "/teste-lealdades-invisiveis",
+    titulo: "A Sabedoria das Lealdades Invisíveis",
+    badgeCategoria: "Sistêmica • 6 Situações",
+    badgeCor: "bg-[#F8F4ED] text-[#B8965A]",
+    badgeBorda: "border-[#B8965A]/20",
+    iconeCategoria: <Heart className="w-3.5 h-3.5 text-[#B8965A] shrink-0" />,
+    tempoEstimado: "~5 min",
+    resumo: "Este teste foi criado para mapear as lealdades inconscientes que influenciam silenciosamente suas escolhas profissionais, seus relacionamentos e seus bloqueios no dia a dia.",
+    paragrafosCompletos: [
+      "Por meio de situações existenciais baseadas nas Constelações Familiares de Bert Hellinger, você identificará qual dos seis grandes emaranhamentos sistêmicos está operando com maior intensidade em sua vida atual.",
+      "Ao concluir, você encontrará um diagnóstico preciso sobre a dinâmica oculta do seu sistema familiar, o caminho de consciência para transformar o amor cego em força e as frases de solução exatas para se libertar de repetições e seguir em direção ao seu próprio destino com ordem e leveza.",
+    ],
+    destaques: [
+      "Mapeamento de emaranhamentos sistêmicos",
+      "Diagnóstico do Perfil Dominante",
+      "Exercícios somáticos e falas de cura",
+      "Laudo Clínico em PDF A4 incluso",
+    ],
+    corDestaque: "text-[#B8965A]",
+    corBgDestaque: "bg-[#B8965A]/10 border-[#B8965A]/25",
+    corBordaHover: "hover:border-[#B8965A]/60",
+    corBotao: "bg-[#1A3C4D] hover:bg-[#15313F]",
+    corBotaoHover: "shadow-[#1A3C4D]/15",
+    precoDefault: 47,
+  }
 ];
 
 interface TesteCardsGridProps {

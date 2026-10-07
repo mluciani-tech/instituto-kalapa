@@ -89,6 +89,7 @@ export default function AdminCupons({ cupons, produtos, onReload, onError }: Pro
                     valor_minimo_pedido: "",
                     validade: "",
                     ativo: true,
+                    produto_id: null,
                   });
                   setShowCupomModal(true);
                 }}
