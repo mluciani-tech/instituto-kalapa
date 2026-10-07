@@ -39,10 +39,13 @@ export default function LealdadesReportModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 print:p-0 print:block print:relative print:z-auto print:inset-auto bg-black/60 print:bg-white backdrop-blur-sm print:backdrop-blur-none transition-opacity">
+    <div 
+      id="relatorio-impressao-container"
+      className="modal-impressao-backdrop fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 print:p-0 print:block print:relative print:z-auto print:inset-auto bg-black/60 print:bg-white backdrop-blur-sm print:backdrop-blur-none transition-opacity"
+    >
       
       {/* Modal Principal */}
-      <div className="relative bg-[#FDFBF7] w-full max-w-4xl max-h-[90vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden animate-slideUp print:shadow-none print:animate-none print:max-h-none print:rounded-none print:w-full print:max-w-none print:bg-white print:overflow-visible">
+      <div className="modal-impressao-card relative bg-[#FDFBF7] w-full max-w-4xl max-h-[90vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden animate-slideUp print:shadow-none print:animate-none print:max-h-none print:rounded-none print:w-full print:max-w-none print:bg-white print:overflow-visible">
         
         {/* Header Fixo (apenas na tela) */}
         <div className="shrink-0 border-b border-[#E8DEC8] px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between bg-white z-10 gap-4 print:hidden">
@@ -74,7 +77,7 @@ export default function LealdadesReportModal({
         </div>
 
         {/* Conteúdo Rolável */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar print:overflow-visible print:block print:p-0">
+        <div id="relatorio-impressao" className="relatorio-impressao-conteudo flex-1 overflow-y-auto custom-scrollbar print:overflow-visible print:block print:p-0">
           
           {/* ========================================================= */}
           {/* VISUALIZAÇÃO NA TELA (Oculto na impressão para dar lugar ao PDF completo) */}
