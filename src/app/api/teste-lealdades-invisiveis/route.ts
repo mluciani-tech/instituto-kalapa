@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { verificarCreditoDisponivel, consumirCreditoTeste, isTesteGratuito } from "@/lib/testes-creditos";
-import { getUser } from "@/lib/auth";
+import { getClienteFromRequest } from "@/lib/cliente-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,15 +9,16 @@ export async function POST(req: NextRequest) {
   try {
     const { respostas, resultadoCalculado } = await req.json();
 
-    const user = await getUser();
-    if (!user) {
+    const clienteLogado = await getClienteFromRequest(req);
+    
+    if (!clienteLogado) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
     const { data: usuario, error: errorUser } = await supabaseAdmin!
       .from("usuarios")
       .select("id, nome, email, telefone")
-      .eq("email", user.email)
+      .eq("email", clienteLogado.email)
       .single();
 
     if (errorUser || !usuario) {

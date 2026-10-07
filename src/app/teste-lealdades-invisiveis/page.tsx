@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Heart,
   ArrowRight,
@@ -89,7 +90,9 @@ export default function TesteLealdadesPage() {
       nome: produtoTeste.nome,
       preco: produtoTeste.preco_promocional ?? produtoTeste.preco,
       slug: produtoTeste.slug,
-      tipo: "teste",
+      is_teste: true,
+      categoria: "testes",
+      rota_teste: "/teste-lealdades-invisiveis",
       imagem_url: produtoTeste.imagem_url,
     });
     openDrawer();
