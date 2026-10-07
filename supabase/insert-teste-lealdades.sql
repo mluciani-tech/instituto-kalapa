@@ -17,7 +17,6 @@ INSERT INTO public.produtos (
     slug, 
     descricao, 
     preco, 
-    preco_promocional, 
     categoria, 
     rota_teste, 
     orientacoes_pre_teste, 
@@ -29,11 +28,10 @@ INSERT INTO public.produtos (
     'teste-lealdades-invisiveis',
     'Este teste foi criado para mapear as lealdades inconscientes que influenciam silenciosamente suas escolhas profissionais, seus relacionamentos e seus bloqueios no dia a dia. Por meio de situações existenciais baseadas nas Constelações Familiares de Bert Hellinger, você identificará qual dos seis grandes emaranhamentos sistêmicos está operando com maior intensidade em sua vida atual. Ao concluir, você encontrará um diagnóstico preciso sobre a dinâmica oculta do seu sistema familiar, o caminho de consciência para transformar o amor cego em força e as frases de solução exatas para se libertar de repetições e seguir em direção ao seu próprio destino com ordem e leveza.',
     47.00,
-    NULL,
     'Testes',
     '/teste-lealdades-invisiveis',
     'Este é um teste introdutório de autopercepção e reflexão consciente. Escolha as respostas que mais se alinham à sua experiência real.',
     TRUE,
     NULL,
-    4 -- Ou o próximo número na ordem
+    4
 );
