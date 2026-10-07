@@ -190,13 +190,23 @@ export default function Checkout() {
     setValidandoCupom(true);
 
     try {
+      const itensEnvio = isCartCheckout 
+        ? cartItems 
+        : (produto ? [{
+            produto_id: produto.id,
+            slug: produto.slug,
+            nome: produto.nome,
+            preco: produto.preco || 0,
+            quantidade: 1
+          }] : []);
+
       const res = await fetch("/api/cupons/validar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           codigo: cupomInput.trim(),
           subtotal,
-          itens: cartItems,
+          itens: itensEnvio,
         }),
       });
 

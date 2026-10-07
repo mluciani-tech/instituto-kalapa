@@ -46,6 +46,7 @@ export default function TesteLealdadesPage() {
   const [etapa, setEtapa] = useState<"intro" | "teste" | "resultado">("intro");
   const [perguntaAtualIndex, setPerguntaAtualIndex] = useState(0);
   const [respostas, setRespostas] = useState<Record<number, string>>({});
+  const [dataRealizacao, setDataRealizacao] = useState<string | null>(null);
   const [modalRelatorioAberto, setModalRelatorioAberto] = useState(false);
   const [verificandoManual, setVerificandoManual] = useState(false);
 
@@ -54,7 +55,14 @@ export default function TesteLealdadesPage() {
       if (isManual) setVerificandoManual(true);
       else if (!usuario) setLoadingAuth(true);
 
-      const res = await fetch("/api/testes/credito?slug=teste-lealdades-invisiveis", {
+      const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+      const isVisualizar = params?.get("visualizar") === "1";
+      const avaliacaoId = params?.get("avaliacao_id");
+
+      let url = "/api/testes/credito?slug=teste-lealdades-invisiveis";
+      if (avaliacaoId) url += `&avaliacao_id=${encodeURIComponent(avaliacaoId)}`;
+
+      const res = await fetch(url, {
         cache: "no-store",
       });
       const data = await res.json();
@@ -67,6 +75,30 @@ export default function TesteLealdadesPage() {
       setCreditosRestantes(creditos);
       if (data?.produto) {
         setProdutoTeste(data.produto);
+      }
+
+      if (data?.ultimaAvaliacao) {
+        const dataIso = data.ultimaAvaliacao.created_at;
+        const dataFormatada = dataIso
+          ? new Intl.DateTimeFormat("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }).format(new Date(dataIso))
+          : null;
+        setDataRealizacao(dataFormatada);
+
+        if (creditos === 0 || isVisualizar) {
+          setRespostas(data.ultimaAvaliacao.respostas || {});
+          setEtapa("resultado");
+        }
+      }
+
+      // Se o usuário veio com ?iniciar=1 ou ?sucesso=1 e possui créditos, avança direto para o teste!
+      if (params && (params.get("iniciar") === "1" || params.get("sucesso") === "1") && creditos > 0) {
+        setEtapa("teste");
       }
     } catch (err) {
       console.error("Erro ao verificar auth/créditos", err);
@@ -88,20 +120,26 @@ export default function TesteLealdadesPage() {
     addItem({
       id: produtoTeste.id,
       nome: produtoTeste.nome,
-      preco: produtoTeste.preco_promocional ?? produtoTeste.preco,
+      preco: produtoTeste.preco_promocional ?? produtoTeste.preco ?? 47,
       slug: produtoTeste.slug,
       is_teste: true,
       categoria: "testes",
       rota_teste: "/teste-lealdades-invisiveis",
       imagem_url: produtoTeste.imagem_url,
     });
-    openDrawer();
+    sessionStorage.setItem("produto_selecionado", produtoTeste.id);
+    window.location.href = "/checkout";
   };
 
   const iniciarTeste = () => {
+    if (creditosRestantes <= 0) {
+      handleComprar();
+      return;
+    }
     setEtapa("teste");
     setPerguntaAtualIndex(0);
     setRespostas({});
+    setDataRealizacao(null);
   };
 
   const handleResponder = async (letra: string) => {
@@ -308,6 +346,10 @@ export default function TesteLealdadesPage() {
             <LealdadesResultView 
               resultado={resultadoCalculado}
               onAbrirRelatorio={() => setModalRelatorioAberto(true)}
+              onReiniciar={iniciarTeste}
+              onComprarNovoTeste={handleComprar}
+              creditosRestantes={creditosRestantes}
+              dataRealizacao={dataRealizacao}
             />
           </div>
         )}

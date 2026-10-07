@@ -58,26 +58,42 @@ export async function GET(req: NextRequest) {
       slug
     );
 
+    const avaliacaoIdParam = req.nextUrl.searchParams.get("avaliacao_id");
+
     let ultimaAvaliacao = null;
     if (supabaseAdmin) {
       let tableName = "";
       if (slugNormalizado.includes("cronotipo")) tableName = "avaliacoes_cronotipo";
       else if (slugNormalizado.includes("eneagrama")) tableName = "avaliacoes_eneagrama";
       else if (slugNormalizado.includes("yin-yang") || slugNormalizado.includes("yinyang")) tableName = "avaliacoes_yin_yang";
+      else if (slugNormalizado.includes("lealdade")) tableName = "avaliacoes_lealdades";
 
       if (tableName) {
         try {
-          const { data: aval } = await supabaseAdmin
-            .from(tableName)
-            .select("respostas, created_at")
-            .or(`usuario_id.eq.${usuario.id},email.eq.${usuario.email.trim().toLowerCase()}`)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          
-          if (aval) ultimaAvaliacao = aval;
+          if (avaliacaoIdParam) {
+            const { data: avalById } = await supabaseAdmin
+              .from(tableName)
+              .select("*")
+              .eq("id", avaliacaoIdParam)
+              .or(`usuario_id.eq.${usuario.id},email.eq.${usuario.email.trim().toLowerCase()}`)
+              .maybeSingle();
+
+            if (avalById) ultimaAvaliacao = avalById;
+          }
+
+          if (!ultimaAvaliacao) {
+            const { data: aval } = await supabaseAdmin
+              .from(tableName)
+              .select("*")
+              .or(`usuario_id.eq.${usuario.id},email.eq.${usuario.email.trim().toLowerCase()}`)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (aval) ultimaAvaliacao = aval;
+          }
         } catch (err) {
-          console.warn("[api/testes/credito] Erro ao buscar última avaliação:", err);
+          console.warn("[api/testes/credito] Erro ao buscar avaliação:", err);
         }
       }
     }

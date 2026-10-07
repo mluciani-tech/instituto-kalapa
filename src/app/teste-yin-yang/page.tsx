@@ -55,6 +55,7 @@ export default function TesteYinYangPage() {
   const [etapa, setEtapa] = useState<"intro" | "teste" | "resultado">("intro");
   const [perguntaAtualIndex, setPerguntaAtualIndex] = useState(0);
   const [respostas, setRespostas] = useState<Record<number, "yang" | "yin">>({});
+  const [dataRealizacao, setDataRealizacao] = useState<string | null>(null);
 
   const [modalRelatorioAberto, setModalRelatorioAberto] = useState(false);
   const [modalEmpateAberto, setModalEmpateAberto] = useState(false);
@@ -65,7 +66,14 @@ export default function TesteYinYangPage() {
       if (isManual) setVerificandoManual(true);
       else if (!usuario) setLoadingAuth(true);
 
-      const res = await fetch("/api/testes/credito?slug=teste-yin-yang", {
+      const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+      const isVisualizar = params?.get("visualizar") === "1";
+      const avaliacaoId = params?.get("avaliacao_id");
+
+      let url = "/api/testes/credito?slug=teste-yin-yang";
+      if (avaliacaoId) url += `&avaliacao_id=${encodeURIComponent(avaliacaoId)}`;
+
+      const res = await fetch(url, {
         cache: "no-store",
       });
       const data = await res.json();
@@ -80,17 +88,28 @@ export default function TesteYinYangPage() {
         setProdutoTeste(data.produto);
       }
 
-      if (data?.ultimaAvaliacao && creditos === 0) {
-        setRespostas(data.ultimaAvaliacao.respostas);
-        setEtapa("resultado");
+      if (data?.ultimaAvaliacao) {
+        const dataIso = data.ultimaAvaliacao.created_at;
+        const dataFormatada = dataIso
+          ? new Intl.DateTimeFormat("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }).format(new Date(dataIso))
+          : null;
+        setDataRealizacao(dataFormatada);
+
+        if (creditos === 0 || isVisualizar) {
+          setRespostas(data.ultimaAvaliacao.respostas || {});
+          setEtapa("resultado");
+        }
       }
 
       // Se o usuário veio com ?iniciar=1 ou ?sucesso=1 e possui créditos, avança direto para o teste!
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        if ((params.get("iniciar") === "1" || params.get("sucesso") === "1") && creditos > 0) {
-          setEtapa("teste");
-        }
+      if (params && (params.get("iniciar") === "1" || params.get("sucesso") === "1") && creditos > 0) {
+        setEtapa("teste");
       }
     } catch (err) {
       console.error("Erro ao verificar créditos do teste:", err);
@@ -235,9 +254,14 @@ export default function TesteYinYangPage() {
   };
 
   const handleReiniciarTeste = () => {
-    if (window.confirm("Deseja realmente recomeçar o teste? Suas respostas serão apagadas.")) {
+    if (precoExibicao > 0 && creditosRestantes <= 0) {
+      handleComprarTeste();
+      return;
+    }
+    if (window.confirm("Deseja iniciar um novo teste utilizando 1 de seus créditos disponíveis? Suas respostas serão renovadas.")) {
       setRespostas({});
       setPerguntaAtualIndex(0);
+      setDataRealizacao(null);
       setEtapa("teste");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -588,6 +612,9 @@ export default function TesteYinYangPage() {
             pontosYang={pontosYang}
             pontosYin={pontosYin}
             handleReiniciarTeste={handleReiniciarTeste} 
+            handleComprarNovoTeste={handleComprarTeste}
+            creditosRestantes={creditosRestantes}
+            dataRealizacao={dataRealizacao}
             resultadoAtual={resultadoAtual}
             tipoResultado={tipoResultado}
             usuario={usuario}

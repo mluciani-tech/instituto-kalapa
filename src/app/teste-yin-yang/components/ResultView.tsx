@@ -16,14 +16,18 @@ import {
   HeartHandshake,
   Play,
   Pause,
-  RotateCcw
+  RotateCcw,
+  ShoppingBag,
 } from "lucide-react";
 import { ResultadoInfo } from "../data/yin-yang-data";
 
 interface ResultViewProps {
   pontosYang: number;
   pontosYin: number;
-  handleReiniciarTeste: () => void;
+  handleReiniciarTeste?: () => void;
+  handleComprarNovoTeste?: () => void;
+  creditosRestantes?: number;
+  dataRealizacao?: string | null;
   resultadoAtual: ResultadoInfo;
   tipoResultado: "yang" | "yin";
   usuario: { id: string; nome: string; email?: string } | null;
@@ -34,6 +38,9 @@ export default function ResultView({
   pontosYang,
   pontosYin,
   handleReiniciarTeste,
+  handleComprarNovoTeste,
+  creditosRestantes = 0,
+  dataRealizacao,
   resultadoAtual,
   tipoResultado,
   usuario,
@@ -91,6 +98,44 @@ export default function ResultView({
   return (
     <>
           <div className="space-y-8">
+            {/* Banner Informativo de Avaliação Concluída / Histórico */}
+            {dataRealizacao && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#1A3C4D]/5 border border-[#B8965A]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs sm:text-sm text-[#1A3C4D]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center shrink-0">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-[#1A3C4D]">
+                      Avaliação realizada em {dataRealizacao}
+                    </p>
+                    <p className="text-[#1A3C4D]/70 text-xs">
+                      Seu laudo oficial está disponível para consulta e emissão em PDF a qualquer momento.
+                    </p>
+                  </div>
+                </div>
+
+                {creditosRestantes > 0 ? (
+                  <button
+                    type="button"
+                    onClick={handleReiniciarTeste}
+                    className="px-4 py-2.5 rounded-xl bg-[#7D8C6E] hover:bg-[#6C7B5D] text-white text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Realizar Novo Teste ({creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""})</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleComprarNovoTeste}
+                    className="px-4 py-2.5 rounded-xl bg-[#B8965A] hover:bg-[#A3834C] text-white text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>Comprar novo teste para refazer</span>
+                  </button>
+                )}
+              </div>
+            )}
             {/* Banner do Resultado com Destaque e Imagem IA */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E8DEC8]">
               <div className="grid grid-cols-1 md:grid-cols-12">
@@ -169,7 +214,7 @@ export default function ResultView({
                     </div>
                   </div>
 
-                  {/* Ações Rápidas: PDF e Refazer */}
+                  {/* Ações Rápidas: PDF e Refazer / Comprar */}
                   <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-[#E8DEC8]/60">
                     <button
                       type="button"
@@ -179,14 +224,26 @@ export default function ResultView({
                       <Printer className="w-4 h-4" />
                       <span>Visualizar & Imprimir Relatório em PDF</span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleReiniciarTeste}
-                      className="px-4 py-3 rounded-xl border border-[#E8DEC8] text-xs sm:text-sm font-medium text-[#1A3C4D]/80 hover:bg-[#F8F4ED] transition-colors flex items-center gap-1.5"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>Refazer Teste</span>
-                    </button>
+
+                    {creditosRestantes > 0 ? (
+                      <button
+                        type="button"
+                        onClick={handleReiniciarTeste}
+                        className="px-4 py-3 rounded-xl border border-[#7D8C6E] bg-white text-xs sm:text-sm font-medium text-[#7D8C6E] hover:bg-[#7D8C6E]/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                        <span>Realizar Novo Teste ({creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""})</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleComprarNovoTeste}
+                        className="px-4 py-3 rounded-xl border border-[#B8965A] bg-[#B8965A]/10 text-xs sm:text-sm font-medium text-[#B8965A] hover:bg-[#B8965A]/20 transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <ShoppingBag className="w-4 h-4" />
+                        <span>Comprar novo teste para refazer</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

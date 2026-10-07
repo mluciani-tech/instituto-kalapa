@@ -21,6 +21,8 @@ import {
   Flame,
   Droplets,
   HelpCircle,
+  Calendar,
+  ShoppingBag,
 } from "lucide-react";
 import { ResultadoCronotipoCalculado } from "../lib/calculo-cronotipo";
 import {
@@ -31,7 +33,10 @@ import TestShareMenu from "@/app/components/TestShareMenu";
 
 interface CronotipoResultViewProps {
   resultado: ResultadoCronotipoCalculado;
-  onReiniciar: () => void;
+  onReiniciar?: () => void;
+  onComprarNovoTeste?: () => void;
+  creditosRestantes?: number;
+  dataRealizacao?: string | null;
   onAbrirRelatorio: () => void;
   usuario: { id: string; nome: string; email?: string } | null;
 }
@@ -41,6 +46,9 @@ type TabKey = "neurobiologia" | "orientacoes" | "respostas";
 export default function CronotipoResultView({
   resultado,
   onReiniciar,
+  onComprarNovoTeste,
+  creditosRestantes = 0,
+  dataRealizacao,
   onAbrirRelatorio,
   usuario,
 }: CronotipoResultViewProps) {
@@ -63,6 +71,45 @@ export default function CronotipoResultView({
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-8 animate-fadeIn">
+      {/* Banner Informativo de Avaliação Concluída / Histórico */}
+      {dataRealizacao && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#1A3C4D]/5 border border-[#B8965A]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs sm:text-sm text-[#1A3C4D]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center shrink-0">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-semibold text-[#1A3C4D]">
+                Avaliação realizada em {dataRealizacao}
+              </p>
+              <p className="text-[#1A3C4D]/70 text-xs">
+                Seu laudo oficial está disponível para consulta e emissão em PDF a qualquer momento.
+              </p>
+            </div>
+          </div>
+
+          {creditosRestantes > 0 ? (
+            <button
+              type="button"
+              onClick={onReiniciar}
+              className="px-4 py-2.5 rounded-xl bg-[#7D8C6E] hover:bg-[#6C7B5D] text-white text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Realizar Novo Teste ({creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""})</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onComprarNovoTeste}
+              className="px-4 py-2.5 rounded-xl bg-[#B8965A] hover:bg-[#A3834C] text-white text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>Comprar novo teste para refazer</span>
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Card Principal de Destaque */}
       <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl shadow-[#E8DEC8]/25 border border-[#E8DEC8] relative overflow-hidden">
         {/* Glow de fundo */}
@@ -211,14 +258,26 @@ export default function CronotipoResultView({
               convite={`Fiz o teste de Ritmo Biológico no INstituto Kalapa e meu resultado foi ${info.nome} (${info.arquetipo}) com ${pontuacaoTotal} pontos:`}
             />
 
-            <button
-              type="button"
-              onClick={onReiniciar}
-              className="p-3 rounded-2xl border border-[#E8DEC8] text-[#1A3C4D]/70 hover:text-[#1A3C4D] hover:bg-[#F8F4ED] transition-colors cursor-pointer"
-              title="Refazer teste"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
+            {creditosRestantes > 0 ? (
+              <button
+                type="button"
+                onClick={onReiniciar}
+                className="p-3 rounded-2xl border border-[#7D8C6E] text-[#7D8C6E] hover:bg-[#7D8C6E]/10 transition-colors cursor-pointer"
+                title="Realizar novo teste"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onComprarNovoTeste}
+                className="px-4 py-2.5 rounded-2xl border border-[#B8965A] bg-[#B8965A]/10 text-[#B8965A] hover:bg-[#B8965A]/20 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Comprar novo teste para refazer"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>Comprar novo teste</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

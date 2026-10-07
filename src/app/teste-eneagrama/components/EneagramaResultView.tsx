@@ -24,14 +24,19 @@ import {
   BookOpen,
   Award,
   ChevronRight,
-  SunMedium
+  SunMedium,
+  Calendar,
+  ShoppingBag,
 } from "lucide-react";
 import { ResultadoEneagramaCalculado } from "../lib/calculo-eneagrama";
 import { ENEAGRAMA_REPORTS_MAP, EneagramaReportData } from "../data/eneagrama-reports-data";
 
 interface EneagramaResultViewProps {
   resultado: ResultadoEneagramaCalculado;
-  onReiniciar: () => void;
+  onReiniciar?: () => void;
+  onComprarNovoTeste?: () => void;
+  creditosRestantes?: number;
+  dataRealizacao?: string | null;
   onAbrirRelatorio: () => void;
   usuario: { id: string; nome: string; email?: string } | null;
 }
@@ -41,6 +46,9 @@ type TabKey = "matriz" | "sistemica" | "ladoluz" | "terapias";
 export default function EneagramaResultView({
   resultado,
   onReiniciar,
+  onComprarNovoTeste,
+  creditosRestantes = 0,
+  dataRealizacao,
   onAbrirRelatorio,
   usuario,
 }: EneagramaResultViewProps) {
@@ -67,6 +75,45 @@ export default function EneagramaResultView({
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-10">
+      {/* Banner Informativo de Avaliação Concluída / Histórico */}
+      {dataRealizacao && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#1A3C4D]/5 border border-[#B8965A]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs sm:text-sm text-[#1A3C4D]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#B8965A]/15 text-[#B8965A] flex items-center justify-center shrink-0">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-semibold text-[#1A3C4D]">
+                Avaliação realizada em {dataRealizacao}
+              </p>
+              <p className="text-[#1A3C4D]/70 text-xs">
+                Seu laudo oficial está disponível para consulta e emissão em PDF a qualquer momento.
+              </p>
+            </div>
+          </div>
+
+          {creditosRestantes > 0 ? (
+            <button
+              type="button"
+              onClick={onReiniciar}
+              className="px-4 py-2.5 rounded-xl bg-[#7D8C6E] hover:bg-[#6C7B5D] text-white text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Realizar Novo Teste ({creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""})</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onComprarNovoTeste}
+              className="px-4 py-2.5 rounded-xl bg-[#B8965A] hover:bg-[#A3834C] text-white text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>Comprar novo teste para refazer</span>
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Topo do Resultado */}
       <div className="text-center relative">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] text-xs sm:text-sm font-semibold tracking-wide mb-4 border border-[#7D8C6E]/30">
@@ -634,14 +681,25 @@ export default function EneagramaResultView({
 
       {/* Botões de Ações e Próximos Passos */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
-        <button
-          type="button"
-          onClick={onReiniciar}
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-[#E8DEC8] bg-white hover:bg-[#F8F4ED] text-[#1A3C4D] text-xs sm:text-sm font-medium transition-all shadow-xs cursor-pointer w-full sm:w-auto justify-center"
-        >
-          <RotateCcw className="w-4 h-4" />
-          <span>Refazer a Avaliação</span>
-        </button>
+        {creditosRestantes > 0 ? (
+          <button
+            type="button"
+            onClick={onReiniciar}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-[#7D8C6E] bg-white hover:bg-[#7D8C6E]/10 text-[#7D8C6E] text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer w-full sm:w-auto justify-center"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>Realizar Novo Teste ({creditosRestantes} crédito{creditosRestantes > 1 ? "s" : ""})</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onComprarNovoTeste}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-[#B8965A] bg-[#B8965A]/10 hover:bg-[#B8965A]/20 text-[#B8965A] text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer w-full sm:w-auto justify-center"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            <span>Comprar novo teste para refazer</span>
+          </button>
+        )}
 
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-center sm:justify-end">
           <button

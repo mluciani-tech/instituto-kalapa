@@ -282,18 +282,19 @@ export default function AdminCupons({ cupons, produtos, onReload, onError }: Pro
               </div>
 
               <div>
-                <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Produto (Opcional)</label>
+                <label className="text-xs font-medium text-brand-charcoal/70 block mb-1">Produto *</label>
                 <select
+                  required
                   value={cupomForm.produto_id || ""}
                   onChange={(e) => setCupomForm({ ...cupomForm, produto_id: e.target.value || null })}
                   className="w-full border border-brand-beige rounded-lg px-3 py-2 text-sm focus-visible:border-brand-purple"
                 >
-                  <option value="">Aplicável a todos os produtos</option>
+                  <option value="" disabled>Selecione um produto</option>
                   {produtos.map(p => (
                     <option key={p.id} value={p.id}>{p.nome}</option>
                   ))}
                 </select>
-                <span className="text-[10px] text-brand-charcoal/40 mt-0.5 block">Atrele o cupom a um produto específico</span>
+                <span className="text-[10px] text-brand-charcoal/40 mt-0.5 block">O cupom deve ser atrelado a um produto específico</span>
               </div>
 
               <div>
