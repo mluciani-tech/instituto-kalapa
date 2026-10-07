@@ -78,6 +78,48 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
     router.push("/checkout");
   };
 
+  const [loadingGratuito, setLoadingGratuito] = useState(false);
+
+  const handleComprarGratuito = async () => {
+    try {
+      setLoadingGratuito(true);
+      const response = await fetch("/api/checkout-gratuito", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          produto_id: produto.id,
+        }),
+      });
+
+      if (response.status === 401) {
+        // Redireciona para o login e depois volta
+        router.push(`/login?callbackUrl=/produtos/${produto.slug}`);
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || "Erro ao gerar acesso gratuito.");
+        setLoadingGratuito(false);
+        return;
+      }
+
+      const data = await response.json();
+      
+      if (isTeste && produto.rota_teste) {
+        // Teste: envia para a página do teste
+        router.push(produto.rota_teste);
+      } else {
+        // Produto normal (evento, etc): envia para a tela de sucesso
+        router.push(`/checkout/sucesso?order_nsu=${data.order_nsu}`);
+      }
+    } catch (err) {
+      console.error("Erro no checkout gratuito:", err);
+      alert("Erro de conexão. Tente novamente.");
+      setLoadingGratuito(false);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 md:py-16">
       {/* Navegação Voltar e Compartilhar */}
@@ -309,6 +351,28 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                     <span className="truncate">Escolher Data e Horário na Agenda</span>
                     <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
                   </a>
+                ) : isGratuito ? (
+                  <button
+                    type="button"
+                    onClick={handleComprarGratuito}
+                    disabled={!!vagasEsgotadas || loadingGratuito}
+                    className={`flex-1 py-3.5 px-5 font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer ${
+                      vagasEsgotadas
+                        ? "bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed"
+                        : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/25 hover:-translate-y-0.5"
+                    }`}
+                  >
+                    {loadingGratuito ? (
+                      "Processando..."
+                    ) : vagasEsgotadas ? (
+                      "Turma Lotada"
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4" />
+                        <span>{isTeste ? "Acessar Avaliação" : "Garantir Vaga Gratuitamente"}</span>
+                      </>
+                    )}
+                  </button>
                 ) : (
                   <>
                     <button
