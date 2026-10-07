@@ -22,13 +22,11 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
 
 ### Área Pública & E-commerce
 - **Hero & Narrativa:** Apresentação institucional com imagem real e tipografia refinada.
-- **Autoavaliação Yin/Yang (MTC):**
-  - Botão destacado *"Faça o seu teste"* na Hero ao lado de Calendário e no menu de navegação.
-  - Questionário interativo com 15 dimensões fisiológicas e comportamentais do Cânone do Imperador Amarelo (*Huangdi Neijing*).
-  - Autenticação obrigatória (login ou cadastro rápido com retorno automático), estimulando o crescimento da base de clientes.
-  - Diagnóstico clínico personalizado (Predominância Yang, Yin ou Equilíbrio), impacto no sono (*Wei Qi*), dietoterapia, fitoterapia/chás e metrônomo respiratório interativo.
-  - Emissão e impressão com 1 clique de **Relatório Clínico em PDF (formato A4)** com dados do participante e respostas.
-  - Fotografias editoriais em estilo zen contemporâneo geradas por IA.
+- **Autoavaliações (Testes):**
+  - **Teste Yin/Yang (MTC):** Diagnóstico clínico baseado na Medicina Tradicional Chinesa com metrônomo respiratório e dietoterapia.
+  - **Teste de Eneagrama:** Mapeamento de personalidade em 9 tipos fundamentais, revelando a motivação central, medos, vícios emocionais e caminhos de integração.
+  - **Teste de Lealdades Invisíveis:** Baseado nas Constelações Familiares de Bert Hellinger, identifica emaranhamentos sistêmicos (ex: "Sigo você", "Exclusão") e entrega frases de solução.
+  - *Características gerais:* Autenticação exigida, emissão/impressão com 1 clique de **Relatório em PDF (formato A4)** com dados e conclusões detalhadas, e fotografias editoriais geradas por IA.
 - **Recuperação Autônoma de Senha:**
   - Fluxo de autoatendimento no `/login` com token temporário de 1 hora via SMTP Hostinger corporativo.
   - Formato multipart (HTML + Texto Puro) garantindo alta entregabilidade sem bloqueio de spam.

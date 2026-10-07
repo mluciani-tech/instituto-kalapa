@@ -585,20 +585,20 @@ export default function AdminManual() {
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
-                    <span className="font-bold text-brand-purple">1. Acesso na Home</span>
-                    <p className="text-brand-charcoal/70">O visitante clica no botão de destaque <strong>&ldquo;Teste de Autoconhecimento&rdquo;</strong> (posicionado ao lado de Calendário na Hero principal).</p>
+                    <span className="font-bold text-brand-purple">1. Descoberta</span>
+                    <p className="text-brand-charcoal/70">O visitante acessa a seção de testes pela Home (botão <strong>&ldquo;Teste de Autoconhecimento&rdquo;</strong>) e escolhe qual avaliação deseja realizar.</p>
                   </div>
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
                     <span className="font-bold text-brand-purple">2. Login Obrigatório</span>
-                    <p className="text-brand-charcoal/70">Para personalizar o laudo e armazenar o histórico, é exigido login ou cadastro rápido gratuito, com retorno automático.</p>
+                    <p className="text-brand-charcoal/70">Para personalizar o laudo, é exigido login ou cadastro rápido gratuito, permitindo que a plataforma armazene os vínculos ao usuário.</p>
                   </div>
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
-                    <span className="font-bold text-brand-purple">3. 15 Perguntas MTC</span>
-                    <p className="text-brand-charcoal/70">O participante responde a 15 dimensões fisiológicas comparando tendências Yang (fogo/ação) e Yin (frescor/recolhimento).</p>
+                    <span className="font-bold text-brand-purple">3. Questionário</span>
+                    <p className="text-brand-charcoal/70">O participante responde às questões interativas formatadas de acordo com a lógica do teste escolhido (ex: tendências, reações ou comportamentos).</p>
                   </div>
                   <div className="bg-white p-3.5 rounded-xl border border-brand-beige space-y-1">
                     <span className="font-bold text-brand-purple">4. Relatório em PDF</span>
-                    <p className="text-brand-charcoal/70">O sistema calcula o placar, entrega o diagnóstico detalhado e gera o documento A4 profissional para download ou impressão.</p>
+                    <p className="text-brand-charcoal/70">O sistema calcula as respostas, exibe o diagnóstico e fornece o documento A4 profissional para download ou impressão.</p>
                   </div>
                 </div>
               </div>
@@ -870,12 +870,12 @@ export default function AdminManual() {
               <div className="space-y-3">
                 {[
                   {
-                    q: "O que é o teste 'Teste de Autoconhecimento' na página inicial e como os clientes participam?",
-                    a: "É uma avaliação energética e clínica baseada na Medicina Tradicional Chinesa (MTC) e no Cânone do Imperador Amarelo. O cliente responde a 15 perguntas práticas e recebe um diagnóstico completo (Yang, Yin ou Equilíbrio), orientações de sono, alimentação, chás, metrônomo de respiração e emissão de laudo A4 em PDF. Para realizar o teste, o cliente deve estar cadastrado/logado na plataforma.",
+                    q: "Quais testes de Autoconhecimento estão disponíveis na plataforma?",
+                    a: "Atualmente a plataforma oferece três testes: o Teste Yin/Yang (Medicina Tradicional Chinesa), o Teste de Eneagrama (mapeamento de personalidade em 9 tipos) e o Teste de Lealdades Invisíveis (Constelações Familiares). Todos exigem que o cliente esteja cadastrado/logado.",
                   },
                   {
-                    q: "Como o participante pode salvar ou imprimir o laudo em PDF do teste Yin/Yang?",
-                    a: "Na tela de resultado do teste, há o botão 'Visualizar & Imprimir Relatório em PDF'. O sistema abre um modal formatado com o cabeçalho oficial do INstituto Kalapa, dados do participante e data de emissão, acionando a impressão ou o salvamento direto em PDF pelo navegador.",
+                    q: "Como o participante salva ou imprime o laudo em PDF dos testes?",
+                    a: "Na tela de resultado final, o usuário encontra o botão 'Visualizar & Imprimir Relatório em PDF'. O sistema abrirá um layout especial adaptado (em A4) com cabeçalhos oficiais do Instituto Kalapa, dados do paciente e todo o conteúdo do laudo, pronto para ser salvo em PDF ou impresso diretamente pelo navegador.",
                   },
                   {
                     q: "Como funciona a recuperação de senha quando o cliente esquece?",
@@ -952,6 +952,15 @@ export default function AdminManual() {
                     <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">
+                    Expansão do Módulo de Autoavaliações
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
+                    <li><strong>Teste de Lealdades Invisíveis:</strong> Implementação do teste baseado em Constelações Familiares com mapa de diagnóstico, impressão em PDF (A4) contendo biografia de Bert Hellinger e leis sistêmicas.</li>
+                    <li><strong>Teste de Eneagrama:</strong> Mapeamento dos 9 tipos de personalidade com detalhamento profundo (motivação, virtudes, vícios) e visualização com PDF em A4.</li>
+                    <li><strong>Correção de Acompanhantes:</strong> Refatoração do fluxo de check-out para criar corretamente as inscrições de convidados e atualização do Admin para não sobrescrever os nomes dos acompanhantes na edição manual.</li>
+                  </ul>
+                  
+                  <h4 className="text-sm font-bold text-brand-purple mt-4 mb-2">
                     Módulo de Autoavaliação Yin/Yang (MTC) & Emissão de Relatório Clínico A4
                   </h4>
                   <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
