@@ -78,13 +78,36 @@ export async function PATCH(
 
   // Sincronizar inscrição vinculada
   if (Object.keys(inscSync).length > 0) {
-    const { error: syncError } = await supabaseAdmin!
+    const { data: inscricoes } = await supabaseAdmin!
       .from("inscricoes")
-      .update(inscSync)
+      .select("id, motivacao, nome")
       .eq("pedido_id", id);
 
-    if (syncError) {
-      console.warn("[admin/pedidos] Erro ao sincronizar inscrição:", syncError);
+    if (inscricoes && inscricoes.length > 0) {
+      for (const insc of inscricoes) {
+        const updateParaEstaInsc = { ...inscSync };
+        const isAcompanhante = insc.motivacao?.toLowerCase().includes("acompanhante") || 
+                               insc.motivacao?.toLowerCase().includes("convidado") ||
+                               (insc.nome !== body.cliente_nome && insc.nome !== "Participante" && insc.nome !== "");
+        
+        // Se for acompanhante, atualizamos apenas o status (não sobrescrevemos nome/email/telefone do acompanhante)
+        if (isAcompanhante) {
+          delete updateParaEstaInsc.nome;
+          delete updateParaEstaInsc.email;
+          delete updateParaEstaInsc.telefone;
+        }
+
+        if (Object.keys(updateParaEstaInsc).length > 0) {
+          const { error: syncError } = await supabaseAdmin!
+            .from("inscricoes")
+            .update(updateParaEstaInsc)
+            .eq("id", insc.id);
+
+          if (syncError) {
+            console.warn(`[admin/pedidos] Erro ao sincronizar inscrição ${insc.id}:`, syncError);
+          }
+        }
+      }
     }
   }
 
