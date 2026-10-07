@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
       const codigoNorm = cupom_codigo.trim().toUpperCase();
       const { data: cupom } = await supabaseAdmin!
         .from("cupons")
-        .select("id, codigo, tipo, valor, quantidade_maxima, quantidade_utilizada, valor_minimo_pedido, validade, ativo")
+        .select("id, codigo, tipo, valor, quantidade_maxima, quantidade_utilizada, valor_minimo_pedido, validade, ativo, produto_id")
         .eq("codigo", codigoNorm)
         .eq("ativo", true)
         .single();
@@ -153,14 +153,28 @@ export async function POST(req: NextRequest) {
         const minimoNaoAtingido = cupom.valor_minimo_pedido && subtotal < Number(cupom.valor_minimo_pedido);
 
         if (!expirado && !esgotado && !minimoNaoAtingido) {
-          cupomId = cupom.id;
-          cupomCodigoFinal = cupom.codigo;
-          if (cupom.tipo === "porcentagem") {
-            valorDesconto = (subtotal * Number(cupom.valor)) / 100;
+          let precoBaseDesconto = 0;
+          if (cupom.produto_id) {
+            const itemVinculado = itensProcessados.find(i => i.produto_id === cupom.produto_id);
+            if (itemVinculado) {
+              precoBaseDesconto = itemVinculado.precoUnitario;
+            } else {
+              precoBaseDesconto = 0;
+            }
           } else {
-            valorDesconto = Number(cupom.valor);
+            precoBaseDesconto = Math.max(...itensProcessados.map(i => i.precoUnitario), 0);
           }
-          valorDesconto = Math.min(valorDesconto, subtotal);
+
+          if (precoBaseDesconto > 0) {
+            cupomId = cupom.id;
+            cupomCodigoFinal = cupom.codigo;
+            if (cupom.tipo === "porcentagem") {
+              valorDesconto = (precoBaseDesconto * Number(cupom.valor)) / 100;
+            } else {
+              valorDesconto = Number(cupom.valor);
+            }
+            valorDesconto = Math.min(valorDesconto, precoBaseDesconto, subtotal);
+          }
         }
       }
     }

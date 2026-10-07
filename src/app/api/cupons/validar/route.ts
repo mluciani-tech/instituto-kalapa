@@ -59,14 +59,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Identificar qual preço base usar para o desconto (1 unidade)
+    let precoBaseDesconto = 0;
+
     // Checar vinculação com produto
-    if (cupom.produto_id && Array.isArray(itens)) {
-      const temProduto = itens.some((item: any) => item.produto_id === cupom.produto_id);
-      if (!temProduto) {
-        return NextResponse.json(
-          { error: "Este cupom não é válido para os produtos no seu carrinho." },
-          { status: 400 }
-        );
+    if (cupom.produto_id) {
+      if (Array.isArray(itens) && itens.length > 0) {
+        const itemVinculado = itens.find((item: any) => item.produto_id === cupom.produto_id);
+        if (!itemVinculado) {
+          return NextResponse.json(
+            { error: "Este cupom não é válido para os produtos no seu carrinho." },
+            { status: 400 }
+          );
+        }
+        precoBaseDesconto = Number(itemVinculado.preco) || 0;
+      } else {
+        precoBaseDesconto = valorSubtotal;
+      }
+    } else {
+      // Cupom não vinculado (legado) - pega a unidade do item mais caro
+      if (Array.isArray(itens) && itens.length > 0) {
+        precoBaseDesconto = Math.max(...itens.map((i: any) => Number(i.preco) || 0));
+      } else {
+        precoBaseDesconto = valorSubtotal;
       }
     }
 
@@ -93,16 +108,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Calcular desconto
+    // Calcular desconto restrito a 1 unidade (precoBaseDesconto)
     let desconto = 0;
     if (cupom.tipo === "porcentagem") {
-      desconto = (valorSubtotal * Number(cupom.valor)) / 100;
+      desconto = (precoBaseDesconto * Number(cupom.valor)) / 100;
     } else {
       desconto = Number(cupom.valor);
     }
 
-    // Não permitir desconto maior que o subtotal
-    desconto = Math.min(desconto, valorSubtotal);
+    // Não permitir desconto maior que o valor da unidade, nem do subtotal total
+    desconto = Math.min(desconto, precoBaseDesconto, valorSubtotal);
     const totalComDesconto = Math.max(0, valorSubtotal - desconto);
 
     return NextResponse.json({
