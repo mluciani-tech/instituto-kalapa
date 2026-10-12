@@ -53,7 +53,7 @@ export async function GET(
         .select("id, status")
         .eq("produto_id", id)
         .eq("cliente_email", usuario.email)
-        .in("status", ["pago", "aprovado", "concluido", "finalizado"])
+        .in("status", ["pago", "aprovado", "concluido", "finalizado", "confirmado"])
         .limit(1)
         .maybeSingle();
 

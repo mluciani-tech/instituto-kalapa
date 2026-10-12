@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle, Calendar, Clock, Phone, Sparkles, CheckCircle2, ArrowRight, FileText } from "lucide-react";
+import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle, Calendar, Clock, Phone, Sparkles, CheckCircle2, ArrowRight, FileText, Download } from "lucide-react";
 import Footer from "../../components/Footer";
 import ModalAlterarSenha from "@/components/ModalAlterarSenha";
 import { useCart } from "@/context/CartContext";
@@ -311,18 +311,22 @@ export default function MeusPedidosPage() {
                   ? p.order_nsu.slice(-6).toUpperCase()
                   : `${pedidos.length - idx}`;
 
-                const isPago = p.status === "pago";
+                const isPago = p.status === "pago" || p.status === "confirmado" || p.status === "aprovado" || p.status === "concluido";
                 const isPendente = p.status === "pendente";
                 const isCancelado = p.status === "cancelado";
 
                 const itens = p.itens && p.itens.length > 0
                   ? p.itens
                   : [{
+                      produto_id: p.produto_id || (p.produtos as any)?.id,
                       nome: p.produtos?.nome || "Vivência Terapêutica",
                       quantidade: 1,
                       preco: p.valor,
                       is_teste: (p.produtos as any)?.is_teste,
                       rota_teste: (p.produtos as any)?.rota_teste,
+                      is_biblioteca: (p.produtos as any)?.is_biblioteca || Boolean((p.produtos as any)?.arquivo_url),
+                      arquivo_url: (p.produtos as any)?.arquivo_url,
+                      arquivo_nome: (p.produtos as any)?.arquivo_nome,
                     }];
 
                 return (
@@ -344,7 +348,7 @@ export default function MeusPedidosPage() {
                       <div>
                         {isPago && (
                           <span className="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-semibold bg-brand-mint/20 text-brand-mint border border-brand-mint/30">
-                            Pago
+                            {p.status === "confirmado" && Number(p.valor) === 0 ? "Confirmado (Gratuito)" : "Pago"}
                           </span>
                         )}
                         {isPendente && (
@@ -365,29 +369,50 @@ export default function MeusPedidosPage() {
                       {itens.map((item, i) => {
                         const isItemTeste = (item as any).is_teste || (item as any).slug?.startsWith("teste-") || (item as any).rota_teste;
                         const rotaItemTeste = (item as any).rota_teste || ((item as any).slug ? `/${(item as any).slug}` : "/teste-autoconhecimento");
+                        
+                        const itemProdutoId = (item as any).produto_id || p.produto_id || (p.produtos as any)?.id;
+                        const isItemBiblioteca = (item as any).is_biblioteca || Boolean((item as any).arquivo_url) || (p.produtos as any)?.is_biblioteca || Boolean((p.produtos as any)?.arquivo_url);
 
                         return (
-                          <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-sm text-white/80">
-                            <div>
+                          <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm text-white/80">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <span>{item.nome} × {item.quantidade}</span>
                               {isItemTeste && (
-                                <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
                                   <Sparkles className="w-3 h-3 text-amber-300" />
                                   Teste Online
                                 </span>
                               )}
-                              <span className="font-semibold text-white ml-2">
+                              {isItemBiblioteca && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
+                                  <FileText className="w-3 h-3 text-blue-300" />
+                                  Material Digital
+                                </span>
+                              )}
+                              <span className="font-semibold text-white ml-1">
                                 R$ {((item.preco || 0) * (item.quantidade || 1)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                               </span>
                             </div>
-                            {isPago && isItemTeste && (
-                              <Link
-                                href={rotaItemTeste}
-                                className="inline-flex items-center gap-1 text-xs text-amber-300 hover:text-amber-200 underline font-medium self-start sm:self-center"
-                              >
-                                Iniciar Teste <ArrowRight className="w-3 h-3" />
-                              </Link>
-                            )}
+
+                            <div className="flex items-center gap-2">
+                              {isPago && isItemTeste && (
+                                <Link
+                                  href={rotaItemTeste}
+                                  className="inline-flex items-center gap-1 text-xs text-amber-300 hover:text-amber-200 underline font-medium self-start sm:self-center"
+                                >
+                                  Iniciar Teste <ArrowRight className="w-3 h-3" />
+                                </Link>
+                              )}
+                              {isPago && isItemBiblioteca && itemProdutoId && (
+                                <a
+                                  href={`/api/produtos/${itemProdutoId}/download`}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition-all hover:scale-[1.02] self-start sm:self-center"
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                  Baixar Arquivo
+                                </a>
+                              )}
+                            </div>
                           </div>
                         );
                       })}

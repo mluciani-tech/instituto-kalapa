@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     // Buscar pedidos associados ao usuario_id OU ao e-mail do cliente
     const { data: pedidos, error } = await supabaseAdmin!
       .from("pedidos")
-      .select("id, order_nsu, valor, valor_desconto, status, metodo_pagamento, capture_method, receipt_url, transaction_nsu, itens, created_at, produtos(nome, slug, imagem_url)")
+      .select("id, order_nsu, produto_id, valor, valor_desconto, status, metodo_pagamento, capture_method, receipt_url, transaction_nsu, itens, created_at, produtos(id, nome, slug, imagem_url, arquivo_url, arquivo_nome, is_biblioteca)")
       .or(`usuario_id.eq.${cliente.id},cliente_email.eq.${cliente.email}`)
       .order("created_at", { ascending: false });
 
