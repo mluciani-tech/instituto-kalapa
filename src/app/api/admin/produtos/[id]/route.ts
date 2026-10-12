@@ -54,6 +54,7 @@ export async function PUT(
     "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "vagas_ocupadas_manual", "categoria", "forma_pagamento_disponivel", "atendimento_individual", "duracao_minutos",
     "is_teste", "rota_teste", "orientacoes_pre_teste", "inclui_laudo_pdf", "permite_checkout",
     "is_biblioteca", "arquivo_url", "arquivo_nome", "arquivo_tamanho",
+    "botao_principal_texto", "botao_secundario_texto",
   ];
 
   for (const field of allowedFields) {
@@ -156,6 +157,14 @@ export async function PUT(
     updates.arquivo_tamanho = parseIntegerSafely(updates.arquivo_tamanho);
   }
 
+  if (updates.botao_principal_texto !== undefined) {
+    updates.botao_principal_texto = updates.botao_principal_texto ? String(updates.botao_principal_texto).trim() : null;
+  }
+
+  if (updates.botao_secundario_texto !== undefined) {
+    updates.botao_secundario_texto = updates.botao_secundario_texto ? String(updates.botao_secundario_texto).trim() : null;
+  }
+
   let { data, error } = await supabaseAdmin!
     .from("produtos")
     .update(updates)
@@ -174,7 +183,9 @@ export async function PUT(
     error.message?.includes("is_biblioteca") ||
     error.message?.includes("arquivo_url") ||
     error.message?.includes("arquivo_nome") ||
-    error.message?.includes("arquivo_tamanho")
+    error.message?.includes("arquivo_tamanho") ||
+    error.message?.includes("botao_principal_texto") ||
+    error.message?.includes("botao_secundario_texto")
   )) {
     console.warn("[admin/produtos] Coluna nova não encontrada no banco ao atualizar. Tentando fallback defensivo.");
     if (error.message?.includes("duracao_minutos")) delete updates.duracao_minutos;
@@ -188,6 +199,8 @@ export async function PUT(
     if (error.message?.includes("arquivo_url")) delete updates.arquivo_url;
     if (error.message?.includes("arquivo_nome")) delete updates.arquivo_nome;
     if (error.message?.includes("arquivo_tamanho")) delete updates.arquivo_tamanho;
+    if (error.message?.includes("botao_principal_texto")) delete updates.botao_principal_texto;
+    if (error.message?.includes("botao_secundario_texto")) delete updates.botao_secundario_texto;
     const retry = await supabaseAdmin!
       .from("produtos")
       .update(updates)

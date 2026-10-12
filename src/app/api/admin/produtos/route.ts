@@ -71,6 +71,8 @@ export async function POST(req: NextRequest) {
     arquivo_url,
     arquivo_nome,
     arquivo_tamanho,
+    botao_principal_texto,
+    botao_secundario_texto,
   } = body;
 
   const cleanSlug = typeof slug === "string"
@@ -129,6 +131,8 @@ export async function POST(req: NextRequest) {
     arquivo_url: arquivo_url ? String(arquivo_url).trim() : null,
     arquivo_nome: arquivo_nome ? String(arquivo_nome).trim() : null,
     arquivo_tamanho: parseIntegerSafely(arquivo_tamanho),
+    botao_principal_texto: botao_principal_texto ? String(botao_principal_texto).trim() : null,
+    botao_secundario_texto: botao_secundario_texto ? String(botao_secundario_texto).trim() : null,
   };
 
   let { data, error } = await supabaseAdmin!
@@ -149,7 +153,9 @@ export async function POST(req: NextRequest) {
     error.message?.includes("is_biblioteca") ||
     error.message?.includes("arquivo_url") ||
     error.message?.includes("arquivo_nome") ||
-    error.message?.includes("arquivo_tamanho")
+    error.message?.includes("arquivo_tamanho") ||
+    error.message?.includes("botao_principal_texto") ||
+    error.message?.includes("botao_secundario_texto")
   )) {
     console.warn("[admin/produtos] Coluna nova não encontrada no banco. Tentando fallback defensivo.");
     if (error.message?.includes("duracao_minutos")) delete insertPayload.duracao_minutos;
@@ -163,6 +169,8 @@ export async function POST(req: NextRequest) {
     if (error.message?.includes("arquivo_url")) delete insertPayload.arquivo_url;
     if (error.message?.includes("arquivo_nome")) delete insertPayload.arquivo_nome;
     if (error.message?.includes("arquivo_tamanho")) delete insertPayload.arquivo_tamanho;
+    if (error.message?.includes("botao_principal_texto")) delete insertPayload.botao_principal_texto;
+    if (error.message?.includes("botao_secundario_texto")) delete insertPayload.botao_secundario_texto;
     const retry = await supabaseAdmin!
       .from("produtos")
       .insert(insertPayload)

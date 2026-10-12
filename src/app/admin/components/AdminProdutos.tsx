@@ -43,6 +43,8 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
     arquivo_url: "",
     arquivo_nome: "",
     arquivo_tamanho: "",
+    botao_principal_texto: "",
+    botao_secundario_texto: "",
   });
   const [produtoImagemFile, setProdutoImagemFile] = useState<File | null>(null);
   const [produtoArquivoFile, setProdutoArquivoFile] = useState<File | null>(null);
@@ -103,6 +105,8 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       arquivo_url: "",
       arquivo_nome: "",
       arquivo_tamanho: "",
+      botao_principal_texto: "",
+      botao_secundario_texto: "",
     });
     setProdutoImagemFile(null);
     setProdutoArquivoFile(null);
@@ -212,6 +216,8 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       arquivo_url: arquivoUrl || null,
       arquivo_nome: arquivoNome || null,
       arquivo_tamanho: arquivoTamanho ? parseInt(arquivoTamanho, 10) : null,
+      botao_principal_texto: produtoForm.botao_principal_texto?.trim() || null,
+      botao_secundario_texto: produtoForm.botao_secundario_texto?.trim() || null,
     };
 
     const url = produtoEditando
@@ -266,6 +272,8 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       arquivo_url: p.arquivo_url || "",
       arquivo_nome: p.arquivo_nome || "",
       arquivo_tamanho: p.arquivo_tamanho != null ? p.arquivo_tamanho.toString() : "",
+      botao_principal_texto: p.botao_principal_texto || "",
+      botao_secundario_texto: p.botao_secundario_texto || "",
     });
     setProdutoImagemFile(null);
     setProdutoArquivoFile(null);
@@ -841,6 +849,50 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                           </div>
                         </div>
                       )}
+                    </div>
+
+                    {/* Seção Personalização de Botões de Ação */}
+                    <div className="sm:col-span-2 p-4 rounded-xl border border-brand-purple/20 bg-brand-purple/5 flex flex-col gap-3 transition-colors">
+                      <div>
+                        <span className="text-xs sm:text-sm font-bold text-brand-charcoal flex items-center gap-1.5">
+                          🔘 Personalização dos Botões de Ação (Opcional)
+                        </span>
+                        <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
+                          Altere o texto dos botões de compra/ação deste produto. Se deixado em branco, o sistema aplica automaticamente textos inteligentes contextuais (ex: <em>"Baixar Arquivo"</em> para download livre, <em>"Comprar Avaliação"</em> para testes, ou <em>"Garantir Vaga"</em> para vivências).
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <div>
+                          <label className="block text-xs font-semibold text-brand-charcoal/80 mb-1">
+                            Texto do Botão Principal (Ação Direta)
+                          </label>
+                          <input
+                            value={produtoForm.botao_principal_texto}
+                            onChange={(e) => setProdutoForm({ ...produtoForm, botao_principal_texto: e.target.value })}
+                            className="w-full px-3 py-2 border border-brand-beige rounded-lg text-xs bg-white focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                            placeholder={produtoForm.is_biblioteca ? "Padrão: Baixar Arquivo" : produtoForm.is_teste ? "Padrão: Comprar Avaliação" : "Padrão: Garantir Vaga"}
+                          />
+                          <p className="text-[10px] text-brand-charcoal/50 mt-1">
+                            Exemplos: <em>Baixar Receitas</em>, <em>Acessar Guia</em>, <em>Garantir Minha Vaga</em>, <em>Comprar Agora</em>
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-brand-charcoal/80 mb-1">
+                            Texto do Botão Secundário (Carrinho / Reserva)
+                          </label>
+                          <input
+                            value={produtoForm.botao_secundario_texto}
+                            onChange={(e) => setProdutoForm({ ...produtoForm, botao_secundario_texto: e.target.value })}
+                            className="w-full px-3 py-2 border border-brand-beige rounded-lg text-xs bg-white focus-visible:ring-2 focus-visible:ring-brand-purple/30"
+                            placeholder={produtoForm.is_biblioteca ? "Deixe vazio para ocultar em gratuitos" : "Padrão: Reservar / Carrinho"}
+                          />
+                          <p className="text-[10px] text-brand-charcoal/50 mt-1">
+                            Exemplos: <em>Adicionar à Lista</em>, <em>Carrinho</em>, <em>Reservar</em>
+                          </p>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Seção Modo Informativo / Permitir Checkout */}

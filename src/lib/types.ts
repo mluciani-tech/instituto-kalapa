@@ -28,6 +28,8 @@ export interface Produto {
   arquivo_url?: string | null;
   arquivo_nome?: string | null;
   arquivo_tamanho?: number | null;
+  botao_principal_texto?: string | null;
+  botao_secundario_texto?: string | null;
   created_at?: string;
 }
 

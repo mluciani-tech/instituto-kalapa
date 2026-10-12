@@ -20,6 +20,7 @@ import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
 import ProductAppointmentSection from "@/components/agendamento/ProductAppointmentSection";
 import { isProdutoAgendamento, isProdutoCalendario, permiteCheckoutProduto } from "@/lib/agendamento";
+import { getProdutoBotoesConfig } from "@/lib/produto-botoes";
 import ProductShareMenu from "@/app/components/ProductShareMenu";
 
 interface ProductDetailClientProps {
@@ -59,6 +60,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
   const arquivoDisponivel = Boolean(produto.arquivo_url);
   const permiteCheckout = permiteCheckoutProduto(produto);
 
+  const botoesConfig = getProdutoBotoesConfig(produto);
   const [baixandoArquivo, setBaixandoArquivo] = useState(false);
 
   const handleDownloadArquivo = async () => {
@@ -422,7 +424,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                       className="flex-1 py-3.5 px-5 font-bold text-sm rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/25 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
-                      <span>{baixandoArquivo ? "Iniciando Download..." : "Baixar Arquivo Gratuitamente"}</span>
+                      <span>{baixandoArquivo ? "Iniciando Download..." : botoesConfig.textoPrincipal}</span>
                     </button>
                   ) : (
                     <button
@@ -442,40 +444,42 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                       ) : (
                         <>
                           <Check className="w-4 h-4" />
-                          <span>{isTeste ? "Acessar Avaliação" : "Garantir Vaga Gratuitamente"}</span>
+                          <span>{botoesConfig.textoPrincipal}</span>
                         </>
                       )}
                     </button>
                   )
                 ) : (
                   <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        addItem({
-                          id: produto.id,
-                          slug: produto.slug,
-                          nome: produto.nome,
-                          preco: produto.preco,
-                          imagem_url: produto.imagem_url,
-                          categoria: produto.categoria,
-                          is_teste: isTeste,
-                          rota_teste: produto.rota_teste,
-                        });
-                        openDrawer();
-                      }}
-                      disabled={!!vagasEsgotadas}
-                      className="flex-1 py-3.5 px-4 font-semibold text-sm rounded-xl border border-brand-purple/30 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      <ShoppingBag className="w-4 h-4" />
-                      {isTeste ? "Adicionar ao Carrinho" : "Adicionar à Reserva"}
-                    </button>
+                    {botoesConfig.exibirSecundario && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          addItem({
+                            id: produto.id,
+                            slug: produto.slug,
+                            nome: produto.nome,
+                            preco: produto.preco,
+                            imagem_url: produto.imagem_url,
+                            categoria: produto.categoria,
+                            is_teste: isTeste,
+                            rota_teste: produto.rota_teste,
+                          });
+                          openDrawer();
+                        }}
+                        disabled={!!vagasEsgotadas}
+                        className="flex-1 py-3.5 px-4 font-semibold text-sm rounded-xl border border-brand-purple/30 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <ShoppingBag className="w-4 h-4" />
+                        {botoesConfig.textoSecundario}
+                      </button>
+                    )}
 
                     <button
                       type="button"
                       onClick={handleComprarAgora}
                       disabled={!!vagasEsgotadas}
-                      className={`flex-1 py-3.5 px-5 font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer ${
+                      className={`${botoesConfig.exibirSecundario ? "flex-1" : "w-full"} py-3.5 px-5 font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer ${
                         vagasEsgotadas
                           ? "bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed"
                           : "bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-brand-terracotta/25 hover:-translate-y-0.5"
@@ -485,7 +489,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                         "Turma Lotada"
                       ) : (
                         <>
-                          <span>{isTeste ? "Comprar Avaliação" : "Garantir Vaga"}</span>
+                          <span>{botoesConfig.textoPrincipal}</span>
                           <ArrowRight className="w-4 h-4" />
                         </>
                       )}

@@ -4,11 +4,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, ArrowRight, ShoppingBag, Calendar } from "lucide-react";
+import { Check, ArrowRight, ShoppingBag, Calendar, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
 import { isProdutoAgendamento, isProdutoCalendario, permiteCheckoutProduto } from "@/lib/agendamento";
+import { getProdutoBotoesConfig } from "@/lib/produto-botoes";
 
 export type { Produto };
 
@@ -56,7 +57,32 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
     ? "Acesso Livre"
     : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const temVagasExibiveis = !isTeste && !isAgendamento && permiteCheckout && Boolean(vagas);
+  const botoesConfig = getProdutoBotoesConfig(produto);
+  const [baixando, setBaixando] = useState(false);
+
+  const handleDownloadDireto = async () => {
+    try {
+      setBaixando(true);
+      const res = await fetch(`/api/produtos/${produto.id}/download`);
+      if (res.status === 401) {
+        router.push(`/login?callbackUrl=/produtos/${produto.slug || produto.id}`);
+        return;
+      }
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || "Erro ao baixar arquivo.");
+        setBaixando(false);
+        return;
+      }
+      window.location.href = `/api/produtos/${produto.id}/download`;
+      setTimeout(() => setBaixando(false), 2000);
+    } catch {
+      alert("Erro ao conectar ao servidor.");
+      setBaixando(false);
+    }
+  };
+
+  const temVagasExibiveis = !isTeste && !isAgendamento && !botoesConfig.isDownloadGratuito && permiteCheckout && Boolean(vagas);
   const vagasEsgotadas = temVagasExibiveis && vagas && vagas.restantes <= 0;
   const vagasQuaseEsgotadas = temVagasExibiveis && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
 
@@ -207,44 +233,56 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-2">
-                    {isAgendamento ? (
+                    {botoesConfig.isDownloadGratuito ? (
+                      <button
+                        type="button"
+                        onClick={handleDownloadDireto}
+                        disabled={baixando}
+                        className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 hover:shadow-blue-600/35 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
+                      >
+                        <Download className="w-4 h-4 text-white shrink-0" />
+                        <span>{baixando ? "Iniciando Download..." : botoesConfig.textoPrincipal}</span>
+                      </button>
+                    ) : botoesConfig.isAgendamento ? (
                       <Link
                         href={`/produtos/${produto.id}#agendamento`}
                         className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
                       >
                         <Calendar className="w-4 h-4 text-white shrink-0" />
-                        <span>Ver Agenda & Horários</span>
+                        <span>{botoesConfig.textoPrincipal}</span>
                         <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
                       </Link>
                     ) : (
                       <>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            addItem({
-                              id: produto.id,
-                              slug: produto.slug,
-                              nome: produto.nome,
-                              preco: produto.preco,
-                              imagem_url: produto.imagem_url,
-                              categoria: produto.categoria,
-                              is_teste: isTeste,
-                              rota_teste: produto.rota_teste,
-                            });
-                            openDrawer();
-                          }}
-                          disabled={!!vagasEsgotadas}
-                          className="flex-1 py-3 px-3 font-medium text-xs md:text-sm rounded-xl border border-brand-purple/20 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
-                          title={isTeste ? "Adicionar ao carrinho" : "Adicionar à sua lista de reserva"}
-                        >
-                          <ShoppingBag aria-hidden="true" className="w-4 h-4" />
-                          {isTeste ? "Carrinho" : "Reservar"}
-                        </button>
+                        {botoesConfig.exibirSecundario && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              addItem({
+                                id: produto.id,
+                                slug: produto.slug,
+                                nome: produto.nome,
+                                preco: produto.preco,
+                                imagem_url: produto.imagem_url,
+                                categoria: produto.categoria,
+                                is_teste: isTeste,
+                                rota_teste: produto.rota_teste,
+                              });
+                              openDrawer();
+                            }}
+                            disabled={!!vagasEsgotadas}
+                            className="flex-1 py-3 px-3 font-medium text-xs md:text-sm rounded-xl border border-brand-purple/20 bg-brand-purple/5 hover:bg-brand-purple/10 text-brand-purple transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
+                            title={botoesConfig.textoSecundario}
+                          >
+                            <ShoppingBag aria-hidden="true" className="w-4 h-4" />
+                            {botoesConfig.textoSecundario}
+                          </button>
+                        )}
 
                         <button
                           onClick={handleEscolher}
                           disabled={!!vagasEsgotadas}
-                          className={`flex-1 py-3 px-4 font-semibold text-xs md:text-sm rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
+                          className={`${botoesConfig.exibirSecundario ? "flex-1" : "w-full"} py-3 px-4 font-semibold text-xs md:text-sm rounded-xl transition-[background-color,box-shadow,transform] duration-300 flex items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 ${
                             vagasEsgotadas
                               ? 'bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed'
                               : 'bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5'
@@ -252,7 +290,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                         >
                           {vagasEsgotadas ? 'Turma lotada' : (
                             <>
-                              {isTeste ? "Comprar Agora" : "Garantir Vaga"}
+                              <span>{botoesConfig.textoPrincipal}</span>
                               <ArrowRight aria-hidden="true" className="w-4 h-4" />
                             </>
                           )}
