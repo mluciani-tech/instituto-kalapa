@@ -68,7 +68,39 @@ export async function GET(
       }
     }
 
-    // 4. Gerar Signed URL para download seguro do Supabase Storage
+    // 4. Registrar telemetria/log de download para controle e prospecção de leads
+    try {
+      // Buscar telefone atualizado do usuário caso disponível no cadastro
+      let clienteTelefone = usuario.telefone || "";
+      let clienteNome = usuario.nome || "";
+
+      if (!clienteTelefone) {
+        const { data: userDb } = await supabaseAdmin!
+          .from("usuarios")
+          .select("nome, telefone")
+          .eq("id", usuario.id)
+          .maybeSingle();
+
+        if (userDb) {
+          if (userDb.telefone) clienteTelefone = userDb.telefone;
+          if (userDb.nome) clienteNome = userDb.nome;
+        }
+      }
+
+      await supabaseAdmin!.from("downloads_biblioteca").insert({
+        produto_id: produto.id,
+        usuario_id: usuario.id,
+        cliente_nome: clienteNome,
+        cliente_email: usuario.email,
+        cliente_telefone: clienteTelefone,
+        arquivo_nome: produto.arquivo_nome || "arquivo",
+      });
+    } catch (logErr) {
+      // Falha não-bloqueante de telemetria para não interromper a experiência do usuário
+      console.warn("[download] Aviso ao registrar log de download:", logErr);
+    }
+
+    // 5. Gerar Signed URL para download seguro do Supabase Storage
     const BUCKET = "biblioteca";
     const filePath = produto.arquivo_url;
 

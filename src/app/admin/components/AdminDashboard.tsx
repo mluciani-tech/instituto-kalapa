@@ -25,6 +25,9 @@ import {
   Zap,
   Tag,
   Lightbulb,
+  BookOpen,
+  Download,
+  FileText,
 } from "lucide-react";
 
 interface LinhaNegocioItem {
@@ -88,6 +91,29 @@ interface DashboardData {
     vivencias: LinhaNegocioItem;
   };
   monitorTestes?: MonitorTestesData;
+  bibliotecaStats?: {
+    totalDownloadsPeriodo: number;
+    totalDownloadsGeral: number;
+    leadsUnicosPeriodo: number;
+    leadsUnicosGeral: number;
+    materiaisRanking: {
+      nome: string;
+      downloads: number;
+      produto_id?: string;
+    }[];
+    leadsRecentes: {
+      id: string;
+      produto_id: string;
+      usuario_id: string | null;
+      cliente_nome: string;
+      cliente_email: string | null;
+      cliente_telefone: string | null;
+      telefone_whatsapp: string | null;
+      material_nome: string;
+      tipo_lead: "novo_prospect" | "cliente_recorrente";
+      created_at: string;
+    }[];
+  };
   timeline: {
     date: string;
     label: string;
@@ -694,6 +720,98 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
                 </div>
               </div>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* Seção: Biblioteca Kalapa & Captação de Leads Gratuitos */}
+      {data?.bibliotecaStats && (
+        <div className="bg-gradient-to-r from-amber-500/10 via-brand-beige-light to-brand-mint/10 p-5 rounded-2xl border border-brand-beige shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-brand-terracotta text-white flex items-center justify-center shadow-xs">
+                  <BookOpen className="w-4 h-4" />
+                </span>
+                <h3 className="text-sm font-bold text-brand-purple">
+                  Biblioteca Kalapa & Atração de Novos Clientes (Lead Magnet)
+                </h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-terracotta/15 text-brand-terracotta border border-brand-terracotta/30">
+                  Prospecção Ativa
+                </span>
+              </div>
+              <p className="text-xs text-brand-charcoal/60 mt-1">
+                Acompanhe o volume de downloads de receitas e materiais gratuitos que servem de porta de entrada para vivências e atendimentos.
+              </p>
+            </div>
+            <button
+              onClick={() => onNavigateTab("produtos")}
+              className="text-xs font-semibold text-brand-purple hover:underline flex items-center gap-1 self-start sm:self-auto shrink-0"
+            >
+              Gerenciar Materiais <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {/* Total Downloads no Período */}
+            <div className="bg-white/90 backdrop-blur-xs p-4 rounded-xl border border-brand-beige">
+              <span className="text-[11px] font-medium text-brand-charcoal/60 block">
+                Downloads no Período
+              </span>
+              <div className="text-2xl font-bold text-brand-purple mt-1 flex items-baseline gap-2">
+                {data.bibliotecaStats.totalDownloadsPeriodo}
+                <span className="text-xs font-normal text-brand-charcoal/50">
+                  ({data.bibliotecaStats.totalDownloadsGeral} no total)
+                </span>
+              </div>
+              <p className="text-[10px] text-brand-charcoal/50 mt-1 flex items-center gap-1">
+                <Download className="w-3 h-3 text-brand-terracotta" />
+                Arquivos baixados por clientes logados
+              </p>
+            </div>
+
+            {/* Leads Únicos Captados */}
+            <div className="bg-white/90 backdrop-blur-xs p-4 rounded-xl border border-brand-beige">
+              <span className="text-[11px] font-medium text-brand-charcoal/60 block">
+                Contatos / Leads Únicos
+              </span>
+              <div className="text-2xl font-bold text-emerald-700 mt-1 flex items-baseline gap-2">
+                {data.bibliotecaStats.leadsUnicosPeriodo}
+                <span className="text-xs font-normal text-brand-charcoal/50">
+                  ({data.bibliotecaStats.leadsUnicosGeral} histórico)
+                </span>
+              </div>
+              <p className="text-[10px] text-brand-charcoal/50 mt-1 flex items-center gap-1">
+                <Users className="w-3 h-3 text-emerald-600" />
+                Usuários com interesse demonstrado
+              </p>
+            </div>
+
+            {/* Material Campeão */}
+            <div className="bg-white/90 backdrop-blur-xs p-4 rounded-xl border border-brand-beige sm:col-span-2">
+              <span className="text-[11px] font-medium text-brand-charcoal/60 block">
+                Material Mais Procurado da Biblioteca
+              </span>
+              {data.bibliotecaStats.materiaisRanking && data.bibliotecaStats.materiaisRanking.length > 0 ? (
+                <div className="mt-1 flex items-center justify-between">
+                  <div className="min-w-0 pr-2">
+                    <p className="text-sm font-bold text-brand-charcoal truncate">
+                      {data.bibliotecaStats.materiaisRanking[0].nome}
+                    </p>
+                    <p className="text-[11px] text-brand-charcoal/60 mt-0.5">
+                      {data.bibliotecaStats.materiaisRanking[0].downloads} download(s) no período selecionado
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 border border-amber-200 shrink-0">
+                    🏆 Top 1
+                  </span>
+                </div>
+              ) : (
+                <p className="text-xs text-brand-charcoal/40 italic mt-1.5">
+                  Nenhum download registrado ainda no período.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -1329,6 +1447,112 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
               <strong>Dica Kalapa:</strong> Entrar em contato nas primeiras 2 horas após a tentativa aumenta a taxa de conversão em até 40%.
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* Seção Exclusiva: Central de Prospecção Ativa da Biblioteca Kalapa */}
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-brand-beige shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs shadow-xs">
+                <MessageCircle className="w-4 h-4 text-emerald-700" />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-brand-purple flex items-center gap-2">
+                  Prospecção de Novos Clientes (Downloads da Biblioteca)
+                </h3>
+                <p className="text-xs text-brand-charcoal/50 mt-0.5">
+                  Contate em 1 clique via WhatsApp quem baixou receitas ou artigos gratuitos para iniciar um diálogo de acolhimento
+                </p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => onNavigateTab("usuarios")}
+            className="text-xs text-brand-purple font-medium hover:underline flex items-center gap-1 self-start sm:self-auto shrink-0"
+          >
+            Ver todos usuários <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {data?.bibliotecaStats?.leadsRecentes && data.bibliotecaStats.leadsRecentes.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            {data.bibliotecaStats.leadsRecentes.map((lead) => (
+              <div
+                key={lead.id}
+                className="p-4 rounded-xl border border-brand-beige/80 bg-brand-beige-light/30 hover:bg-white hover:border-emerald-300 transition-all flex flex-col justify-between gap-3"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold text-brand-charcoal">{lead.cliente_nome}</span>
+                        {lead.tipo_lead === "novo_prospect" ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                            🌟 Novo Prospect
+                          </span>
+                        ) : (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                            🌱 Cliente Existente
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-brand-charcoal/60 mt-0.5 truncate">
+                        {lead.cliente_email || "E-mail não informado"}
+                        {lead.cliente_telefone ? ` · ${lead.cliente_telefone}` : ""}
+                      </p>
+                    </div>
+                    <span className="text-[10px] text-brand-charcoal/40 whitespace-nowrap">
+                      {formatDateShort(lead.created_at)}
+                    </span>
+                  </div>
+
+                  <div className="mt-2.5 p-2 rounded-lg bg-white/80 border border-brand-beige/60 text-xs flex items-center gap-2 text-brand-charcoal/80">
+                    <FileText className="w-3.5 h-3.5 text-brand-terracotta shrink-0" />
+                    <span className="truncate font-medium">{lead.material_nome}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-brand-beige/60 flex items-center justify-between gap-2">
+                  <span className="text-[11px] text-brand-charcoal/50 italic">
+                    {lead.tipo_lead === "novo_prospect"
+                      ? "Oportunidade para apresentar vivências e atendimentos"
+                      : "Cliente já ativo na casa"}
+                  </span>
+
+                  {lead.telefone_whatsapp ? (
+                    <a
+                      href={lead.telefone_whatsapp}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0 shadow-xs"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </a>
+                  ) : (
+                    <span className="text-[10px] text-brand-charcoal/40 italic">Sem telefone</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-8 text-center bg-brand-beige-light/40 rounded-xl border border-dashed border-brand-beige">
+            <BookOpen className="w-8 h-8 text-brand-terracotta mx-auto mb-2 opacity-70" />
+            <p className="text-xs font-semibold text-brand-charcoal">Nenhum download registrado ainda</p>
+            <p className="text-[11px] text-brand-charcoal/50 mt-1 max-w-md mx-auto">
+              Assim que os clientes realizarem downloads gratuitos ou pagos na Biblioteca Kalapa, eles aparecerão aqui com atalhos de contato para prospecção calorosa.
+            </p>
+          </div>
+        )}
+
+        <div className="mt-4 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-xs text-emerald-900 flex items-center gap-2.5">
+          <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>
+            <strong>Abordagem Acolhedora:</strong> O botão de WhatsApp já vem com a mensagem personalizada pronta citando o material baixado pelo lead, facilitando o início de uma conversa humanizada.
+          </span>
         </div>
       </div>
     </div>

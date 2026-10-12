@@ -38,15 +38,23 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
   - Identificação de cliente, aplicação de cupons (%, valor fixo ou cortesia 100%).
   - Pix com QR Code dinâmico e Cartão de Crédito.
   - Confirmação com comprovante e links diretos para contato via WhatsApp.
+- **Biblioteca Kalapa (Produtos Digitais & Lead Magnet):**
+  - Download de arquivos digitais (PDF, receitas de dietoterapia chinesa, artigos e apostilas) diretamente pela plataforma com proteção via Signed URLs do Supabase Storage.
+  - Autenticação obrigatória prévia para download, ampliando a captação de usuários e gerando histórico pessoal em "Meus Pedidos".
+  - Botões customizáveis por produto (`botao_principal_texto` e `botao_secundario_texto`), permitindo substituir "Garantir Vaga" por "Baixar Arquivo" ou termos adequados.
 
 ### Painel Administrativo (`/admin`)
+- **Visão Geral, Métricas & Prospecção Ativa:**
+  - KPIs consolidados de faturamento, ocupação de vagas e taxa de conversão.
+  - Indicadores exclusivos da **Biblioteca Kalapa**: total de downloads e contagem de novos contatos/leads gerados.
+  - **Central de Prospecção via WhatsApp**: acionamento em 1 clique de clientes com checkouts pendentes ou que baixaram materiais da Biblioteca, com mensagem personalizada e acolhedora.
 - **Novo Menu Lateral (Sidebar):**
   - *Desktop:* Barra lateral fixa à esquerda com 9 abas organizadas, contadores dinâmicos, alertas pulsantes para novos agendamentos e rodapé integrado com atalho para catálogo e logout.
   - *Mobile:* Drawer deslizante acionado por botão hambúrguer com fechamento rápido ao toque no fundo escurecido.
 - **Gestão de Produtos:**
-  - CRUD completo, upload de fotos no Supabase Storage, alternância entre turma de grupo ou atendimento individual, ajuste manual de vagas.
-  - Geração automática de slug a partir do nome do produto (`slugify`).
-  - Total flexibilidade para produtos compartilharem categorias ou termos de slug sem restrições ou bloqueios no painel.
+  - CRUD completo, upload de fotos e de **arquivos para download (até 50MB)** no bucket `biblioteca` do Supabase Storage.
+  - Alternância entre vivência de grupo, atendimento individual ou produto digital da biblioteca.
+  - Customização de textos de botões de ação e ajuste manual de vagas.
 - **Agenda & Atendimentos:**
   - Grade semanal de disponibilidade da terapeuta (turnos manhã e tarde, sessões de 50 min com intervalo).
   - Bloqueios de feriados e férias sem afetar a grade fixa.

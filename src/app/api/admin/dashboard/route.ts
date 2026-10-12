@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Buscar dados em paralelo
-    const [pedidosRes, produtosRes, usuariosRes, testesCreditosRes] = await Promise.all([
+    const [pedidosRes, produtosRes, usuariosRes, testesCreditosRes, downloadsRes] = await Promise.all([
       supabaseAdmin!
         .from("pedidos")
         .select(`
@@ -56,13 +56,13 @@ export async function GET(req: NextRequest) {
           produto_id,
           itens,
           created_at,
-          produtos (id, nome, slug, is_teste, atendimento_individual, categoria)
+          produtos (id, nome, slug, is_teste, atendimento_individual, categoria, is_biblioteca)
         `)
         .order("created_at", { ascending: false }),
 
       supabaseAdmin!
         .from("produtos")
-        .select("id, nome, slug, preco, vagas_maximas, vagas_ocupadas_manual, ativo, is_teste, rota_teste, atendimento_individual, categoria")
+        .select("id, nome, slug, preco, vagas_maximas, vagas_ocupadas_manual, ativo, is_teste, rota_teste, atendimento_individual, categoria, is_biblioteca, arquivo_nome")
         .order("ordem", { ascending: true }),
 
       supabaseAdmin!
@@ -73,6 +73,21 @@ export async function GET(req: NextRequest) {
         .from("testes_creditos")
         .select("id, status, slug_teste, created_at, utilizado_em, produto_id, pedido_id, email_beneficiario")
         .order("created_at", { ascending: false }),
+
+      supabaseAdmin!
+        .from("downloads_biblioteca")
+        .select(`
+          id,
+          produto_id,
+          usuario_id,
+          cliente_nome,
+          cliente_email,
+          cliente_telefone,
+          arquivo_nome,
+          created_at,
+          produtos (id, nome, slug)
+        `)
+        .order("created_at", { ascending: false }),
     ]);
 
     if (pedidosRes.error || produtosRes.error) {
@@ -82,6 +97,7 @@ export async function GET(req: NextRequest) {
 
     const allPedidos = pedidosRes.data || [];
     const allProdutos = produtosRes.data || [];
+    const allDownloads = downloadsRes.data || [];
     const totalUsuarios = usuariosRes.count || 0;
 
     // Helper para categorização de item
@@ -335,6 +351,83 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // ==========================================
+    // Telemetria & Leads da Biblioteca Kalapa
+    // ==========================================
+    const downloadsPeriodo = sinceDate
+      ? allDownloads.filter((d: { created_at: string }) => new Date(d.created_at) >= sinceDate)
+      : allDownloads;
+
+    // Contagem de leads únicos por e-mail que baixaram
+    const emailsLeadsPeriodo = new Set(
+      downloadsPeriodo.map((d: { cliente_email?: string | null }) => (d.cliente_email || "").toLowerCase().trim()).filter(Boolean)
+    );
+    const emailsLeadsTotal = new Set(
+      allDownloads.map((d: { cliente_email?: string | null }) => (d.cliente_email || "").toLowerCase().trim()).filter(Boolean)
+    );
+
+    // Contagem de compras pagas por e-mail para qualificar se o lead já é cliente ou novo prospect
+    const emailsClientesCompradores = new Set(
+      pedidosPagosTotal
+        .filter((p) => Number(p.valor) > 0)
+        .map((p) => (p.cliente_email || "").toLowerCase().trim())
+        .filter(Boolean)
+    );
+
+    // Ranking de materiais mais baixados
+    const countPorMaterial: Record<string, { nome: string; downloads: number; produto_id?: string }> = {};
+    for (const d of downloadsPeriodo) {
+      const prodObj = Array.isArray(d.produtos) ? d.produtos[0] : d.produtos;
+      const nomeMaterial = prodObj?.nome || d.arquivo_nome || "Material da Biblioteca";
+      const chave = d.produto_id || nomeMaterial;
+      if (!countPorMaterial[chave]) {
+        countPorMaterial[chave] = { nome: nomeMaterial, downloads: 0, produto_id: d.produto_id };
+      }
+      countPorMaterial[chave].downloads += 1;
+    }
+    const materiaisRanking = Object.values(countPorMaterial).sort((a, b) => b.downloads - a.downloads);
+
+    // Lista de leads recentes da biblioteca com WhatsApp em 1 clique
+    const leadsBibliotecaRecentes = allDownloads.slice(0, 20).map((d: any) => {
+      const prodObj = Array.isArray(d.produtos) ? d.produtos[0] : d.produtos;
+      const materialNome = prodObj?.nome || d.arquivo_nome || "Material da Biblioteca";
+
+      let telLimpo = (d.cliente_telefone || "").replace(/\D/g, "");
+      if (telLimpo.length === 10 || telLimpo.length === 11) {
+        telLimpo = `55${telLimpo}`;
+      }
+
+      const nomeCliente = (d.cliente_nome || "").trim() || "Cliente";
+      const emailCliente = (d.cliente_email || "").toLowerCase().trim();
+      const jaComprou = emailCliente ? emailsClientesCompradores.has(emailCliente) : false;
+
+      // Mensagem calorosa para abordagem no WhatsApp
+      const msgTexto = `Olá ${nomeCliente}, tudo bem? Sou da equipe do Instituto Kalapa. Vi que você baixou o conteúdo "${materialNome}" da nossa Biblioteca! Gostaria de saber o que achou do material e se ficou com alguma dúvida. Estamos à disposição caso queira se aprofundar!`;
+      const msgEncoded = encodeURIComponent(msgTexto);
+
+      return {
+        id: d.id,
+        produto_id: d.produto_id,
+        usuario_id: d.usuario_id,
+        cliente_nome: nomeCliente,
+        cliente_email: d.cliente_email,
+        cliente_telefone: d.cliente_telefone,
+        telefone_whatsapp: telLimpo ? `https://wa.me/${telLimpo}?text=${msgEncoded}` : null,
+        material_nome: materialNome,
+        tipo_lead: jaComprou ? ("cliente_recorrente" as const) : ("novo_prospect" as const),
+        created_at: d.created_at,
+      };
+    });
+
+    const bibliotecaStats = {
+      totalDownloadsPeriodo: downloadsPeriodo.length,
+      totalDownloadsGeral: allDownloads.length,
+      leadsUnicosPeriodo: emailsLeadsPeriodo.size,
+      leadsUnicosGeral: emailsLeadsTotal.size,
+      materiaisRanking,
+      leadsRecentes: leadsBibliotecaRecentes,
+    };
+
     return NextResponse.json({
       periodo,
       kpis: {
@@ -351,6 +444,7 @@ export async function GET(req: NextRequest) {
       },
       linhasNegocio,
       monitorTestes,
+      bibliotecaStats,
       timeline,
       metodosPagamento,
       produtosRanking,

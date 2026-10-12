@@ -106,7 +106,7 @@ export default function AdminManual() {
       title: "9. Histórico & Versões do Sistema",
       icon: Zap,
       summary: "Registro de atualizações contínuas e notas de versão do projeto.",
-      badge: "v2.11",
+      badge: "v2.12",
     },
   ];
 
@@ -456,6 +456,36 @@ export default function AdminManual() {
                     2. O sistema calcula automaticamente: <code>Vagas Restantes = Vagas Máximas - Vagas Pagas</code>.<br />
                     3. Caso você queira ajustar manualmente vagas preenchidas fora do site (ex: transferências bancárias manuais), use o campo de ajuste manual de vagas na edição do produto.
                   </p>
+                </div>
+
+                {/* NOVO: Biblioteca Kalapa & Produtos Digitais */}
+                <div className="border border-brand-terracotta/30 bg-brand-terracotta/5 rounded-xl p-4 space-y-3">
+                  <h4 className="font-bold text-brand-terracotta flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-brand-terracotta" /> Biblioteca Kalapa & Produtos Digitais (Receitas, Artigos, E-books)
+                  </h4>
+                  <p className="text-brand-charcoal/80 leading-relaxed">
+                    Permite disponibilizar arquivos digitais protegidos para download (PDF, imagens, documentos até 50MB):
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-brand-charcoal/80">
+                    <li><strong>Como Ativar:</strong> No cadastro/edição do produto, marque a opção <em>&ldquo;Disponibilizar na Biblioteca Kalapa (Download de Arquivo)&rdquo;</em>.</li>
+                    <li><strong>Upload Seguro:</strong> Faça o upload do arquivo diretamente para o bucket <code>biblioteca</code> no Supabase Storage. O sistema gera links assinados temporários (Signed URLs) protegendo o arquivo contra vazamento externo.</li>
+                    <li><strong>Produtos Gratuitos vs Pagos:</strong> Se o valor for R$ 0, o download é liberado imediatamente para qualquer usuário autenticado (login obrigatório). Se tiver custo, o sistema valida se há pedido aprovado/pago antes de liberar.</li>
+                    <li><strong>Prospecção e Atração:</strong> Cada download gera um registro automático com os dados do cliente, permitindo contato direto via WhatsApp no painel <em>Visão Geral</em>.</li>
+                  </ul>
+                </div>
+
+                {/* NOVO: Botões Personalizáveis */}
+                <div className="border border-brand-purple/20 bg-brand-purple/5 rounded-xl p-4 space-y-3">
+                  <h4 className="font-bold text-brand-purple flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-brand-purple" /> Personalização Total dos Botões de Ação
+                  </h4>
+                  <p className="text-brand-charcoal/80 leading-relaxed">
+                    Você pode personalizar os textos dos botões de cada produto para se adequar ao propósito do conteúdo (ex: substituir &ldquo;Garantir Vaga&rdquo; ou &ldquo;Reservar&rdquo; por &ldquo;Baixar Arquivo&rdquo;, &ldquo;Acessar Conteúdo&rdquo;, etc.):
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-brand-charcoal/80">
+                    <li><strong>Botão Principal:</strong> Define o texto do botão principal de ação nos cards da vitrine e na página de detalhes. Se deixado em branco, adota automaticamente o padrão inteligente (ex: &ldquo;Baixar Arquivo&rdquo; para biblioteca gratuita, &ldquo;Agendar Sessão&rdquo; para atendimentos individuais, etc.).</li>
+                    <li><strong>Botão Secundário:</strong> Define o texto do botão auxiliar de reserva/detalhes. Pode ser ocultado ou personalizado livremente em cada produto.</li>
+                  </ul>
                 </div>
 
                 <div className="border border-brand-purple/20 bg-brand-beige-light/40 rounded-xl p-4 space-y-2">
@@ -939,16 +969,34 @@ export default function AdminManual() {
                   </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-mono font-bold text-xs">
-                  Versão Atual: v2.11.0
+                  Versão Atual: v2.12.0
                 </div>
               </div>
 
               <div className="space-y-4">
-                {/* v2.11.0 */}
+                {/* v2.12.0 */}
                 <div className="relative pl-6 border-l-2 border-brand-purple space-y-1.5">
                   <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-purple" />
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-purple">v2.11.0</span>
+                    <span className="font-bold text-xs text-brand-purple">v2.12.0</span>
+                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-brand-charcoal">
+                    Biblioteca Kalapa, Personalização de Botões & Central de Prospecção de Leads
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
+                    <li><strong>Biblioteca Kalapa:</strong> Novo atalho na Hero da Home (&ldquo;Biblioteca Kalapa&rdquo;) e suporte a produtos com arquivos digitais (PDF, artigos, receitas de dietoterapia) com download seguro via URLs assinadas do Supabase Storage.</li>
+                    <li><strong>Autenticação Obrigatória no Download:</strong> Exigência suave de login/cadastro para baixar qualquer conteúdo da biblioteca, transformando materiais gratuitos em poderosos ímãs de novos clientes (Lead Magnet).</li>
+                    <li><strong>Personalização de Botões por Produto:</strong> Flexibilidade total no cadastro de produtos para definir o texto do botão principal e secundário, substituindo &ldquo;Garantir Vaga&rdquo; e &ldquo;Reservar&rdquo; por expressões sob medida como &ldquo;Baixar Arquivo&rdquo;.</li>
+                    <li><strong>Painel de Telemetria & Prospecção no Admin:</strong> Tabela dedicada de rastreamento de downloads e novo widget no painel <em>Visão Geral</em> com identificação de <em>Novo Prospect</em> vs <em>Cliente Existente</em> e acionamento direto via WhatsApp em 1 clique com mensagem de acolhimento personalizada.</li>
+                  </ul>
+                </div>
+
+                {/* v2.11.0 */}
+                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
+                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-brand-charcoal/70">v2.11.0</span>
                     <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">
