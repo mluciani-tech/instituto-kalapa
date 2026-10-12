@@ -24,6 +24,10 @@ export interface Produto {
   orientacoes_pre_teste?: string | null;
   inclui_laudo_pdf?: boolean;
   permite_checkout?: boolean;
+  is_biblioteca?: boolean;
+  arquivo_url?: string | null;
+  arquivo_nome?: string | null;
+  arquivo_tamanho?: number | null;
   created_at?: string;
 }
 

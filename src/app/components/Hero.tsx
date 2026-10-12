@@ -116,6 +116,12 @@ export default function Hero() {
             >
               <span>Teste de Autoconhecimento</span>
             </Link>
+            <Link
+              href="/produtos?categoria=biblioteca"
+              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
+            >
+              <span>Biblioteca Kalapa</span>
+            </Link>
             <a
               href="#experiencia"
               className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"

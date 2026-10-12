@@ -39,8 +39,14 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
     destaque: false,
     ativo: true,
     ordem: "0",
+    is_biblioteca: false,
+    arquivo_url: "",
+    arquivo_nome: "",
+    arquivo_tamanho: "",
   });
   const [produtoImagemFile, setProdutoImagemFile] = useState<File | null>(null);
+  const [produtoArquivoFile, setProdutoArquivoFile] = useState<File | null>(null);
+  const [uploadingArquivo, setUploadingArquivo] = useState(false);
   const [uploadingImagem, setUploadingImagem] = useState(false);
   const [salvandoProduto, setSalvandoProduto] = useState(false);
   const [produtoSucesso, setProdutoSucesso] = useState("");
@@ -93,8 +99,13 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       inclui_laudo_pdf: true,
       permite_checkout: true,
       destaque: false, ativo: true, ordem: "0",
+      is_biblioteca: false,
+      arquivo_url: "",
+      arquivo_nome: "",
+      arquivo_tamanho: "",
     });
     setProdutoImagemFile(null);
+    setProdutoArquivoFile(null);
     setProdutoEditando(null);
   };
 
@@ -125,6 +136,36 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
         return;
       }
       setUploadingImagem(false);
+    }
+
+    let arquivoUrl = produtoForm.arquivo_url;
+    let arquivoNome = produtoForm.arquivo_nome;
+    let arquivoTamanho = produtoForm.arquivo_tamanho;
+
+    // Upload de arquivo de biblioteca se selecionado
+    if (produtoArquivoFile) {
+      setUploadingArquivo(true);
+      const formData = new FormData();
+      formData.append("file", produtoArquivoFile);
+
+      const uploadArqRes = await fetch("/api/upload-arquivo", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (uploadArqRes.ok) {
+        const uploadArqData = await uploadArqRes.json();
+        arquivoUrl = uploadArqData.url;
+        arquivoNome = uploadArqData.originalName;
+        arquivoTamanho = uploadArqData.size.toString();
+      } else {
+        const errData = await uploadArqRes.json();
+        setError(errData.error || "Erro ao fazer upload do arquivo da biblioteca");
+        setSalvandoProduto(false);
+        setUploadingArquivo(false);
+        return;
+      }
+      setUploadingArquivo(false);
     }
     
     const parseVagas = (val: string) => {
@@ -167,6 +208,10 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       orientacoes_pre_teste: produtoForm.is_teste ? (produtoForm.orientacoes_pre_teste.trim() || null) : null,
       inclui_laudo_pdf: produtoForm.is_teste ? produtoForm.inclui_laudo_pdf : false,
       permite_checkout: Boolean(produtoForm.permite_checkout),
+      is_biblioteca: Boolean(produtoForm.is_biblioteca),
+      arquivo_url: arquivoUrl || null,
+      arquivo_nome: arquivoNome || null,
+      arquivo_tamanho: arquivoTamanho ? parseInt(arquivoTamanho, 10) : null,
     };
 
     const url = produtoEditando
@@ -217,8 +262,13 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
       destaque: p.destaque ?? false,
       ativo: p.ativo ?? true,
       ordem: (p.ordem ?? 0).toString(),
+      is_biblioteca: Boolean(p.is_biblioteca),
+      arquivo_url: p.arquivo_url || "",
+      arquivo_nome: p.arquivo_nome || "",
+      arquivo_tamanho: p.arquivo_tamanho != null ? p.arquivo_tamanho.toString() : "",
     });
     setProdutoImagemFile(null);
+    setProdutoArquivoFile(null);
     setShowProdutoForm(true);
     setFormProdutoDestacado(true);
 
@@ -702,6 +752,97 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                       )}
                     </div>
 
+                    {/* Seção Biblioteca Kalapa (Download de Arquivo) */}
+                    <div className="sm:col-span-2 p-4 rounded-xl border border-blue-400/30 bg-blue-50/20 flex flex-col gap-3 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id="input-is-biblioteca"
+                          checked={produtoForm.is_biblioteca}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setProdutoForm((prev) => ({
+                              ...prev,
+                              is_biblioteca: checked,
+                              categoria: checked && (!prev.categoria || prev.categoria === "atendimentos" || prev.categoria === "vivencias") ? "biblioteca" : prev.categoria,
+                              atendimento_individual: checked ? false : prev.atendimento_individual,
+                            }));
+                          }}
+                          className="mt-1 w-4 h-4 rounded border-blue-500 text-blue-600 focus:ring-blue-400/30 cursor-pointer"
+                        />
+                        <label htmlFor="input-is-biblioteca" className="cursor-pointer select-none">
+                          <span className="text-xs sm:text-sm font-bold text-brand-charcoal flex items-center gap-1.5">
+                            📚 Biblioteca Kalapa (Material Digital para Download)
+                          </span>
+                          <p className="text-xs text-brand-charcoal/70 mt-1 leading-relaxed">
+                            Marque esta opção para receitas, artigos, apostilas, documentos ou áudios para download. O usuário precisa estar autenticado no sistema para efetuar o download. Se o preço for R$ 0, o download é liberado imediatamente para quem estiver logado.
+                          </p>
+                        </label>
+                      </div>
+
+                      {produtoForm.is_biblioteca && (
+                        <div className="mt-1 pt-3 border-t border-blue-200/50 bg-white/80 rounded-xl p-3.5 space-y-3">
+                          <div>
+                            <label className="block text-xs font-bold text-brand-charcoal mb-1">
+                              📎 Arquivo Digital Anexo (PDF, DOC, XLS, Imagens, MP3 — até 50MB)
+                            </label>
+
+                            {produtoForm.arquivo_url && (
+                              <div className="mb-2 p-2.5 rounded-lg border border-blue-200 bg-blue-50/50 flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2 truncate">
+                                  <span className="font-semibold text-blue-900 truncate">
+                                    📄 {produtoForm.arquivo_nome || produtoForm.arquivo_url}
+                                  </span>
+                                  {produtoForm.arquivo_tamanho && (
+                                    <span className="text-[11px] text-blue-700/70">
+                                      ({(parseInt(produtoForm.arquivo_tamanho, 10) / (1024 * 1024)).toFixed(2)} MB)
+                                    </span>
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setProdutoForm((prev) => ({
+                                      ...prev,
+                                      arquivo_url: "",
+                                      arquivo_nome: "",
+                                      arquivo_tamanho: "",
+                                    }));
+                                    setProdutoArquivoFile(null);
+                                  }}
+                                  className="text-red-500 hover:text-red-700 font-semibold text-xs ml-2 shrink-0 cursor-pointer"
+                                >
+                                  Remover arquivo
+                                </button>
+                              </div>
+                            )}
+
+                            <input
+                              type="file"
+                              accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.mp3,.txt"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0] || null;
+                                setProdutoArquivoFile(file);
+                                if (file) {
+                                  setProdutoForm((prev) => ({
+                                    ...prev,
+                                    arquivo_nome: file.name,
+                                    arquivo_tamanho: file.size.toString(),
+                                  }));
+                                }
+                              }}
+                              className="w-full text-xs text-brand-charcoal/80 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-800 hover:file:bg-blue-200 cursor-pointer"
+                            />
+                            <p className="text-[11px] text-brand-charcoal/60 mt-1">
+                              {uploadingArquivo
+                                ? "Enviando arquivo para o armazenamento seguro..."
+                                : "Selecione um novo arquivo para upload ou substituição."}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     {/* Seção Modo Informativo / Permitir Checkout */}
                     <div className="sm:col-span-2 p-4 rounded-xl border border-amber-300/60 bg-amber-50/50 flex flex-col gap-2 transition-colors">
                       <div className="flex items-start gap-3">
@@ -888,6 +1029,11 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                         {(p.permite_checkout === false || p.categoria?.toLowerCase() === "calendario" || p.slug?.startsWith("calendario")) && (
                           <span className="text-xs bg-purple-50 text-purple-800 border border-purple-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
                             📢 Informativo (Sem Checkout)
+                          </span>
+                        )}
+                        {(p.is_biblioteca || p.arquivo_url) && (
+                          <span className="text-xs bg-blue-50 text-blue-800 border border-blue-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
+                            📚 Biblioteca {p.arquivo_nome ? `(${p.arquivo_nome})` : "(Download)"}
                           </span>
                         )}
                       </div>

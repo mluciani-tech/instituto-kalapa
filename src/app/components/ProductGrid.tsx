@@ -36,6 +36,15 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
                 p.atendimento_individual === true ||
                 (p.atendimento_individual === undefined && isProdutoAgendamento(p))
             );
+          } else if (cat === "biblioteca" || cat === "biblioteca-kalapa") {
+            produtosData = produtosData.filter(
+              (p) =>
+                p.is_biblioteca === true ||
+                normalize(p.categoria || "") === "biblioteca" ||
+                normalize(p.categoria || "") === "biblioteca-kalapa" ||
+                normalize(p.slug || "") === "biblioteca" ||
+                normalize(p.slug || "") === "biblioteca-kalapa"
+            );
           } else {
             produtosData = produtosData.filter(
               (p) => normalize(p.categoria || "") === cat || normalize(p.slug || "") === cat

@@ -13,6 +13,8 @@ const nomesCategorias: Record<string, string> = {
   vivencias: "Vivências",
   atendimentos: "Atendimentos",
   calendario: "Calendário",
+  biblioteca: "Biblioteca Kalapa",
+  "biblioteca-kalapa": "Biblioteca Kalapa",
 };
 
 export default async function ProdutosPage({

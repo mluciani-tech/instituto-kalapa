@@ -52,7 +52,8 @@ export async function PUT(
   const allowedFields = [
     "slug", "nome", "descricao", "descricao_curta", "preco",
     "imagem_url", "beneficios", "destaque", "ativo", "ordem", "vagas_maximas", "vagas_ocupadas_manual", "categoria", "forma_pagamento_disponivel", "atendimento_individual", "duracao_minutos",
-    "is_teste", "rota_teste", "orientacoes_pre_teste", "inclui_laudo_pdf",
+    "is_teste", "rota_teste", "orientacoes_pre_teste", "inclui_laudo_pdf", "permite_checkout",
+    "is_biblioteca", "arquivo_url", "arquivo_nome", "arquivo_tamanho",
   ];
 
   for (const field of allowedFields) {
@@ -139,6 +140,22 @@ export async function PUT(
     updates.permite_checkout = Boolean(updates.permite_checkout);
   }
 
+  if (updates.is_biblioteca !== undefined) {
+    updates.is_biblioteca = Boolean(updates.is_biblioteca);
+  }
+
+  if (updates.arquivo_url !== undefined) {
+    updates.arquivo_url = updates.arquivo_url ? String(updates.arquivo_url).trim() : null;
+  }
+
+  if (updates.arquivo_nome !== undefined) {
+    updates.arquivo_nome = updates.arquivo_nome ? String(updates.arquivo_nome).trim() : null;
+  }
+
+  if (updates.arquivo_tamanho !== undefined) {
+    updates.arquivo_tamanho = parseIntegerSafely(updates.arquivo_tamanho);
+  }
+
   let { data, error } = await supabaseAdmin!
     .from("produtos")
     .update(updates)
@@ -153,7 +170,11 @@ export async function PUT(
     error.message?.includes("rota_teste") ||
     error.message?.includes("orientacoes_pre_teste") ||
     error.message?.includes("inclui_laudo_pdf") ||
-    error.message?.includes("permite_checkout")
+    error.message?.includes("permite_checkout") ||
+    error.message?.includes("is_biblioteca") ||
+    error.message?.includes("arquivo_url") ||
+    error.message?.includes("arquivo_nome") ||
+    error.message?.includes("arquivo_tamanho")
   )) {
     console.warn("[admin/produtos] Coluna nova não encontrada no banco ao atualizar. Tentando fallback defensivo.");
     if (error.message?.includes("duracao_minutos")) delete updates.duracao_minutos;
@@ -163,6 +184,10 @@ export async function PUT(
     if (error.message?.includes("orientacoes_pre_teste")) delete updates.orientacoes_pre_teste;
     if (error.message?.includes("inclui_laudo_pdf")) delete updates.inclui_laudo_pdf;
     if (error.message?.includes("permite_checkout")) delete updates.permite_checkout;
+    if (error.message?.includes("is_biblioteca")) delete updates.is_biblioteca;
+    if (error.message?.includes("arquivo_url")) delete updates.arquivo_url;
+    if (error.message?.includes("arquivo_nome")) delete updates.arquivo_nome;
+    if (error.message?.includes("arquivo_tamanho")) delete updates.arquivo_tamanho;
     const retry = await supabaseAdmin!
       .from("produtos")
       .update(updates)

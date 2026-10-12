@@ -67,6 +67,10 @@ export async function POST(req: NextRequest) {
     orientacoes_pre_teste,
     inclui_laudo_pdf,
     permite_checkout,
+    is_biblioteca,
+    arquivo_url,
+    arquivo_nome,
+    arquivo_tamanho,
   } = body;
 
   const cleanSlug = typeof slug === "string"
@@ -121,6 +125,10 @@ export async function POST(req: NextRequest) {
     orientacoes_pre_teste: orientacoes_pre_teste ? String(orientacoes_pre_teste).trim() : null,
     inclui_laudo_pdf: inclui_laudo_pdf !== false,
     permite_checkout: permite_checkout !== false,
+    is_biblioteca: Boolean(is_biblioteca),
+    arquivo_url: arquivo_url ? String(arquivo_url).trim() : null,
+    arquivo_nome: arquivo_nome ? String(arquivo_nome).trim() : null,
+    arquivo_tamanho: parseIntegerSafely(arquivo_tamanho),
   };
 
   let { data, error } = await supabaseAdmin!
@@ -137,7 +145,11 @@ export async function POST(req: NextRequest) {
     error.message?.includes("rota_teste") ||
     error.message?.includes("orientacoes_pre_teste") ||
     error.message?.includes("inclui_laudo_pdf") ||
-    error.message?.includes("permite_checkout")
+    error.message?.includes("permite_checkout") ||
+    error.message?.includes("is_biblioteca") ||
+    error.message?.includes("arquivo_url") ||
+    error.message?.includes("arquivo_nome") ||
+    error.message?.includes("arquivo_tamanho")
   )) {
     console.warn("[admin/produtos] Coluna nova não encontrada no banco. Tentando fallback defensivo.");
     if (error.message?.includes("duracao_minutos")) delete insertPayload.duracao_minutos;
@@ -147,6 +159,10 @@ export async function POST(req: NextRequest) {
     if (error.message?.includes("orientacoes_pre_teste")) delete insertPayload.orientacoes_pre_teste;
     if (error.message?.includes("inclui_laudo_pdf")) delete insertPayload.inclui_laudo_pdf;
     if (error.message?.includes("permite_checkout")) delete insertPayload.permite_checkout;
+    if (error.message?.includes("is_biblioteca")) delete insertPayload.is_biblioteca;
+    if (error.message?.includes("arquivo_url")) delete insertPayload.arquivo_url;
+    if (error.message?.includes("arquivo_nome")) delete insertPayload.arquivo_nome;
+    if (error.message?.includes("arquivo_tamanho")) delete insertPayload.arquivo_tamanho;
     const retry = await supabaseAdmin!
       .from("produtos")
       .insert(insertPayload)

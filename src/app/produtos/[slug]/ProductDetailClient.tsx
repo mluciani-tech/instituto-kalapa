@@ -12,7 +12,9 @@ import {
   Sparkles,
   MessageCircle,
   ShieldCheck,
-  Calendar
+  Calendar,
+  Download,
+  FileText
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
@@ -53,9 +55,50 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
 
   const isTeste = Boolean(produto.is_teste);
   const isCalendario = isProdutoCalendario(produto);
+  const isBiblioteca = Boolean(produto.is_biblioteca) || Boolean(produto.arquivo_url);
+  const arquivoDisponivel = Boolean(produto.arquivo_url);
   const permiteCheckout = permiteCheckoutProduto(produto);
 
-  const temVagasExibiveis = !isTeste && !isAgendamento && permiteCheckout && Boolean(vagas);
+  const [baixandoArquivo, setBaixandoArquivo] = useState(false);
+
+  const handleDownloadArquivo = async () => {
+    try {
+      setBaixandoArquivo(true);
+      const res = await fetch(`/api/produtos/${produto.id}/download`, {
+        method: "GET",
+      });
+
+      if (res.status === 401) {
+        // Usuário não autenticado
+        router.push(`/login?callbackUrl=/produtos/${produto.slug}`);
+        return;
+      }
+
+      if (res.status === 403) {
+        const data = await res.json();
+        alert(data.error || "Você precisa concluir a compra para baixar este material.");
+        setBaixandoArquivo(false);
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || "Erro ao baixar arquivo. Tente novamente mais tarde.");
+        setBaixandoArquivo(false);
+        return;
+      }
+
+      // Se respondeu com redirect ou blob, aciona o download
+      window.location.href = `/api/produtos/${produto.id}/download`;
+      setTimeout(() => setBaixandoArquivo(false), 2000);
+    } catch (err) {
+      console.error("Erro ao baixar:", err);
+      alert("Erro ao conectar com o servidor. Tente novamente.");
+      setBaixandoArquivo(false);
+    }
+  };
+
+  const temVagasExibiveis = !isTeste && !isAgendamento && !isBiblioteca && permiteCheckout && Boolean(vagas);
   const vagasEsgotadas = temVagasExibiveis && vagas && vagas.restantes <= 0;
   const vagasQuaseEsgotadas = temVagasExibiveis && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
 
@@ -243,6 +286,25 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                 {produto.orientacoes_pre_teste || "Acesso liberado imediatamente após a confirmação do pagamento. O teste pode ser realizado no seu próprio ritmo com relatório salvo permanentemente no seu histórico."}
               </p>
             </div>
+          ) : isBiblioteca ? (
+            <div className="mb-6 p-4 rounded-xl bg-blue-50/90 border border-blue-200">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <span className="text-xs uppercase tracking-wider font-semibold text-blue-900 flex items-center gap-1.5">
+                  <FileText className="w-4 h-4 text-blue-600" />
+                  <span>Material Digital da Biblioteca Kalapa</span>
+                </span>
+                {produto.arquivo_nome && (
+                  <span className="text-[11px] font-semibold text-blue-800 bg-white px-2.5 py-0.5 rounded-full border border-blue-300 truncate max-w-[200px]">
+                    {produto.arquivo_nome}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-blue-950/80 leading-relaxed">
+                {isGratuito
+                  ? "Este arquivo é gratuito para todos os usuários com conta no aplicativo. Conecte-se para baixar o arquivo."
+                  : "Material digital com liberação imediata para download após a confirmação de pagamento."}
+              </p>
+            </div>
           ) : !isAgendamento && temVagasExibiveis && vagas && (
             <div className="mb-6 p-4 rounded-xl bg-brand-offwhite border border-brand-charcoal/10">
               <div className="flex items-center justify-between text-xs sm:text-sm mb-1.5">
@@ -352,27 +414,39 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                     <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
                   </a>
                 ) : isGratuito ? (
-                  <button
-                    type="button"
-                    onClick={handleComprarGratuito}
-                    disabled={!!vagasEsgotadas || loadingGratuito}
-                    className={`flex-1 py-3.5 px-5 font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer ${
-                      vagasEsgotadas
-                        ? "bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed"
-                        : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/25 hover:-translate-y-0.5"
-                    }`}
-                  >
-                    {loadingGratuito ? (
-                      "Processando..."
-                    ) : vagasEsgotadas ? (
-                      "Turma Lotada"
-                    ) : (
-                      <>
-                        <Check className="w-4 h-4" />
-                        <span>{isTeste ? "Acessar Avaliação" : "Garantir Vaga Gratuitamente"}</span>
-                      </>
-                    )}
-                  </button>
+                  arquivoDisponivel ? (
+                    <button
+                      type="button"
+                      onClick={handleDownloadArquivo}
+                      disabled={baixandoArquivo}
+                      className="flex-1 py-3.5 px-5 font-bold text-sm rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/25 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>{baixandoArquivo ? "Iniciando Download..." : "Baixar Arquivo Gratuitamente"}</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleComprarGratuito}
+                      disabled={!!vagasEsgotadas || loadingGratuito}
+                      className={`flex-1 py-3.5 px-5 font-bold text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md cursor-pointer ${
+                        vagasEsgotadas
+                          ? "bg-brand-charcoal/10 text-brand-charcoal/40 cursor-not-allowed"
+                          : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/25 hover:-translate-y-0.5"
+                      }`}
+                    >
+                      {loadingGratuito ? (
+                        "Processando..."
+                      ) : vagasEsgotadas ? (
+                        "Turma Lotada"
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>{isTeste ? "Acessar Avaliação" : "Garantir Vaga Gratuitamente"}</span>
+                        </>
+                      )}
+                    </button>
+                  )
                 ) : (
                   <>
                     <button
