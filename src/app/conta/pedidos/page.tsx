@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle, Calendar, Clock, Phone, Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
+import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle, Calendar, Clock, Phone, Sparkles, CheckCircle2, ArrowRight, FileText } from "lucide-react";
 import Footer from "../../components/Footer";
 import ModalAlterarSenha from "@/components/ModalAlterarSenha";
 import { useCart } from "@/context/CartContext";
@@ -33,7 +33,7 @@ export default function MeusPedidosPage() {
   const [retomandoId, setRetomandoId] = useState<string | null>(null);
   const [erroRetomada, setErroRetomada] = useState<{ [pedidoId: string]: string }>({});
   const [modalSenhaOpen, setModalSenhaOpen] = useState(false);
-  const { setCartItems } = useCart();
+  const { setCartItems, clearCart, addItem } = useCart();
 
   const fetchPedidos = useCallback(async () => {
     try {
@@ -164,6 +164,28 @@ export default function MeusPedidosPage() {
       }));
       setRetomandoId(null);
     }
+  };
+
+  const handleComprarNovamente = (cred: any) => {
+    const produto = cred.produtos;
+    clearCart();
+    addItem(
+      {
+        id: cred.produto_id || produto?.id,
+        slug: produto?.slug || cred.slug_teste,
+        nome: produto?.nome || "Teste de Autoconhecimento",
+        preco: produto?.preco_promocional ?? produto?.preco ?? 47,
+        imagem_url: produto?.imagem_url,
+        categoria: "testes",
+        is_teste: true,
+        rota_teste: produto?.rota_teste || `/${cred.slug_teste}`,
+      },
+      1
+    );
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("produto_selecionado", cred.produto_id || produto?.id);
+    }
+    router.push("/checkout");
   };
 
   if (loading) {
@@ -547,13 +569,24 @@ export default function MeusPedidosPage() {
                               <ArrowRight className="w-4 h-4" />
                             </Link>
                           ) : (
-                            <Link
-                              href={rotaTeste}
-                              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 text-xs font-medium border border-white/10 transition-all cursor-pointer"
-                            >
-                              <span>Ver Página do Teste</span>
-                              <ExternalLink className="w-3.5 h-3.5" />
-                            </Link>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Link
+                                href={`${rotaTeste}?visualizar=1${cred.avaliacao_id ? `&avaliacao_id=${cred.avaliacao_id}` : ""}`}
+                                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-semibold transition-all cursor-pointer shadow-sm"
+                              >
+                                <FileText className="w-3.5 h-3.5 text-amber-400" />
+                                <span>Visualizar Laudo / Imprimir</span>
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() => handleComprarNovamente(cred)}
+                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-xs font-medium transition-all cursor-pointer"
+                                title="Comprar novo teste para refazer a avaliação"
+                              >
+                                <ShoppingBag className="w-3.5 h-3.5" />
+                                <span>Comprar Novamente</span>
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>

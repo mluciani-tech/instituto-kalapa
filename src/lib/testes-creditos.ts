@@ -66,6 +66,9 @@ export function extrairSlugNormalizadoTeste(item: ItemLiberacao): string {
   if (nomeLower.includes("yin") || nomeLower.includes("yang")) {
     return "teste-yin-yang";
   }
+  if (nomeLower.includes("lealdade")) {
+    return "teste-lealdades-invisiveis";
+  }
   return normalizarSlugTeste(item.slug || "teste");
 }
 
