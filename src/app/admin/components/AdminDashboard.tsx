@@ -1361,198 +1361,201 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
           </div>
         </div>
 
-        {/* Central de Recuperação de Vendas via WhatsApp */}
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-brand-beige shadow-xs h-fit flex flex-col">
-          <div>
-            <div className="flex items-center justify-between mb-4">
+        {/* Coluna Direita: Recuperação de Checkouts + Prospecção da Biblioteca */}
+        <div className="space-y-6">
+          {/* Central de Recuperação de Vendas via WhatsApp */}
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-brand-beige shadow-xs flex flex-col">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-sm font-bold text-brand-purple flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4 text-emerald-600" />
+                    Recuperação de Checkouts (Leads Quentes)
+                  </h3>
+                  <p className="text-xs text-brand-charcoal/50 mt-0.5">
+                    Contate clientes com pagamento pendente com 1 clique
+                  </p>
+                </div>
+                <button
+                  onClick={() => onNavigateTab("pedidos")}
+                  className="text-xs text-brand-purple font-medium hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  Ver todos <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {data?.pedidosPendentesRecentes && data.pedidosPendentesRecentes.length > 0 ? (
+                <div className="space-y-3">
+                  {data.pedidosPendentesRecentes.map((ped) => (
+                    <div
+                      key={ped.id}
+                      className="p-3.5 rounded-xl border border-brand-beige/80 bg-brand-beige-light/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white hover:border-brand-purple/20 transition-all"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <p className="text-xs font-bold text-brand-charcoal break-words">{ped.cliente_nome}</p>
+                          <span className="text-[10px] text-brand-charcoal/40 whitespace-nowrap">· {formatDateShort(ped.created_at)}</span>
+                          {ped.categoria === "testes" && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-purple-100 text-purple-700 border border-purple-200">
+                              🧠 Teste Online
+                            </span>
+                          )}
+                          {ped.categoria === "atendimentos" && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                              🗓️ Atendimento
+                            </span>
+                          )}
+                          {ped.categoria === "vivencias" && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              🌿 Vivência
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-brand-charcoal/70 break-words mt-1 leading-relaxed">
+                          {ped.produto_nome} · <strong className="text-brand-purple font-semibold">{formatMoney(ped.valor)}</strong>
+                        </p>
+                      </div>
+
+                      {ped.telefone_whatsapp ? (
+                        <a
+                          href={ped.telefone_whatsapp}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shrink-0 shadow-xs self-start sm:self-center"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>Chamar</span>
+                        </a>
+                      ) : (
+                        <span className="text-[10px] text-brand-charcoal/40 italic shrink-0 self-start sm:self-center">Sem telefone</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center bg-brand-beige-light/50 rounded-xl border border-dashed border-brand-beige">
+                  <CheckCircle2 className="w-8 h-8 text-brand-mint mx-auto mb-2 opacity-80" />
+                  <p className="text-xs font-semibold text-brand-charcoal">Nenhum checkout pendente!</p>
+                  <p className="text-[11px] text-brand-charcoal/50 mt-1">
+                    Todos os pedidos recentes foram confirmados com sucesso.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 p-3 rounded-xl bg-brand-purple/5 border border-brand-purple/10 text-xs text-brand-charcoal/70 flex items-center gap-2.5">
+              <Sparkles className="w-4 h-4 text-brand-purple shrink-0" />
+              <span>
+                <strong>Dica Kalapa:</strong> Entrar em contato nas primeiras 2 horas após a tentativa aumenta a taxa de conversão em até 40%.
+              </span>
+            </div>
+          </div>
+
+          {/* Central de Prospecção Ativa da Biblioteca Kalapa */}
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-brand-beige shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
               <div>
-                <h3 className="text-sm font-bold text-brand-purple flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4 text-emerald-600" />
-                  Recuperação de Checkouts (Leads Quentes)
-                </h3>
-                <p className="text-xs text-brand-charcoal/50 mt-0.5">
-                  Contate clientes com pagamento pendente com 1 clique
-                </p>
+                <div className="flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs shadow-xs">
+                    <MessageCircle className="w-4 h-4 text-emerald-700" />
+                  </span>
+                  <div>
+                    <h3 className="text-sm font-bold text-brand-purple flex items-center gap-2">
+                      Prospecção de Novos Clientes (Downloads da Biblioteca)
+                    </h3>
+                    <p className="text-xs text-brand-charcoal/50 mt-0.5">
+                      Contate em 1 clique via WhatsApp quem baixou receitas ou artigos gratuitos para iniciar um diálogo de acolhimento
+                    </p>
+                  </div>
+                </div>
               </div>
               <button
-                onClick={() => onNavigateTab("pedidos")}
-                className="text-xs text-brand-purple font-medium hover:underline flex items-center gap-1"
+                onClick={() => onNavigateTab("usuarios")}
+                className="text-xs text-brand-purple font-medium hover:underline flex items-center gap-1 self-start sm:self-auto shrink-0 cursor-pointer"
               >
-                Ver todos <ArrowUpRight className="w-3.5 h-3.5" />
+                Ver todos usuários <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            {data?.pedidosPendentesRecentes && data.pedidosPendentesRecentes.length > 0 ? (
+            {data?.bibliotecaStats?.leadsRecentes && data.bibliotecaStats.leadsRecentes.length > 0 ? (
               <div className="space-y-3">
-                {data.pedidosPendentesRecentes.map((ped) => (
+                {data.bibliotecaStats.leadsRecentes.map((lead) => (
                   <div
-                    key={ped.id}
-                    className="p-3.5 rounded-xl border border-brand-beige/80 bg-brand-beige-light/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white hover:border-brand-purple/20 transition-all"
+                    key={lead.id}
+                    className="p-3.5 rounded-xl border border-brand-beige/80 bg-brand-beige-light/30 hover:bg-white hover:border-emerald-300 transition-all flex flex-col justify-between gap-3"
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <p className="text-xs font-bold text-brand-charcoal break-words">{ped.cliente_nome}</p>
-                        <span className="text-[10px] text-brand-charcoal/40 whitespace-nowrap">· {formatDateShort(ped.created_at)}</span>
-                        {ped.categoria === "testes" && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-purple-100 text-purple-700 border border-purple-200">
-                            🧠 Teste Online
-                          </span>
-                        )}
-                        {ped.categoria === "atendimentos" && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                            🗓️ Atendimento
-                          </span>
-                        )}
-                        {ped.categoria === "vivencias" && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            🌿 Vivência
-                          </span>
-                        )}
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-bold text-brand-charcoal">{lead.cliente_nome}</span>
+                            {lead.tipo_lead === "novo_prospect" ? (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                🌟 Novo Prospect
+                              </span>
+                            ) : (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                🌱 Cliente Existente
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-brand-charcoal/60 mt-0.5 truncate">
+                            {lead.cliente_email || "E-mail não informado"}
+                            {lead.cliente_telefone ? ` · ${lead.cliente_telefone}` : ""}
+                          </p>
+                        </div>
+                        <span className="text-[10px] text-brand-charcoal/40 whitespace-nowrap">
+                          {formatDateShort(lead.created_at)}
+                        </span>
                       </div>
-                      <p className="text-xs text-brand-charcoal/70 break-words mt-1 leading-relaxed">
-                        {ped.produto_nome} · <strong className="text-brand-purple font-semibold">{formatMoney(ped.valor)}</strong>
-                      </p>
+
+                      <div className="mt-2.5 p-2 rounded-lg bg-white/80 border border-brand-beige/60 text-xs flex items-center gap-2 text-brand-charcoal/80">
+                        <FileText className="w-3.5 h-3.5 text-brand-terracotta shrink-0" />
+                        <span className="truncate font-medium">{lead.material_nome}</span>
+                      </div>
                     </div>
 
-                    {ped.telefone_whatsapp ? (
-                      <a
-                        href={ped.telefone_whatsapp}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shrink-0 shadow-xs self-start sm:self-center"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5" />
-                        <span>Chamar</span>
-                      </a>
-                    ) : (
-                      <span className="text-[10px] text-brand-charcoal/40 italic shrink-0 self-start sm:self-center">Sem telefone</span>
-                    )}
+                    <div className="pt-2 border-t border-brand-beige/60 flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-brand-charcoal/50 italic">
+                        {lead.tipo_lead === "novo_prospect"
+                          ? "Oportunidade para apresentar vivências e atendimentos"
+                          : "Cliente já ativo na casa"}
+                      </span>
+
+                      {lead.telefone_whatsapp ? (
+                        <a
+                          href={lead.telefone_whatsapp}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0 shadow-xs"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>WhatsApp</span>
+                        </a>
+                      ) : (
+                        <span className="text-[10px] text-brand-charcoal/40 italic">Sem telefone</span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-8 text-center bg-brand-beige-light/50 rounded-xl border border-dashed border-brand-beige">
-                <CheckCircle2 className="w-8 h-8 text-brand-mint mx-auto mb-2 opacity-80" />
-                <p className="text-xs font-semibold text-brand-charcoal">Nenhum checkout pendente!</p>
-                <p className="text-[11px] text-brand-charcoal/50 mt-1">
-                  Todos os pedidos recentes foram confirmados com sucesso.
+              <div className="p-8 text-center bg-brand-beige-light/40 rounded-xl border border-dashed border-brand-beige">
+                <BookOpen className="w-8 h-8 text-brand-terracotta mx-auto mb-2 opacity-70" />
+                <p className="text-xs font-semibold text-brand-charcoal">Nenhum download registrado ainda</p>
+                <p className="text-[11px] text-brand-charcoal/50 mt-1 max-w-md mx-auto">
+                  Assim que os clientes realizarem downloads gratuitos ou pagos na Biblioteca Kalapa, eles aparecerão aqui com atalhos de contato para prospecção calorosa.
                 </p>
               </div>
             )}
-          </div>
 
-          <div className="mt-5 p-3 rounded-xl bg-brand-purple/5 border border-brand-purple/10 text-xs text-brand-charcoal/70 flex items-center gap-2.5">
-            <Sparkles className="w-4 h-4 text-brand-purple shrink-0" />
-            <span>
-              <strong>Dica Kalapa:</strong> Entrar em contato nas primeiras 2 horas após a tentativa aumenta a taxa de conversão em até 40%.
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Seção Exclusiva: Central de Prospecção Ativa da Biblioteca Kalapa */}
-      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-brand-beige shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs shadow-xs">
-                <MessageCircle className="w-4 h-4 text-emerald-700" />
+            <div className="mt-4 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-xs text-emerald-900 flex items-center gap-2.5">
+              <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>
+                <strong>Abordagem Acolhedora:</strong> O botão de WhatsApp já vem com a mensagem personalizada pronta citando o material baixado pelo lead, facilitando o início de uma conversa humanizada.
               </span>
-              <div>
-                <h3 className="text-sm font-bold text-brand-purple flex items-center gap-2">
-                  Prospecção de Novos Clientes (Downloads da Biblioteca)
-                </h3>
-                <p className="text-xs text-brand-charcoal/50 mt-0.5">
-                  Contate em 1 clique via WhatsApp quem baixou receitas ou artigos gratuitos para iniciar um diálogo de acolhimento
-                </p>
-              </div>
             </div>
           </div>
-          <button
-            onClick={() => onNavigateTab("usuarios")}
-            className="text-xs text-brand-purple font-medium hover:underline flex items-center gap-1 self-start sm:self-auto shrink-0"
-          >
-            Ver todos usuários <ArrowUpRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {data?.bibliotecaStats?.leadsRecentes && data.bibliotecaStats.leadsRecentes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {data.bibliotecaStats.leadsRecentes.map((lead) => (
-              <div
-                key={lead.id}
-                className="p-4 rounded-xl border border-brand-beige/80 bg-brand-beige-light/30 hover:bg-white hover:border-emerald-300 transition-all flex flex-col justify-between gap-3"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold text-brand-charcoal">{lead.cliente_nome}</span>
-                        {lead.tipo_lead === "novo_prospect" ? (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                            🌟 Novo Prospect
-                          </span>
-                        ) : (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-                            🌱 Cliente Existente
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-brand-charcoal/60 mt-0.5 truncate">
-                        {lead.cliente_email || "E-mail não informado"}
-                        {lead.cliente_telefone ? ` · ${lead.cliente_telefone}` : ""}
-                      </p>
-                    </div>
-                    <span className="text-[10px] text-brand-charcoal/40 whitespace-nowrap">
-                      {formatDateShort(lead.created_at)}
-                    </span>
-                  </div>
-
-                  <div className="mt-2.5 p-2 rounded-lg bg-white/80 border border-brand-beige/60 text-xs flex items-center gap-2 text-brand-charcoal/80">
-                    <FileText className="w-3.5 h-3.5 text-brand-terracotta shrink-0" />
-                    <span className="truncate font-medium">{lead.material_nome}</span>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-brand-beige/60 flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-brand-charcoal/50 italic">
-                    {lead.tipo_lead === "novo_prospect"
-                      ? "Oportunidade para apresentar vivências e atendimentos"
-                      : "Cliente já ativo na casa"}
-                  </span>
-
-                  {lead.telefone_whatsapp ? (
-                    <a
-                      href={lead.telefone_whatsapp}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0 shadow-xs"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5" />
-                      <span>WhatsApp</span>
-                    </a>
-                  ) : (
-                    <span className="text-[10px] text-brand-charcoal/40 italic">Sem telefone</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-8 text-center bg-brand-beige-light/40 rounded-xl border border-dashed border-brand-beige">
-            <BookOpen className="w-8 h-8 text-brand-terracotta mx-auto mb-2 opacity-70" />
-            <p className="text-xs font-semibold text-brand-charcoal">Nenhum download registrado ainda</p>
-            <p className="text-[11px] text-brand-charcoal/50 mt-1 max-w-md mx-auto">
-              Assim que os clientes realizarem downloads gratuitos ou pagos na Biblioteca Kalapa, eles aparecerão aqui com atalhos de contato para prospecção calorosa.
-            </p>
-          </div>
-        )}
-
-        <div className="mt-4 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-xs text-emerald-900 flex items-center gap-2.5">
-          <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>
-            <strong>Abordagem Acolhedora:</strong> O botão de WhatsApp já vem com a mensagem personalizada pronta citando o material baixado pelo lead, facilitando o início de uma conversa humanizada.
-          </span>
         </div>
       </div>
     </div>

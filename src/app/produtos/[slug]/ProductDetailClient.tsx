@@ -291,19 +291,19 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
               </p>
             </div>
           ) : isBiblioteca ? (
-            <div className="mb-6 p-4 rounded-xl bg-blue-50/90 border border-blue-200">
+            <div className="mb-6 p-4 rounded-xl bg-brand-beige-light/80 border border-brand-beige">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                <span className="text-xs uppercase tracking-wider font-semibold text-blue-900 flex items-center gap-1.5">
-                  <FileText className="w-4 h-4 text-blue-600" />
+                <span className="text-xs uppercase tracking-wider font-semibold text-brand-purple flex items-center gap-1.5">
+                  <FileText className="w-4 h-4 text-brand-terracotta" />
                   <span>Material Digital da Biblioteca Kalapa</span>
                 </span>
                 {produto.arquivo_nome && (
-                  <span className="text-[11px] font-semibold text-blue-800 bg-white px-2.5 py-0.5 rounded-full border border-blue-300 truncate max-w-[200px]">
+                  <span className="text-[11px] font-semibold text-brand-purple bg-white px-2.5 py-0.5 rounded-full border border-brand-beige truncate max-w-[200px]">
                     {produto.arquivo_nome}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-blue-950/80 leading-relaxed">
+              <p className="text-xs text-brand-charcoal/80 leading-relaxed">
                 {isGratuito
                   ? "Este arquivo é gratuito para todos os usuários com conta no aplicativo. Conecte-se para baixar o arquivo."
                   : "Material digital com liberação imediata para download após a confirmação de pagamento."}
@@ -437,7 +437,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                       type="button"
                       onClick={handleDownloadArquivo}
                       disabled={baixandoArquivo}
-                      className="flex-1 py-3.5 px-5 font-bold text-sm rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/25 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+                      className="flex-1 py-3.5 px-5 font-bold text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>{baixandoArquivo ? "Iniciando Download..." : botoesConfig.textoPrincipal}</span>

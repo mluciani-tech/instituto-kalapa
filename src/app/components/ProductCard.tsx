@@ -239,7 +239,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                           type="button"
                           onClick={handleDownloadDireto}
                           disabled={baixando}
-                          className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 hover:shadow-blue-600/35 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
+                          className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/20 hover:shadow-brand-terracotta/35 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
                         >
                           <Download className="w-4 h-4 text-white shrink-0" />
                           <span>{baixando ? "Iniciando Download..." : botoesConfig.textoPrincipal}</span>

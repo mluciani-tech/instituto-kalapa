@@ -384,8 +384,8 @@ export default function MeusPedidosPage() {
                                 </span>
                               )}
                               {isItemBiblioteca && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
-                                  <FileText className="w-3 h-3 text-blue-300" />
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-terracotta/20 text-brand-terracotta border border-brand-terracotta/30">
+                                  <FileText className="w-3 h-3 text-brand-terracotta" />
                                   Material Digital
                                 </span>
                               )}
@@ -406,7 +406,7 @@ export default function MeusPedidosPage() {
                               {isPago && isItemBiblioteca && itemProdutoId && (
                                 <a
                                   href={`/api/produtos/${itemProdutoId}/download`}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-xs transition-all hover:scale-[1.02] self-start sm:self-center"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-xs transition-all hover:scale-[1.02] self-start sm:self-center"
                                 >
                                   <Download className="w-3.5 h-3.5" />
                                   Baixar Arquivo
