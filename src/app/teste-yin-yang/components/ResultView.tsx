@@ -20,6 +20,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { ResultadoInfo } from "../data/yin-yang-data";
+import SupportNotice from "@/components/SupportNotice";
 
 interface ResultViewProps {
   pontosYang: number;
@@ -110,7 +111,7 @@ export default function ResultView({
                       Avaliação realizada em {dataRealizacao}
                     </p>
                     <p className="text-[#1A3C4D]/70 text-xs">
-                      Seu laudo oficial está disponível para consulta e emissão em PDF a qualquer momento.
+                      Seu relatório de autoconhecimento está disponível para consulta e emissão em PDF a qualquer momento.
                     </p>
                   </div>
                 </div>
@@ -173,7 +174,7 @@ export default function ResultView({
                 <div className="p-6 sm:p-8 md:col-span-7 flex flex-col justify-between">
                   <div>
                     <span className="text-xs uppercase tracking-wider font-semibold text-[#B8965A]">
-                      Diagnóstico Clínico Kalapa
+                      Mapeamento Energético Kalapa
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D] mt-1 mb-2">
                       {resultadoAtual.titulo}
@@ -509,6 +510,8 @@ export default function ResultView({
                 ))}
               </div>
             </div>
+
+            <SupportNotice />
 
             {/* Próximos Passos & CTA Terapêutico */}
             <div className="bg-gradient-to-br from-[#1A3C4D] to-[#122A36] text-white rounded-2xl p-6 sm:p-10 shadow-lg text-center">

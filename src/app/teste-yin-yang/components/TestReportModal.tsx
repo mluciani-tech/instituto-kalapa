@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import { X, Printer, Download, Sparkles, CheckCircle2, HeartHandshake, ShieldCheck } from "lucide-react";
 import { YIN_YANG_PERGUNTAS, ResultadoInfo } from "../data/yin-yang-data";
+import SupportNotice from "@/components/SupportNotice";
 
 interface TestReportModalProps {
   isOpen: boolean;
@@ -368,6 +369,9 @@ export default function TestReportModal({
               </table>
             </div>
           </div>
+
+          {/* Aviso Acolhedor de Cuidado e Apoio */}
+          <SupportNotice variant="print" />
 
           {/* Rodapé Institucional e Chamada para Ação */}
           <div className="pt-6 border-t-2 border-brand-terracotta/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-brand-charcoal/70">

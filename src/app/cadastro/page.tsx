@@ -67,8 +67,13 @@ export default function CadastroPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const searchParams = new URLSearchParams(window.location.search);
-      const r = searchParams.get("redirect");
-      if (r) setRedirectPath(r);
+      const r =
+        searchParams.get("redirect") ||
+        searchParams.get("callbackUrl") ||
+        searchParams.get("returnUrl");
+      if (r && r.startsWith("/") && !r.startsWith("//")) {
+        setRedirectPath(r);
+      }
     }
   }, []);
 

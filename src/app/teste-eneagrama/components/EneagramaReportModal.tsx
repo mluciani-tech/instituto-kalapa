@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { ResultadoEneagramaCalculado } from "../lib/calculo-eneagrama";
 import { ENEAGRAMA_REPORTS_MAP, EneagramaReportData } from "../data/eneagrama-reports-data";
+import SupportNotice from "@/components/SupportNotice";
 
 interface EneagramaReportModalProps {
   isOpen: boolean;
@@ -100,7 +101,7 @@ export default function EneagramaReportModal({
             </span>
             <div>
               <h2 className="text-sm font-serif font-medium text-white">
-                Laudo Diagnóstico Integrativo • Eneagrama & Constelações
+                Relatório de Autoconhecimento Integrativo • Eneagrama & Constelações
               </h2>
               <p className="text-[11px] text-white/70">
                 INstituto Kalapa • Relatório Clínico Completo (5 Páginas)
@@ -145,7 +146,7 @@ export default function EneagramaReportModal({
                 INstituto Kalapa — Eneagrama & Abordagem Sistêmica
               </span>
               <span className="font-medium text-[#7D8C6E] uppercase tracking-wider">
-                Laudo Diagnóstico Integrativo
+                Relatório de Autoconhecimento Integrativo
               </span>
             </div>
 
@@ -297,7 +298,7 @@ export default function EneagramaReportModal({
                 INstituto Kalapa — Eneagrama & Abordagem Sistêmica
               </span>
               <span className="font-medium text-[#7D8C6E] uppercase tracking-wider">
-                Laudo Diagnóstico Integrativo
+                Relatório de Autoconhecimento Integrativo
               </span>
             </div>
 
@@ -419,7 +420,7 @@ export default function EneagramaReportModal({
                 INstituto Kalapa — Eneagrama & Abordagem Sistêmica
               </span>
               <span className="font-medium text-[#7D8C6E] uppercase tracking-wider">
-                Laudo Diagnóstico Integrativo
+                Relatório de Autoconhecimento Integrativo
               </span>
             </div>
 
@@ -489,7 +490,7 @@ export default function EneagramaReportModal({
                 INstituto Kalapa — Eneagrama & Abordagem Sistêmica
               </span>
               <span className="font-medium text-[#7D8C6E] uppercase tracking-wider">
-                Laudo Diagnóstico Integrativo
+                Relatório de Autoconhecimento Integrativo
               </span>
             </div>
 
@@ -576,7 +577,7 @@ export default function EneagramaReportModal({
                 INstituto Kalapa — Eneagrama & Abordagem Sistêmica
               </span>
               <span className="font-medium text-[#7D8C6E] uppercase tracking-wider">
-                Laudo Diagnóstico Integrativo
+                Relatório de Autoconhecimento Integrativo
               </span>
             </div>
 
@@ -668,6 +669,8 @@ export default function EneagramaReportModal({
                 ))}
               </div>
             </div>
+
+            <SupportNotice variant="print" />
 
             {/* Rodapé Final Institucional */}
             <div className="border-t border-[#1A3C4D]/15 pt-2.5 space-y-1 print-avoid-break">

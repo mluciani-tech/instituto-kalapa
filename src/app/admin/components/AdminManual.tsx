@@ -969,16 +969,34 @@ export default function AdminManual() {
                   </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-mono font-bold text-xs">
-                  Versão Atual: v2.12.0
+                  Versão Atual: v2.13.0
                 </div>
               </div>
 
               <div className="space-y-4">
-                {/* v2.12.0 */}
+                {/* v2.13.0 */}
                 <div className="relative pl-6 border-l-2 border-brand-purple space-y-1.5">
                   <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-purple" />
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-purple">v2.12.0</span>
+                    <span className="font-bold text-xs text-brand-purple">v2.13.0</span>
+                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-brand-charcoal">
+                    Padronização Acolhedora nos Testes, Proteção no Checkout & Modais Seguros no Admin
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
+                    <li><strong>Unificação dos 4 Testes de Autoconhecimento:</strong> Eneagrama, Yin/Yang, Cronotipo e Lealdades Invisíveis agora seguem o mesmo padrão de design, autosave transparente no navegador (localStorage) e reenvio resiliente em caso de falha de conexão.</li>
+                    <li><strong>Linguagem Não-Clínica & Acolhimento Ético:</strong> Nomenclatura ajustada para <em>&ldquo;Relatório de Autoconhecimento&rdquo;</em> e inclusão do componente de apoio com canal direto de acolhimento via WhatsApp e Centro de Valorização da Vida (CVV 188).</li>
+                    <li><strong>Proteção de Carrinho & Privacidade de Dados:</strong> O carrinho de compras não é mais esvaziado indevidamente ao clicar em &ldquo;Comprar Agora&rdquo;, e dados sensíveis (CPF e telefone) passam por mascaramento automático no checkout.</li>
+                    <li><strong>Eliminação de Diálogos Nativos no Admin:</strong> Substituição total de caixas de diálogo nativas do navegador (<code>alert</code> e <code>confirm</code>) por modais elegantes de confirmação e banners de feedback inline com auto-dismiss em cupons, agenda e avaliações.</li>
+                  </ul>
+                </div>
+
+                {/* v2.12.0 */}
+                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
+                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-brand-charcoal/70">v2.12.0</span>
                     <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">

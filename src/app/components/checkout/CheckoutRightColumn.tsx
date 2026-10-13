@@ -25,6 +25,22 @@ interface CheckoutRightColumnProps {
   produto: Produto | null;
 }
 
+function mascararCpf(cpf?: string | null): string {
+  if (!cpf) return "Não informado";
+  const digitos = cpf.replace(/\D/g, "");
+  if (digitos.length !== 11) return cpf;
+  return `***.***.${digitos.slice(6, 9)}-${digitos.slice(9, 11)}`;
+}
+
+function mascararTelefone(tel?: string | null): string {
+  if (!tel) return "Não informado";
+  const digitos = tel.replace(/\D/g, "");
+  if (digitos.length < 10) return tel;
+  const ddd = digitos.slice(0, 2);
+  const final = digitos.slice(-4);
+  return `(${ddd}) *****-${final}`;
+}
+
 export default function CheckoutRightColumn({
   usuario,
   erro,
@@ -58,8 +74,10 @@ export default function CheckoutRightColumn({
               </div>
               <p className="text-sm font-bold text-brand-charcoal">{usuario.nome}</p>
               <p className="text-xs text-brand-charcoal/70">{usuario.email}</p>
-              <p className="text-xs text-brand-charcoal/70">Tel: {usuario.telefone}</p>
-              <p className="text-xs text-brand-charcoal/45 font-mono mt-1">CPF: {usuario.cpf}</p>
+              <p className="text-xs text-brand-charcoal/70">Tel: {mascararTelefone(usuario.telefone)}</p>
+              <p className="text-xs text-brand-charcoal/45 font-mono mt-1">
+                CPF: {mascararCpf(usuario.cpf)} <span className="text-[10px] font-sans text-brand-charcoal/40">(protegido)</span>
+              </p>
             </div>
 
             <div className="p-4 bg-brand-offwhite border border-brand-charcoal/10 rounded-xl">

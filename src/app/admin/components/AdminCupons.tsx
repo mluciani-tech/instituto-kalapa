@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import type { Cupom, Produto } from "@/lib/types";
 import { formatDate } from "../lib/format";
 
@@ -26,6 +27,8 @@ export default function AdminCupons({ cupons, produtos, onReload, onError }: Pro
   });
   const [salvandoCupom, setSalvandoCupom] = useState(false);
   const [cupomSucesso, setCupomSucesso] = useState("");
+  const [cupomParaExcluir, setCupomParaExcluir] = useState<Cupom | null>(null);
+  const [isExcluindo, setIsExcluindo] = useState(false);
 
   const handleSalvarCupom = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,10 +67,26 @@ export default function AdminCupons({ cupons, produtos, onReload, onError }: Pro
     if (res.ok) await onReload();
   };
 
-  const handleExcluirCupom = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este cupom?")) return;
-    const res = await fetch(`/api/admin/cupons/${id}`, { method: "DELETE" });
-    if (res.ok) await onReload();
+  const handleConfirmarExclusao = async () => {
+    if (!cupomParaExcluir) return;
+    setIsExcluindo(true);
+    try {
+      const res = await fetch(`/api/admin/cupons/${cupomParaExcluir.id}`, { method: "DELETE" });
+      if (res.ok) {
+        const codigo = cupomParaExcluir.codigo;
+        setCupomParaExcluir(null);
+        setCupomSucesso(`Cupom "${codigo}" excluído com sucesso.`);
+        await onReload();
+        setTimeout(() => setCupomSucesso(""), 3000);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        onError(d.error || "Erro ao excluir cupom");
+      }
+    } catch {
+      onError("Erro ao excluir cupom");
+    } finally {
+      setIsExcluindo(false);
+    }
   };
 
   return (
@@ -191,8 +210,9 @@ export default function AdminCupons({ cupons, produtos, onReload, onError }: Pro
                                   Editar
                                 </button>
                                 <button
-                                  onClick={() => handleExcluirCupom(c.id)}
-                                  className="px-2.5 py-1 text-xs border border-red-200 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  type="button"
+                                  onClick={() => setCupomParaExcluir(c)}
+                                  className="px-2.5 py-1 text-xs border border-red-200 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                                 >
                                   Excluir
                                 </button>
@@ -338,6 +358,40 @@ export default function AdminCupons({ cupons, produtos, onReload, onError }: Pro
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {cupomParaExcluir && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4" role="dialog" aria-modal="true" aria-label="Confirmar exclusão de cupom">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full border border-brand-beige text-center space-y-4 shadow-xl">
+            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-brand-charcoal">Excluir Cupom?</h3>
+              <p className="text-xs text-brand-charcoal/70 mt-1">
+                Tem certeza que deseja apagar o cupom <strong className="font-mono">{cupomParaExcluir.codigo}</strong>? Clientes não poderão mais utilizá-lo no checkout.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setCupomParaExcluir(null)}
+                disabled={isExcluindo}
+                className="flex-1 py-2.5 rounded-xl border border-brand-beige text-xs font-medium text-brand-charcoal hover:bg-brand-beige/20 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmarExclusao}
+                disabled={isExcluindo}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {isExcluindo ? "Excluindo..." : "Sim, Excluir"}
+              </button>
+            </div>
           </div>
         </div>
       )}

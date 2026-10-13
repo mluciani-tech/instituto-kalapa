@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, CheckCircle2, Heart, ArrowRight, Printer, AlertTriangle } from "lucide-react";
 import { ResultadoLealdadesCalculado } from "../lib/calculo-lealdades";
+import SupportNotice from "@/components/SupportNotice";
 
 interface LealdadesReportModalProps {
   isOpen: boolean;
@@ -125,11 +126,13 @@ export default function LealdadesReportModal({
                 {perfil.exercicioSomatico.falas.map((fala, idx) => (
                   <div key={idx} className="flex gap-3 bg-white p-4 rounded-xl border border-emerald-100/50 shadow-sm">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                    <p className="text-emerald-900 font-medium italic">"{fala}"</p>
+                    <p className="text-emerald-900 font-medium italic">&ldquo;{fala}&rdquo;</p>
                   </div>
                 ))}
               </div>
             </section>
+
+            <SupportNotice variant="screen" />
           </div>
 
           {/* ========================================================= */}
@@ -152,7 +155,7 @@ export default function LealdadesReportModal({
               </div>
 
               <p className="text-justify print-avoid-break">
-                Este teste foi criado para mapear as lealdades inconscientes que influenciam silenciosamente suas escolhas profissionais, seus relacionamentos e seus bloqueios no dia a dia. Por meio de situações existenciais baseadas nas Constelações Familiares de Bert Hellinger, você identificará qual dos seis grandes emaranhamentos sistêmicos está operando com maior intensidade em sua vida atual. Ao concluir, você encontrará um diagnóstico preciso sobre a dinâmica oculta do seu sistema familiar, o caminho de consciência para transformar o amor cego em força e as frases de solução exatas para se libertar de repetições e seguir em direção ao seu próprio destino com ordem e leveza.
+                Este teste foi criado para mapear as lealdades inconscientes que influenciam silenciosamente suas escolhas profissionais, seus relacionamentos e seus bloqueios no dia a dia. Por meio de situações existenciais baseadas nas Constelações Familiares de Bert Hellinger, você identificará qual dos seis grandes emaranhamentos sistêmicos está operando com maior intensidade em sua vida atual. Ao concluir, você encontrará um mapeamento cuidadoso sobre a dinâmica oculta do seu sistema familiar, o caminho de consciência para transformar o amor cego em força e as frases de solução exatas para se libertar de repetições e seguir em direção ao seu próprio destino com ordem e leveza.
               </p>
 
               <div className="border border-[#B8965A] p-4 bg-[#FDFBF7] print-avoid-break">
@@ -167,7 +170,7 @@ export default function LealdadesReportModal({
                   O Que é um Emaranhamento Sistêmico?
                 </h2>
                 <p className="text-justify">
-                  Na abordagem desenvolvida por <strong>Bert Hellinger</strong>, o emaranhamento (ou envolvimento sistêmico) ocorre quando um membro de uma geração posterior assume, de forma inconsciente e por amor infantil, o destino, a culpa, a dor ou a exclusão de alguém que veio antes no sistema familiar. Isso não decorre de fraqueza pessoal ou defeito de caráter, mas de uma necessidade arcaica e biológica de vinculação e pertencimento ao clã. A alma infantil acredita magicamente: <em>'Eu sofro por você'</em>, <em>'Eu fracasso para ficar igual a você'</em> ou <em>'Antes eu do que você'</em>. Reconhecer esse padrão não serve para acusar a família, mas para devolver a dignidade a quem veio antes e permitir que a vida siga adiante com força.
+                  Na abordagem desenvolvida por <strong>Bert Hellinger</strong>, o emaranhamento (ou envolvimento sistêmico) ocorre quando um membro de uma geração posterior assume, de forma inconsciente e por amor infantil, o destino, a culpa, a dor ou a exclusão de alguém que veio antes no sistema familiar. Isso não decorre de fraqueza pessoal ou defeito de caráter, mas de uma necessidade arcaica e biológica de vinculação e pertencimento ao clã. A alma infantil acredita magicamente: <em>&apos;Eu sofro por você&apos;</em>, <em>&apos;Eu fracasso para ficar igual a você&apos;</em> ou <em>&apos;Antes eu do que você&apos;</em>. Reconhecer esse padrão não serve para acusar a família, mas para devolver a dignidade a quem veio antes e permitir que a vida siga adiante com força.
                 </p>
               </div>
 
@@ -181,7 +184,7 @@ export default function LealdadesReportModal({
                     <strong>1. A Lei do Pertencimento:</strong> Todos concebidos ou acolhidos em um sistema têm o direito inalienável de pertencer — vivos, falecidos, natimortos, abortados, esquecidos ou julgados. Quando alguém é excluído, o sistema pressiona um descendente a repetir o seu destino até que a dignidade daquele antepassado seja restabelecida.
                   </li>
                   <li>
-                    <strong>2. A Lei da Ordem (Hierarquia de Chegada):</strong> Quem chegou antes no sistema tem precedência sobre quem chegou depois. Os pais são os 'grandes' que transmitem o dom da vida, e os filhos são os 'pequenos' que recebem. Quando um filho se coloca como juiz, cuidador ou salvador de seus pais, desrespeita a ordem natural e atrai para si o fracasso e o esgotamento.
+                    <strong>2. A Lei da Ordem (Hierarquia de Chegada):</strong> Quem chegou antes no sistema tem precedência sobre quem chegou depois. Os pais são os &apos;grandes&apos; que transmitem o dom da vida, e os filhos são os &apos;pequenos&apos; que recebem. Quando um filho se coloca como juiz, cuidador ou salvador de seus pais, desrespeita a ordem natural e atrai para si o fracasso e o esgotamento.
                   </li>
                   <li>
                     <strong>3. A Lei do Equilíbrio entre Dar e Tomar:</strong> Entre iguais (casais, sócios, amigos), as relações exigem reciprocidade proporcional. Apenas na relação entre pais e filhos existe uma assimetria sagrada: os pais dão a vida e os filhos tomam. O filho jamais retribui na mesma medida aos pais; sua forma legítima de compensação é passar a vida adiante para as próximas gerações ou em projetos para o mundo.
@@ -194,7 +197,7 @@ export default function LealdadesReportModal({
 
               {/* Rodapé Página 1 */}
               <div className="border-t border-gray-300 pt-2 flex justify-between text-[9px] text-gray-500 mt-16 print-avoid-break">
-                <span>Material de Autodiagnóstico e Falas Sistêmicas • Baseado no legado de Bert Hellinger</span>
+                <span>Relatório de Mapeamento Sistêmico e Falas de Cura • Baseado no legado de Bert Hellinger</span>
                 <span>Página 1</span>
               </div>
             </div>
@@ -203,7 +206,7 @@ export default function LealdadesReportModal({
             <div className="print:break-after-page space-y-6 pt-4 pb-8">
               <div className="border-b-2 border-[#1A3C4D] pb-4 mb-6 print-avoid-break">
                 <p className="text-[#B8965A] font-bold text-[10px] uppercase tracking-widest mb-1">
-                  Seu Diagnóstico Sistêmico
+                  Seu Mapeamento Sistêmico
                 </p>
                 <h2 className="text-xl font-serif font-extrabold text-[#1A3C4D]">
                   [ PERFIL {perfil.letra} ] {perfil.nome.toUpperCase()}
@@ -272,7 +275,7 @@ export default function LealdadesReportModal({
                   As soluções sistêmicas não são fórmulas intelectuais ou rituais mágicos; elas representam uma profunda <strong>mudança de postura na alma</strong> perante a realidade factual da vida. Quando você identifica o seu emaranhamento dominante através deste teste, o primeiro passo é <strong>concordar com tudo exatamente como foi e como é</strong>. A resistência, a queixa e o julgamento amarram a alma ao passado; a aceitação humilde e serena devolve a liberdade e a força.
                 </p>
                 <p>
-                  Bert Hellinger ensina que <em>'a solução consiste sempre em soltar-se de algo'</em>. Soltar-se das pretensões de consertar os pais, soltar-se da necessidade infantil de ser leal à dor do clã e assumir a responsabilidade adulta sobre o próprio destino.
+                  Bert Hellinger ensina que <em>&apos;a solução consiste sempre em soltar-se de algo&apos;</em>. Soltar-se das pretensões de consertar os pais, soltar-se da necessidade infantil de ser leal à dor do clã e assumir a responsabilidade adulta sobre o próprio destino.
                 </p>
               </div>
 
@@ -295,19 +298,19 @@ export default function LealdadesReportModal({
                       <td className="border border-gray-300 p-2 font-bold bg-[#FDFBF7]">Pertencimento</td>
                       <td className="border border-gray-300 p-2">Excluir, julgar ou esquecer membros do clã.</td>
                       <td className="border border-gray-300 p-2">Solidão crônica, sensação de desterro, perdas inexplicáveis.</td>
-                      <td className="border border-gray-300 p-2 italic bg-[#F9FBF8]">'Eu vejo você. Você faz parte da nossa história e tem um bom lugar em meu coração.'</td>
+                      <td className="border border-gray-300 p-2 italic bg-[#F9FBF8]">&apos;Eu vejo você. Você faz parte da nossa história e tem um bom lugar em meu coração.&apos;</td>
                     </tr>
                     <tr>
                       <td className="border border-gray-300 p-2 font-bold bg-[#FDFBF7]">Ordem (Hierarquia)</td>
                       <td className="border border-gray-300 p-2">Querer ser maior que os pais; julgar quem veio antes.</td>
                       <td className="border border-gray-300 p-2">Esgotamento, fracasso profissional, arrogância e impotência.</td>
-                      <td className="border border-gray-300 p-2 italic bg-[#F9FBF8]">'Vocês são os grandes e eu sou o pequeno. Vocês dão e eu recebo.'</td>
+                      <td className="border border-gray-300 p-2 italic bg-[#F9FBF8]">&apos;Vocês são os grandes e eu sou o pequeno. Vocês dão e eu recebo.&apos;</td>
                     </tr>
                     <tr>
                       <td className="border border-gray-300 p-2 font-bold bg-[#FDFBF7]">Equilíbrio</td>
                       <td className="border border-gray-300 p-2">Dar demais nas relações adultas; recusar-se a receber.</td>
                       <td className="border border-gray-300 p-2">Rupturas de casais, amargura, desvalorização e dependência.</td>
-                      <td className="border border-gray-300 p-2 italic bg-[#F9FBF8]">'Eu dou na medida em que você pode retribuir; recebo com carinho o que me oferece.'</td>
+                      <td className="border border-gray-300 p-2 italic bg-[#F9FBF8]">&apos;Eu dou na medida em que você pode retribuir; recebo com carinho o que me oferece.&apos;</td>
                     </tr>
                   </tbody>
                 </table>
@@ -323,7 +326,7 @@ export default function LealdadesReportModal({
 
               {/* Rodapé Página 3 */}
               <div className="border-t border-gray-300 pt-2 flex justify-between text-[9px] text-gray-500 mt-16 print-avoid-break">
-                <span>Material de Autodiagnóstico e Falas Sistêmicas • Baseado no legado de Bert Hellinger</span>
+                <span>Relatório de Mapeamento Sistêmico e Falas de Cura • Baseado no legado de Bert Hellinger</span>
                 <span>Página 3</span>
               </div>
             </div>
@@ -361,7 +364,7 @@ export default function LealdadesReportModal({
                 <div>
                   <strong className="text-[#1A3C4D] text-[12px] block mb-1">Autodefinição:</strong>
                   <p>
-                    Bert Hellinger recusava o rótulo de mero psicoterapeuta, definindo-se como <em>'um filósofo a serviço da vida, como ela é, sem desejar que seja diferente'</em>.
+                    Bert Hellinger recusava o rótulo de mero psicoterapeuta, definindo-se como <em>&apos;um filósofo a serviço da vida, como ela é, sem desejar que seja diferente&apos;</em>.
                   </p>
                 </div>
               </div>
@@ -388,9 +391,13 @@ export default function LealdadesReportModal({
                 </ul>
               </div>
 
+              <div className="mt-8 print-avoid-break">
+                <SupportNotice variant="print" />
+              </div>
+
               {/* Rodapé Página 4 */}
               <div className="border-t border-gray-300 pt-2 flex justify-between text-[9px] text-gray-500 mt-16 print-avoid-break">
-                <span>Material de Autodiagnóstico e Falas Sistêmicas • Baseado no legado de Bert Hellinger</span>
+                <span>Relatório de Mapeamento Sistêmico e Falas de Cura • Baseado no legado de Bert Hellinger</span>
                 <span>Página 4 de 4</span>
               </div>
             </div>

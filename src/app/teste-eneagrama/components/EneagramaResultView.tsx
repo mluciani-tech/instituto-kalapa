@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { ResultadoEneagramaCalculado } from "../lib/calculo-eneagrama";
 import { ENEAGRAMA_REPORTS_MAP, EneagramaReportData } from "../data/eneagrama-reports-data";
+import SupportNotice from "@/components/SupportNotice";
 
 interface EneagramaResultViewProps {
   resultado: ResultadoEneagramaCalculado;
@@ -87,7 +88,7 @@ export default function EneagramaResultView({
                 Avaliação realizada em {dataRealizacao}
               </p>
               <p className="text-[#1A3C4D]/70 text-xs">
-                Seu laudo oficial está disponível para consulta e emissão em PDF a qualquer momento.
+                Seu relatório de autoconhecimento está disponível para consulta e emissão em PDF a qualquer momento.
               </p>
             </div>
           </div>
@@ -118,7 +119,7 @@ export default function EneagramaResultView({
       <div className="text-center relative">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] text-xs sm:text-sm font-semibold tracking-wide mb-4 border border-[#7D8C6E]/30">
           <Sparkles className="w-4 h-4" />
-          <span>Diagnóstico Concluído • INstituto Kalapa</span>
+          <span>Mapeamento Concluído • INstituto Kalapa</span>
         </div>
 
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-light text-[#1A3C4D] tracking-tight mb-3">
@@ -130,7 +131,7 @@ export default function EneagramaResultView({
         </h1>
 
         <p className="max-w-2xl mx-auto text-sm sm:text-base text-[#1A3C4D]/80 leading-relaxed font-light">
-          Apresentamos sua síntese clínica e sistêmica completa, integrando a sabedoria do Eneagrama com as Constelações Familiares de Bert Hellinger e terapias integrativas.
+          Apresentamos sua síntese de autoconhecimento e sistêmica completa, integrando a sabedoria do Eneagrama com as Constelações Familiares de Bert Hellinger e terapias integrativas.
         </p>
       </div>
 
@@ -146,7 +147,7 @@ export default function EneagramaResultView({
               <p className="text-xs sm:text-sm text-amber-800/90 font-light leading-relaxed mb-3">
                 Você obteve a mesma pontuação máxima em mais de um perfil:{" "}
                 <strong>{empates.map((e) => `Tipo ${e.numero}`).join(" e ")}</strong>.
-                Exibimos o laudo do Tipo {tipoDominante.numero}. Recomendamos verificar também os aspectos do outro perfil no laudo geral impresso.
+                Exibimos o relatório do Tipo {tipoDominante.numero}. Recomendamos verificar também os aspectos do outro perfil no relatório geral impresso.
               </p>
             </div>
           </div>
@@ -171,7 +172,7 @@ export default function EneagramaResultView({
                   {getCentroIcon(relatorio.centroCategoria)}
                   {relatorio.centro}
                 </span>
-                <p className="text-xs text-white/80 font-light">Diagnóstico Clínico & Sistêmico</p>
+                <p className="text-xs text-white/80 font-light">Mapeamento de Autoconhecimento & Sistêmico</p>
                 <h3 className="text-xl sm:text-2xl font-serif text-white font-medium">
                   {relatorio.titulo}
                 </h3>
@@ -679,6 +680,8 @@ export default function EneagramaResultView({
         </div>
       </div>
 
+      <SupportNotice />
+
       {/* Botões de Ações e Próximos Passos */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
         {creditosRestantes > 0 ? (
@@ -708,7 +711,7 @@ export default function EneagramaResultView({
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border border-[#7D8C6E] text-[#7D8C6E] hover:bg-[#7D8C6E]/10 text-xs sm:text-sm font-semibold transition-all shadow-xs cursor-pointer w-full sm:w-auto justify-center"
           >
             <Printer className="w-4 h-4" />
-            <span>Imprimir / Salvar Laudo Completo (A4)</span>
+            <span>Imprimir / Salvar Relatório Completo (A4)</span>
           </button>
 
           <Link

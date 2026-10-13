@@ -30,6 +30,7 @@ import {
   CronotipoReportData,
 } from "../data/cronotipo-reports-data";
 import TestShareMenu from "@/app/components/TestShareMenu";
+import SupportNotice from "@/components/SupportNotice";
 
 interface CronotipoResultViewProps {
   resultado: ResultadoCronotipoCalculado;
@@ -83,7 +84,7 @@ export default function CronotipoResultView({
                 Avaliação realizada em {dataRealizacao}
               </p>
               <p className="text-[#1A3C4D]/70 text-xs">
-                Seu laudo oficial está disponível para consulta e emissão em PDF a qualquer momento.
+                Seu relatório de autoconhecimento está disponível para consulta e emissão em PDF a qualquer momento.
               </p>
             </div>
           </div>
@@ -439,6 +440,8 @@ export default function CronotipoResultView({
         )}
       </div>
 
+      <SupportNotice />
+
       {/* Convite para Vivências e Integração */}
       <div className="bg-[#F8F4ED] rounded-3xl p-6 sm:p-8 border border-[#E8DEC8] flex flex-col sm:flex-row items-center justify-between gap-6">
         <div>
@@ -462,7 +465,7 @@ export default function CronotipoResultView({
             onClick={onAbrirRelatorio}
             className="px-5 py-3 rounded-xl bg-[#B8965A] text-white text-xs font-semibold hover:bg-[#A38349] transition-colors shadow-xs"
           >
-            Emitir Laudo PDF
+            Emitir Relatório PDF
           </button>
         </div>
       </div>

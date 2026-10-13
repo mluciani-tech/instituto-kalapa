@@ -42,6 +42,7 @@ export default function AdminAvaliacoesEneagrama() {
   const [selecionada, setSelecionada] = useState<AvaliacaoEneagrama | null>(null);
   const [paraExcluir, setParaExcluir] = useState<AvaliacaoEneagrama | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [feedback, setFeedback] = useState<{ tipo: "sucesso" | "erro" | "aviso"; texto: string } | null>(null);
 
   const fetchAvaliacoes = useCallback(async () => {
     setLoading(true);
@@ -82,9 +83,10 @@ export default function AdminAvaliacoesEneagrama() {
       });
       if (!res.ok) throw new Error("Erro ao excluir avaliação.");
       setParaExcluir(null);
+      setFeedback({ tipo: "sucesso", texto: "Avaliação excluída com sucesso." });
       await fetchAvaliacoes();
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Erro ao excluir.");
+      setFeedback({ tipo: "erro", texto: err instanceof Error ? err.message : "Erro ao excluir avaliação." });
     } finally {
       setIsDeleting(false);
     }
@@ -95,7 +97,7 @@ export default function AdminAvaliacoesEneagrama() {
 
   const exportarCSV = () => {
     if (avaliacoes.length === 0) {
-      alert("Não há registros para exportar no filtro atual.");
+      setFeedback({ tipo: "aviso", texto: "Não há registros para exportar no filtro atual." });
       return;
     }
 
@@ -297,6 +299,28 @@ export default function AdminAvaliacoesEneagrama() {
           ))}
         </div>
       </div>
+
+      {feedback && (
+        <div
+          className={`p-3.5 rounded-xl text-xs flex items-center justify-between gap-2 border animate-fadeIn ${
+            feedback.tipo === "sucesso"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : feedback.tipo === "erro"
+              ? "bg-red-50 border-red-200 text-red-800"
+              : "bg-amber-50 border-amber-200 text-amber-800"
+          }`}
+        >
+          <span>{feedback.texto}</span>
+          <button
+            type="button"
+            onClick={() => setFeedback(null)}
+            className="font-bold opacity-60 hover:opacity-100 px-1 cursor-pointer"
+            aria-label="Fechar"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Tabela */}
       <div className="bg-white rounded-2xl border border-brand-beige overflow-hidden shadow-xs">

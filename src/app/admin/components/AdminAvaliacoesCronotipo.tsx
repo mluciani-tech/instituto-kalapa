@@ -2,13 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  Clock,
   MessageCircle,
-  Mail,
   Search,
   RefreshCw,
   Download,
-  Calendar,
   Eye,
   Trash2,
   X,
@@ -18,7 +15,6 @@ import {
   Sunrise,
   SunMedium,
   Moon,
-  Sparkles,
 } from "lucide-react";
 import type { AvaliacaoCronotipo } from "@/lib/types";
 
@@ -46,6 +42,7 @@ export default function AdminAvaliacoesCronotipo() {
   const [selecionada, setSelecionada] = useState<AvaliacaoCronotipo | null>(null);
   const [paraExcluir, setParaExcluir] = useState<AvaliacaoCronotipo | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [feedback, setFeedback] = useState<{ tipo: "sucesso" | "erro" | "aviso"; texto: string } | null>(null);
 
   const fetchAvaliacoes = useCallback(async () => {
     setLoading(true);
@@ -86,9 +83,10 @@ export default function AdminAvaliacoesCronotipo() {
       });
       if (!res.ok) throw new Error("Erro ao excluir avaliação.");
       setParaExcluir(null);
+      setFeedback({ tipo: "sucesso", texto: "Avaliação excluída com sucesso." });
       await fetchAvaliacoes();
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Erro ao excluir.");
+      setFeedback({ tipo: "erro", texto: err instanceof Error ? err.message : "Erro ao excluir avaliação." });
     } finally {
       setIsDeleting(false);
     }
@@ -122,7 +120,7 @@ export default function AdminAvaliacoesCronotipo() {
 
   const exportarCSV = () => {
     if (avaliacoes.length === 0) {
-      alert("Não há registros para exportar no filtro atual.");
+      setFeedback({ tipo: "aviso", texto: "Não há registros para exportar no filtro atual." });
       return;
     }
     const cabecalho = ["Nome", "E-mail", "WhatsApp", "Cronotipo", "Pontuação", "Data"];
@@ -244,6 +242,27 @@ export default function AdminAvaliacoesCronotipo() {
           </button>
         </div>
       </div>
+
+      {feedback && (
+        <div
+          className={`p-3.5 rounded-xl text-xs flex items-center justify-between gap-2 border animate-fadeIn ${
+            feedback.tipo === "sucesso"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : feedback.tipo === "erro"
+              ? "bg-red-50 border-red-200 text-red-800"
+              : "bg-amber-50 border-amber-200 text-amber-800"
+          }`}
+        >
+          <span>{feedback.texto}</span>
+          <button
+            type="button"
+            onClick={() => setFeedback(null)}
+            className="text-xs font-semibold underline hover:opacity-80 cursor-pointer"
+          >
+            Fechar
+          </button>
+        </div>
+      )}
 
       {/* Tabela de Resultados */}
       <div className="bg-white rounded-2xl border border-brand-sand shadow-xs overflow-hidden">
@@ -432,7 +451,7 @@ export default function AdminAvaliacoesCronotipo() {
               </h4>
               <div className="space-y-2">
                 {Array.isArray(selecionada.respostas) &&
-                  selecionada.respostas.map((r: any, idx: number) => (
+                  selecionada.respostas.map((r: { questaoId?: number; dimensao?: string; texto?: string; resposta?: number | string; pontos?: number; opcaoTexto?: string }, idx: number) => (
                     <div
                       key={idx}
                       className="p-3 rounded-xl bg-brand-cream/20 border border-brand-sand text-xs space-y-1"

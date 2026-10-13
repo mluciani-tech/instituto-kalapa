@@ -112,7 +112,7 @@ export default function EneagramaQuestionCard({
                 : "opacity-50 bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            <span>Ver Meu Diagnóstico</span>
+            <span>Ver Meu Resultado</span>
             <Check className="w-4 h-4" />
           </button>
         ) : (

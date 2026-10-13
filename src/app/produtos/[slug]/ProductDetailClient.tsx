@@ -19,7 +19,7 @@ import {
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
 import ProductAppointmentSection from "@/components/agendamento/ProductAppointmentSection";
-import { isProdutoAgendamento, isProdutoCalendario, permiteCheckoutProduto } from "@/lib/agendamento";
+import { isProdutoAgendamento, permiteCheckoutProduto } from "@/lib/agendamento";
 import { getProdutoBotoesConfig } from "@/lib/produto-botoes";
 import ProductShareMenu from "@/app/components/ProductShareMenu";
 
@@ -30,7 +30,8 @@ interface ProductDetailClientProps {
 
 export default function ProductDetailClient({ produto, vagas }: ProductDetailClientProps) {
   const router = useRouter();
-  const { addItem, clearCart, openDrawer } = useCart();
+  const { addItem, openDrawer } = useCart();
+  const [acaoErro, setAcaoErro] = useState<string | null>(null);
 
   const isAgendamento = isProdutoAgendamento(produto);
 
@@ -55,7 +56,6 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
     : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const isTeste = Boolean(produto.is_teste);
-  const isCalendario = isProdutoCalendario(produto);
   const isBiblioteca = Boolean(produto.is_biblioteca) || Boolean(produto.arquivo_url);
   const arquivoDisponivel = Boolean(produto.arquivo_url);
   const permiteCheckout = permiteCheckoutProduto(produto);
@@ -65,6 +65,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
 
   const handleDownloadArquivo = async () => {
     try {
+      setAcaoErro(null);
       setBaixandoArquivo(true);
       const res = await fetch(`/api/produtos/${produto.id}/download`, {
         method: "GET",
@@ -78,14 +79,14 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
 
       if (res.status === 403) {
         const data = await res.json();
-        alert(data.error || "Você precisa concluir a compra para baixar este material.");
+        setAcaoErro(data.error || "Você precisa concluir a compra para baixar este material.");
         setBaixandoArquivo(false);
         return;
       }
 
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || "Erro ao baixar arquivo. Tente novamente mais tarde.");
+        setAcaoErro(data.error || "Erro ao baixar arquivo. Tente novamente mais tarde.");
         setBaixandoArquivo(false);
         return;
       }
@@ -95,7 +96,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
       setTimeout(() => setBaixandoArquivo(false), 2000);
     } catch (err) {
       console.error("Erro ao baixar:", err);
-      alert("Erro ao conectar com o servidor. Tente novamente.");
+      setAcaoErro("Erro ao conectar com o servidor. Tente novamente.");
       setBaixandoArquivo(false);
     }
   };
@@ -105,7 +106,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
   const vagasQuaseEsgotadas = temVagasExibiveis && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
 
   const handleComprarAgora = () => {
-    clearCart();
+    // Adiciona o produto preservando outros itens do carrinho
     addItem(
       {
         id: produto.id,
@@ -127,6 +128,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
 
   const handleComprarGratuito = async () => {
     try {
+      setAcaoErro(null);
       setLoadingGratuito(true);
       const response = await fetch("/api/checkout-gratuito", {
         method: "POST",
@@ -144,7 +146,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
 
       if (!response.ok) {
         const errorData = await response.json();
-        alert(errorData.error || "Erro ao gerar acesso gratuito.");
+        setAcaoErro(errorData.error || "Erro ao gerar acesso gratuito.");
         setLoadingGratuito(false);
         return;
       }
@@ -160,7 +162,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
       }
     } catch (err) {
       console.error("Erro no checkout gratuito:", err);
-      alert("Erro de conexão. Tente novamente.");
+      setAcaoErro("Erro de conexão. Tente novamente.");
       setLoadingGratuito(false);
     }
   };
@@ -399,6 +401,20 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                   </span>
                 )}
               </div>
+
+              {acaoErro && (
+                <div className="mb-4 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-between gap-3 animate-fadeIn">
+                  <span className="leading-relaxed">{acaoErro}</span>
+                  <button
+                    type="button"
+                    onClick={() => setAcaoErro(null)}
+                    className="text-red-700/60 hover:text-red-900 font-bold px-1.5 py-0.5 rounded cursor-pointer"
+                    aria-label="Fechar aviso"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
 
               <div className="flex flex-col sm:flex-row gap-3">
                 {isAgendamento ? (

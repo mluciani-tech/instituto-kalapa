@@ -37,6 +37,8 @@ export default function AdminBloqueios({
   const [novoBloqueioDiaInteiro, setNovoBloqueioDiaInteiro] = useState(false);
   const [novoBloqueioMotivo, setNovoBloqueioMotivo] = useState("");
   const [salvandoBloqueio, setSalvandoBloqueio] = useState(false);
+  const [bloqueioParaExcluir, setBloqueioParaExcluir] = useState<TherapistBlock | null>(null);
+  const [isExcluindo, setIsExcluindo] = useState(false);
 
   const fetchBlocks = useCallback(async () => {
     try {
@@ -101,20 +103,25 @@ export default function AdminBloqueios({
     setSalvandoBloqueio(false);
   };
 
-  const handleExcluirBloqueio = async (id: string) => {
-    if (!confirm("Deseja remover este bloqueio e liberar os horários na agenda?")) return;
+  const handleConfirmarExcluirBloqueio = async () => {
+    if (!bloqueioParaExcluir) return;
+    setIsExcluindo(true);
     try {
-      const res = await fetch(`/api/admin/agendamentos/bloqueios?id=${id}`, {
+      const res = await fetch(`/api/admin/agendamentos/bloqueios?id=${bloqueioParaExcluir.id}`, {
         method: "DELETE",
       });
       if (res.ok) {
-        setSucesso("Bloqueio removido.");
+        setBloqueioParaExcluir(null);
+        setSucesso("Bloqueio removido com sucesso.");
         await fetchBlocks();
       } else {
-        setError("Erro ao remover bloqueio.");
+        const d = await res.json().catch(() => ({}));
+        setError(d.error || "Erro ao remover bloqueio.");
       }
     } catch {
       setError("Falha de conexão.");
+    } finally {
+      setIsExcluindo(false);
     }
   };
 
@@ -156,8 +163,9 @@ export default function AdminBloqueios({
           {blocks.map((b) => (
             <div key={b.id} className="bg-rose-50 border border-rose-200 rounded-xl p-4 relative group">
               <button
-                onClick={() => handleExcluirBloqueio(b.id)}
-                className="absolute top-3 right-3 text-rose-400 hover:text-rose-700 hover:bg-rose-100 p-1.5 rounded-lg transition-colors"
+                type="button"
+                onClick={() => setBloqueioParaExcluir(b)}
+                className="absolute top-3 right-3 text-rose-400 hover:text-rose-700 hover:bg-rose-100 p-1.5 rounded-lg transition-colors cursor-pointer"
                 title="Remover Bloqueio"
               >
                 <Trash2 className="w-4 h-4" />
@@ -273,6 +281,40 @@ export default function AdminBloqueios({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {bloqueioParaExcluir && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="Confirmar remoção de bloqueio">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full border border-brand-beige text-center space-y-4 shadow-xl">
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-brand-charcoal">Remover Bloqueio?</h3>
+              <p className="text-xs text-brand-charcoal/70 mt-1">
+                Deseja remover o bloqueio do dia <strong>{formatDateTimeBr(bloqueioParaExcluir.start_time).split(" ")[0]}</strong> e liberar os horários na agenda?
+              </p>
+            </div>
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setBloqueioParaExcluir(null)}
+                disabled={isExcluindo}
+                className="flex-1 py-2.5 rounded-xl border border-brand-beige text-xs font-medium text-brand-charcoal hover:bg-brand-beige/20 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmarExcluirBloqueio}
+                disabled={isExcluindo}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {isExcluindo ? "Removendo..." : "Sim, Remover"}
+              </button>
+            </div>
           </div>
         </div>
       )}

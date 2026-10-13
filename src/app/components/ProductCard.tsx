@@ -8,7 +8,7 @@ import { Check, ArrowRight, ShoppingBag, Calendar, Download } from "lucide-react
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
-import { isProdutoAgendamento, isProdutoCalendario, permiteCheckoutProduto } from "@/lib/agendamento";
+import { isProdutoAgendamento, permiteCheckoutProduto } from "@/lib/agendamento";
 import { getProdutoBotoesConfig } from "@/lib/produto-botoes";
 
 export type { Produto };
@@ -23,11 +23,10 @@ interface ProductCardProps {
 
 export default function ProductCard({ produto, index = 0, vagas }: ProductCardProps) {
   const router = useRouter();
-  const { addItem, clearCart, openDrawer } = useCart();
+  const { addItem, openDrawer } = useCart();
 
   const isAgendamento = isProdutoAgendamento(produto);
   const isTeste = Boolean(produto.is_teste);
-  const isCalendario = isProdutoCalendario(produto);
   const permiteCheckout = permiteCheckoutProduto(produto);
 
   const handleEscolher = () => {
@@ -35,8 +34,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
       router.push(`/produtos/${produto.id}#agendamento`);
       return;
     }
-    // Sincroniza o produto escolhido limpando itens anteriores e inserindo o produto direto
-    clearCart();
+    // Adiciona o produto ao carrinho preservando itens pré-existentes
     addItem({
       id: produto.id,
       slug: produto.slug,
@@ -59,9 +57,11 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
 
   const botoesConfig = getProdutoBotoesConfig(produto);
   const [baixando, setBaixando] = useState(false);
+  const [downloadErro, setDownloadErro] = useState<string | null>(null);
 
   const handleDownloadDireto = async () => {
     try {
+      setDownloadErro(null);
       setBaixando(true);
       const res = await fetch(`/api/produtos/${produto.id}/download`);
       if (res.status === 401) {
@@ -70,14 +70,14 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
       }
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || "Erro ao baixar arquivo.");
+        setDownloadErro(data.error || "Não foi possível baixar o material agora. Tente novamente mais tarde.");
         setBaixando(false);
         return;
       }
       window.location.href = `/api/produtos/${produto.id}/download`;
       setTimeout(() => setBaixando(false), 2000);
     } catch {
-      alert("Erro ao conectar ao servidor.");
+      setDownloadErro("Falha de conexão com o servidor. Verifique sua internet.");
       setBaixando(false);
     }
   };
@@ -234,15 +234,22 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
 
                   <div className="flex flex-col sm:flex-row gap-2">
                     {botoesConfig.isDownloadGratuito ? (
-                      <button
-                        type="button"
-                        onClick={handleDownloadDireto}
-                        disabled={baixando}
-                        className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 hover:shadow-blue-600/35 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
-                      >
-                        <Download className="w-4 h-4 text-white shrink-0" />
-                        <span>{baixando ? "Iniciando Download..." : botoesConfig.textoPrincipal}</span>
-                      </button>
+                      <div className="w-full">
+                        <button
+                          type="button"
+                          onClick={handleDownloadDireto}
+                          disabled={baixando}
+                          className="w-full py-3.5 px-4 font-bold text-xs md:text-sm rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 hover:shadow-blue-600/35 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
+                        >
+                          <Download className="w-4 h-4 text-white shrink-0" />
+                          <span>{baixando ? "Iniciando Download..." : botoesConfig.textoPrincipal}</span>
+                        </button>
+                        {downloadErro && (
+                          <p className="mt-2 text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200 text-center">
+                            {downloadErro}
+                          </p>
+                        )}
+                      </div>
                     ) : botoesConfig.isAgendamento ? (
                       <Link
                         href={`/produtos/${produto.id}#agendamento`}

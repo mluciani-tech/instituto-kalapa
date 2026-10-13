@@ -6,10 +6,8 @@ import Link from "next/link";
 import {
   Heart,
   ArrowRight,
-  Sparkles,
   ShieldCheck,
   Clock,
-  ArrowLeft,
   Lock,
   UserCheck,
   BookOpen,
@@ -22,18 +20,33 @@ import {
 } from "./data/lealdades-data";
 import {
   calcularResultadoLealdades,
-  ResultadoLealdadesCalculado,
 } from "./lib/calculo-lealdades";
 import LealdadesProgressIndicator from "./components/LealdadesProgressIndicator";
 import LealdadesQuestionCard from "./components/LealdadesQuestionCard";
 import LealdadesResultView from "./components/LealdadesResultView";
 import LealdadesReportModal from "./components/LealdadesReportModal";
 import Footer from "../components/Footer";
-import TestShareMenu from "../components/TestShareMenu";
 import { useCart } from "@/context/CartContext";
+import { useRegistrarAvaliacao } from "@/lib/testes/use-registrar-avaliacao";
+import { useRascunhoTeste } from "@/lib/testes/use-rascunho-teste";
+import {
+  RascunhoTesteNotice,
+  SalvarResultadoBanner,
+} from "@/components/testes/TesteStatusNotices";
+
+interface ProdutoTeste {
+  id: string;
+  nome: string;
+  slug: string;
+  preco: number;
+  preco_promocional?: number | null;
+  categoria?: string | null;
+  imagem_url?: string | null;
+  rota_teste?: string | null;
+}
 
 export default function TesteLealdadesPage() {
-  const { clearCart, addItem, openDrawer } = useCart();
+  const { clearCart, addItem } = useCart();
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [usuario, setUsuario] = useState<{
     id: string;
@@ -41,7 +54,7 @@ export default function TesteLealdadesPage() {
     email?: string;
   } | null>(null);
   const [creditosRestantes, setCreditosRestantes] = useState<number>(0);
-  const [produtoTeste, setProdutoTeste] = useState<any>(null);
+  const [produtoTeste, setProdutoTeste] = useState<ProdutoTeste | null>(null);
 
   const [etapa, setEtapa] = useState<"intro" | "teste" | "resultado">("intro");
   const [perguntaAtualIndex, setPerguntaAtualIndex] = useState(0);
@@ -49,6 +62,42 @@ export default function TesteLealdadesPage() {
   const [dataRealizacao, setDataRealizacao] = useState<string | null>(null);
   const [modalRelatorioAberto, setModalRelatorioAberto] = useState(false);
   const [verificandoManual, setVerificandoManual] = useState(false);
+
+  const onAvaliacaoSalva = useCallback(
+    () => setCreditosRestantes((prev) => Math.max(0, prev - 1)),
+    []
+  );
+
+  const {
+    registrar: registrarAvaliacao,
+    tentarNovamente: tentarSalvarNovamente,
+    salvando: salvandoResultado,
+    erro: erroSalvarResultado,
+  } = useRegistrarAvaliacao({
+    endpoint: "/api/teste-lealdades-invisiveis",
+    onSalvo: onAvaliacaoSalva,
+  });
+
+  const {
+    rascunho,
+    salvar: salvarRascunho,
+    limpar: limparRascunho,
+  } = useRascunhoTeste<Record<number, string>>(
+    "teste-lealdades-invisiveis",
+    usuario?.id
+  );
+
+  // Autosave do rascunho a cada resposta
+  useEffect(() => {
+    if (etapa === "teste") salvarRascunho(respostas, perguntaAtualIndex);
+  }, [etapa, respostas, perguntaAtualIndex, salvarRascunho]);
+
+  const continuarRascunho = () => {
+    if (!rascunho) return;
+    setRespostas(rascunho.respostas);
+    setPerguntaAtualIndex(rascunho.indice);
+    setEtapa("teste");
+  };
 
   const carregarStatus = useCallback(async (isManual = false) => {
     try {
@@ -136,13 +185,14 @@ export default function TesteLealdadesPage() {
       handleComprar();
       return;
     }
+    limparRascunho();
     setEtapa("teste");
     setPerguntaAtualIndex(0);
     setRespostas({});
     setDataRealizacao(null);
   };
 
-  const handleResponder = async (letra: string) => {
+  const handleResponder = (letra: string) => {
     const novasRespostas = { ...respostas, [perguntaAtualIndex]: letra };
     setRespostas(novasRespostas);
 
@@ -153,24 +203,16 @@ export default function TesteLealdadesPage() {
       }, 300);
     } else {
       // Fim do teste
-      try {
-        const resultadoCalc = calcularResultadoLealdades(novasRespostas);
-        // Salvar resultado via API
-        await fetch("/api/teste-lealdades-invisiveis", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            respostas: novasRespostas,
-            resultadoCalculado: resultadoCalc,
-          }),
+      const resultadoCalc = calcularResultadoLealdades(novasRespostas);
+      if (usuario) {
+        void registrarAvaliacao({
+          respostas: novasRespostas,
+          resultadoCalculado: resultadoCalc,
         });
-        setEtapa("resultado");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        carregarStatus(true);
-      } catch (err) {
-        console.error("Erro ao salvar resultado", err);
-        setEtapa("resultado");
       }
+      limparRascunho();
+      setEtapa("resultado");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -226,6 +268,17 @@ export default function TesteLealdadesPage() {
                   </div>
                 </div>
 
+                {rascunho && etapa === "intro" && (
+                  <div className="max-w-2xl mx-auto mb-8 text-left">
+                    <RascunhoTesteNotice
+                      respondidas={Object.keys(rascunho.respostas).length}
+                      total={LEALDADES_PERGUNTAS.length}
+                      onContinuar={continuarRascunho}
+                      onRecomecar={limparRascunho}
+                    />
+                  </div>
+                )}
+
                 <div className="flex items-center justify-center gap-4 relative z-20">
                   {loadingAuth ? (
                     <div className="flex items-center gap-3 text-white/50 bg-white/5 px-8 py-4 rounded-full border border-white/10">
@@ -238,7 +291,7 @@ export default function TesteLealdadesPage() {
                         onClick={iniciarTeste}
                         className="bg-[#B8965A] hover:bg-[#A3854F] text-white px-10 py-4 rounded-full text-base font-bold transition-all shadow-[0_0_40px_rgba(184,150,90,0.3)] hover:shadow-[0_0_60px_rgba(184,150,90,0.4)] flex items-center gap-3 group cursor-pointer"
                       >
-                        Iniciar Diagnóstico Sistêmico
+                        Iniciar Mapeamento Sistêmico
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </button>
                       <p className="text-sm text-white/60">
@@ -343,6 +396,13 @@ export default function TesteLealdadesPage() {
         {/* Resultado */}
         {etapa === "resultado" && resultadoCalculado && (
           <div className="pt-24 pb-20 px-4">
+            <div className="max-w-4xl mx-auto mb-6">
+              <SalvarResultadoBanner
+                erro={erroSalvarResultado}
+                salvando={salvandoResultado}
+                onTentarNovamente={() => void tentarSalvarNovamente()}
+              />
+            </div>
             <LealdadesResultView 
               resultado={resultadoCalculado}
               onAbrirRelatorio={() => setModalRelatorioAberto(true)}

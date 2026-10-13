@@ -1,5 +1,6 @@
 import { FileText, ArrowRight, CheckCircle2, Calendar, ShoppingBag, RotateCcw } from "lucide-react";
 import { ResultadoLealdadesCalculado } from "../lib/calculo-lealdades";
+import SupportNotice from "@/components/SupportNotice";
 
 interface LealdadesResultViewProps {
   resultado: ResultadoLealdadesCalculado;
@@ -34,7 +35,7 @@ export default function LealdadesResultView({
                 Avaliação realizada em {dataRealizacao}
               </p>
               <p className="text-[#1A3C4D]/70 text-xs">
-                Seu laudo oficial está disponível para consulta e emissão em PDF a qualquer momento.
+                Seu relatório de autoconhecimento está disponível para consulta e emissão em PDF a qualquer momento.
               </p>
             </div>
           </div>
@@ -67,7 +68,7 @@ export default function LealdadesResultView({
         
         <div className="relative z-10 text-center mb-8">
           <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold tracking-widest uppercase mb-4 border border-emerald-200">
-            Diagnóstico Sistêmico Concluído
+            Mapeamento Sistêmico Concluído
           </span>
           <h2 className="text-sm font-semibold tracking-widest text-[#B8965A] uppercase mb-2">
             Seu Emaranhamento Dominante:
@@ -122,6 +123,8 @@ export default function LealdadesResultView({
           )}
         </div>
       </div>
+
+      <SupportNotice />
 
       <div className="text-center text-xs text-[#1A3C4D]/40 font-light">
         INstituto Kalapa • Baseado no legado de Bert Hellinger

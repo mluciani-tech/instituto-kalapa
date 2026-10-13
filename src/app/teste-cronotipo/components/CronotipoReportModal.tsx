@@ -21,6 +21,7 @@ import {
   CRONOTIPO_REPORTS_MAP,
   CronotipoReportData,
 } from "../data/cronotipo-reports-data";
+import SupportNotice from "@/components/SupportNotice";
 
 interface CronotipoReportModalProps {
   isOpen: boolean;
@@ -97,7 +98,7 @@ export default function CronotipoReportModal({
             </span>
             <div>
               <p className="text-xs uppercase tracking-wider text-[#B8965A] font-semibold">
-                Laudo Diagnóstico Circadiano
+                Relatório de Autoconhecimento Circadiano
               </p>
               <h3 className="text-sm font-medium text-white/90">
                 {info.nome} ({info.arquetipo})
@@ -131,7 +132,7 @@ export default function CronotipoReportModal({
           ref={reportRef}
           className="p-6 sm:p-12 overflow-y-auto print:overflow-visible print:p-0 text-[#1A3C4D] space-y-8 bg-white"
         >
-          {/* Cabeçalho Oficial do Laudo */}
+          {/* Cabeçalho Oficial do Relatório */}
           <div className="border-b border-[#E8DEC8] pb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -141,7 +142,7 @@ export default function CronotipoReportModal({
                   <span>Cronobiologia & Medicina do Ritmo</span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-serif font-light text-[#1A3C4D]">
-                  Laudo do Cronotipo & Ritmo Biológico
+                  Relatório do Cronotipo & Ritmo Biológico
                 </h1>
                 <p className="text-xs text-[#1A3C4D]/60 mt-0.5">
                   Avaliação individual da preferência circadiana e organização funcional
@@ -267,13 +268,16 @@ export default function CronotipoReportModal({
             </div>
           </div>
 
+          {/* Aviso Acolhedor de Cuidado e Apoio */}
+          <SupportNotice variant="print" />
+
           {/* Rodapé Institucional */}
           <div className="pt-8 border-t border-[#E8DEC8] text-center text-xs text-[#1A3C4D]/60 space-y-1">
             <p className="font-serif italic text-sm text-[#1A3C4D]/80">
               INstituto Kalapa — Centro Integrativo de Autoconhecimento & Bem-Estar
             </p>
             <p>
-              Este laudo possui finalidade educativa e de autoconhecimento circadiano. Documento confidencial.
+              Este relatório possui finalidade educativa e de autoconhecimento circadiano. Documento confidencial.
             </p>
           </div>
         </div>

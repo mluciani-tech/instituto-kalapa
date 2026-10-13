@@ -31,6 +31,12 @@ import CronotipoReportModal from "./components/CronotipoReportModal";
 import Footer from "../components/Footer";
 import TestShareMenu from "../components/TestShareMenu";
 import { useCart } from "@/context/CartContext";
+import { useRegistrarAvaliacao } from "@/lib/testes/use-registrar-avaliacao";
+import { useRascunhoTeste } from "@/lib/testes/use-rascunho-teste";
+import {
+  RascunhoTesteNotice,
+  SalvarResultadoBanner,
+} from "@/components/testes/TesteStatusNotices";
 
 export default function TesteCronotipoPage() {
   const { clearCart, addItem, openDrawer } = useCart();
@@ -60,6 +66,27 @@ export default function TesteCronotipoPage() {
   const [dataRealizacao, setDataRealizacao] = useState<string | null>(null);
   const [modalRelatorioAberto, setModalRelatorioAberto] = useState(false);
   const [verificandoManual, setVerificandoManual] = useState(false);
+
+  const onAvaliacaoSalva = useCallback(
+    () => setCreditosRestantes((prev) => Math.max(0, prev - 1)),
+    []
+  );
+  const {
+    registrar: registrarAvaliacao,
+    tentarNovamente: tentarSalvarNovamente,
+    salvando: salvandoResultado,
+    erro: erroSalvarResultado,
+  } = useRegistrarAvaliacao({ endpoint: "/api/teste-cronotipo", onSalvo: onAvaliacaoSalva });
+  const {
+    rascunho,
+    salvar: salvarRascunho,
+    limpar: limparRascunho,
+  } = useRascunhoTeste<Record<number, string>>("teste-cronotipo", usuario?.id);
+
+  // Autosave do rascunho a cada resposta
+  useEffect(() => {
+    if (etapa === "teste") salvarRascunho(respostas, questaoAtualIndex);
+  }, [etapa, respostas, questaoAtualIndex, salvarRascunho]);
 
   const carregarStatus = useCallback(async (isManual = false) => {
     try {
@@ -211,40 +238,34 @@ export default function TesteCronotipoPage() {
     }
   };
 
+  const montarPayloadAvaliacao = () => {
+    return {
+      usuario_id: usuario?.id,
+      nome: usuario?.nome,
+      email: usuario?.email,
+      pontuacao_total: resultadoCalculado.pontuacaoTotal,
+      cronotipo: resultadoCalculado.tipoCronotipo,
+      nome_cronotipo: resultadoCalculado.info.nome,
+      respostas: resultadoCalculado.respostasDetalhadas,
+    };
+  };
+
   const handleConcluirTeste = () => {
     if (usuario) {
-      fetch("/api/teste-cronotipo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usuario_id: usuario.id,
-          nome: usuario.nome,
-          email: usuario.email,
-          pontuacao_total: resultadoCalculado.pontuacaoTotal,
-          cronotipo: resultadoCalculado.tipoCronotipo,
-          nome_cronotipo: resultadoCalculado.info.nome,
-          respostas: resultadoCalculado.respostasDetalhadas,
-        }),
-      })
-        .then(async (res) => {
-          if (!res.ok) {
-            const errData = await res.json();
-            if (errData.sem_credito) {
-              alert(
-                errData.error ||
-                  "Você não possui créditos para realizar este teste no INstituto Kalapa."
-              );
-            }
-          } else {
-            setCreditosRestantes((prev) => Math.max(0, prev - 1));
-          }
-        })
-        .catch((err) =>
-          console.error("Erro ao registrar avaliação do Cronotipo:", err)
-        );
+      void registrarAvaliacao(montarPayloadAvaliacao());
     }
+    limparRascunho();
 
     setEtapa("resultado");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const continuarRascunho = () => {
+    if (!rascunho) return;
+    setRespostas(rascunho.respostas);
+    setQuestaoAtualIndex(Math.min(rascunho.indice, totalQuestoes - 1));
+    setDataRealizacao(null);
+    setEtapa("teste");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -258,6 +279,7 @@ export default function TesteCronotipoPage() {
         "Deseja iniciar um novo teste utilizando 1 de seus créditos disponíveis? Suas respostas serão renovadas."
       )
     ) {
+      limparRascunho();
       setRespostas({});
       setQuestaoAtualIndex(0);
       setDataRealizacao(null);
@@ -271,6 +293,7 @@ export default function TesteCronotipoPage() {
       handleComprarTeste();
       return;
     }
+    limparRascunho();
     setRespostas({});
     setQuestaoAtualIndex(0);
     setDataRealizacao(null);
@@ -341,7 +364,7 @@ export default function TesteCronotipoPage() {
 
             <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
               Para identificar seu Cronotipo com precisão, acessar seu dossiê comportamental e emitir seu{" "}
-              <strong>Laudo Clínico em PDF personalizado</strong> no INstituto Kalapa:
+              <strong>Relatório de Autoconhecimento em PDF personalizado</strong> no INstituto Kalapa:
             </p>
 
             {/* Box de Preço e Benefícios */}
@@ -362,7 +385,7 @@ export default function TesteCronotipoPage() {
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#B8965A]/15 text-[#B8965A] text-xs font-semibold border border-[#B8965A]/20 self-start sm:self-center">
                   <CheckCircle2 className="w-4 h-4 text-[#B8965A]" />
-                  <span>Laudo PDF Incluso</span>
+                  <span>Relatório PDF Incluso</span>
                 </div>
               </div>
 
@@ -391,7 +414,7 @@ export default function TesteCronotipoPage() {
                 <li className="flex items-start gap-2">
                   <span className="text-[#B8965A] font-bold">•</span>
                   <span>
-                    <strong>Laudo em PDF A4:</strong> Documento visual pronto para impressão e preservação clínica.
+                    <strong>Relatório em PDF A4:</strong> Documento visual pronto para impressão e preservação pessoal.
                   </span>
                 </li>
               </ul>
@@ -431,7 +454,7 @@ export default function TesteCronotipoPage() {
             </h2>
 
             <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
-              Você ainda não possui créditos disponíveis para iniciar o teste do Cronotipo &amp; Ritmo Biológico. Para desbloquear o questionário e emitir seu Laudo Diagnóstico Completo em PDF, adquira sua avaliação abaixo:
+              Você ainda não possui créditos disponíveis para iniciar o teste do Cronotipo &amp; Ritmo Biológico. Para desbloquear o questionário e emitir seu Relatório de Autoconhecimento Completo em PDF, adquira sua avaliação abaixo:
             </p>
 
             <div className="bg-[#F8F4ED] rounded-2xl p-6 mb-8 text-left border border-[#E8DEC8]">
@@ -449,7 +472,7 @@ export default function TesteCronotipoPage() {
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#B8965A]/15 text-[#B8965A] text-xs font-semibold border border-[#B8965A]/20 self-start sm:self-center">
                   <CheckCircle2 className="w-4 h-4 text-[#B8965A]" />
-                  <span>Laudo PDF Incluso</span>
+                  <span>Relatório PDF Incluso</span>
                 </div>
               </div>
 
@@ -464,7 +487,7 @@ export default function TesteCronotipoPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#B8965A] shrink-0" />
-                  <span>Laudo Clínico em PDF A4</span>
+                  <span>Relatório em PDF A4</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#B8965A] shrink-0" />
@@ -583,13 +606,22 @@ export default function TesteCronotipoPage() {
                       3
                     </div>
                     <h4 className="text-xs font-semibold text-[#1A3C4D] mb-1">
-                      Laudo 30 Tópicos
+                      Relatório 30 Tópicos
                     </h4>
                     <p className="text-[11px] text-[#1A3C4D]/70 font-light">
                       Dossiê completo para download e impressão.
                     </p>
                   </div>
                 </div>
+
+                {rascunho && (
+                  <RascunhoTesteNotice
+                    respondidas={Object.keys(rascunho.respostas).length}
+                    total={totalQuestoes}
+                    onContinuar={continuarRascunho}
+                    onRecomecar={limparRascunho}
+                  />
+                )}
 
                 <div className="space-y-4">
                   <button
@@ -640,15 +672,22 @@ export default function TesteCronotipoPage() {
 
             {etapa === "resultado" && (
               /* Tela de Resultado */
-              <CronotipoResultView
-                resultado={resultadoCalculado}
-                onReiniciar={iniciarTeste}
-                onComprarNovoTeste={handleComprarTeste}
-                creditosRestantes={creditosRestantes}
-                dataRealizacao={dataRealizacao}
-                onAbrirRelatorio={() => setModalRelatorioAberto(true)}
-                usuario={usuario}
-              />
+              <>
+                <SalvarResultadoBanner
+                  erro={erroSalvarResultado}
+                  salvando={salvandoResultado}
+                  onTentarNovamente={() => void tentarSalvarNovamente()}
+                />
+                <CronotipoResultView
+                  resultado={resultadoCalculado}
+                  onReiniciar={iniciarTeste}
+                  onComprarNovoTeste={handleComprarTeste}
+                  creditosRestantes={creditosRestantes}
+                  dataRealizacao={dataRealizacao}
+                  onAbrirRelatorio={() => setModalRelatorioAberto(true)}
+                  usuario={usuario}
+                />
+              </>
             )}
           </>
         )}

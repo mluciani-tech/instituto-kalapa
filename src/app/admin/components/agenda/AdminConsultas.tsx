@@ -36,6 +36,9 @@ export default function AdminConsultas({
   const [justificativaCancelamento, setJustificativaCancelamento] = useState("");
   const [salvandoCancelamento, setSalvandoCancelamento] = useState(false);
 
+  const [concluindoAppt, setConcluindoAppt] = useState<Appointment | null>(null);
+  const [salvandoConclusao, setSalvandoConclusao] = useState(false);
+
   const fetchAppointments = useCallback(async () => {
     try {
       setLoading(true);
@@ -55,23 +58,27 @@ export default function AdminConsultas({
     fetchAppointments();
   }, [fetchAppointments]);
 
-  const handleUpdateStatus = async (apptId: string, novoStatus: "COMPLETED") => {
-    if (!confirm(`Deseja marcar este atendimento como CONCLUÍDO?`)) return;
+  const handleConfirmarConclusao = async () => {
+    if (!concluindoAppt) return;
+    setSalvandoConclusao(true);
     try {
       const res = await fetch("/api/admin/agendamentos", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ appointment_id: apptId, status: novoStatus }),
+        body: JSON.stringify({ appointment_id: concluindoAppt.id, status: "COMPLETED" }),
       });
       if (res.ok) {
+        setConcluindoAppt(null);
         setSucesso("Status atualizado com sucesso!");
         await fetchAppointments();
       } else {
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         setError(d.error || "Erro ao atualizar status");
       }
     } catch {
       setError("Falha de conexão.");
+    } finally {
+      setSalvandoConclusao(false);
     }
   };
 
@@ -282,7 +289,8 @@ export default function AdminConsultas({
                       <div className="flex items-center justify-end gap-1.5">
                         {appt.status === "CONFIRMED" && (
                           <button
-                            onClick={() => handleUpdateStatus(appt.id, "COMPLETED")}
+                            type="button"
+                            onClick={() => setConcluindoAppt(appt)}
                             className="bg-brand-purple hover:bg-brand-charcoal text-white px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 text-[10px] font-semibold touch-manipulation cursor-pointer"
                             title="Marcar como concluído"
                           >
@@ -360,6 +368,57 @@ export default function AdminConsultas({
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     "Confirmar Cancelamento"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {concluindoAppt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="Confirmar conclusão de atendimento">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-brand-beige overflow-hidden">
+            <div className="p-6 border-b border-brand-beige text-center space-y-2">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-brand-charcoal text-base">Concluir Atendimento?</h3>
+              <p className="text-xs text-brand-charcoal/70">
+                Confirma a conclusão da consulta? O status será alterado para concluído.
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="bg-brand-beige-light rounded-xl p-3 text-xs border border-brand-beige space-y-1">
+                <p>
+                  <strong>Paciente:</strong>{" "}
+                  {concluindoAppt.usuarios?.nome || "N/A"}
+                </p>
+                <p>
+                  <strong>Horário:</strong> {formatDateTimeBr(concluindoAppt.start_time)}
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setConcluindoAppt(null)}
+                  disabled={salvandoConclusao}
+                  className="flex-1 py-3 text-sm font-semibold text-brand-charcoal bg-white border border-brand-beige rounded-xl hover:bg-brand-beige-light transition-colors cursor-pointer"
+                >
+                  Voltar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmarConclusao}
+                  disabled={salvandoConclusao}
+                  className="flex-1 py-3 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {salvandoConclusao ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    "Sim, Concluir"
                   )}
                 </button>
               </div>

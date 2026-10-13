@@ -34,6 +34,12 @@ import EneagramaReportModal from "./components/EneagramaReportModal";
 import Footer from "../components/Footer";
 import TestShareMenu from "../components/TestShareMenu";
 import { useCart } from "@/context/CartContext";
+import { useRegistrarAvaliacao } from "@/lib/testes/use-registrar-avaliacao";
+import { useRascunhoTeste } from "@/lib/testes/use-rascunho-teste";
+import {
+  RascunhoTesteNotice,
+  SalvarResultadoBanner,
+} from "@/components/testes/TesteStatusNotices";
 
 export default function TesteEneagramaPage() {
   const { clearCart, addItem, openDrawer } = useCart();
@@ -63,6 +69,26 @@ export default function TesteEneagramaPage() {
   const [dataRealizacao, setDataRealizacao] = useState<string | null>(null);
   const [modalRelatorioAberto, setModalRelatorioAberto] = useState(false);
   const [verificandoManual, setVerificandoManual] = useState(false);
+  const onAvaliacaoSalva = useCallback(
+    () => setCreditosRestantes((prev) => Math.max(0, prev - 1)),
+    []
+  );
+  const {
+    registrar: registrarAvaliacao,
+    tentarNovamente: tentarSalvarNovamente,
+    salvando: salvandoResultado,
+    erro: erroSalvarResultado,
+  } = useRegistrarAvaliacao({ endpoint: "/api/teste-eneagrama", onSalvo: onAvaliacaoSalva });
+  const {
+    rascunho,
+    salvar: salvarRascunho,
+    limpar: limparRascunho,
+  } = useRascunhoTeste<Record<string, number>>("teste-eneagrama", usuario?.id);
+
+  // Guarda o progresso a cada resposta para o teste sobreviver a um refresh ou interrupção.
+  useEffect(() => {
+    if (etapa === "teste") salvarRascunho(respostas, afirmacaoAtualIndex);
+  }, [etapa, respostas, afirmacaoAtualIndex, salvarRascunho]);
 
   const carregarStatus = useCallback(async (isManual = false) => {
     try {
@@ -213,44 +239,39 @@ export default function TesteEneagramaPage() {
     }
   };
 
+  const montarPayloadAvaliacao = () => {
+    const tiposPrincipais = resultadoCalculado.empates.length
+      ? resultadoCalculado.empates.map((t) => t.numero)
+      : [resultadoCalculado.tipoDominante.numero];
+    const pontuacoes = Object.fromEntries(
+      resultadoCalculado.ranking.map((r) => [r.tipo.numero, r.pontos])
+    );
+    return {
+      usuario_id: usuario?.id,
+      nome: usuario?.nome,
+      email: usuario?.email,
+      tipos_principais: tiposPrincipais,
+      pontuacoes,
+      respostas,
+    };
+  };
+
   const handleConcluirTeste = () => {
     if (usuario) {
-      const tiposPrincipais = resultadoCalculado.empates.length
-        ? resultadoCalculado.empates.map((t) => t.numero)
-        : [resultadoCalculado.tipoDominante.numero];
-      const pontuacoes = Object.fromEntries(
-        resultadoCalculado.ranking.map((r) => [r.tipo.numero, r.pontos])
-      );
-
-      fetch("/api/teste-eneagrama", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usuario_id: usuario.id,
-          nome: usuario.nome,
-          email: usuario.email,
-          tipos_principais: tiposPrincipais,
-          pontuacoes,
-          respostas,
-        }),
-      })
-        .then(async (res) => {
-          if (!res.ok) {
-            const errData = await res.json();
-            if (errData.sem_credito) {
-              alert(
-                errData.error ||
-                  "Você não possui créditos para realizar este teste no INstituto Kalapa."
-              );
-            }
-          } else {
-            setCreditosRestantes((prev) => Math.max(0, prev - 1));
-          }
-        })
-        .catch((err) => console.error("Erro ao registrar avaliação do Eneagrama:", err));
+      void registrarAvaliacao(montarPayloadAvaliacao());
     }
+    limparRascunho();
 
     setEtapa("resultado");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const continuarRascunho = () => {
+    if (!rascunho) return;
+    setRespostas(rascunho.respostas);
+    setAfirmacaoAtualIndex(Math.min(rascunho.indice, totalQuestoes - 1));
+    setDataRealizacao(null);
+    setEtapa("teste");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -277,6 +298,7 @@ export default function TesteEneagramaPage() {
       handleComprarTeste();
       return;
     }
+    limparRascunho();
     setRespostas({});
     setAfirmacaoAtualIndex(0);
     setDataRealizacao(null);
@@ -346,7 +368,7 @@ export default function TesteEneagramaPage() {
 
             <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
               Para mapear seu Tipo Dominante com precisão, acessar seu dossiê comportamental e emitir seu{" "}
-              <strong>Laudo Diagnóstico Completo em PDF personalizado</strong> no INstituto Kalapa, adquira sua avaliação abaixo:
+              <strong>Relatório de Autoconhecimento Completo em PDF personalizado</strong> no INstituto Kalapa, adquira sua avaliação abaixo:
             </p>
 
             {/* Box de Preço e Benefícios */}
@@ -365,7 +387,7 @@ export default function TesteEneagramaPage() {
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] text-xs font-semibold border border-[#7D8C6E]/20 self-start sm:self-center">
                   <CheckCircle2 className="w-4 h-4 text-[#7D8C6E]" />
-                  <span>Laudo PDF Incluso</span>
+                  <span>Relatório PDF Incluso</span>
                 </div>
               </div>
 
@@ -387,7 +409,7 @@ export default function TesteEneagramaPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#7D8C6E] font-bold">•</span>
-                  <span><strong>Laudo Clínico em PDF A4:</strong> Documento visual completo pronto para download ou impressão.</span>
+                  <span><strong>Relatório de Autoconhecimento em PDF A4:</strong> Documento visual completo pronto para download ou impressão.</span>
                 </li>
               </ul>
             </div>
@@ -430,7 +452,7 @@ export default function TesteEneagramaPage() {
             </h2>
 
             <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
-              Você ainda não possui créditos disponíveis para iniciar o teste do Eneagrama. Para desbloquear o questionário e emitir seu Laudo Diagnóstico Completo em PDF, adquira sua avaliação abaixo:
+              Você ainda não possui créditos disponíveis para iniciar o teste do Eneagrama. Para desbloquear o questionário e emitir seu Relatório de Autoconhecimento Completo em PDF, adquira sua avaliação abaixo:
             </p>
 
             <div className="bg-[#F8F4ED] rounded-2xl p-6 mb-8 text-left border border-[#E8DEC8]">
@@ -448,7 +470,7 @@ export default function TesteEneagramaPage() {
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] text-xs font-semibold border border-[#7D8C6E]/20 self-start sm:self-center">
                   <CheckCircle2 className="w-4 h-4 text-[#7D8C6E]" />
-                  <span>Laudo PDF Incluso</span>
+                  <span>Relatório PDF Incluso</span>
                 </div>
               </div>
 
@@ -463,7 +485,7 @@ export default function TesteEneagramaPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
-                  <span>Laudo Clínico em PDF A4</span>
+                  <span>Relatório de Autoconhecimento em PDF A4</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
@@ -575,6 +597,15 @@ export default function TesteEneagramaPage() {
                     </div>
                   </div>
 
+                  {rascunho && (
+                    <RascunhoTesteNotice
+                      respondidas={Object.keys(rascunho.respostas).length}
+                      total={totalQuestoes}
+                      onContinuar={continuarRascunho}
+                      onRecomecar={limparRascunho}
+                    />
+                  )}
+
                   <button
                     type="button"
                     onClick={iniciarTeste}
@@ -608,6 +639,14 @@ export default function TesteEneagramaPage() {
                   onConcluir={handleConcluirTeste}
                 />
               </div>
+            )}
+
+            {etapa === "resultado" && (
+              <SalvarResultadoBanner
+                erro={erroSalvarResultado}
+                salvando={salvandoResultado}
+                onTentarNovamente={() => void tentarSalvarNovamente()}
+              />
             )}
 
             {/* ETAPA 3: LAUDO E DIAGNÓSTICO FINAL */}

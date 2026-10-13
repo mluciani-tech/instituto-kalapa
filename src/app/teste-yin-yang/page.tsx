@@ -33,6 +33,12 @@ import ProgressIndicator from "./components/ProgressIndicator";
 import QuestionCard from "./components/QuestionCard";
 import ResultView from "./components/ResultView";
 import { useCart } from "@/context/CartContext";
+import { useRegistrarAvaliacao } from "@/lib/testes/use-registrar-avaliacao";
+import { useRascunhoTeste } from "@/lib/testes/use-rascunho-teste";
+import {
+  RascunhoTesteNotice,
+  SalvarResultadoBanner,
+} from "@/components/testes/TesteStatusNotices";
 
 export default function TesteYinYangPage() {
   const { clearCart, addItem, openDrawer } = useCart();
@@ -60,6 +66,27 @@ export default function TesteYinYangPage() {
   const [modalRelatorioAberto, setModalRelatorioAberto] = useState(false);
   const [modalEmpateAberto, setModalEmpateAberto] = useState(false);
   const [verificandoManual, setVerificandoManual] = useState(false);
+
+  const onAvaliacaoSalva = useCallback(
+    () => setCreditosRestantes((prev) => Math.max(0, prev - 1)),
+    []
+  );
+  const {
+    registrar: registrarAvaliacao,
+    tentarNovamente: tentarSalvarNovamente,
+    salvando: salvandoResultado,
+    erro: erroSalvarResultado,
+  } = useRegistrarAvaliacao({ endpoint: "/api/teste-yin-yang", onSalvo: onAvaliacaoSalva });
+  const {
+    rascunho,
+    salvar: salvarRascunho,
+    limpar: limparRascunho,
+  } = useRascunhoTeste<Record<number, "yang" | "yin">>("teste-yin-yang", usuario?.id);
+
+  // Autosave do rascunho a cada resposta
+  useEffect(() => {
+    if (etapa === "teste") salvarRascunho(respostas, perguntaAtualIndex);
+  }, [etapa, respostas, perguntaAtualIndex, salvarRascunho]);
 
   const carregarStatus = useCallback(async (isManual = false) => {
     try {
@@ -205,6 +232,18 @@ export default function TesteYinYangPage() {
     }
   };
 
+  const montarPayloadAvaliacao = () => {
+    return {
+      usuario_id: usuario?.id,
+      nome: usuario?.nome,
+      email: usuario?.email,
+      tipo_resultado: tipoResultado,
+      pontos_yang: pontosYang,
+      pontos_yin: pontosYin,
+      respostas,
+    };
+  };
+
   const handleConcluirTeste = () => {
     if (pontosYang === pontosYin) {
       setModalEmpateAberto(true);
@@ -212,40 +251,25 @@ export default function TesteYinYangPage() {
     }
 
     if (usuario && usuario.email) {
-      fetch("/api/teste-yin-yang", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usuario_id: usuario.id,
-          nome: usuario.nome,
-          email: usuario.email,
-          tipo_resultado: tipoResultado,
-          pontos_yang: pontosYang,
-          pontos_yin: pontosYin,
-          respostas,
-        }),
-      })
-        .then(async (res) => {
-          if (!res.ok) {
-            const errData = await res.json();
-            if (errData.sem_credito) {
-              alert(
-                errData.error ||
-                  "Você não possui créditos para realizar este teste no INstituto Kalapa."
-              );
-            }
-          } else {
-            setCreditosRestantes((prev) => Math.max(0, prev - 1));
-          }
-        })
-        .catch((err) => console.error("Erro ao registrar avaliação Yin/Yang:", err));
+      void registrarAvaliacao(montarPayloadAvaliacao());
     }
+    limparRascunho();
 
     setEtapa("resultado");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const continuarRascunho = () => {
+    if (!rascunho) return;
+    setRespostas(rascunho.respostas);
+    setPerguntaAtualIndex(Math.min(rascunho.indice, YIN_YANG_PERGUNTAS.length - 1));
+    setDataRealizacao(null);
+    setEtapa("teste");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleRefazerPorEmpate = () => {
+    limparRascunho();
     setRespostas({});
     setPerguntaAtualIndex(0);
     setEtapa("teste");
@@ -259,6 +283,7 @@ export default function TesteYinYangPage() {
       return;
     }
     if (window.confirm("Deseja iniciar um novo teste utilizando 1 de seus créditos disponíveis? Suas respostas serão renovadas.")) {
+      limparRascunho();
       setRespostas({});
       setPerguntaAtualIndex(0);
       setDataRealizacao(null);
@@ -272,6 +297,7 @@ export default function TesteYinYangPage() {
       handleComprarTeste();
       return;
     }
+    limparRascunho();
     setEtapa("teste");
     setRespostas({});
     setPerguntaAtualIndex(0);
@@ -340,8 +366,8 @@ export default function TesteYinYangPage() {
             </h2>
 
             <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
-              Esta avaliação clínica personalizada inclui o cálculo minucioso das suas tendências, orientações terapêuticas de Medicina Tradicional Chinesa e emissão do{" "}
-              <strong>Laudo Clínico Completo em PDF para download</strong> no INstituto Kalapa.
+              Esta avaliação personalizada inclui o cálculo minucioso das suas tendências, orientações terapêuticas de Medicina Tradicional Chinesa e emissão do{" "}
+              <strong>Relatório de Autoconhecimento Completo em PDF para download</strong> no INstituto Kalapa.
             </p>
 
             {/* Box de Preço e Benefícios */}
@@ -360,7 +386,7 @@ export default function TesteYinYangPage() {
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] text-xs font-semibold border border-[#7D8C6E]/20 self-start sm:self-center">
                   <CheckCircle2 className="w-4 h-4 text-[#7D8C6E]" />
-                  <span>Laudo PDF Incluso</span>
+                  <span>Relatório PDF Incluso</span>
                 </div>
               </div>
 
@@ -370,7 +396,7 @@ export default function TesteYinYangPage() {
               <ul className="space-y-2.5 text-xs sm:text-sm text-[#1A3C4D]/85">
                 <li className="flex items-start gap-2">
                   <span className="text-[#B8965A] font-bold">•</span>
-                  <span><strong>Diagnóstico MTC Completo:</strong> Tendência Fogo (Yang), Frio (Yin) ou Equilíbrio Dinâmico.</span>
+                  <span><strong>Mapeamento MTC Completo:</strong> Tendência Fogo (Yang), Frio (Yin) ou Equilíbrio Dinâmico.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#B8965A] font-bold">•</span>
@@ -382,7 +408,7 @@ export default function TesteYinYangPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#B8965A] font-bold">•</span>
-                  <span><strong>Laudo Clínico em PDF:</strong> Documento completo para download e impressão em formato A4.</span>
+                  <span><strong>Relatório em PDF A4:</strong> Documento completo para download e impressão em formato A4.</span>
                 </li>
               </ul>
             </div>
@@ -425,7 +451,7 @@ export default function TesteYinYangPage() {
             </h2>
 
             <p className="text-sm sm:text-base text-[#1A3C4D]/75 font-light leading-relaxed mb-6">
-              Você ainda não possui créditos disponíveis para iniciar o teste Yin/Yang. Para desbloquear o questionário e emitir seu Laudo Clínico em PDF, adquira sua avaliação abaixo:
+              Você ainda não possui créditos disponíveis para iniciar o teste Yin/Yang. Para desbloquear o questionário e emitir seu Relatório de Autoconhecimento em PDF, adquira sua avaliação abaixo:
             </p>
 
             <div className="bg-[#F8F4ED] rounded-2xl p-6 mb-8 text-left border border-[#E8DEC8]">
@@ -443,7 +469,7 @@ export default function TesteYinYangPage() {
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#7D8C6E]/15 text-[#7D8C6E] text-xs font-semibold border border-[#7D8C6E]/20 self-start sm:self-center">
                   <CheckCircle2 className="w-4 h-4 text-[#7D8C6E]" />
-                  <span>Laudo PDF Incluso</span>
+                  <span>Relatório PDF Incluso</span>
                 </div>
               </div>
 
@@ -454,7 +480,7 @@ export default function TesteYinYangPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
-                  <span>Laudo Clínico em PDF A4</span>
+                  <span>Relatório em PDF A4</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-[#7D8C6E] shrink-0" />
@@ -537,10 +563,20 @@ export default function TesteYinYangPage() {
                 <li className="flex gap-3">
                   <span className="text-[#B8965A] font-bold mt-0.5">•</span>
                   <span>
-                    Ao final, você receberá seu Laudo Clínico em PDF personalizado para download com orientações completas para equilibrar suas energias.
+                    Ao final, você receberá seu Relatório em PDF personalizado para download com orientações completas para equilibrar suas energias.
                   </span>
                 </li>
               </ul>
+
+              {rascunho && (
+                <RascunhoTesteNotice
+                  respondidas={Object.keys(rascunho.respostas).length}
+                  total={YIN_YANG_PERGUNTAS.length}
+                  onContinuar={continuarRascunho}
+                  onRecomecar={limparRascunho}
+                />
+              )}
+
               <button
                 onClick={iniciarTeste}
                 className="w-full sm:w-auto px-10 py-4 rounded-xl bg-[#1A3C4D] text-white font-medium hover:bg-[#15313F] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 mx-auto cursor-pointer"
@@ -597,7 +633,7 @@ export default function TesteYinYangPage() {
                   className="w-full sm:w-auto px-7 py-3 rounded-xl bg-[#7D8C6E] text-white text-sm font-medium hover:bg-[#6C7A5E] transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer animate-pulse"
                 >
                   <Sparkles className="w-4 h-4" />
-                  <span>Ver Meu Diagnóstico Completo</span>
+                  <span>Ver Meu Resultado Completo</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
@@ -608,18 +644,25 @@ export default function TesteYinYangPage() {
             </div>
           </div>
         ) : (
-          <ResultView
-            pontosYang={pontosYang}
-            pontosYin={pontosYin}
-            handleReiniciarTeste={handleReiniciarTeste} 
-            handleComprarNovoTeste={handleComprarTeste}
-            creditosRestantes={creditosRestantes}
-            dataRealizacao={dataRealizacao}
-            resultadoAtual={resultadoAtual}
-            tipoResultado={tipoResultado}
-            usuario={usuario}
-            setModalRelatorioAberto={setModalRelatorioAberto}
-          />
+          <>
+            <SalvarResultadoBanner
+              erro={erroSalvarResultado}
+              salvando={salvandoResultado}
+              onTentarNovamente={() => void tentarSalvarNovamente()}
+            />
+            <ResultView
+              pontosYang={pontosYang}
+              pontosYin={pontosYin}
+              handleReiniciarTeste={handleReiniciarTeste} 
+              handleComprarNovoTeste={handleComprarTeste}
+              creditosRestantes={creditosRestantes}
+              dataRealizacao={dataRealizacao}
+              resultadoAtual={resultadoAtual}
+              tipoResultado={tipoResultado}
+              usuario={usuario}
+              setModalRelatorioAberto={setModalRelatorioAberto}
+            />
+          </>
         )}
       </section>
 

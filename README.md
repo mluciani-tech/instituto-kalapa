@@ -22,11 +22,12 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
 
 ### Área Pública & E-commerce
 - **Hero & Narrativa:** Apresentação institucional com imagem real e tipografia refinada.
-- **Autoavaliações (Testes):**
-  - **Teste Yin/Yang (MTC):** Diagnóstico clínico baseado na Medicina Tradicional Chinesa com metrônomo respiratório e dietoterapia.
-  - **Teste de Eneagrama:** Mapeamento de personalidade em 9 tipos fundamentais, revelando a motivação central, medos, vícios emocionais e caminhos de integração.
-  - **Teste de Lealdades Invisíveis:** Baseado nas Constelações Familiares de Bert Hellinger, identifica emaranhamentos sistêmicos (ex: "Sigo você", "Exclusão") e entrega frases de solução.
-  - *Características gerais:* Autenticação exigida, emissão/impressão com 1 clique de **Relatório em PDF (formato A4)** com dados e conclusões detalhadas, e fotografias editoriais geradas por IA.
+- **Autoavaliações (Testes de Autoconhecimento):**
+  - **Teste Yin/Yang (MTC):** Mapeamento energético baseado na Medicina Tradicional Chinesa com metrônomo respiratório e dietoterapia.
+  - **Teste de Eneagrama:** Mapeamento de personalidade em 9 tipos fundamentais, revelando a motivação central, virtudes e caminhos de integração.
+  - **Teste de Cronotipo:** Identificação de perfil circadiano (Leão, Urso, Lobo, Golfinho) com cronograma de pico de energia e rotina de sono ideal.
+  - **Teste de Lealdades Invisíveis:** Identificação de emaranhamentos sistêmicos com frases de reconciliação baseadas nas Constelações Familiares.
+  - *Características gerais:* Padrão acolhedor unificado, autosave contínuo de respostas em tempo real no navegador (localStorage), componente de apoio com canal direto de acolhimento e CVV 188, emissão/impressão com 1 clique de **Relatório em PDF (formato A4)** e fotografias editoriais geradas por IA.
 - **Recuperação Autônoma de Senha:**
   - Fluxo de autoatendimento no `/login` com token temporário de 1 hora via SMTP Hostinger corporativo.
   - Formato multipart (HTML + Texto Puro) garantindo alta entregabilidade sem bloqueio de spam.
@@ -34,8 +35,10 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
   - *Vivências & Cursos (Em Grupo):* Controle de vagas máximas e preenchidas, badges dinâmicos de disponibilidade.
   - *Atendimentos Individuais:* Escolha prévia de data e horário na agenda antes do pagamento com reserva temporária (*Hold* de 15 min).
   - *Compartilhamento Único & OpenGraph:* Links de compartilhamento individualizados por ID no WhatsApp, Web Share e cópia de link, garantindo prévias fiéis em redes sociais sem colisão de slugs legados.
-- **Checkout Seguro:**
+- **Checkout Seguro & Preservação do Carrinho:**
   - Identificação de cliente, aplicação de cupons (%, valor fixo ou cortesia 100%).
+  - Preservação do carrinho existente ao clicar em compras diretas no catálogo.
+  - Proteção de dados sensíveis (CPF e telefone mascarados) no resumo lateral do checkout.
   - Pix com QR Code dinâmico e Cartão de Crédito.
   - Confirmação com comprovante e links diretos para contato via WhatsApp.
 - **Biblioteca Kalapa (Produtos Digitais & Lead Magnet):**
@@ -67,7 +70,8 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
   - Emissão de Lista de Convidados formatada para impressão/PDF.
 - **Cupons de Desconto:** Criação de cupons por porcentagem, valor fixo, limite de usos e validade.
 - **Usuários:** Lista completa de clientes com dados de contato, endereço e histórico de compras.
-- **Manual do Sistema Integrado:** Guia oficial com diagramas visuais e procedimentos operacionais totalmente harmonizado na paleta da marca.
+- **Manual do Sistema Integrado:** Guia oficial com diagramas visuais e procedimentos operacionais totalmente harmonizado na paleta da marca (atualizado na versão v2.13.0).
+- **Feedback & Modais Seguros:** Eliminação completa de caixas de diálogo bloqueantes do navegador (`alert`/`confirm`), adotando modais dedicados de confirmação e banners de retorno inline com auto-dismiss.
 - **Toast Notifications:** Alertas em tempo real na tela quando novos agendamentos são confirmados.
 
 ---
