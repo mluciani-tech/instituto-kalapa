@@ -69,14 +69,23 @@ export default function MetamorfoseReportModal({
       <div className="modal-impressao-card relative bg-[#FDFBF7] w-full max-w-4xl max-h-[90vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden animate-slideUp print:shadow-none print:animate-none print:max-h-none print:rounded-none print:w-full print:max-w-none print:bg-white print:overflow-visible">
         {/* Header Fixo (Apenas na tela) */}
         <div className="shrink-0 border-b border-[#E8DEC8] px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between bg-white z-10 gap-4 print:hidden">
-          <div>
-            <h2 className="text-xl font-serif font-bold text-[#1A3C4D]">
-              Dossiê da Metamorfose da Consciência (6 Páginas A4)
-            </h2>
-            <p className="text-xs text-[#1A3C4D]/60 font-light mt-1">
-              Cartas Sorteadas: {cartas[1].id} • {cartas[2].id} • {cartas[3].id} •{" "}
-              {cartas[4].id}
-            </p>
+          <div className="flex items-center gap-4">
+            {/* Logo Kalapa */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-kalapa.png"
+              alt="INstituto Kalapa"
+              className="h-10 w-auto object-contain shrink-0"
+            />
+            <div>
+              <h2 className="text-xl font-serif font-bold text-[#1A3C4D]">
+                Dossiê da Metamorfose da Consciência (6 Páginas A4)
+              </h2>
+              <p className="text-xs text-[#1A3C4D]/60 font-light mt-0.5">
+                Cartas Sorteadas: {cartas[1].id} • {cartas[2].id} • {cartas[3].id} •{" "}
+                {cartas[4].id}
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 self-end sm:self-auto">
@@ -250,124 +259,178 @@ export default function MetamorfoseReportModal({
               </p>
             </section>
 
+            {/* Ficha Técnica & Concepção */}
+            <section className="p-5 rounded-2xl bg-white border border-[#E8DEC8] space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-[#1A3C4D] border-b border-[#E8DEC8] pb-2">
+                Ficha Técnica & Concepção
+              </h4>
+              <div className="text-xs text-[#1A3C4D]/85 space-y-1.5">
+                <p>
+                  • <strong>Criadora do Jogo:</strong> Clatihúcia Capeli – Consteladora familiar, certificada pela International Systemic Management
+                </p>
+                <p>
+                  • <strong>Programação e Desenvolvimento:</strong> Marcio Luciani
+                </p>
+              </div>
+
+              <h4 className="text-xs font-bold uppercase tracking-widest text-[#1A3C4D] border-b border-[#E8DEC8] pt-2 pb-2">
+                Bibliografias utilizadas para criação do jogo
+              </h4>
+              <ul className="text-xs text-[#1A3C4D]/85 space-y-1 list-disc pl-4">
+                <li>
+                  <strong>Hellinger, Bert.</strong>{" "}
+                  <em>
+                    Ordens do Amor; Ordens da Ajuda; Êxito na Vida, Êxito na Profissão; A Fonte Não Precisa Perguntar Pelo Caminho.
+                  </em>
+                </li>
+                <li>
+                  <strong>Stam, Jan Jacob.</strong>{" "}
+                  <em>
+                    A Alma do Negócio: O Campo Sistêmico nas Organizações.
+                  </em>
+                </li>
+                <li>
+                  <strong>Garriga Bacardí, Joan.</strong>{" "}
+                  <em>
+                    Onde Estão as Moedas? A Chave do Vínculo Entre Pais e Filhos.
+                  </em>
+                </li>
+                <li>
+                  <strong>Schützenberger, Anne Ancelin.</strong>{" "}
+                  <em>Meus Antepassados! A Família e suas Heranças Ocultas.</em>
+                </li>
+              </ul>
+            </section>
+
             <SupportNotice variant="screen" />
           </div>
 
           {/* ========================================================= */}
           {/* LAYOUT DE IMPRESSÃO A4 (6 PÁGINAS EDITORIAIS) */}
           {/* ========================================================= */}
-          <div className="hidden print:block bg-white text-black w-full text-[11.5px] leading-relaxed max-w-[210mm] mx-auto">
+          <div className="hidden print:block bg-white text-black w-full text-[10.5px] leading-relaxed max-w-[210mm] mx-auto">
             {/* ------------------------------------------------------- */}
             {/* PÁGINA 1: FUNDAMENTAÇÃO, EQUAÇÃO NARRATIVA E BALANÇA */}
             {/* ------------------------------------------------------- */}
-            <div className="print:break-after-page space-y-5 pt-2 pb-6">
-              <div className="text-center space-y-1.5 mb-5 border-b-2 border-[#B8965A] pb-4">
-                <p className="text-[#B8965A] font-bold text-[10px] uppercase tracking-widest">
-                  INstituto Kalapa • Desenvolvimento Humano & Abordagem Sistêmica
-                </p>
-                <h1 className="text-2xl font-serif font-extrabold text-[#1A3C4D]">
-                  JOGO SISTÊMICO — A METAMORFOSE DA CONSCIÊNCIA
-                </h1>
-                <p className="text-[#1A3C4D]/75 italic text-xs">
-                  Dossiê Fenomenológico Individual • Fundamentado em Bert Hellinger, Jan Jacob Stam & Joan Garriga
-                </p>
-              </div>
-
-              {/* Metadados da Sessão */}
-              <div className="grid grid-cols-3 gap-3 p-3 bg-[#FDFBF7] border border-[#E8DEC8] text-[11px] print-avoid-break">
-                <div>
-                  <span className="font-bold text-[#1A3C4D] block uppercase text-[9.5px]">
-                    Esfera Investigada:
-                  </span>
-                  <span>{resultado.categoriaTemaLabel}</span>
+            <div className="relatorio-pagina print:break-after-page min-h-[260mm] flex flex-col justify-between pt-1 pb-3">
+              <div className="space-y-2.5">
+                {/* Cabeçalho da Página 1 com Logo no Canto Superior Esquerdo */}
+                <div className="flex items-center gap-4 border-b-2 border-[#B8965A] pb-2.5 mb-2 print-avoid-break">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/logo-kalapa.png"
+                    alt="INstituto Kalapa"
+                    className="h-10 w-auto object-contain shrink-0"
+                  />
+                  <div className="flex-1 text-left min-w-0">
+                    <p className="text-[#B8965A] font-bold text-[9px] uppercase tracking-widest leading-none mb-1">
+                      INstituto Kalapa • Desenvolvimento Humano & Abordagem Sistêmica
+                    </p>
+                    <h1 className="text-xl font-serif font-extrabold text-[#1A3C4D] leading-tight">
+                      JOGO SISTÊMICO — A METAMORFOSE DA CONSCIÊNCIA
+                    </h1>
+                    <p className="text-[#1A3C4D]/75 italic text-[10px] leading-tight">
+                      Dossiê Fenomenológico Individual • Fundamentado em Bert Hellinger, Jan Jacob Stam & Joan Garriga
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-bold text-[#1A3C4D] block uppercase text-[9.5px]">
-                    Tema Registrado:
-                  </span>
-                  <span>
-                    {resultado.temaEmSilencio
-                      ? "Mentalizado em Silêncio"
-                      : resultado.temaDescricao || "Vivência Pessoal"}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-bold text-[#1A3C4D] block uppercase text-[9.5px]">
-                    Data & Tiragem:
-                  </span>
-                  <span>
-                    {dataExibicao} ({cartas[1].id} • {cartas[2].id} •{" "}
-                    {cartas[3].id} • {cartas[4].id})
-                  </span>
-                </div>
-              </div>
 
-              {/* Fundamentação Sintética */}
-              <div className="space-y-1.5 text-justify print-avoid-break">
-                <h2 className="text-[#1A3C4D] font-bold uppercase text-[12px] border-b border-[#1A3C4D] pb-0.5">
-                  1. Fundamentação & As Três Leis Sistêmicas
-                </h2>
-                <p>
-                  O <strong>Jogo Sistêmico — A Metamorfose da Consciência</strong> é uma experiência de autoconhecimento desenvolvida pelo <strong>INstituto Kalapa</strong>. Unindo os quatro estágios biológicos da metamorfose (Ovo, Lagarta, Crisálida e Borboleta) às Três Leis Sistêmicas de Bert Hellinger (<strong>1. Pertencimento</strong>, <strong>2. Ordem/Hierarquia</strong> e <strong>3. Equilíbrio entre Dar e Receber</strong>), o jogo convida a alma a abandonar a pressa infantil de manipular acontecimentos e encontrar a força que brota da concordância com a realidade exatamente como ela é.
-                </p>
-              </div>
-
-              {/* A Equação Narrativa Contínua */}
-              <div className="space-y-2 print-avoid-break">
-                <h2 className="text-[#1A3C4D] font-bold uppercase text-[12px] border-b border-[#1A3C4D] pb-0.5">
-                  2. O Diagnóstico Narrativo Contínuo da Sua Alma
-                </h2>
-                <p className="text-[11px] text-justify">
-                  Ao retirar suas quatro cartas na ordem orgânica da metamorfose, o campo revelou a seguinte equação narrativa contínua (recomenda-se a leitura pausada e em voz alta):
-                </p>
-
-                <div className="border border-[#B8965A] bg-[#FDFBF7] p-3.5 space-y-2.5">
-                  {([1, 2, 3, 4] as const).map((qId) => {
-                    const c = cartas[qId];
-                    return (
-                      <div key={qId} className="text-justify">
-                        <span className="font-bold text-[#1A3C4D] text-[11px]">
-                          {qId}. {c.quadrante_nome.toUpperCase()} (Carta {c.id} —{" "}
-                          {c.titulo} | Bloco {c.bloco}):{" "}
-                        </span>
-                        <span className="italic font-serif">
-                          «{c.mensagem_completa}»
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* A Balança entre a Ferida e a Consciência Adulta */}
-              <div className="space-y-2 print-avoid-break">
-                <h2 className="text-[#1A3C4D] font-bold uppercase text-[12px] border-b border-[#1A3C4D] pb-0.5">
-                  3. A Balança entre a Ferida (Bloco A) e a Consciência Adulta (Bloco B)
-                </h2>
-                <div className="border border-[#7D8C6E] bg-[#F9FBF8] p-3.5 space-y-2 text-justify">
-                  <div className="flex justify-between items-center border-b border-[#7D8C6E]/30 pb-1">
-                    <strong className="text-[#1A3C4D] text-[12px]">
-                      {balanca.titulo}
-                    </strong>
-                    <span className="text-[10.5px] font-bold text-[#7D8C6E]">
-                      Bloco A: {balanca.totalBlocoA} | Bloco B:{" "}
-                      {balanca.totalBlocoB}
+                {/* Metadados da Sessão */}
+                <div className="grid grid-cols-3 gap-2.5 p-2 bg-[#FDFBF7] border border-[#E8DEC8] text-[10px] print-avoid-break">
+                  <div>
+                    <span className="font-bold text-[#1A3C4D] block uppercase text-[8.5px]">
+                      Esfera Investigada:
+                    </span>
+                    <span>{resultado.categoriaTemaLabel}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-[#1A3C4D] block uppercase text-[8.5px]">
+                      Tema Registrado:
+                    </span>
+                    <span>
+                      {resultado.temaEmSilencio
+                        ? "Mentalizado em Silêncio"
+                        : resultado.temaDescricao || "Vivência Pessoal"}
                     </span>
                   </div>
-                  <p>{balanca.analiseFenomenologica}</p>
-                  <p>
-                    <strong>• Pergunta-Chave:</strong>{" "}
-                    <em>«{balanca.perguntaChave}»</em>
+                  <div>
+                    <span className="font-bold text-[#1A3C4D] block uppercase text-[8.5px]">
+                      Data & Tiragem:
+                    </span>
+                    <span>
+                      {dataExibicao} ({cartas[1].id} • {cartas[2].id} •{" "}
+                      {cartas[3].id} • {cartas[4].id})
+                    </span>
+                  </div>
+                </div>
+
+                {/* Fundamentação Sintética */}
+                <div className="space-y-1 text-justify print-avoid-break">
+                  <h2 className="text-[#1A3C4D] font-bold uppercase text-[10.5px] border-b border-[#1A3C4D] pb-0.5">
+                    1. Fundamentação & As Três Leis Sistêmicas
+                  </h2>
+                  <p className="text-[10px] leading-relaxed">
+                    O <strong>Jogo Sistêmico — A Metamorfose da Consciência</strong> é uma experiência de autoconhecimento desenvolvida pelo <strong>INstituto Kalapa</strong>. Unindo os quatro estágios biológicos da metamorfose (Ovo, Lagarta, Crisálida e Borboleta) às Três Leis Sistêmicas de Bert Hellinger (<strong>1. Pertencimento</strong>, <strong>2. Ordem/Hierarquia</strong> e <strong>3. Equilíbrio entre Dar e Receber</strong>), o jogo convida a alma a abandonar a pressa infantil de manipular acontecimentos e encontrar a força que brota da concordância com a realidade exatamente como ela é.
                   </p>
-                  <p>
-                    <strong>• Postura de Integração:</strong>{" "}
-                    {balanca.posturaRecomendada}
+                </div>
+
+                {/* A Equação Narrativa Contínua */}
+                <div className="space-y-1.5 print-avoid-break">
+                  <h2 className="text-[#1A3C4D] font-bold uppercase text-[10.5px] border-b border-[#1A3C4D] pb-0.5">
+                    2. O Diagnóstico Narrativo Contínuo da Sua Alma
+                  </h2>
+                  <p className="text-[9.5px] text-justify leading-relaxed">
+                    Ao retirar suas quatro cartas na ordem orgânica da metamorfose, o campo revelou a seguinte equação narrativa contínua (recomenda-se a leitura pausada e em voz alta):
                   </p>
+
+                  <div className="border border-[#B8965A] bg-[#FDFBF7] p-2.5 space-y-1.5">
+                    {([1, 2, 3, 4] as const).map((qId) => {
+                      const c = cartas[qId];
+                      return (
+                        <div key={qId} className="text-justify text-[9.5px] leading-snug">
+                          <span className="font-bold text-[#1A3C4D]">
+                            {qId}. {c.quadrante_nome.toUpperCase()} (Carta {c.id} —{" "}
+                            {c.titulo} | Bloco {c.bloco}):{" "}
+                          </span>
+                          <span className="italic font-serif">
+                            «{c.mensagem_completa}»
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* A Balança entre a Ferida e a Consciência Adulta */}
+                <div className="space-y-1.5 print-avoid-break">
+                  <h2 className="text-[#1A3C4D] font-bold uppercase text-[10.5px] border-b border-[#1A3C4D] pb-0.5">
+                    3. A Balança entre a Ferida (Bloco A) e a Consciência Adulta (Bloco B)
+                  </h2>
+                  <div className="border border-[#7D8C6E] bg-[#F9FBF8] p-2.5 space-y-1.5 text-justify text-[9.5px] leading-relaxed">
+                    <div className="flex justify-between items-center border-b border-[#7D8C6E]/30 pb-0.5">
+                      <strong className="text-[#1A3C4D] text-[10.5px]">
+                        {balanca.titulo}
+                      </strong>
+                      <span className="text-[9px] font-bold text-[#7D8C6E]">
+                        Bloco A: {balanca.totalBlocoA} | Bloco B:{" "}
+                        {balanca.totalBlocoB}
+                      </span>
+                    </div>
+                    <p>{balanca.analiseFenomenologica}</p>
+                    <p>
+                      <strong>• Pergunta-Chave:</strong>{" "}
+                      <em>«{balanca.perguntaChave}»</em>
+                    </p>
+                    <p>
+                      <strong>• Postura de Integração:</strong>{" "}
+                      {balanca.posturaRecomendada}
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* Rodapé Página 1 */}
-              <div className="border-t border-gray-300 pt-2 flex justify-between text-[9px] text-gray-500 mt-8 print-avoid-break">
+              <div className="border-t border-gray-300 pt-1.5 flex justify-between text-[8.5px] text-gray-500 mt-auto print-avoid-break">
                 <span>
                   Jogo Sistêmico — A Metamorfose da Consciência • INstituto Kalapa
                 </span>
@@ -388,116 +451,125 @@ export default function MetamorfoseReportModal({
               return (
                 <div
                   key={qId}
-                  className="print:break-after-page space-y-4 pt-2 pb-6"
+                  className="relatorio-pagina print:break-after-page min-h-[260mm] flex flex-col justify-between pt-1 pb-3"
                 >
-                  {/* Cabeçalho do Quadrante */}
-                  <div className="border-b-2 border-[#1A3C4D] pb-3 print-avoid-break">
-                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-[#B8965A] mb-0.5">
-                      <span>
-                        Quadrante {qId}: {qInfo.nome} • {qInfo.subtituloArquetipico}
-                      </span>
-                      <span>Pergunta: «{qInfo.perguntaSistemica}»</span>
-                    </div>
-                    <h2 className="text-xl font-serif font-extrabold text-[#1A3C4D]">
-                      [ CARTA {c.id} ] {c.titulo.toUpperCase()}
-                    </h2>
-                    <p className="text-[11px] text-[#1A3C4D]/80 font-semibold">
-                      Bloco {c.bloco} ({c.categoria}) • {c.subtitulo}
-                    </p>
-                  </div>
-
-                  {/* Frase-Guia */}
-                  <div className="p-3 bg-[#FDFBF7] border border-[#B8965A] text-justify print-avoid-break">
-                    <strong className="text-[#B8965A] uppercase text-[10px] block mb-0.5">
-                      Frase-Guia Revelada no Caderno:
-                    </strong>
-                    <p className="font-serif italic text-[12.5px] text-[#1A3C4D]">
-                      «{c.mensagem_completa}»
-                    </p>
-                  </div>
-
-                  {/* As 3 Dimensões Analíticas */}
-                  <div className="space-y-3 text-justify print-avoid-break">
-                    <div>
-                      <strong className="text-[#1A3C4D] text-[11.5px] uppercase block mb-0.5">
-                        1. Reflexão Sistêmica & Conexão com {qInfo.nome}:
-                      </strong>
-                      <p>{c.reflexao_sistemica}</p>
-                    </div>
-
-                    <div>
-                      <strong className="text-[#1A3C4D] text-[11.5px] uppercase block mb-0.5">
-                        2. Dinâmica Interna Sistêmica (Na Alma):
-                      </strong>
-                      <p>{c.dinamica_interna}</p>
-                    </div>
-
-                    <div>
-                      <strong className="text-[#1A3C4D] text-[11.5px] uppercase block mb-0.5">
-                        3. Dinâmica Externa no Mundo Real (Negócios & Vida):
-                      </strong>
-                      <p>{c.dinamica_externa}</p>
-                    </div>
-                  </div>
-
-                  {/* 4. Perguntas de Autoindagação e Registro do Caderno */}
-                  <div className="border border-gray-300 p-3.5 bg-white space-y-2.5 print-avoid-break">
-                    <strong className="text-[#1A3C4D] text-[11.5px] uppercase block border-b border-gray-200 pb-1">
-                      4. Perguntas de Autoindagação Fenomenológica & Registro do Participante:
-                    </strong>
-
-                    {c.perguntas_autoindagacao.map((pergunta, idx) => {
-                      const key = (`resposta${idx + 1}`) as
-                        | "resposta1"
-                        | "resposta2"
-                        | "resposta3";
-                      const respostaDigitada = notas[key]?.trim();
-
-                      return (
-                        <div key={idx} className="space-y-1 text-justify">
-                          <p className="font-semibold text-[#1A3C4D] text-[11px]">
-                            • {pergunta}
-                          </p>
-                          {respostaDigitada ? (
-                            <p className="p-2 bg-[#FDFBF7] border-l-2 border-[#B8965A] italic text-[#1A3C4D]">
-                              {respostaDigitada}
-                            </p>
-                          ) : (
-                            <div className="space-y-2 pt-1 pb-1">
-                              <div className="border-b border-dashed border-gray-300 h-4" />
-                              <div className="border-b border-dashed border-gray-300 h-4" />
-                            </div>
-                          )}
+                  <div className="space-y-2">
+                    {/* Cabeçalho do Quadrante com Logo no Canto Superior Esquerdo */}
+                    <div className="border-b-2 border-[#1A3C4D] pb-2 flex items-center gap-3 print-avoid-break">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/logo-kalapa.png"
+                        alt="INstituto Kalapa"
+                        className="h-8 w-auto object-contain shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center text-[9px] font-bold uppercase tracking-widest text-[#B8965A]">
+                          <span>
+                            Quadrante {qId}: {qInfo.nome} • {qInfo.subtituloArquetipico}
+                          </span>
+                          <span>Pergunta: «{qInfo.perguntaSistemica}»</span>
                         </div>
-                      );
-                    })}
-
-                    <div className="pt-1 text-justify">
-                      <p className="font-semibold text-[#1A3C4D] text-[11px]">
-                        • Ressonância Corporal (Onde meu corpo sentiu alívio ou aperto ao ler esta carta?):
-                      </p>
-                      {notas.ressonanciaCorporal?.trim() ? (
-                        <p className="p-2 bg-[#FDFBF7] border-l-2 border-[#7D8C6E] italic text-[#1A3C4D] mt-1">
-                          {notas.ressonanciaCorporal}
-                        </p>
-                      ) : (
-                        <div className="border-b border-dashed border-gray-300 h-4 mt-1" />
-                      )}
+                        <div className="flex justify-between items-baseline mt-0.5">
+                          <h2 className="text-base font-serif font-extrabold text-[#1A3C4D]">
+                            [ CARTA {c.id} ] {c.titulo.toUpperCase()}
+                          </h2>
+                          <span className="text-[10px] text-[#1A3C4D]/80 font-semibold">
+                            Bloco {c.bloco} ({c.categoria}) • {c.subtitulo}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Exercício Interior da Concordância e Rito de Passagem */}
-                  <div className="border border-[#7D8C6E] p-3.5 bg-[#F9FBF8] text-justify print-avoid-break">
-                    <strong className="text-[#7D8C6E] text-[11px] uppercase block mb-1">
-                      • O Exercício Interior da Concordância ({qInfo.nome}):
-                    </strong>
-                    <p className="italic font-serif text-[#1A3C4D] font-medium">
-                      «{fala}»
-                    </p>
+                    {/* Frase-Guia */}
+                    <div className="py-1.5 px-2.5 bg-[#FDFBF7] border border-[#B8965A] text-justify print-avoid-break">
+                      <strong className="text-[#B8965A] uppercase text-[9px] block mb-0.5">
+                        Frase-Guia Revelada no Caderno:
+                      </strong>
+                      <p className="font-serif italic text-[11px] text-[#1A3C4D] leading-snug">
+                        «{c.mensagem_completa}»
+                      </p>
+                    </div>
+
+                    {/* As 3 Dimensões Analíticas */}
+                    <div className="space-y-1.5 text-justify text-[9.5px] leading-relaxed print-avoid-break">
+                      <div>
+                        <strong className="text-[#1A3C4D] uppercase block mb-0.5">
+                          1. Reflexão Sistêmica & Conexão com {qInfo.nome}:
+                        </strong>
+                        <p>{c.reflexao_sistemica}</p>
+                      </div>
+
+                      <div>
+                        <strong className="text-[#1A3C4D] uppercase block mb-0.5">
+                          2. Dinâmica Interna Sistêmica (Na Alma):
+                        </strong>
+                        <p>{c.dinamica_interna}</p>
+                      </div>
+
+                      <div>
+                        <strong className="text-[#1A3C4D] uppercase block mb-0.5">
+                          3. Dinâmica Externa no Mundo Real (Negócios & Vida):
+                        </strong>
+                        <p>{c.dinamica_externa}</p>
+                      </div>
+                    </div>
+
+                    {/* 4. Perguntas de Autoindagação e Registro do Caderno */}
+                    <div className="border border-gray-300 p-2 bg-white space-y-1 print-avoid-break">
+                      <strong className="text-[#1A3C4D] text-[9.5px] uppercase block border-b border-gray-200 pb-0.5">
+                        4. Perguntas de Autoindagação Fenomenológica & Registro do Participante:
+                      </strong>
+
+                      {c.perguntas_autoindagacao.map((pergunta, idx) => {
+                        const key = (`resposta${idx + 1}`) as
+                          | "resposta1"
+                          | "resposta2"
+                          | "resposta3";
+                        const respostaDigitada = notas[key]?.trim();
+
+                        return (
+                          <div key={idx} className="space-y-0.5 text-justify text-[9px]">
+                            <p className="font-semibold text-[#1A3C4D]">
+                              • {pergunta}
+                            </p>
+                            {respostaDigitada ? (
+                              <p className="p-1 bg-[#FDFBF7] border-l-2 border-[#B8965A] italic text-[#1A3C4D]">
+                                {respostaDigitada}
+                              </p>
+                            ) : (
+                              <div className="border-b border-dashed border-gray-300 h-3" />
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      <div className="pt-0.5 text-justify text-[9px]">
+                        <p className="font-semibold text-[#1A3C4D]">
+                          • Ressonância Corporal (Onde meu corpo sentiu alívio ou aperto ao ler esta carta?):
+                        </p>
+                        {notas.ressonanciaCorporal?.trim() ? (
+                          <p className="p-1 bg-[#FDFBF7] border-l-2 border-[#7D8C6E] italic text-[#1A3C4D] mt-0.5">
+                            {notas.ressonanciaCorporal}
+                          </p>
+                        ) : (
+                          <div className="border-b border-dashed border-gray-300 h-3 mt-0.5" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Exercício Interior da Concordância e Rito de Passagem */}
+                    <div className="border border-[#7D8C6E] py-1.5 px-2.5 bg-[#F9FBF8] text-justify print-avoid-break">
+                      <strong className="text-[#7D8C6E] text-[9.5px] uppercase block mb-0.5">
+                        • O Exercício Interior da Concordância ({qInfo.nome}):
+                      </strong>
+                      <p className="italic font-serif text-[#1A3C4D] text-[10px] font-medium leading-snug">
+                        «{fala}»
+                      </p>
+                    </div>
                   </div>
 
                   {/* Rodapé da Página do Quadrante */}
-                  <div className="border-t border-gray-300 pt-2 flex justify-between text-[9px] text-gray-500 mt-6 print-avoid-break">
+                  <div className="border-t border-gray-300 pt-1.5 flex justify-between text-[8.5px] text-gray-500 mt-auto print-avoid-break">
                     <span>
                       Jogo Sistêmico — A Metamorfose da Consciência • Quadrante{" "}
                       {qId}: {qInfo.nome} • INstituto Kalapa
@@ -511,131 +583,156 @@ export default function MetamorfoseReportModal({
             {/* ------------------------------------------------------- */}
             {/* PÁGINA 6: FOLHA DE INTEGRAÇÃO FINAL, 72H E REFERÊNCIAS */}
             {/* ------------------------------------------------------- */}
-            <div className="space-y-5 pt-2 pb-6">
-              <div className="space-y-1 border-b-2 border-[#1A3C4D] pb-2 mb-4 print-avoid-break">
-                <p className="text-[#B8965A] font-bold text-[10px] uppercase tracking-widest">
-                  Fechamento & Prática Pessoal • INstituto Kalapa
-                </p>
-                <h2 className="text-[#1A3C4D] font-serif font-extrabold uppercase text-lg">
-                  INTEGRAÇÃO DA JORNADA COMPLETA & RECOLHIMENTO
-                </h2>
-              </div>
+            <div className="relatorio-pagina-final min-h-[260mm] flex flex-col justify-between pt-1 pb-3">
+              <div className="space-y-1.5">
+                {/* Cabeçalho Página 6 com Logo no Canto Superior Esquerdo */}
+                <div className="border-b-2 border-[#1A3C4D] pb-2 flex items-center gap-3 print-avoid-break">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/logo-kalapa.png"
+                    alt="INstituto Kalapa"
+                    className="h-8 w-auto object-contain shrink-0"
+                  />
+                  <div className="flex-1">
+                    <p className="text-[#B8965A] font-bold text-[9px] uppercase tracking-widest leading-none mb-1">
+                      Fechamento & Prática Pessoal • INstituto Kalapa
+                    </p>
+                    <h2 className="text-[#1A3C4D] font-serif font-extrabold uppercase text-base leading-tight">
+                      INTEGRAÇÃO DA JORNADA COMPLETA & RECOLHIMENTO
+                    </h2>
+                  </div>
+                </div>
 
-              {/* Tabela Resumo de Registro e Postura */}
-              <div className="space-y-2 print-avoid-break">
-                <h3 className="text-[#1A3C4D] font-bold uppercase text-[12px]">
-                  1. Quadro Sinóptico da Sua Metamorfose
-                </h3>
-                <table className="w-full border-collapse border border-gray-300 text-[10.5px]">
-                  <thead>
-                    <tr className="bg-[#1A3C4D] text-white">
-                      <th className="border border-gray-300 p-2 text-left w-1/5">
-                        Quadrante
-                      </th>
-                      <th className="border border-gray-300 p-2 text-left w-1/4">
-                        Carta Revelada
-                      </th>
-                      <th className="border border-gray-300 p-2 text-left">
-                         Postura Interior de Concordância
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {([1, 2, 3, 4] as const).map((qId) => {
-                      const c = cartas[qId];
-                      return (
-                        <tr key={qId}>
-                          <td className="border border-gray-300 p-2 font-bold bg-[#FDFBF7]">
-                            {qId}. {c.quadrante_nome}
-                          </td>
-                          <td className="border border-gray-300 p-2">
-                            <strong>
-                              {c.id} — {c.titulo}
-                            </strong>
-                            <br />
-                            <span className="text-[9.5px] text-gray-600">
-                              Bloco {c.bloco} • {c.subtitulo}
-                            </span>
-                          </td>
-                          <td className="border border-gray-300 p-2 italic bg-[#F9FBF8] text-justify">
-                            «{obterFalaConcordanciaCarta(c)}»
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                {/* Tabela Resumo de Registro e Postura */}
+                <div className="space-y-0.5 print-avoid-break">
+                  <h3 className="text-[#1A3C4D] font-bold uppercase text-[10px]">
+                    1. Quadro Sinóptico da Sua Metamorfose
+                  </h3>
+                  <table className="w-full border-collapse border border-gray-300 text-[9px]">
+                    <thead>
+                      <tr className="bg-[#1A3C4D] text-white">
+                        <th className="border border-gray-300 p-1 text-left w-1/5">
+                          Quadrante
+                        </th>
+                        <th className="border border-gray-300 p-1 text-left w-1/4">
+                          Carta Revelada
+                        </th>
+                        <th className="border border-gray-300 p-1 text-left">
+                          Postura Interior de Concordância
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {([1, 2, 3, 4] as const).map((qId) => {
+                        const c = cartas[qId];
+                        return (
+                          <tr key={qId}>
+                            <td className="border border-gray-300 p-1 font-bold bg-[#FDFBF7]">
+                              {qId}. {c.quadrante_nome}
+                            </td>
+                            <td className="border border-gray-300 p-1">
+                              <strong>
+                                {c.id} — {c.titulo}
+                              </strong>
+                              <br />
+                              <span className="text-[8px] text-gray-600">
+                                Bloco {c.bloco} • {c.subtitulo}
+                              </span>
+                            </td>
+                            <td className="border border-gray-300 p-1 italic bg-[#F9FBF8] text-justify leading-snug">
+                              «{obterFalaConcordanciaCarta(c)}»
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
 
-              {/* Espaço para Anotação de Integração Final */}
-              <div className="border border-gray-300 p-3.5 bg-white space-y-2.5 print-avoid-break">
-                <strong className="text-[#1A3C4D] text-[11.5px] uppercase block">
-                  2. Postura de Integração Pessoal (O que posso concordar e soltar hoje?):
-                </strong>
-                <div className="space-y-2.5 pt-1">
-                  <div className="border-b border-dashed border-gray-300 h-4" />
-                  <div className="border-b border-dashed border-gray-300 h-4" />
-                  <div className="border-b border-dashed border-gray-300 h-4" />
+                {/* Espaço para Anotação de Integração Final */}
+                <div className="border border-gray-300 p-2 bg-white space-y-0.5 print-avoid-break">
+                  <strong className="text-[#1A3C4D] text-[9.5px] uppercase block">
+                    2. Postura de Integração Pessoal (O que posso concordar e soltar hoje?):
+                  </strong>
+                  <div className="space-y-1.5 pt-0.5">
+                    <div className="border-b border-dashed border-gray-300 h-3" />
+                    <div className="border-b border-dashed border-gray-300 h-3" />
+                  </div>
+                </div>
+
+                {/* A Sabedoria da Não-Intervenção Imediata */}
+                <div className="border border-[#B8965A] p-2 bg-[#FDFBF7] text-justify print-avoid-break">
+                  <h3 className="font-bold text-[#B8965A] uppercase text-[9.5px] mb-0.5">
+                    3. A Sabedoria do Recolhimento e da Não-Intervenção Imediata (As 72 Horas)
+                  </h3>
+                  <p className="text-[9px] leading-relaxed">
+                    Após realizar a tiragem, <strong>não tente formular planos de ação imediatos nem tomar decisões impulsivas nas próximas 72 horas</strong>. Como nos ensina Bert Hellinger em <em>A Fonte Não Precisa Perguntar pelo Caminho</em>, as compreensões sistêmicas atuam como sementes no solo fértil da alma. Quando perturbamos o processo com análises mentais excessivas ou discutimos imediatamente a tiragem com terceiros, roubamos a força do movimento primordial. Guarde este registro em silêncio e confie que a realidade encontrará o seu próprio curso no tempo certo.
+                  </p>
+                </div>
+
+                {/* Diretriz Ética */}
+                <div className="border border-[#1A3C4D] p-2 text-justify print-avoid-break">
+                  <h3 className="font-bold text-[#1A3C4D] uppercase text-[9px] mb-0.5">
+                    Diretriz Ética e Compromisso com a Experiência Viva — INstituto Kalapa
+                  </h3>
+                  <p className="text-[9px] leading-relaxed">
+                    Esta vivência é um instrumento fenomenológico de autopercepção e tomada de consciência. O aprofundamento terapêutico e o desatamento de emaranhamentos familiares ou organizacionais demandam o acompanhamento de um <strong>profissional com formação certificada em Constelação Sistêmica</strong>. Não tome nada aqui como dogma rígido: observe os movimentos da sua alma e escute com honestidade a resposta do seu corpo.
+                  </p>
+                </div>
+
+                {/* Ficha Técnica & Concepção */}
+                <div className="space-y-0.5 print-avoid-break">
+                  <h3 className="text-[#1A3C4D] font-bold uppercase text-[9.5px] border-b border-[#1A3C4D] pb-0.5">
+                    Ficha Técnica & Concepção
+                  </h3>
+                  <div className="text-[9px] space-y-0.5 text-[#1A3C4D]">
+                    <p>
+                      • <strong>Criadora do Jogo:</strong> Clatihúcia Capeli – Consteladora familiar, certificada pela International Systemic Management
+                    </p>
+                    <p>
+                      • <strong>Programação e Desenvolvimento:</strong> Marcio Luciani
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bibliografias utilizadas para criação do jogo */}
+                <div className="space-y-0.5 print-avoid-break">
+                  <h3 className="text-[#1A3C4D] font-bold uppercase text-[9.5px] border-b border-[#1A3C4D] pb-0.5">
+                    Bibliografias utilizadas para criação do jogo
+                  </h3>
+                  <ul className="text-[8.5px] space-y-0.5 leading-snug">
+                    <li>
+                      • <strong>Hellinger, Bert.</strong>{" "}
+                      <em>
+                        Ordens do Amor; Ordens da Ajuda; Êxito na Vida, Êxito na Profissão; A Fonte Não Precisa Perguntar Pelo Caminho.
+                      </em>
+                    </li>
+                    <li>
+                      • <strong>Stam, Jan Jacob.</strong>{" "}
+                      <em>
+                        A Alma do Negócio: O Campo Sistêmico nas Organizações.
+                      </em>
+                    </li>
+                    <li>
+                      • <strong>Garriga Bacardí, Joan.</strong>{" "}
+                      <em>
+                        Onde Estão as Moedas? A Chave do Vínculo Entre Pais e Filhos.
+                      </em>
+                    </li>
+                    <li>
+                      • <strong>Schützenberger, Anne Ancelin.</strong>{" "}
+                      <em>Meus Antepassados! A Família e suas Heranças Ocultas.</em>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="pt-0.5 print-avoid-break">
+                  <SupportNotice variant="print" />
                 </div>
               </div>
 
-              {/* A Sabedoria da Não-Intervenção Imediata */}
-              <div className="border border-[#B8965A] p-4 bg-[#FDFBF7] text-justify print-avoid-break">
-                <h3 className="font-bold text-[#B8965A] uppercase text-[11px] mb-1.5">
-                  3. A Sabedoria do Recolhimento e da Não-Intervenção Imediata (As 72 Horas)
-                </h3>
-                <p className="text-[11px]">
-                  Após realizar a tiragem, <strong>não tente formular planos de ação imediatos nem tomar decisões impulsivas nas próximas 72 horas</strong>. Como nos ensina Bert Hellinger em <em>A Fonte Não Precisa Perguntar pelo Caminho</em>, as compreensões sistêmicas atuam como sementes no solo fértil da alma. Quando perturbamos o processo com análises mentais excessivas ou discutimos imediatamente a tiragem com terceiros, roubamos a força do movimento primordial. Guarde este registro em silêncio e confie que a realidade encontrará o seu próprio curso no tempo certo.
-                </p>
-              </div>
-
-              {/* Diretriz Ética */}
-              <div className="border border-[#1A3C4D] p-3.5 text-justify print-avoid-break">
-                <h3 className="font-bold text-[#1A3C4D] uppercase text-[10.5px] mb-1">
-                  Diretriz Ética e Compromisso com a Experiência Viva — INstituto Kalapa
-                </h3>
-                <p className="text-[10.5px]">
-                  Esta vivência é um instrumento fenomenológico de autopercepção e tomada de consciência. O aprofundamento terapêutico e o desatamento de emaranhamentos familiares ou organizacionais demandam o acompanhamento de um <strong>profissional com formação certificada em Constelação Sistêmica</strong>. Não tome nada aqui como dogma rígido: observe os movimentos da sua alma e escute com honestidade a resposta do seu corpo.
-                </p>
-              </div>
-
-              {/* Referências Bibliográficas */}
-              <div className="space-y-1 print-avoid-break">
-                <h3 className="text-[#1A3C4D] font-bold uppercase text-[11px] border-b border-[#1A3C4D] pb-0.5">
-                  Bibliografia Estruturante Recomendada
-                </h3>
-                <ul className="text-[10px] space-y-0.5">
-                  <li>
-                    • <strong>Hellinger, Bert.</strong>{" "}
-                    <em>
-                      Ordens do Amor; Ordens da Ajuda; Êxito na Vida, Êxito na Profissão; A Fonte Não Precisa Perguntar Pelo Caminho.
-                    </em>
-                  </li>
-                  <li>
-                    • <strong>Stam, Jan Jacob.</strong>{" "}
-                    <em>
-                      A Alma do Negócio: O Campo Sistêmico nas Organizações.
-                    </em>
-                  </li>
-                  <li>
-                    • <strong>Garriga Bacardí, Joan.</strong>{" "}
-                    <em>
-                      Onde Estão as Moedas? A Chave do Vínculo Entre Pais e Filhos.
-                    </em>
-                  </li>
-                  <li>
-                    • <strong>Schützenberger, Anne Ancelin.</strong>{" "}
-                    <em>Meus Antepassados! A Família e suas Heranças Ocultas.</em>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="pt-2 print-avoid-break">
-                <SupportNotice variant="print" />
-              </div>
-
               {/* Rodapé Página 6 */}
-              <div className="border-t border-gray-300 pt-2 flex justify-between text-[9px] text-gray-500 mt-6 print-avoid-break">
+              <div className="border-t border-gray-300 pt-1.5 flex justify-between text-[8.5px] text-gray-500 mt-auto print-avoid-break">
                 <span>
                   Jogo Sistêmico — A Metamorfose da Consciência • INstituto Kalapa
                 </span>

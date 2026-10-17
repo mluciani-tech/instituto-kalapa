@@ -106,7 +106,7 @@ export default function AdminManual() {
       title: "9. Histórico & Versões do Sistema",
       icon: Zap,
       summary: "Registro de atualizações contínuas e notas de versão do projeto.",
-      badge: "v2.12",
+      badge: "v2.14",
     },
   ];
 
@@ -974,11 +974,31 @@ export default function AdminManual() {
               </div>
 
               <div className="space-y-4">
-                {/* v2.13.0 */}
+                {/* v2.14.0 */}
                 <div className="relative pl-6 border-l-2 border-brand-purple space-y-1.5">
                   <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-purple" />
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-purple">v2.13.0</span>
+                    <span className="font-bold text-xs text-brand-purple">v2.14.0</span>
+                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-brand-charcoal">
+                    Relatório Editorial do Jogo Sistêmico (Metamorfose), Ficha Técnica & Correção de Impressão de Inscrições
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
+                    <li><strong>Logotipo do INstituto Kalapa em Todas as Páginas:</strong> Inclusão do logotipo oficial no canto superior esquerdo da barra superior do modal na tela e em todas as 6 páginas A4 do relatório impresso/PDF (capa, quadrantes e folha de encerramento).</li>
+                    <li><strong>Eliminação Rigorosa de Páginas Fantasmas:</strong> Otimização da densidade vertical, paddings e alturas de linhas em todas as 6 páginas, além de ancoragem com <code>mt-auto</code> e regras de margem <code>8mm 10mm</code> com bloqueio estrito de quebra acidental (<code>page-break-after: avoid !important</code>) na página final.</li>
+                    <li><strong>Ficha Técnica & Concepção do Jogo:</strong> Criação de bloco exclusivo destacando a Criadora do Jogo (Clatihúcia Capeli – Consteladora familiar, certificada pela International Systemic Management) e Programação e Desenvolvimento (Marcio Luciani).</li>
+                    <li><strong>Atualização de Bibliografia:</strong> Título atualizado para <em>&ldquo;Bibliografias utilizadas para criação do jogo&rdquo;</em>, preservando as obras de Bert Hellinger, Jan Jacob Stam, Joan Garriga e Anne Ancelin Schützenberger.</li>
+                    <li><strong>Correção da Lista de Convidados (Casa 52):</strong> O modal de relatório do módulo de Inscrições foi migrado para Portal direto no <code>document.body</code> com contêiner oficial de impressão (<code>#relatorio-impressao-container</code>), resolvendo o problema de páginas em branco ao imprimir.</li>
+                    <li><strong>Filtro Inicial & Fallback Instantâneo:</strong> A lista de convidados agora abre por padrão em <em>&ldquo;Todos os produtos / Geral&rdquo;</em> (sem forçar produtos vazios), com pré-população imediata dos dados da tela e suporte expandido a todos os status de pagamento e confirmação.</li>
+                  </ul>
+                </div>
+
+                {/* v2.13.0 */}
+                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
+                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-brand-charcoal/70">v2.13.0</span>
                     <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">

@@ -194,7 +194,21 @@ export async function GET(req: NextRequest) {
     if (statusParam && statusParam !== "todos") {
       if (statusParam === "pago" || statusParam === "confirmados") {
         normalizedData = normalizedData.filter((p) =>
-          ["pago", "confirmado", "confirmada"].includes((p.status || "").toLowerCase())
+          [
+            "pago",
+            "confirmado",
+            "confirmada",
+            "confirmed",
+            "aprovado",
+            "approved",
+            "concluido",
+            "concluida",
+            "completed",
+            "paga",
+            "paid",
+            "ativo",
+            "ativa",
+          ].includes((p.status || "").toLowerCase())
         );
       } else {
         normalizedData = normalizedData.filter(

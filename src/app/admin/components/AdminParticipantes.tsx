@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { Participante, Produto } from "@/lib/types";
 import { formatDate, formatCPF } from "../lib/format";
 import SortableHeader from "./ui/SortableHeader";
@@ -48,13 +49,18 @@ export default function AdminParticipantes({
   onRefreshAll,
   onError,
 }: Props) {
+  const [mounted, setMounted] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [clearing, setClearing] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Relatório de Convidados para Casa 52
   const [showRelatorioModal, setShowRelatorioModal] = useState(false);
   const [relatorioProdutoId, setRelatorioProdutoId] = useState("");
-  const [relatorioApenasPagos, setRelatorioApenasPagos] = useState(true);
+  const [relatorioApenasPagos, setRelatorioApenasPagos] = useState(false);
   const [relatorioCarregando, setRelatorioCarregando] = useState(false);
   const [relatorioParticipantes, setRelatorioParticipantes] = useState<Participante[]>([]);
 
@@ -91,7 +97,8 @@ export default function AdminParticipantes({
         const res = await fetch(`/api/admin/participantes?${params.toString()}`);
         if (res.ok) {
           const json = await res.json();
-          setRelatorioParticipantes(json.data || []);
+          const lista: Participante[] = json.data || [];
+          setRelatorioParticipantes(lista);
         }
       } catch (err) {
         console.error("Erro ao carregar dados do relatório:", err);
@@ -103,8 +110,20 @@ export default function AdminParticipantes({
   );
 
   const handleAbrirRelatorio = () => {
-    const prodIdInicial = participantesProdutoFiltro || (produtos.length > 0 ? produtos[0].id : "");
+    // Usa o filtro de produto atualmente ativo ou vazio para todos os produtos
+    const prodIdInicial = participantesProdutoFiltro && participantesProdutoFiltro !== "todos" ? participantesProdutoFiltro : "";
     setRelatorioProdutoId(prodIdInicial);
+
+    // Inicializa imediatamente com os participantes da visualização atual para não ficar em branco
+    if (participantes && participantes.length > 0) {
+      if (!prodIdInicial) {
+        setRelatorioParticipantes(participantes);
+      } else {
+        const filtrados = participantes.filter((p) => p.produto_id === prodIdInicial);
+        setRelatorioParticipantes(filtrados.length > 0 ? filtrados : participantes);
+      }
+    }
+
     setShowRelatorioModal(true);
     void carregarRelatorio(prodIdInicial, relatorioApenasPagos);
   };
@@ -577,9 +596,10 @@ export default function AdminParticipantes({
       )}
 
       {/* Modal / Visualização de Relatório - Lista de Convidados Casa 52 */}
-      {showRelatorioModal && (
+      {showRelatorioModal && mounted && createPortal(
         <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 print:p-0 print:bg-white print:static print:inset-auto"
+          id="relatorio-impressao-container"
+          className="modal-impressao-backdrop fixed inset-0 z-[100] overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 print:p-0 print:bg-white print:static print:inset-auto"
           role="dialog"
           aria-modal="true"
           aria-label="Lista de convidados para Casa 52"
@@ -587,11 +607,16 @@ export default function AdminParticipantes({
             if (e.key === "Escape") setShowRelatorioModal(false);
           }}
         >
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-brand-beige overflow-hidden print:border-none print:shadow-none print:max-w-none print:max-h-none print:w-full print:rounded-none">
+          <div className="modal-impressao-card bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-brand-beige overflow-hidden print:border-none print:shadow-none print:max-w-none print:max-h-none print:w-full print:rounded-none">
             {/* Barra de Ações do Modal (oculta na impressão) */}
             <div className="no-print p-4 border-b border-brand-beige bg-brand-beige-light/70 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <span className="text-xl">📄</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/logo-kalapa.png"
+                  alt="INstituto Kalapa"
+                  className="h-8 w-auto object-contain shrink-0"
+                />
                 <div>
                   <h3 className="text-sm font-bold text-brand-charcoal">Lista de Convidados · Casa 52</h3>
                   <p className="text-xs text-brand-charcoal/60">Controle de entrada e recepção dos participantes</p>
@@ -607,10 +632,10 @@ export default function AdminParticipantes({
                     setRelatorioProdutoId(newId);
                     void carregarRelatorio(newId, relatorioApenasPagos);
                   }}
-                  className="px-2.5 py-1.5 border border-brand-beige rounded-lg text-xs bg-white font-medium text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30 max-w-[180px] truncate"
+                  className="px-2.5 py-1.5 border border-brand-beige rounded-lg text-xs bg-white font-medium text-brand-charcoal focus-visible:ring-2 focus-visible:ring-brand-purple/30 max-w-[200px] truncate"
                   aria-label="Filtrar por produto no relatório"
                 >
-                  <option value="">Todos os produtos</option>
+                  <option value="">Todos os produtos / Geral</option>
                   {produtos.map((prod) => (
                     <option key={prod.id} value={prod.id}>
                       {prod.nome}
@@ -664,15 +689,29 @@ export default function AdminParticipantes({
                 className="bg-white text-black p-8 rounded-xl shadow-xs border border-gray-200 print:shadow-none print:border-none print:p-0 max-w-3xl mx-auto print:max-w-none print:w-full"
               >
                 {/* Cabeçalho Oficial Conforme Requisitos */}
-                <div className="border-b-2 border-black pb-4 mb-5">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h1 className="text-2xl font-bold tracking-tight text-black uppercase">
-                        Lista de convidados para Casa 52
-                      </h1>
+                <div className="border-b-2 border-black pb-4 mb-5 print-avoid-break">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      {/* Logo no Canto Superior Esquerdo */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/logo-kalapa.png"
+                        alt="INstituto Kalapa"
+                        className="h-10 w-auto object-contain shrink-0"
+                      />
+                      <div>
+                        <h1 className="text-xl font-bold tracking-tight text-black uppercase">
+                          Lista de convidados para Casa 52
+                        </h1>
+                        <p className="text-xs text-gray-700 font-medium mt-0.5">
+                          {produtos.find((p) => p.id === relatorioProdutoId)?.nome || "Todas as Inscrições / Eventos"}
+                          {relatorioApenasPagos ? " • Apenas confirmados" : " • Lista Geral de Inscritos"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right text-xs text-gray-500 font-mono">
+                    <div className="text-right text-xs text-gray-500 font-mono shrink-0">
                       <p>Emissão: {new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">INstituto Kalapa</p>
                     </div>
                   </div>
 
@@ -684,11 +723,14 @@ export default function AdminParticipantes({
                         {relatorioParticipantes.length} {relatorioParticipantes.length === 1 ? "pessoa" : "pessoas"}
                       </strong>
                     </div>
+                    {relatorioCarregando && (
+                      <span className="text-xs text-brand-purple font-medium animate-pulse no-print">Atualizando dados...</span>
+                    )}
                   </div>
                 </div>
 
                 {/* Tabela de Convidados com Nome e Sobrenome + CPF */}
-                {relatorioCarregando ? (
+                {relatorioCarregando && relatorioParticipantes.length === 0 ? (
                   <div className="text-center py-12 text-gray-400 text-sm">Carregando convidados...</div>
                 ) : relatorioParticipantes.length === 0 ? (
                   <div className="text-center py-12 text-gray-400 text-sm border border-dashed border-gray-300 rounded-lg">
@@ -699,15 +741,18 @@ export default function AdminParticipantes({
                     <table className="w-full text-xs text-left border-collapse">
                       <thead>
                         <tr className="bg-gray-100 border-b border-black text-black">
-                          <th className="py-2.5 px-2 w-12 text-center font-bold border-r border-black">#</th>
+                          <th className="py-2.5 px-2 w-10 text-center font-bold border-r border-black">#</th>
                           <th className="py-2.5 px-3 font-bold border-r border-black">Nome e Sobrenome</th>
-                          <th className="py-2.5 px-3 w-44 font-bold border-r border-black">CPF</th>
-                          <th className="py-2.5 px-3 w-64 text-center font-bold">Observação</th>
+                          <th className="py-2.5 px-3 w-36 font-bold border-r border-black">CPF</th>
+                          {!relatorioProdutoId && (
+                            <th className="py-2.5 px-3 w-44 font-bold border-r border-black">Produto / Vivência</th>
+                          )}
+                          <th className="py-2.5 px-3 w-56 text-center font-bold">Observação / Assinatura</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-300">
                         {relatorioParticipantes.map((part, idx) => (
-                          <tr key={part.id} className="hover:bg-gray-50 print:hover:bg-transparent">
+                          <tr key={part.id || idx} className="hover:bg-gray-50 print:hover:bg-transparent print-avoid-break">
                             <td className="py-2.5 px-2 text-center text-gray-500 font-mono border-r border-gray-300">
                               {String(idx + 1).padStart(2, "0")}
                             </td>
@@ -717,6 +762,11 @@ export default function AdminParticipantes({
                             <td className="py-2.5 px-3 font-mono text-black whitespace-nowrap border-r border-gray-300">
                               {formatCPF(part.cpf)}
                             </td>
+                            {!relatorioProdutoId && (
+                              <td className="py-2.5 px-3 text-[11px] text-gray-700 border-r border-gray-300">
+                                {part.produto || "—"}
+                              </td>
+                            )}
                             <td className="py-2.5 px-3 border-gray-300">
                               <div className="h-6 flex items-end justify-center">
                                 <span className="w-full border-b border-gray-300 block"></span>
@@ -730,14 +780,15 @@ export default function AdminParticipantes({
                 )}
 
                 {/* Rodapé da folha impressa */}
-                <div className="mt-6 pt-3 border-t border-gray-300 flex justify-between items-center text-[10px] text-gray-500">
-                  <span>Casa 52</span>
+                <div className="mt-6 pt-3 border-t border-gray-300 flex justify-between items-center text-[10px] text-gray-500 print-avoid-break">
+                  <span>Casa 52 • INstituto Kalapa</span>
                   <span>Lista oficial de convidados para entrada</span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
