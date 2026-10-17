@@ -30,20 +30,47 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
         if (categoria) {
           const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
           const cat = normalize(categoria);
-          if (cat === "atendimentos" || cat === "atendimento") {
+          if (cat === "atendimentos" || cat === "atendimento" || cat === "psicoterapia") {
             produtosData = produtosData.filter(
               (p) =>
                 p.atendimento_individual === true ||
+                normalize(p.categoria || "") === "atendimentos" ||
+                normalize(p.categoria || "") === "psicoterapia" ||
                 (p.atendimento_individual === undefined && isProdutoAgendamento(p))
             );
-          } else if (cat === "biblioteca" || cat === "biblioteca-kalapa") {
+          } else if (
+            cat === "biblioteca" ||
+            cat === "biblioteca-kalapa" ||
+            cat === "guias" ||
+            cat === "downloads"
+          ) {
             produtosData = produtosData.filter(
               (p) =>
                 p.is_biblioteca === true ||
-                normalize(p.categoria || "") === "biblioteca" ||
-                normalize(p.categoria || "") === "biblioteca-kalapa" ||
-                normalize(p.slug || "") === "biblioteca" ||
-                normalize(p.slug || "") === "biblioteca-kalapa"
+                ["biblioteca", "biblioteca-kalapa", "guias", "guia", "downloads", "download", "materiais"].includes(
+                  normalize(p.categoria || "")
+                ) ||
+                ["biblioteca", "biblioteca-kalapa", "guias", "downloads"].includes(
+                  normalize(p.slug || "")
+                )
+            );
+          } else if (cat === "empreendedorismo" || cat === "lideranca") {
+            produtosData = produtosData.filter(
+              (p) =>
+                ["empreendedorismo", "lideranca", "negocios"].includes(
+                  normalize(p.categoria || "")
+                ) ||
+                normalize(p.slug || "").includes("empreendedorismo") ||
+                normalize(p.slug || "").includes("lideranca")
+            );
+          } else if (cat === "formacao" || cat === "supervisao") {
+            produtosData = produtosData.filter(
+              (p) =>
+                ["formacao", "supervisao", "cursos", "treinamentos"].includes(
+                  normalize(p.categoria || "")
+                ) ||
+                normalize(p.slug || "").includes("formacao") ||
+                normalize(p.slug || "").includes("supervisao")
             );
           } else {
             produtosData = produtosData.filter(

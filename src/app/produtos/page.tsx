@@ -11,10 +11,18 @@ export const metadata: Metadata = {
 
 const nomesCategorias: Record<string, string> = {
   vivencias: "Vivências",
-  atendimentos: "Atendimentos",
+  atendimentos: "Psicoterapia & Atendimentos",
+  empreendedorismo: "Liderança e Empreendedorismo",
+  formacao: "Formação e Supervisão Profissional",
   calendario: "Calendário",
   biblioteca: "Biblioteca Kalapa",
   "biblioteca-kalapa": "Biblioteca Kalapa",
+  receitas: "Receitas das Vivências",
+  jogos: "Jogos e Dinâmicas Sistêmicas",
+  testes: "Testes de Autoconhecimento",
+  artigos: "Artigos e Conteúdos",
+  guias: "Guias, Materiais e Downloads",
+  downloads: "Guias, Materiais e Downloads",
 };
 
 export default async function ProdutosPage({

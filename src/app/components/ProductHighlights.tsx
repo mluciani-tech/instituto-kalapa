@@ -16,7 +16,38 @@ export default function ProductHighlights() {
     fetch("/api/produtos")
       .then((r) => r.json())
       .then(async (data: Produto[]) => {
-        const destaques = data.filter((p: Produto) => p.destaque);
+        const CategoriasOutros = new Set([
+          "testes",
+          "teste",
+          "jogos",
+          "jogo",
+          "receitas",
+          "receita",
+          "artigos",
+          "artigo",
+          "conteudos",
+          "conteudo",
+          "biblioteca",
+          "biblioteca-kalapa",
+          "guias",
+          "guia",
+          "downloads",
+          "download",
+          "materiais",
+        ]);
+        const norm = (s: string) =>
+          s
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim();
+
+        const destaques = data.filter((p: Produto) => {
+          if (!p.destaque) return false;
+          if (p.is_teste || p.is_biblioteca) return false;
+          if (CategoriasOutros.has(norm(p.categoria || ""))) return false;
+          return true;
+        });
         setProdutos(destaques);
 
         const produtosComVagas = destaques.filter((p) => p.vagas_maximas != null);

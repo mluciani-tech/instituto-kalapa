@@ -51,10 +51,26 @@ async function getProdutoBySlug(
     vivencias: "vivencias",
     atendimento: "atendimentos",
     atendimentos: "atendimentos",
+    psicoterapia: "atendimentos",
     calendario: "calendario",
     "terapia-adulto": "atendimentos",
     teste: "testes",
     testes: "testes",
+    formacao: "formacao",
+    supervisao: "formacao",
+    "formacao-e-supervisao": "formacao",
+    receita: "receitas",
+    receitas: "receitas",
+    jogo: "jogos",
+    jogos: "jogos",
+    artigo: "artigos",
+    artigos: "artigos",
+    guia: "guias",
+    guias: "guias",
+    download: "guias",
+    downloads: "guias",
+    biblioteca: "biblioteca",
+    "biblioteca-kalapa": "biblioteca",
   };
   const lowerSlug = slug.toLowerCase();
   if (genericSlugs[lowerSlug]) {
@@ -76,6 +92,11 @@ async function getProdutoBySlug(
 
   if (bySlugList && bySlugList.length === 1) {
     return { produto: bySlugList[0] };
+  }
+
+  // Fallback para categorias principais caso não exista produto único com o slug
+  if (lowerSlug === "empreendedorismo" || lowerSlug === "lideranca") {
+    return { produto: null, redirectCategoria: "empreendedorismo" };
   }
 
   return { produto: null };

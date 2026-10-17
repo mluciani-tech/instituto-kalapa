@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { CheckCircle2, ShieldCheck, HeartHandshake, Sparkles } from "lucide-react";
+import { CheckCircle2, ShieldCheck, HeartHandshake } from "lucide-react";
 import BlurText from "@/components/ui/blur-text";
 
 export default function Hero() {
@@ -30,7 +29,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-brand-charcoal">
+    <section className="relative min-h-[72vh] md:min-h-[78vh] flex items-center overflow-hidden bg-brand-charcoal">
       {/* Background cinematográfico com profundidade */}
       <div className="absolute inset-0 cinematic-gradient" />
 
@@ -51,7 +50,7 @@ export default function Hero() {
       <div className="absolute inset-0 shadow-[inset_0_0_200px_rgba(0,0,0,0.7)] pointer-events-none" />
 
       {/* Conteúdo */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 py-20 md:py-32 md:px-8">
+      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 pt-28 pb-16 md:pt-36 md:pb-24 md:px-8">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -87,53 +86,10 @@ export default function Hero() {
             </strong>
           </motion.p>
 
-          {/* CTA */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-wrap md:flex-nowrap items-center gap-2 sm:gap-2.5 overflow-x-auto md:overflow-visible pb-1 md:pb-0"
-          >
-            <Link
-              href="/produtos?categoria=vivencias"
-              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
-            >
-              Vivências
-            </Link>
-            <Link
-              href="/produtos?categoria=atendimentos"
-              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
-            >
-              Atendimentos
-            </Link>
-            <Link
-              href="/produtos?categoria=calendario"
-              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
-            >
-              Calendário
-            </Link>
-            <Link
-              href="/teste-autoconhecimento"
-              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-brand-terracotta/40 hover:border-brand-terracotta text-white text-xs sm:text-sm font-semibold rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card bg-brand-terracotta/20 hover:bg-brand-terracotta/30 hover:-translate-y-0.5 shadow-lg shadow-brand-terracotta/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
-            >
-              <span>Teste de Autoconhecimento</span>
-            </Link>
-            <Link
-              href="/produtos?categoria=biblioteca"
-              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
-            >
-              <span>Biblioteca Kalapa</span>
-            </Link>
-            <a
-              href="#experiencia"
-              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 py-3 border border-white/20 hover:border-white/45 text-white text-xs sm:text-sm font-medium rounded-xl transition-[background-color,border-color,transform] duration-300 glass-card hover:bg-white/12 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-purple-deep whitespace-nowrap"
-            >
-              Sobre o INstituto Kalapa
-            </a>
-          </motion.div>
-
           {/* Indicadores de confiança */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-wrap items-center justify-center gap-6 pt-4 text-white/60 text-sm"
+            className="flex flex-wrap items-center justify-start gap-6 pt-2 text-white/60 text-sm"
           >
             <div className="flex items-center gap-2 hover:text-white/80 transition-colors duration-200">
               <CheckCircle2 aria-hidden="true" className="w-4 h-4 text-brand-mint" />
