@@ -1,109 +1,69 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { CheckCircle2, ShieldCheck, HeartHandshake } from "lucide-react";
-import BlurText from "@/components/ui/blur-text";
 
 export default function Hero() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: [0.16, 1, 0.3, 1] as const,
-      },
-    },
-  };
-
   return (
-    <section className="relative min-h-[72vh] md:min-h-[78vh] flex items-center overflow-hidden bg-brand-charcoal">
-      {/* Background cinematográfico com profundidade */}
-      <div className="absolute inset-0 cinematic-gradient" />
+    <section className="relative mt-20 md:mt-22 min-h-[300px] sm:min-h-[340px] md:min-h-[375px] flex items-center overflow-hidden bg-[#1E3323]">
+      {/* Imagem panorâmica de fundo (deck de madeira e natureza ao sol) */}
+      <Image
+        src="/images/caminhos/hero-deck.jpg"
+        alt="Espaço contemplativo do INstituto Kalapa cercado pela natureza"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-center"
+      />
 
-      {/* Overlay com textura de grão cinematográfico */}
-      <div className="absolute inset-0 cinematic-overlay" />
-
-      {/* Imagem de fundo simulada — pessoa em introspecção */}
+      {/* Degradê suave à esquerda para leitura nítida do texto branco */}
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-70"
-        style={{
-          backgroundImage:
-            "url('/fotoSiteHome.jpeg')",
-        }}
+        className="absolute inset-0 bg-gradient-to-r from-[#1A2E1E]/92 via-[#233A27]/72 to-transparent"
         aria-hidden="true"
       />
 
-      {/* Vinheta cinematográfica */}
-      <div className="absolute inset-0 shadow-[inset_0_0_200px_rgba(0,0,0,0.7)] pointer-events-none" />
-
-      {/* Conteúdo */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 pt-28 pb-16 md:pt-36 md:pb-24 md:px-8">
+      {/* Conteúdo Alinhado à Esquerda conforme Foto */}
+      <div className="relative z-10 w-full max-w-[1340px] mx-auto px-6 sm:px-8 lg:px-12 py-10 sm:py-12 md:py-14">
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col gap-8 md:gap-10"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-xl text-white"
         >
-          {/* Headline com BlurText */}
-          <motion.div variants={itemVariants}>
-            <BlurText
-              text="A dor pode marcar a sua história, mas ela não precisa definir a sua vida"
-              animateBy="words"
-              direction="bottom"
-              delay={100}
-              stepDuration={0.4}
-              className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight text-white"
-            />
-          </motion.div>
+          {/* Marca com ícone de flor de lótus branco + título serifado */}
+          <div className="flex items-center gap-3.5 mb-4">
+            <svg
+              className="w-11 h-11 sm:w-13 sm:h-13 text-white shrink-0"
+              viewBox="0 0 48 48"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M24 8C19.5 15 17.5 21.5 17.5 28a6.5 6.5 0 0 0 13 0C30.5 21.5 28.5 15 24 8z" />
+              <path d="M24 34.5c-8 0-14.5-4.5-17-12.5 7.5-1 14 2.2 17 12.5z" />
+              <path d="M24 34.5c8 0 14.5-4.5 17-12.5-7.5-1-14 2.2-17 12.5z" />
+            </svg>
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-[46px] font-normal tracking-tight text-white leading-none">
+              INstituto Kalapa
+            </h1>
+          </div>
 
-          {/* Subheadline */}
-          <motion.p
-            variants={itemVariants}
-            className="text-lg md:text-xl text-white/70 max-w-2xl leading-relaxed font-light"
-          >
-            O INstituto Kalapa é um espaço de acolhimento, ciência e humanidade,
-            onde cada passo em direção à consciência abre caminho para uma{" "}
-            <strong className="text-white/90 font-medium font-sans">
-              transformação real.
-            </strong>
-            <br />
-            Toda transformação começa na menor unidade:{" "}
-            <strong className="text-white/90 font-medium font-sans">
-              uma nova escolha.
-            </strong>
-          </motion.p>
+          {/* Subheadline Principal */}
+          <p className="text-lg sm:text-xl md:text-[23px] font-normal text-white leading-snug mb-3.5">
+            Consciência para transformar a maneira
+            <br className="hidden sm:inline" /> de viver, relacionar-se e trabalhar.
+          </p>
 
-          {/* Indicadores de confiança */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-wrap items-center justify-start gap-6 pt-2 text-white/60 text-sm"
-          >
-            <div className="flex items-center gap-2 hover:text-white/80 transition-colors duration-200">
-              <CheckCircle2 aria-hidden="true" className="w-4 h-4 text-brand-mint" />
-              <span>Profissionais certificados</span>
-            </div>
-            <div className="flex items-center gap-2 hover:text-white/80 transition-colors duration-200">
-              <HeartHandshake aria-hidden="true" className="w-4 h-4 text-brand-mint" />
-              <span>Ambiente seguro e sigiloso</span>
-            </div>
-            <div className="flex items-center gap-2 hover:text-white/80 transition-colors duration-200">
-              <ShieldCheck aria-hidden="true" className="w-4 h-4 text-brand-mint" />
-              <span>Pagamento seguro via InfinitePay</span>
-            </div>
-          </motion.div>
+          {/* Texto Descritivo Institucional */}
+          <p className="text-xs sm:text-sm md:text-[14.5px] text-white/90 font-light leading-relaxed max-w-lg">
+            Um espaço de desenvolvimento humano que integra psicologia,
+            experiências de autoconhecimento e olhar sistêmico para ampliar a
+            compreensão sobre si, suas relações e os desafios da vida e dos
+            negócios.
+          </p>
         </motion.div>
       </div>
     </section>

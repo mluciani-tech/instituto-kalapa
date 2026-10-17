@@ -7,8 +7,6 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Menu,
   X,
-  Mail,
-  MessageCircle,
   LayoutGrid,
   User as UserIcon,
   ShoppingBag,
@@ -22,11 +20,12 @@ import type { Usuario } from "@/lib/types";
 
 const navLinks = [
   { href: "/", label: "Início" },
-  { href: "/#sobre", label: "Sobre a Fundadora" },
+  { href: "/produtos?categoria=atendimentos", label: "Psicoterapia" },
   { href: "/produtos?categoria=vivencias", label: "Vivências" },
-  { href: "/produtos?categoria=atendimentos", label: "Atendimentos" },
-  { href: "/produtos/empreendedorismo", label: "Prosperidade & Negócio" },
-  { href: "/produtos?categoria=calendario", label: "Calendário" },
+  { href: "/produtos/empreendedorismo", label: "Liderança e Empreendedorismo" },
+  { href: "/produtos?categoria=formacao", label: "Formação e Supervisão" },
+  { href: "/#conhecimento-experiencias", label: "Biblioteca" },
+  { href: "/#sobre", label: "Sobre" },
 ];
 
 const contatos = {
@@ -34,64 +33,12 @@ const contatos = {
   instagram: "https://instagram.com/institutoKalapa",
   instagramLabel: "@institutoKalapa",
   email: "clatihucia.capeli@institutokalapa.com.br",
-  whatsapp: "https://wa.me/5511917452732",
+  whatsapp:
+    "https://wa.me/5511917452732?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20um%20atendimento%20ou%20falar%20com%20a%20equipe%20do%20INstituto%20Kalapa.",
   whatsappLabel: "(11) 91745-2732",
   erp: "https://espaco-serena-clinica.web.app/?return_url=https%3A%2F%2Fwww.institutokalapa.com.br&redirect_url=https%3A%2F%2Fwww.institutokalapa.com.br",
   erpLabel: "Sistema Espaço Serena (ERP)",
 };
-
-function ContactIcons({ showAll = false }: { showAll?: boolean }) {
-  return (
-    <div className="flex items-center gap-1.5 xl:gap-2">
-      <a
-        href={contatos.erp}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={contatos.erpLabel}
-        title={contatos.erpLabel}
-        className={`${
-          showAll ? "flex" : "hidden xl:flex"
-        } h-9 w-9 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta`}
-      >
-        <LayoutGrid className="w-4 h-4" />
-      </a>
-      <a
-        href={contatos.instagram}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`Instagram ${contatos.instagramLabel}`}
-        title={`Instagram ${contatos.instagramLabel}`}
-        className="flex h-9 w-9 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta"
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-        </svg>
-      </a>
-      <a
-        href={`mailto:${contatos.email}`}
-        aria-label={`E-mail ${contatos.email}`}
-        title={`E-mail ${contatos.email}`}
-        className={`${
-          showAll ? "flex" : "hidden xl:flex"
-        } h-9 w-9 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta`}
-      >
-        <Mail className="w-4 h-4" />
-      </a>
-      <a
-        href={contatos.whatsapp}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`WhatsApp ${contatos.whatsappLabel}`}
-        title={`WhatsApp ${contatos.whatsappLabel}`}
-        className="flex h-9 w-9 xl:h-10 xl:w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta"
-      >
-        <MessageCircle className="w-4 h-4" />
-      </a>
-    </div>
-  );
-}
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -105,7 +52,7 @@ export default function Header() {
   const { totalItems, openDrawer } = useCart();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -164,167 +111,194 @@ export default function Header() {
   // Header não aparece no admin
   if (pathname.startsWith("/admin")) return null;
 
-  const textColor = scrolled ? "text-brand-charcoal" : "text-white";
-  const textMuted = scrolled ? "text-brand-charcoal/50" : "text-white/50";
   const primeiroNome = usuario?.nome ? usuario.nome.split(" ")[0] : "";
 
   return (
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "border-b border-brand-beige/80 bg-white/90 shadow-sm backdrop-blur-xl"
-          : "border-b border-white/10 bg-brand-purple-deep/65 backdrop-blur-md"
+          ? "border-b border-[#E2DFD3] bg-[#F7F5EE]/95 shadow-xs backdrop-blur-xl"
+          : "border-b border-[#E6E3D8] bg-[#F7F5EE]"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="flex h-20 items-center justify-between gap-3 xl:gap-4 md:h-24">
-          {/* Logo + Nome */}
+      <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-20 items-center justify-between gap-3 md:h-22">
+          {/* Logo + Nome + Subtítulo Conceitual */}
           <Link
             href="/"
             onClick={handleHomeClick}
             aria-label="INstituto Kalapa — voltar para a página inicial"
-            className="group flex shrink-0 items-center gap-2.5 sm:gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-terracotta focus-visible:ring-offset-2"
+            className="group flex shrink-0 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B5241] focus-visible:ring-offset-2"
           >
             <Image
               src="/logo-kalapa.png"
-              alt=""
-              width={72}
-              height={72}
-              className="h-12 w-12 shrink-0 rounded-xl border border-white/80 bg-white p-1 object-contain shadow-md transition-transform duration-300 group-hover:scale-[1.03] md:h-14 md:w-14"
+              alt="Logo INstituto Kalapa"
+              width={64}
+              height={64}
+              className="h-11 w-11 shrink-0 rounded-xl border border-[#DFDCD2] bg-white p-1 object-contain shadow-xs transition-transform duration-300 group-hover:scale-[1.03] md:h-12 md:w-12"
             />
             <div className="shrink-0 leading-tight">
-              <span className={`block whitespace-nowrap text-base font-semibold tracking-tight transition-colors md:text-lg ${textColor}`}>
+              <span className="block font-serif text-xl md:text-[24px] font-medium tracking-tight text-[#214137]">
                 INstituto Kalapa
               </span>
-              <span className={`hidden whitespace-nowrap text-[11px] transition-colors xl:block ${textMuted}`}>
-                {contatos.endereco}
+              <span className="hidden sm:block text-[10.5px] md:text-[11px] font-normal tracking-wide text-[#4A5D52]">
+                Ciência • Comportamento • Experiência • Consciência
               </span>
             </div>
           </Link>
 
-          {/* Nav desktop */}
-          <nav aria-label="Navegação principal" className="hidden lg:flex items-center gap-0.5 xl:gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1 shrink-0">
+          {/* Navegação Desktop Central */}
+          <nav
+            aria-label="Navegação principal"
+            className="hidden xl:flex items-center gap-5 2xl:gap-6 shrink-0"
+          >
             {navLinks.map((link) => {
               const isHome = link.href === "/";
+              const isActive = isHome && pathname === "/";
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={isHome ? handleHomeClick : undefined}
-                  className={`whitespace-nowrap rounded-full px-2.5 xl:px-3.5 py-1.5 xl:py-2 text-xs xl:text-sm font-medium transition-[background-color,color] ${
-                    scrolled
-                      ? "text-brand-charcoal/70 hover:text-brand-purple hover:bg-brand-purple/5"
-                      : "text-white/75 hover:bg-white/10 hover:text-white"
+                  className={`relative whitespace-nowrap py-1.5 text-[13px] 2xl:text-[13.5px] transition-colors ${
+                    isActive
+                      ? "font-semibold text-[#1B362D]"
+                      : "font-normal text-[#2E463B]/85 hover:text-[#1B362D]"
                   }`}
                 >
                   {link.label}
+                  {isActive && (
+                    <span className="absolute bottom-0 inset-x-0 h-[2px] rounded-full bg-[#214137]" />
+                  )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Right side: Contatos + E-commerce Buttons (User & Cart) */}
-          <div className="flex items-center gap-2 xl:gap-2.5 shrink-0">
-            <div className="hidden md:flex items-center shrink-0">
-              <ContactIcons />
-            </div>
+          {/* Lado Direito: Botão "Agendar / Falar Conosco" + Ícones discretos (ERP, Conta, Reserva) */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            <a
+              href={contatos.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#3B5241] hover:bg-[#2E4233] text-white text-xs sm:text-[13px] font-medium shadow-xs transition-all duration-200 hover:-translate-y-0.5"
+            >
+              <Calendar className="w-3.5 h-3.5 text-white/90 shrink-0" />
+              <span className="whitespace-nowrap">Agendar / Falar Conosco</span>
+            </a>
 
-            {/* BOTÕES DE E-COMMERCE CONFORME SCREENSHOT 1 */}
-            <div className="flex items-center gap-2">
-              {/* Botão Perfil / Usuário */}
-              <div className="relative" ref={userMenuRef}>
-                {usuario ? (
-                  <button
-                    onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    aria-label="Menu do usuário"
-                    className="flex h-10 items-center gap-2 px-3.5 rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta cursor-pointer"
-                  >
-                    <UserIcon className="w-4 h-4 text-brand-charcoal" />
-                    <span className="text-xs font-semibold max-w-[100px] truncate text-brand-charcoal">
-                      Olá, {primeiroNome}
-                    </span>
-                  </button>
-                ) : (
-                  <Link
-                    href="/login"
-                    aria-label="Entrar na conta"
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta cursor-pointer"
-                  >
-                    <UserIcon className="w-4 h-4 text-brand-charcoal" />
-                  </Link>
-                )}
+            {/* Ícone discreto do Sistema ERP */}
+            <a
+              href={contatos.erp}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={contatos.erpLabel}
+              title={contatos.erpLabel}
+              className="hidden md:flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241]"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </a>
 
-                {/* Dropdown menu do usuário logado */}
-                {usuario && userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-52 rounded-xl bg-brand-purple-deep border border-white/10 shadow-2xl py-2 z-50 text-white font-sans">
-                    <div className="px-4 py-2 border-b border-white/10">
-                      <p className="text-xs font-bold text-white truncate">{usuario.nome}</p>
-                      <p className="text-[11px] text-white/50 truncate">{usuario.email}</p>
-                    </div>
-                    <Link
-                      href="/conta/pedidos"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-white/80 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      <Calendar className="w-4 h-4 text-brand-terracotta" />
-                      Minhas Vivências
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        setModalSenhaOpen(true);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-white/80 hover:text-white hover:bg-white/5 transition-colors text-left cursor-pointer"
-                    >
-                      <KeyRound className="w-4 h-4 text-brand-terracotta" />
-                      Alterar Senha
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-400 hover:bg-white/5 transition-colors text-left cursor-pointer"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Sair da conta
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Botão de Reserva */}
-              <button
-                onClick={openDrawer}
-                aria-label={`Ver minha reserva com ${totalItems} vivências`}
-                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-brand-charcoal shadow-xs transition-all duration-300 hover:scale-105 hover:bg-white hover:text-brand-terracotta cursor-pointer"
-              >
-                <ShoppingBag className="w-4 h-4 text-brand-charcoal" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 w-4 min-w-4 items-center justify-center rounded-full bg-brand-terracotta text-[10px] font-bold text-white shadow-xs">
-                    {totalItems}
+            {/* Botão Perfil / Usuário */}
+            <div className="relative" ref={userMenuRef}>
+              {usuario ? (
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  aria-label="Menu do usuário"
+                  className="flex h-9 items-center gap-1.5 px-3 rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241] cursor-pointer"
+                >
+                  <UserIcon className="w-4 h-4 text-[#214137]" />
+                  <span className="text-xs font-semibold max-w-[90px] truncate text-[#214137] hidden md:inline">
+                    Olá, {primeiroNome}
                   </span>
-                )}
-              </button>
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  aria-label="Entrar na conta"
+                  title="Entrar na conta"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241] cursor-pointer"
+                >
+                  <UserIcon className="w-4 h-4 text-[#214137]" />
+                </Link>
+              )}
+
+              {/* Dropdown menu do usuário logado */}
+              {usuario && userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-52 rounded-xl bg-[#1F352A] border border-white/10 shadow-2xl py-2 z-50 text-white font-sans">
+                  <div className="px-4 py-2 border-b border-white/10">
+                    <p className="text-xs font-bold text-white truncate">{usuario.nome}</p>
+                    <p className="text-[11px] text-white/60 truncate">{usuario.email}</p>
+                  </div>
+                  <Link
+                    href="/conta/pedidos"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-white/85 hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    <Calendar className="w-4 h-4 text-brand-terracotta" />
+                    Minhas Vivências
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      setModalSenhaOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-white/85 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
+                  >
+                    <KeyRound className="w-4 h-4 text-brand-terracotta" />
+                    Alterar Senha
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-300 hover:bg-white/10 transition-colors text-left cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sair da conta
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Hamburger mobile */}
+            {/* Botão de Reserva / Sacola */}
+            <button
+              onClick={openDrawer}
+              aria-label={`Ver minha reserva com ${totalItems} vivências`}
+              title="Minha Reserva"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241] cursor-pointer"
+            >
+              <ShoppingBag className="w-4 h-4 text-[#214137]" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 min-w-4 items-center justify-center rounded-full bg-[#3B5241] text-[10px] font-bold text-white shadow-xs">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+
+            {/* Hamburger Mobile / Tablet */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={menuOpen}
-              className={`lg:hidden rounded-xl p-2 transition-colors ${
-                scrolled ? "text-brand-charcoal hover:bg-brand-purple/5" : "text-white hover:bg-white/10"
-              }`}
+              className="xl:hidden rounded-xl p-2 text-[#214137] hover:bg-[#EAE8DF] transition-colors"
             >
-              {menuOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
+              {menuOpen ? (
+                <X className="w-5 h-5" aria-hidden="true" />
+              ) : (
+                <Menu className="w-5 h-5" aria-hidden="true" />
+              )}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Menu mobile */}
+      {/* Menu Mobile / Tablet */}
       {menuOpen && (
-        <div className="lg:hidden border-t border-brand-beige/80 bg-white/95 shadow-lg backdrop-blur-xl">
-          <nav aria-label="Menu mobile" className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1">
+        <div className="xl:hidden border-t border-[#E2DFD3] bg-[#F7F5EE] shadow-lg">
+          <nav
+            aria-label="Menu mobile"
+            className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1"
+          >
             {navLinks.map((link) => {
               const isHome = link.href === "/";
               return (
@@ -338,18 +312,30 @@ export default function Header() {
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }
                   }}
-                  className="px-4 py-3 text-sm font-medium text-brand-charcoal/80 hover:text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors"
+                  className="px-4 py-3 text-sm font-medium text-[#214137] hover:bg-[#EAE8DF] rounded-xl transition-colors"
                 >
                   {link.label}
                 </Link>
               );
             })}
+
+            <a
+              href={contatos.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMenuOpen(false)}
+              className="mt-2 mx-4 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-[#3B5241] text-white text-xs font-semibold shadow-xs"
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Agendar / Falar Conosco</span>
+            </a>
+
             {usuario ? (
               <>
                 <Link
                   href="/conta/pedidos"
                   onClick={() => setMenuOpen(false)}
-                  className="px-4 py-3 text-sm font-medium text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors flex items-center gap-2"
+                  className="mt-2 px-4 py-3 text-sm font-medium text-[#214137] hover:bg-[#EAE8DF] rounded-xl transition-colors flex items-center gap-2"
                 >
                   <Calendar className="w-4 h-4" />
                   Minhas Vivências ({usuario.nome.split(" ")[0]})
@@ -360,7 +346,7 @@ export default function Header() {
                     setMenuOpen(false);
                     setModalSenhaOpen(true);
                   }}
-                  className="w-full text-left px-4 py-3 text-sm font-medium text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
+                  className="w-full text-left px-4 py-3 text-sm font-medium text-[#214137] hover:bg-[#EAE8DF] rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
                 >
                   <KeyRound className="w-4 h-4" />
                   Alterar Senha
@@ -370,17 +356,24 @@ export default function Header() {
               <Link
                 href="/login"
                 onClick={() => setMenuOpen(false)}
-                className="px-4 py-3 text-sm font-medium text-brand-purple hover:bg-brand-purple/5 rounded-xl transition-colors flex items-center gap-2"
+                className="mt-1 px-4 py-3 text-sm font-medium text-[#214137] hover:bg-[#EAE8DF] rounded-xl transition-colors flex items-center gap-2"
               >
                 <UserIcon className="w-4 h-4" />
                 Entrar na conta
               </Link>
             )}
-            <div className="mt-3 pt-3 border-t border-brand-beige flex items-center gap-4 px-3">
-              <ContactIcons showAll />
-              <span className="text-[11px] text-brand-charcoal/40 ml-auto">
-                {contatos.endereco}
-              </span>
+
+            <div className="mt-3 pt-3 border-t border-[#E2DFD3] flex items-center justify-between px-4 text-[11px] text-[#4A5D52]">
+              <a
+                href={contatos.erp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-medium text-[#214137] hover:underline"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                Sistema ERP
+              </a>
+              <span>{contatos.endereco}</span>
             </div>
           </nav>
         </div>
