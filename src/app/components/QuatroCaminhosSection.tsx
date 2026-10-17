@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface CaminhoCard {
   id: string;
@@ -434,24 +434,6 @@ export default function QuatroCaminhosSection() {
             </div>
           </div>
         </motion.div>
-      </div>
-
-      {/* Barra Inferior de Assinatura conforme Foto */}
-      <div className="w-full bg-[#33483A] text-white/85 py-3 px-4 sm:px-8">
-        <div className="max-w-[1340px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
-          <div className="hidden sm:block w-36" aria-hidden="true" />
-          <div className="flex items-center justify-center gap-3 text-[11.5px] sm:text-xs text-white/80">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-white/70" aria-hidden="true" />
-              <span>Cotia / SP</span>
-            </span>
-            <span className="text-white/35">|</span>
-            <span>www.institutokalapa.com.br</span>
-          </div>
-          <div className="font-serif italic text-sm sm:text-base text-white/85 tracking-wide">
-            Kalapa é sobre você.
-          </div>
-        </div>
       </div>
     </section>
   );
