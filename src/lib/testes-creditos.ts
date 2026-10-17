@@ -69,6 +69,13 @@ export function extrairSlugNormalizadoTeste(item: ItemLiberacao): string {
   if (nomeLower.includes("lealdade")) {
     return "teste-lealdades-invisiveis";
   }
+  if (
+    nomeLower.includes("metamorfose") ||
+    nomeLower.includes("jogo sistêmico") ||
+    nomeLower.includes("jogo sistemico")
+  ) {
+    return "teste-metamorfose";
+  }
   return normalizarSlugTeste(item.slug || "teste");
 }
 

@@ -21,7 +21,7 @@ export default async function TesteAutoconhecimentoPage() {
       const { data } = await supabaseAdmin!
         .from("produtos")
         .select("*")
-        .or("is_teste.eq.true,categoria.eq.testes,slug.in.(teste-yin-yang,teste-eneagrama,teste-cronotipo)")
+        .or("is_teste.eq.true,categoria.ilike.testes,slug.in.(teste-yin-yang,teste-eneagrama,teste-cronotipo,teste-lealdades-invisiveis,teste-metamorfose)")
         .eq("ativo", true)
         .order("ordem", { ascending: true });
 

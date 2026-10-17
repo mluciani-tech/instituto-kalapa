@@ -67,6 +67,11 @@ export async function GET(req: NextRequest) {
       else if (slugNormalizado.includes("eneagrama")) tableName = "avaliacoes_eneagrama";
       else if (slugNormalizado.includes("yin-yang") || slugNormalizado.includes("yinyang")) tableName = "avaliacoes_yin_yang";
       else if (slugNormalizado.includes("lealdade")) tableName = "avaliacoes_lealdades";
+      else if (
+        slugNormalizado.includes("metamorfose") ||
+        slugNormalizado.includes("jogo-sistemico")
+      )
+        tableName = "avaliacoes_metamorfose";
 
       if (tableName) {
         try {
