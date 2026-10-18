@@ -965,7 +965,7 @@ export default function AdminManual() {
                     9. Versões do Sistema & Notas de Atualização
                   </h2>
                   <p className="text-xs text-brand-charcoal/70 mt-1">
-                    Mecanismo dinâmico de documentação: sempre que houver novas melhorias ou correções, este histórico é atualizado para manter a equipe informada.
+                    Mecanismo dinâmico de documentação: sempre que houver novas melhorias ou correções, este histórico é atualizado. São exibidas apenas as 3 versões mais recentes, da mais nova para a mais antiga.
                   </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-mono font-bold text-xs">
@@ -988,6 +988,7 @@ export default function AdminManual() {
                     <li><strong>Meus Jogos na Área do Usuário:</strong> Nova aba &ldquo;Meus Jogos&rdquo; em <em>Minha Conta</em>, ao lado de &ldquo;Meus Testes&rdquo;. Jogos de autoconhecimento (ex.: A Metamorfose da Consciência) deixam de aparecer misturados aos testes, com textos, ícone e botão &ldquo;Iniciar Jogo&rdquo; próprios.</li>
                     <li><strong>Item Calendário na Home:</strong> Novo item &ldquo;Calendário&rdquo; na faixa de Conhecimento e Experiências, logo após &ldquo;Testes de autoconhecimento&rdquo;, levando à página de produtos da categoria <code>calendario</code>. A faixa passou a acomodar 5 itens e o cartão &ldquo;Quatro caminhos. Uma essência.&rdquo; foi reajustado.</li>
                     <li><strong>Correção da Grade Semanal (Admin &rarr; Agenda):</strong> Corrigido o carregamento infinito (&ldquo;Carregando grade&hellip;&rdquo;) na aba <em>Grade Semanal de Trabalho</em>, causado por uma dependência circular na busca da grade.</li>
+                    <li><strong>Novo Símbolo Kalapa nos Relatórios:</strong> O símbolo oficial (flor de lótus) substitui o logo antigo no Dossiê da Metamorfose, no relatório do Eneagrama e na Lista de Convidados (Casa 52), tanto na tela quanto na impressão.</li>
                   </ul>
                 </div>
 
@@ -1026,203 +1027,6 @@ export default function AdminManual() {
                     <li><strong>Linguagem Não-Clínica & Acolhimento Ético:</strong> Nomenclatura ajustada para <em>&ldquo;Relatório de Autoconhecimento&rdquo;</em> e inclusão do componente de apoio com canal direto de acolhimento via WhatsApp e Centro de Valorização da Vida (CVV 188).</li>
                     <li><strong>Proteção de Carrinho & Privacidade de Dados:</strong> O carrinho de compras não é mais esvaziado indevidamente ao clicar em &ldquo;Comprar Agora&rdquo;, e dados sensíveis (CPF e telefone) passam por mascaramento automático no checkout.</li>
                     <li><strong>Eliminação de Diálogos Nativos no Admin:</strong> Substituição total de caixas de diálogo nativas do navegador (<code>alert</code> e <code>confirm</code>) por modais elegantes de confirmação e banners de feedback inline com auto-dismiss em cupons, agenda e avaliações.</li>
-                  </ul>
-                </div>
-
-                {/* v2.12.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.12.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Biblioteca Kalapa, Personalização de Botões & Central de Prospecção de Leads
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
-                    <li><strong>Biblioteca Kalapa:</strong> Novo atalho na Hero da Home (&ldquo;Biblioteca Kalapa&rdquo;) e suporte a produtos com arquivos digitais (PDF, artigos, receitas de dietoterapia) com download seguro via URLs assinadas do Supabase Storage.</li>
-                    <li><strong>Autenticação Obrigatória no Download:</strong> Exigência suave de login/cadastro para baixar qualquer conteúdo da biblioteca, transformando materiais gratuitos em poderosos ímãs de novos clientes (Lead Magnet).</li>
-                    <li><strong>Personalização de Botões por Produto:</strong> Flexibilidade total no cadastro de produtos para definir o texto do botão principal e secundário, substituindo &ldquo;Garantir Vaga&rdquo; e &ldquo;Reservar&rdquo; por expressões sob medida como &ldquo;Baixar Arquivo&rdquo;.</li>
-                    <li><strong>Painel de Telemetria & Prospecção no Admin:</strong> Tabela dedicada de rastreamento de downloads e novo widget no painel <em>Visão Geral</em> com identificação de <em>Novo Prospect</em> vs <em>Cliente Existente</em> e acionamento direto via WhatsApp em 1 clique com mensagem de acolhimento personalizada.</li>
-                  </ul>
-                </div>
-
-                {/* v2.11.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.11.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Expansão do Módulo de Autoavaliações
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
-                    <li><strong>Teste de Lealdades Invisíveis:</strong> Implementação do teste baseado em Constelações Familiares com mapa de diagnóstico, impressão em PDF (A4) contendo biografia de Bert Hellinger e leis sistêmicas.</li>
-                    <li><strong>Teste de Eneagrama:</strong> Mapeamento dos 9 tipos de personalidade com detalhamento profundo (motivação, virtudes, vícios) e visualização com PDF em A4.</li>
-                    <li><strong>Correção de Acompanhantes:</strong> Refatoração do fluxo de check-out para criar corretamente as inscrições de convidados e atualização do Admin para não sobrescrever os nomes dos acompanhantes na edição manual.</li>
-                  </ul>
-                  
-                  <h4 className="text-sm font-bold text-brand-purple mt-4 mb-2">
-                    Módulo de Autoavaliação Yin/Yang (MTC) & Emissão de Relatório Clínico A4
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
-                    <li>Novo botão de ação rápida <strong>&ldquo;Teste de Autoconhecimento&rdquo;</strong> ao lado de Calendário na Hero da Home e no menu superior.</li>
-                    <li>Questionário clínico interativo com as 15 dimensões fisiológicas e comportamentais do Cânone do Imperador Amarelo (MTC).</li>
-                    <li>Exigência amigável de login ou cadastro prévio, ampliando a base de clientes do INstituto com redirecionamento automático.</li>
-                    <li>Diagnóstico trifásico (Predominância Yang, Predominância Yin e Equilíbrio) com prescrições de sono, dietoterapia e chás.</li>
-                    <li>Metrônomo visual interativo para guia de respiração terapêutica com tempos de expansão e ancoragem.</li>
-                    <li>Emissão com 1 clique de <strong>Relatório Clínico em PDF (formato A4)</strong> para consulta ou impressão pelo paciente.</li>
-                    <li>Fotografias editoriais em estilo zen contemporâneo geradas por inteligência artificial e harmonizadas com a paleta Kalapa.</li>
-                    <li>Suporte a e-mail multipart (HTML + Texto Puro) no módulo de recuperação de senha para máxima compatibilidade anti-spam.</li>
-                  </ul>
-                </div>
-
-                {/* v2.10.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.10.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Ativação do Módulo de Recuperação de Senha & Suporte Multicanal
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
-                    <li>Autoatendimento autônomo completo na tela pública de <strong>/login</strong> (modal com despacho instantâneo via SMTP Hostinger).</li>
-                    <li>Novo endpoint administrativo com geração de token seguro de 1 hora e despacho de e-mail institucional padronizado.</li>
-                    <li>Ação rápida na aba <strong>Usuários</strong> e no modal de detalhes com botão para cópia de link seguro e envio com 1 clique para WhatsApp.</li>
-                    <li>Reutilização integrada das credenciais SMTP corporativas da Hostinger salvas no banco de dados.</li>
-                    <li>Detecção dinâmica de domínio base para garantir que os links de redefinição funcionem em qualquer ambiente.</li>
-                  </ul>
-                </div>
-
-                {/* v2.9.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.9.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Menu Popover de Compartilhamento & Harmonização com a Paleta Oficial
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
-                    <li>Novo botão disparador circular e popover escuro translúcido com cantos arredondados nos cards e página de detalhes.</li>
-                    <li>Compartilhamento direto via WhatsApp com convite acolhedor e prévia automática de foto/título (OpenGraph).</li>
-                    <li>Opção Copiar Link com feedback em tempo real na própria linha (&ldquo;Link copiado!&rdquo; em tom verde).</li>
-                    <li>Opção Mais opções com disparo nativo do sistema operacional (<code>navigator.share</code>) e fallback para e-mail no desktop.</li>
-                    <li>Harmonização visual completa com a paleta oficial da marca Kalapa (Deep Ocean <code>#0D1E28</code>, Terracotta/Dourado <code>#B8965A</code> e Menta/Sage <code>#7D8C6E</code>).</li>
-                  </ul>
-                </div>
-
-                {/* v2.8.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.8.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Setembro / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Módulo de Troca de Senha do Admin & Hardening de Cibersegurança
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
-                    <li>Novo botão <strong>Alterar Senha</strong> no rodapé da barra lateral com modal seguro e validação de senha atual.</li>
-                    <li>Armazenamento criptografado via hash <strong>scrypt + salt</strong> na tabela de configurações do Supabase.</li>
-                    <li>Renovação automática e transparente de sessão ativa, com revogação instantânea de sessões em outros navegadores.</li>
-                    <li>Hardening completo de políticas RLS do Supabase, isolando dados pessoais e notas terapêuticas contra extração via chave anônima.</li>
-                    <li>Rate limiting nas rotas de autenticação e proteção contra vazamento público de credenciais SMTP.</li>
-                  </ul>
-                </div>
-
-                {/* v2.7.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.7.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Setembro / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Tempo de Consulta por Produto & 3 Turnos no Calendário (Manhã / Tarde / Noite)
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
-                    <li>Novo campo <strong>Tempo de Consulta</strong> nos produtos de Atendimento Individual (45min, 1h, 1:30hs, 2h, 3h ou valor personalizado).</li>
-                    <li>Padrão de 1:30hs (90 min) que já inclui o intervalo de transição entre sessões.</li>
-                    <li>Badge de duração exibido na listagem de produtos do painel admin.</li>
-                    <li>Grade semanal expandida para <strong>3 turnos independentes</strong>: Manhã (09:00–12:00), Tarde (13:00–15:00) e Noite (18:00–21:00).</li>
-                    <li>Slots do calendário do cliente calculados dinamicamente pela duração do produto selecionado.</li>
-                    <li>Padrão: Segunda a Sexta com os 3 turnos ativos; Sábado e Domingo inativos (editáveis).</li>
-                  </ul>
-                </div>
-
-                {/* v2.6.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.6.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Setembro / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Novo Menu Lateral (Sidebar), SMTP Hostinger & Validações de Contato
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
-                    <li>Menu lateral desktop fixo e drawer retrátil mobile substituindo abas horizontais do topo.</li>
-                    <li>Integração com servidor SMTP corporativo Hostinger (<code>smtp.hostinger.com:465</code> SSL).</li>
-                    <li>Máscara automática para telefone celular / WhatsApp <code>(11) 99999-9999</code> no painel.</li>
-                    <li>Validação estrita de e-mail de terapeuta para prevenir falhas de digitação e entrega.</li>
-                    <li>Atualização completa do Manual do Sistema alinhado à paleta oficial da identidade visual.</li>
-                  </ul>
-                </div>
-
-                {/* v2.5.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.5.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Setembro / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Notificações de Agendamento, Toast no Admin & Manual do Usuário
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
-                    <li>Novo campo para configurar o e-mail de notificação de cada terapeuta com fallback inteligente.</li>
-                    <li>Disparo de e-mail detalhado para a terapeuta a cada agendamento confirmado (com link WhatsApp).</li>
-                    <li>Notificação tipo Toast flutuante no painel Admin alertando novos agendamentos confirmados.</li>
-                    <li>Criação desta aba oficial de Manual do Usuário com diagramas visuais e guia operacional completo.</li>
-                  </ul>
-                </div>
-
-                {/* v2.4.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.4.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Setembro / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Módulo de Calendário Nativo & Suporte a Atendimentos Individuais
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
-                    <li>Flag de produto <code className="bg-brand-beige px-1 py-0.5 rounded text-brand-purple">atendimento_individual</code> no cadastro de produtos.</li>
-                    <li>Grade semanal de horários com janelas da manhã e tarde, duração de 50 min e buffer de 10 min.</li>
-                    <li>Bloqueios manuais de data e horário com motivo opcional.</li>
-                    <li>Fluxo de reserva obrigatória na vitrine com Hold de 15 minutos e vínculo ao pedido da InfinitePay.</li>
-                  </ul>
-                </div>
-
-                {/* v2.3.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.3.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Agosto / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Checkout Transparente InfinitePay & Sistema de Cupons
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5">
-                    <li>Integração direta com o checkout da InfinitePay com validação HMAC de webhook.</li>
-                    <li>Módulo de cupons com desconto em porcentagem, valor fixo e cupons 100% gratuitos.</li>
                   </ul>
                 </div>
               </div>
