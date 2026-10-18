@@ -44,8 +44,9 @@ export default function ProductHighlights() {
 
         const destaques = data.filter((p: Produto) => {
           if (!p.destaque) return false;
-          if (p.is_teste || p.is_biblioteca) return false;
+          if (p.is_teste || p.is_biblioteca || Boolean(p.arquivo_url)) return false;
           if (CategoriasOutros.has(norm(p.categoria || ""))) return false;
+          if (CategoriasOutros.has(norm(p.slug || ""))) return false;
           return true;
         });
         setProdutos(destaques);
@@ -92,9 +93,15 @@ export default function ProductHighlights() {
   }, []);
 
   const grupos = useMemo(() => {
+    const norm = (s: string) =>
+      s
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
     const map = new Map<string, Produto[]>();
     for (const p of produtos) {
-      const cat = p.categoria || "__sem_categoria__";
+      const cat = norm(p.categoria || p.slug || "__sem_categoria__");
       if (!map.has(cat)) map.set(cat, []);
       map.get(cat)!.push(p);
     }

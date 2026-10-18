@@ -24,9 +24,33 @@ export function getProdutoBotoesConfig(produto: Produto): ProdutoBotoesConfig {
   const isBiblioteca = Boolean(produto.is_biblioteca) || Boolean(produto.arquivo_url);
   const temArquivo = Boolean(produto.arquivo_url);
 
-  // 1. Caso especial: Material Digital da Biblioteca Gratuito
+  const norm = (s?: string | null) =>
+    (s || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+
+  const catNorm = norm(produto.categoria);
+  const slugNorm = norm(produto.slug);
+  const isJogo =
+    catNorm === "jogos" ||
+    catNorm === "jogo" ||
+    slugNorm === "jogos" ||
+    slugNorm === "jogo" ||
+    slugNorm.includes("jogo") ||
+    slugNorm.includes("metamorfose") ||
+    norm(produto.rota_teste).includes("metamorfose");
+  const isReceita =
+    catNorm === "receitas" ||
+    catNorm === "receita" ||
+    slugNorm === "receita" ||
+    slugNorm === "receitas" ||
+    slugNorm.includes("receita");
+
+  // 1. Caso especial: Material Digital da Biblioteca ou Receita Gratuito
   if (isBiblioteca && isGratuito && temArquivo) {
-    const textoPrincipalPadrao = "Baixar Arquivo";
+    const textoPrincipalPadrao = isReceita ? "Baixar Receitas" : "Baixar Arquivo";
     return {
       textoPrincipal: produto.botao_principal_texto?.trim() || textoPrincipalPadrao,
       textoSecundario: produto.botao_secundario_texto?.trim() || "",
@@ -66,9 +90,15 @@ export function getProdutoBotoesConfig(produto: Produto): ProdutoBotoesConfig {
     };
   }
 
-  // 4. Caso especial: Teste de Autoconhecimento
-  if (isTeste) {
-    const textoPrincipalPadrao = isGratuito ? "Acessar Avaliação" : "Comprar Avaliação";
+  // 4. Caso especial: Jogo de Autoconhecimento ou Teste de Autoconhecimento
+  if (isTeste || isJogo) {
+    const textoPrincipalPadrao = isJogo
+      ? isGratuito
+        ? "Acessar Jogo"
+        : "Comprar Acesso ao Jogo"
+      : isGratuito
+      ? "Acessar Avaliação"
+      : "Comprar Avaliação";
     const textoSecundarioPadrao = "Carrinho";
     return {
       textoPrincipal: produto.botao_principal_texto?.trim() || textoPrincipalPadrao,
@@ -81,9 +111,9 @@ export function getProdutoBotoesConfig(produto: Produto): ProdutoBotoesConfig {
     };
   }
 
-  // 5. Caso especial: Material Digital Pago (Biblioteca)
+  // 5. Caso especial: Material Digital Pago (Biblioteca ou Receitas pagas)
   if (isBiblioteca) {
-    const textoPrincipalPadrao = "Comprar Material";
+    const textoPrincipalPadrao = isReceita ? "Comprar Receitas" : "Comprar Material";
     const textoSecundarioPadrao = "Carrinho";
     return {
       textoPrincipal: produto.botao_principal_texto?.trim() || textoPrincipalPadrao,

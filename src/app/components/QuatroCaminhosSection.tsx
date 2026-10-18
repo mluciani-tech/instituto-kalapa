@@ -87,7 +87,7 @@ const caminhos: CaminhoCard[] = [
     descricao:
       "Consultoria sistêmica empresarial, desenvolvimento de líderes e encontros para empreendedores.",
     ctaTexto: "Amplie sua visão sobre o negócio",
-    href: "/produtos/empreendedorismo",
+    href: "/produtos?categoria=empreendedorismo",
     imagem: "/images/caminhos/lideranca.jpg",
     imagemAlt: "Encontro de liderança e empreendedorismo",
     bgClass: "bg-[#EFE7DC]",

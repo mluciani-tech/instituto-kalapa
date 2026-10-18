@@ -63,14 +63,17 @@ async function getProdutoBySlug(
     receitas: "receitas",
     jogo: "jogos",
     jogos: "jogos",
-    artigo: "artigos",
-    artigos: "artigos",
-    guia: "guias",
-    guias: "guias",
-    download: "guias",
-    downloads: "guias",
+    artigo: "biblioteca",
+    artigos: "biblioteca",
+    guia: "biblioteca",
+    guias: "biblioteca",
+    download: "biblioteca",
+    downloads: "biblioteca",
     biblioteca: "biblioteca",
     "biblioteca-kalapa": "biblioteca",
+    empreendedorismo: "empreendedorismo",
+    lideranca: "empreendedorismo",
+    negocios: "empreendedorismo",
   };
   const lowerSlug = slug.toLowerCase();
   if (genericSlugs[lowerSlug]) {

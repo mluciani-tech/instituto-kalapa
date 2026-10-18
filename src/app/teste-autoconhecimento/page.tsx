@@ -21,12 +21,17 @@ export default async function TesteAutoconhecimentoPage() {
       const { data } = await supabaseAdmin!
         .from("produtos")
         .select("*")
-        .or("is_teste.eq.true,categoria.ilike.testes,slug.in.(teste-yin-yang,teste-eneagrama,teste-cronotipo,teste-lealdades-invisiveis,teste-metamorfose)")
+        .or("is_teste.eq.true,categoria.ilike.testes,slug.in.(teste,testes,teste-yin-yang,teste-eneagrama,teste-cronotipo,teste-lealdades-invisiveis)")
         .eq("ativo", true)
         .order("ordem", { ascending: true });
 
       if (data) {
-        produtosTestes = data;
+        produtosTestes = data.filter(
+          (p) =>
+            p.slug?.toLowerCase() !== "jogos" &&
+            p.slug?.toLowerCase() !== "jogo" &&
+            p.categoria?.toLowerCase() !== "jogos"
+        );
       }
     } catch (err) {
       console.warn("[teste-autoconhecimento] Erro ao buscar produtos de teste:", err);

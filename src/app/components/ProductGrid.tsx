@@ -28,50 +28,116 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
         let produtosData: Produto[] = await prodRes.json();
 
         if (categoria) {
-          const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          const normalize = (s: string) =>
+            s
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .trim();
           const cat = normalize(categoria);
-          if (cat === "atendimentos" || cat === "atendimento" || cat === "psicoterapia") {
-            produtosData = produtosData.filter(
-              (p) =>
-                p.atendimento_individual === true ||
-                normalize(p.categoria || "") === "atendimentos" ||
-                normalize(p.categoria || "") === "psicoterapia" ||
-                (p.atendimento_individual === undefined && isProdutoAgendamento(p))
+
+          const isProdJogo = (p: Produto) => {
+            const c = normalize(p.categoria || "");
+            const s = normalize(p.slug || "");
+            const r = normalize(p.rota_teste || "");
+            return (
+              c === "jogos" ||
+              c === "jogo" ||
+              s === "jogos" ||
+              s === "jogo" ||
+              s.includes("jogo") ||
+              s.includes("metamorfose") ||
+              r.includes("metamorfose")
             );
+          };
+
+          const isProdReceita = (p: Produto) => {
+            const c = normalize(p.categoria || "");
+            const s = normalize(p.slug || "");
+            return c === "receitas" || c === "receita" || s === "receita" || s === "receitas" || s.includes("receita");
+          };
+
+          if (cat === "atendimentos" || cat === "atendimento" || cat === "psicoterapia") {
+            produtosData = produtosData.filter((p) => {
+              const c = normalize(p.categoria || "");
+              const s = normalize(p.slug || "");
+              return (
+                p.atendimento_individual === true ||
+                ["atendimentos", "atendimento", "psicoterapia"].includes(c) ||
+                ["atendimentos", "atendimento", "psicoterapia", "terapia-adulto", "terapia-infantil"].includes(s) ||
+                isProdutoAgendamento(p)
+              );
+            });
+          } else if (cat === "vivencias" || cat === "vivencia") {
+            produtosData = produtosData.filter((p) => {
+              const c = normalize(p.categoria || "");
+              const s = normalize(p.slug || "");
+              if (s === "calendario" || c === "calendario") return false;
+              if (p.is_teste || p.is_biblioteca || isProdJogo(p) || isProdReceita(p)) return false;
+              return (
+                ["vivencias", "vivencia"].includes(s) ||
+                ["vivencias", "vivencia", "constelacao", "grupos", "grupo", "meditacao"].includes(c)
+              );
+            });
+          } else if (cat === "receitas" || cat === "receita") {
+            produtosData = produtosData.filter(isProdReceita);
+          } else if (cat === "jogos" || cat === "jogo") {
+            produtosData = produtosData.filter(isProdJogo);
+          } else if (cat === "testes" || cat === "teste") {
+            produtosData = produtosData.filter((p) => {
+              if (isProdJogo(p)) return false;
+              const c = normalize(p.categoria || "");
+              const s = normalize(p.slug || "");
+              return (
+                p.is_teste === true ||
+                c === "testes" ||
+                c === "teste" ||
+                s === "teste" ||
+                s === "testes" ||
+                s.startsWith("teste-")
+              );
+            });
           } else if (
             cat === "biblioteca" ||
             cat === "biblioteca-kalapa" ||
             cat === "guias" ||
-            cat === "downloads"
+            cat === "downloads" ||
+            cat === "artigos"
           ) {
-            produtosData = produtosData.filter(
-              (p) =>
+            produtosData = produtosData.filter((p) => {
+              if (isProdReceita(p) || isProdJogo(p)) return false;
+              const c = normalize(p.categoria || "");
+              const s = normalize(p.slug || "");
+              return (
                 p.is_biblioteca === true ||
-                ["biblioteca", "biblioteca-kalapa", "guias", "guia", "downloads", "download", "materiais"].includes(
-                  normalize(p.categoria || "")
-                ) ||
-                ["biblioteca", "biblioteca-kalapa", "guias", "downloads"].includes(
-                  normalize(p.slug || "")
-                )
-            );
-          } else if (cat === "empreendedorismo" || cat === "lideranca") {
-            produtosData = produtosData.filter(
-              (p) =>
-                ["empreendedorismo", "lideranca", "negocios"].includes(
-                  normalize(p.categoria || "")
-                ) ||
-                normalize(p.slug || "").includes("empreendedorismo") ||
-                normalize(p.slug || "").includes("lideranca")
-            );
+                Boolean(p.arquivo_url) ||
+                ["biblioteca", "biblioteca-kalapa", "guias", "guia", "downloads", "download", "materiais", "artigos", "artigo"].includes(c) ||
+                ["biblioteca", "biblioteca-kalapa", "guias", "downloads", "artigos"].includes(s)
+              );
+            });
+          } else if (cat === "empreendedorismo" || cat === "lideranca" || cat === "negocios") {
+            produtosData = produtosData.filter((p) => {
+              const c = normalize(p.categoria || "");
+              const s = normalize(p.slug || "");
+              return (
+                ["empreendedorismo", "lideranca", "negocios", "cafe"].includes(c) ||
+                s.includes("empreendedorismo") ||
+                s.includes("lideranca") ||
+                s.includes("negocio")
+              );
+            });
           } else if (cat === "formacao" || cat === "supervisao") {
-            produtosData = produtosData.filter(
-              (p) =>
-                ["formacao", "supervisao", "cursos", "treinamentos"].includes(
-                  normalize(p.categoria || "")
-                ) ||
-                normalize(p.slug || "").includes("formacao") ||
-                normalize(p.slug || "").includes("supervisao")
-            );
+            produtosData = produtosData.filter((p) => {
+              const c = normalize(p.categoria || "");
+              const s = normalize(p.slug || "");
+              return (
+                ["formacao", "supervisao", "cursos", "treinamentos", "formacao-e-supervisao"].includes(c) ||
+                s.includes("formacao") ||
+                s.includes("supervisao") ||
+                s.includes("curso") ||
+                s.includes("treinamento")
+              );
+            });
           } else {
             produtosData = produtosData.filter(
               (p) => normalize(p.categoria || "") === cat || normalize(p.slug || "") === cat

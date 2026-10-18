@@ -120,11 +120,18 @@ function classificarProdutoOutro(p: Produto): Exclude<AbaFiltro, "todos"> | null
   const cat = norm(p.categoria || "");
   const slug = norm(p.slug || "");
 
+  if (cat === "receitas" || cat === "receita" || slug.includes("receita")) {
+    return "receitas";
+  }
+
   if (
     cat === "jogos" ||
     cat === "jogo" ||
+    slug === "jogos" ||
+    slug === "jogo" ||
     slug.includes("jogo") ||
-    slug.includes("metamorfose")
+    slug.includes("metamorfose") ||
+    (p.rota_teste || "").includes("metamorfose")
   ) {
     return "jogos";
   }
@@ -133,17 +140,16 @@ function classificarProdutoOutro(p: Produto): Exclude<AbaFiltro, "todos"> | null
     p.is_teste === true ||
     cat === "testes" ||
     cat === "teste" ||
+    slug === "teste" ||
+    slug === "testes" ||
     slug.startsWith("teste-")
   ) {
     return "testes";
   }
 
-  if (cat === "receitas" || cat === "receita" || slug.includes("receita")) {
-    return "receitas";
-  }
-
   if (
     p.is_biblioteca === true ||
+    Boolean(p.arquivo_url) ||
     cat === "biblioteca" ||
     cat === "biblioteca-kalapa" ||
     cat === "artigos" ||
@@ -154,7 +160,9 @@ function classificarProdutoOutro(p: Produto): Exclude<AbaFiltro, "todos"> | null
     cat === "guia" ||
     cat === "downloads" ||
     cat === "download" ||
-    cat === "materiais"
+    cat === "materiais" ||
+    slug === "biblioteca" ||
+    slug === "biblioteca-kalapa"
   ) {
     return "biblioteca";
   }
@@ -173,7 +181,7 @@ export default function OtherProductsSection() {
       const novaAba = customEvent.detail?.aba as AbaFiltro | undefined;
       if (
         novaAba &&
-        ["todos", "testes", "receitas", "artigos", "guias"].includes(novaAba)
+        ["todos", "testes", "jogos", "receitas", "biblioteca"].includes(novaAba)
       ) {
         setAbaAtiva(novaAba);
       }

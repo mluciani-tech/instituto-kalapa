@@ -27,11 +27,38 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
 
   const isAgendamento = isProdutoAgendamento(produto);
   const isTeste = Boolean(produto.is_teste);
+  const norm = (s?: string | null) =>
+    (s || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  const isJogo =
+    norm(produto.categoria) === "jogos" ||
+    norm(produto.categoria) === "jogo" ||
+    norm(produto.slug) === "jogos" ||
+    norm(produto.slug) === "jogo" ||
+    norm(produto.slug).includes("metamorfose") ||
+    norm(produto.rota_teste).includes("metamorfose");
   const permiteCheckout = permiteCheckoutProduto(produto);
+
+  const preco = produto.preco ?? 0;
+  const isGratuito = preco <= 0;
+  const precoFormatado = isGratuito
+    ? "Acesso Livre"
+    : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const handleEscolher = () => {
     if (isAgendamento) {
       router.push(`/produtos/${produto.id}#agendamento`);
+      return;
+    }
+    if ((isTeste || isJogo) && isGratuito && produto.rota_teste) {
+      router.push(produto.rota_teste);
+      return;
+    }
+    if (isGratuito) {
+      router.push(`/produtos/${produto.id}`);
       return;
     }
     // Adiciona o produto ao carrinho preservando itens pré-existentes
@@ -49,12 +76,6 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
     router.push("/checkout");
   };
 
-  const preco = produto.preco ?? 0;
-  const isGratuito = preco <= 0;
-  const precoFormatado = isGratuito
-    ? "Acesso Livre"
-    : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
   const botoesConfig = getProdutoBotoesConfig(produto);
   const [baixando, setBaixando] = useState(false);
   const [downloadErro, setDownloadErro] = useState<string | null>(null);
@@ -65,7 +86,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
       setBaixando(true);
       const res = await fetch(`/api/produtos/${produto.id}/download`);
       if (res.status === 401) {
-        router.push(`/login?callbackUrl=/produtos/${produto.slug || produto.id}`);
+        router.push(`/login?callbackUrl=/produtos/${produto.id}`);
         return;
       }
       if (!res.ok) {
@@ -82,7 +103,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
     }
   };
 
-  const temVagasExibiveis = !isTeste && !isAgendamento && !botoesConfig.isDownloadGratuito && permiteCheckout && Boolean(vagas);
+  const temVagasExibiveis = !isTeste && !isJogo && !isAgendamento && !botoesConfig.isDownloadGratuito && permiteCheckout && Boolean(vagas);
   const vagasEsgotadas = temVagasExibiveis && vagas && vagas.restantes <= 0;
   const vagasQuaseEsgotadas = temVagasExibiveis && vagas && vagas.restantes > 0 && vagas.restantes <= 3;
 
@@ -149,10 +170,10 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
 
             {produto.descricao && (
               <ul className="space-y-1 mb-4">
-                {produto.descricao.split("\n").filter((l) => l.trim()).map((linha) => (
+                {produto.descricao.split("\n").filter((l) => l.trim()).slice(0, 4).map((linha) => (
                   <li key={linha} className="flex items-start gap-2 text-sm text-brand-charcoal/70">
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta/50 mt-1.5 flex-shrink-0" />
-                    {linha}
+                    <span className="line-clamp-3">{linha}</span>
                   </li>
                 ))}
               </ul>
@@ -170,11 +191,23 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
               </ul>
             )}
 
-            {/* Indicador de agendamento, teste ou contador de vagas */}
+            {/* Indicador de agendamento, jogo, teste ou contador de vagas */}
             {isAgendamento ? (
               <div className="mb-4 flex items-center gap-2 text-xs text-brand-charcoal/70 bg-brand-terracotta/10 px-3.5 py-2.5 rounded-xl border border-brand-terracotta/25">
                 <Calendar className="w-4 h-4 text-brand-terracotta shrink-0" />
                 <span className="font-medium text-brand-charcoal">Sessão individual · Escolha seu horário na agenda</span>
+              </div>
+            ) : isJogo ? (
+              <div className="mb-4 flex items-center justify-between text-xs text-brand-charcoal/80 bg-amber-50/80 px-3.5 py-2.5 rounded-xl border border-amber-200/70">
+                <div className="flex items-center gap-1.5 font-medium text-amber-950">
+                  <span>🎮</span>
+                  <span>Jogo de Autoconhecimento</span>
+                </div>
+                {produto.inclui_laudo_pdf !== false && (
+                  <span className="text-[11px] font-semibold text-amber-900 bg-white px-2 py-0.5 rounded-md border border-amber-200">
+                    Dossiê PDF Incluso
+                  </span>
+                )}
               </div>
             ) : isTeste ? (
               <div className="mb-4 flex items-center justify-between text-xs text-brand-charcoal/80 bg-emerald-50 px-3.5 py-2.5 rounded-xl border border-emerald-200/60">
@@ -227,7 +260,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                     </span>
                     {!isGratuito && (
                       <span className="text-sm text-brand-charcoal/45 mb-1">
-                        {isTeste ? "/ avaliação" : "/ sessão"}
+                        {isJogo ? "/ acesso" : isTeste ? "/ avaliação" : "/ sessão"}
                       </span>
                     )}
                   </div>

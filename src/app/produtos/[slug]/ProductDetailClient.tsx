@@ -55,6 +55,14 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
     ? "Gratuito"
     : preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+  const normSlug = (produto.slug || "").toLowerCase();
+  const normCat = (produto.categoria || "").toLowerCase();
+  const isJogo =
+    normSlug === "jogo" ||
+    normSlug === "jogos" ||
+    normCat.includes("jogo") ||
+    (produto.rota_teste || "").includes("metamorfose");
+  const isReceita = normCat.includes("receita") || normSlug.includes("receita");
   const isTeste = Boolean(produto.is_teste);
   const isBiblioteca = Boolean(produto.is_biblioteca) || Boolean(produto.arquivo_url);
   const arquivoDisponivel = Boolean(produto.arquivo_url);
@@ -73,7 +81,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
 
       if (res.status === 401) {
         // Usuário não autenticado
-        router.push(`/login?callbackUrl=/produtos/${produto.slug}`);
+        router.push(`/login?callbackUrl=/produtos/${produto.id}`);
         return;
       }
 
@@ -140,7 +148,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
 
       if (response.status === 401) {
         // Redireciona para o login e depois volta
-        router.push(`/login?callbackUrl=/produtos/${produto.slug}`);
+        router.push(`/login?callbackUrl=/produtos/${produto.id}`);
         return;
       }
 
@@ -277,17 +285,21 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
             <div className="mb-6 p-4 rounded-xl bg-emerald-50/80 border border-emerald-200/80">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <span className="text-xs uppercase tracking-wider font-semibold text-emerald-900 flex items-center gap-1.5">
-                  <span>🧠</span>
-                  <span>Avaliação de Autoconhecimento Online</span>
+                  <span>{isJogo ? "🎮" : "🧠"}</span>
+                  <span>
+                    {isJogo
+                      ? "Jogo de Autoconhecimento Online"
+                      : "Avaliação de Autoconhecimento Online"}
+                  </span>
                 </span>
                 {produto.inclui_laudo_pdf !== false && (
                   <span className="text-[11px] font-semibold text-emerald-800 bg-white px-2.5 py-0.5 rounded-full border border-emerald-300">
-                    Laudo Clínico em PDF Incluso
+                    {isJogo ? "Dossiê em PDF Incluso" : "Laudo Clínico em PDF Incluso"}
                   </span>
                 )}
               </div>
               <p className="text-xs text-emerald-950/80 leading-relaxed">
-                {produto.orientacoes_pre_teste || "Acesso liberado imediatamente após a confirmação do pagamento. O teste pode ser realizado no seu próprio ritmo com relatório salvo permanentemente no seu histórico."}
+                {produto.orientacoes_pre_teste || "Acesso liberado imediatamente após a confirmação do pagamento. Pode ser realizado no seu próprio ritmo com relatório salvo permanentemente no seu histórico."}
               </p>
             </div>
           ) : isBiblioteca ? (
@@ -295,7 +307,11 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
               <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <span className="text-xs uppercase tracking-wider font-semibold text-brand-purple flex items-center gap-1.5">
                   <FileText className="w-4 h-4 text-brand-terracotta" />
-                  <span>Material Digital da Biblioteca Kalapa</span>
+                  <span>
+                    {isReceita
+                      ? "Livro de Receitas Digital — INstituto Kalapa"
+                      : "Material Digital da Biblioteca Kalapa"}
+                  </span>
                 </span>
                 {produto.arquivo_nome && (
                   <span className="text-[11px] font-semibold text-brand-purple bg-white px-2.5 py-0.5 rounded-full border border-brand-beige truncate max-w-[200px]">
@@ -397,7 +413,13 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                 </span>
                 {!isGratuito && (
                   <span className="text-sm text-brand-charcoal/50">
-                    {isTeste ? "/ avaliação" : "/ sessão"}
+                    {isJogo
+                      ? "/ acesso"
+                      : isTeste
+                      ? "/ avaliação"
+                      : isBiblioteca
+                      ? "/ download"
+                      : "/ sessão"}
                   </span>
                 )}
               </div>

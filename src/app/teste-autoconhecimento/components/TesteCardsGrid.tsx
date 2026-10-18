@@ -162,35 +162,6 @@ const TESTES_DEFINICOES: TesteInfo[] = [
     corBotaoHover: "shadow-[#1A3C4D]/15",
     precoDefault: 47,
   },
-  {
-    slug: "teste-metamorfose",
-    rota: "/teste-metamorfose",
-    titulo: "Jogo Sistêmico — A Metamorfose da Consciência",
-    badgeCategoria: "Vivência Sistêmica • 80 Cartas",
-    badgeCor: "bg-[#1A3C4D] text-[#E8DEC8]",
-    badgeBorda: "border-[#B8965A]/40",
-    iconeCategoria: <Sparkles className="w-3.5 h-3.5 text-[#B8965A] shrink-0" />,
-    tempoEstimado: "~15 min",
-    resumo:
-      "Vivência fenomenológica interativa inspirada nas Ordens do Amor (Bert Hellinger), Constelações Organizacionais (Jan Jacob Stam), Joan Garriga e Maha Lilah. Atravesse os 4 quadrantes (Ovo, Lagarta, Crisálida e Borboleta) para desvendar a matriz oculta do seu projeto, carreira ou decisão.",
-    paragrafosCompletos: [
-      "O Jogo Sistêmico — A Metamorfose da Consciência é uma experiência profunda de autoconhecimento e facilitação desenvolvida pelo INstituto Kalapa.",
-      "Em cada um dos quatro quadrantes biológicos — O Ovo (Quem você representa?), A Lagarta (A serviço de quem está?), A Crisálida (Qual peso carrega?) e A Borboleta (O que o campo revela a serviço da vida?) — você retira intuitivamente 1 entre 20 cartas arquetípicas e reflete sobre 4 dimensões analíticas no seu Caderno Híbrido.",
-      "Ao final, suas 4 cartas formam a Equação Narrativa Contínua da sua alma e revelam a Balança entre a Ferida/Emaranhamento (Bloco A) e a Consciência Adulta (Bloco B), emitindo um Dossiê Completo de 6 páginas em PDF A4.",
-    ],
-    destaques: [
-      "Sorteio intuitivo em 4 Quadrantes (80 Cartas)",
-      "Caderno Híbrido & Ritos de Passagem com respiração",
-      "Equação Narrativa da Alma e Balança Bloco A/B",
-      "Dossiê Fenomenológico de 6 Páginas A4 em PDF",
-    ],
-    corDestaque: "text-[#B8965A]",
-    corBgDestaque: "bg-[#B8965A]/10 border-[#B8965A]/25",
-    corBordaHover: "hover:border-[#B8965A]",
-    corBotao: "bg-[#B8965A] hover:bg-[#A3854F]",
-    corBotaoHover: "shadow-[#B8965A]/25",
-    precoDefault: 67,
-  },
 ];
 
 interface TesteCardsGridProps {

@@ -53,7 +53,11 @@ export function extrairSlugNormalizadoTeste(item: ItemLiberacao): string {
   if (item.rota_teste && item.rota_teste.trim() && item.rota_teste !== "/teste") {
     return normalizarSlugTeste(item.rota_teste);
   }
-  if (item.slug && item.slug.trim() && item.slug !== "teste" && item.slug !== "testes") {
+  if (
+    item.slug &&
+    item.slug.trim() &&
+    !["teste", "testes", "jogo", "jogos"].includes(item.slug.trim().toLowerCase())
+  ) {
     return normalizarSlugTeste(item.slug);
   }
   const nomeLower = (item.nome || "").toLowerCase();
