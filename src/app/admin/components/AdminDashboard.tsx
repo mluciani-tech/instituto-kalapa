@@ -72,6 +72,7 @@ export interface AIInsightData {
   copys_whatsapp: AICopy[];
   cupons_recomendados: AICupom[];
   acoes_prioritarias: string[];
+  alertas_operacionais?: string[];
 }
 
 interface DashboardData {
@@ -200,6 +201,8 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
   // Estados de IA & Monetização (Gemini)
   const [aiInsights, setAiInsights] = useState<AIInsightData | null>(null);
   const [aiSource, setAiSource] = useState<"gemini" | "fallback" | null>(null);
+  const [aiModel, setAiModel] = useState<string | null>(null);
+  const [aiAviso, setAiAviso] = useState<string | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
   const [errorAi, setErrorAi] = useState("");
   const [copiadoIdx, setCopiadoIdx] = useState<number | null>(null);
@@ -260,16 +263,23 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
     }
   };
 
-  // Disparo da IA Gemini para análise de monetização
+  // Disparo da IA Gemini para análise de monetização (usando o período selecionado no dashboard)
   const handleGerarInsightsAI = async () => {
     setLoadingAi(true);
     setErrorAi("");
+    setAiAviso(null);
     try {
-      const res = await fetch("/api/admin/insights/ai", { method: "POST" });
+      const res = await fetch("/api/admin/insights/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ periodo }),
+      });
       const json = await res.json();
       if (res.ok && json.insights) {
         setAiInsights(json.insights);
         setAiSource(json.source || "gemini");
+        setAiModel(json.model || json.modelo || null);
+        setAiAviso(json.aviso || null);
       } else {
         setErrorAi(json.error || "Não foi possível gerar os insights no momento.");
       }
@@ -1176,21 +1186,28 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
                 <Sparkles className="w-3.5 h-3.5" />
                 Kalapa Growth AI
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/10 text-white/80 border border-white/15">
+              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
+                aiSource === "gemini"
+                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/30"
+                  : "bg-white/10 text-white/80 border-white/15"
+              }`}>
                 <Bot className="w-3 h-3 text-cyan-300" />
-                Google Gemini 2.5 Flash
+                {aiSource === "gemini" ? (aiModel || "Google Gemini 2.5 Flash") : "Motor Analítico Integrado"}
               </span>
               {aiSource && (
-                <span className="text-[10px] text-white/50">
-                  ({aiSource === "gemini" ? "API Conectada" : "Modo Analítico Integrado"})
+                <span className="text-[10px] text-white/60 font-mono">
+                  {aiSource === "gemini" ? "• Conectado ao Gemini" : "• 13 Tabelas Auditadas"}
                 </span>
               )}
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-white/50 border border-white/10">
+                Período: {periodo.toUpperCase()}
+              </span>
             </div>
             <h3 className="text-lg font-bold text-white mt-2">
               Consultoria Estratégica de Monetização & Vendas
             </h3>
             <p className="text-xs text-white/70 max-w-2xl mt-1 leading-relaxed">
-              Inteligência Artificial aplicada aos seus dados reais: diagnóstico comercial da esteira de produtos, combos sugeridos de alta conversão, copys acolhedoras de WhatsApp e campanhas de cupons.
+              Inteligência Analítica conectada a 100% dos dados reais do Kalapa: pedidos, turmas, consultas, 4 testes, jogo Metamorfose, cupons e downloads da biblioteca.
             </p>
           </div>
 
@@ -1202,12 +1219,12 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
             {loadingAi ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin text-white" />
-                <span>Consultando Gemini...</span>
+                <span>Analisando 13 Fontes de Dados...</span>
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 text-amber-200" />
-                <span>{aiInsights ? "Atualizar Estratégias de IA" : "Gerar Estratégias de Monetização"}</span>
+                <span>{aiInsights ? "Atualizar Análise com IA" : "Gerar Consultoria Estratégica"}</span>
               </>
             )}
           </button>
@@ -1220,13 +1237,20 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
           </div>
         )}
 
+        {aiAviso && (
+          <div className="p-3 bg-amber-500/15 border border-amber-500/30 rounded-xl text-xs text-amber-200 flex items-center gap-2">
+            <Lightbulb className="w-4 h-4 shrink-0 text-amber-300" />
+            <span>{aiAviso}</span>
+          </div>
+        )}
+
         {/* Estado sem insights gerados ainda */}
         {!aiInsights && !loadingAi && (
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center space-y-2">
             <Bot className="w-8 h-8 text-amber-300 mx-auto opacity-80" />
             <h4 className="text-xs font-bold text-white">Nenhuma consultoria gerada nesta sessão</h4>
             <p className="text-[11px] text-white/60 max-w-md mx-auto">
-              Clique no botão dourado acima para que o Gemini analise suas vendas, testes realizados e turmas, cruzando os dados para sugerir ações imediatas de receita.
+              Clique no botão dourado acima para que a inteligência analise suas vendas, turmas, atendimentos, 4 testes, jogo e downloads no período de {periodo.toUpperCase()}.
             </p>
           </div>
         )}
@@ -1236,10 +1260,10 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
           <div className="p-8 rounded-2xl bg-white/5 border border-white/10 text-center space-y-3">
             <div className="w-10 h-10 border-2 border-amber-300 border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-xs font-semibold text-white">
-              Analisando checkouts, testes Yin/Yang, Eneagrama e vivências...
+              Auditando 13 tabelas: vendas, atendimentos, inscrições, 4 testes, jogo e downloads...
             </p>
             <p className="text-[11px] text-white/50 max-w-md mx-auto">
-              O Gemini está identificando oportunidades de cross-sell, precificação de pacotes e redigindo copys humanizadas para o INstituto Kalapa.
+              Cruzando dados para identificar gargalos de conversão, sugestões de combos e copys acolhedoras para o WhatsApp.
             </p>
           </div>
         )}
@@ -1247,6 +1271,26 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
         {/* Conteúdo com os Insights da IA */}
         {aiInsights && !loadingAi && (
           <div className="space-y-6 pt-2">
+            {/* Bloco 0: Alertas Operacionais Críticos (quando houver) */}
+            {aiInsights.alertas_operacionais && aiInsights.alertas_operacionais.length > 0 && (
+              <div className="bg-amber-500/10 border border-amber-400/30 rounded-2xl p-4 sm:p-5">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <Flame className="w-4 h-4 text-amber-300 shrink-0" />
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">
+                    Gargalos & Oportunidades Imediatas Detectadas
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                  {aiInsights.alertas_operacionais.map((alerta, idx) => (
+                    <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-amber-100 flex items-start gap-2">
+                      <span className="text-amber-400 font-bold">•</span>
+                      <span className="leading-relaxed">{alerta}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Bloco 1: Diagnóstico Comercial */}
             <div className="bg-white/10 backdrop-blur-xs rounded-2xl p-5 border border-white/15">
               <div className="flex items-center gap-2 mb-2">
