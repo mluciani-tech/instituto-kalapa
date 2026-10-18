@@ -253,7 +253,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
               <Sparkles className="w-3.5 h-3.5" />
               {produto.categoria || "Vivência Terapêutica"}
             </span>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-charcoal font-sans tracking-tight">
+            <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-medium text-[#214137] tracking-tight">
               {produto.nome}
             </h1>
             {produto.descricao_curta && (

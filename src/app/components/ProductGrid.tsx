@@ -172,7 +172,7 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
           <Sparkles className="w-8 h-8" />
         </div>
 
-        <h3 className="text-xl font-bold text-brand-charcoal mb-2 font-sans">
+        <h3 className="font-serif text-xl sm:text-2xl font-medium text-[#214137] mb-2 tracking-tight">
           {categoria === "atendimentos"
             ? "Nenhum atendimento individual disponível no momento"
             : categoria

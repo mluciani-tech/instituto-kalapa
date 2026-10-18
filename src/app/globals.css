@@ -34,6 +34,10 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1, h2, h3, .font-heading {
+  font-family: var(--font-serif);
+}
+
 body {
   background: #F8F4ED;
   color: #4A4A4A;

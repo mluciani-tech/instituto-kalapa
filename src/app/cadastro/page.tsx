@@ -170,7 +170,7 @@ export default function CadastroPage() {
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-terracotta/15 text-brand-terracotta text-xs font-semibold tracking-wide mb-3 border border-brand-terracotta/25">
                 ✦ Novo Cadastro
               </span>
-              <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+              <h1 className="font-serif text-2xl md:text-3xl font-medium text-white tracking-tight">
                 Crie sua conta no INstituto Kalapa
               </h1>
               <p className="text-xs md:text-sm text-white/50 mt-1">

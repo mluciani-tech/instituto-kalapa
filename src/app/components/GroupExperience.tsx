@@ -54,7 +54,7 @@ export default function GroupExperience() {
           <SplitText
             text="A transformação que nasce do encontro entre almas"
             tag="h2"
-            className="text-3xl md:text-5xl font-bold text-brand-charcoal leading-tight max-w-3xl mx-auto"
+            className="font-serif text-3xl md:text-5xl font-medium text-[#214137] leading-tight max-w-3xl mx-auto tracking-tight"
             splitType="words"
             delay={80}
             duration={0.8}
@@ -91,7 +91,7 @@ export default function GroupExperience() {
                   {beneficio.icone}
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-brand-charcoal mb-2">
+                  <h3 className="font-serif text-xl font-medium text-[#214137] mb-2 tracking-tight">
                     {beneficio.titulo}
                   </h3>
                   <p className="text-brand-charcoal/60 leading-relaxed">

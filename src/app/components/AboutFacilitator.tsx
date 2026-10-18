@@ -112,7 +112,7 @@ export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProp
             <Sparkles className="w-4 h-4" />
             Quem Conduz
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold text-brand-charcoal tracking-tight">
+          <h2 className="font-serif text-3xl md:text-5xl font-medium text-[#214137] tracking-tight">
             Presença, Cuidado e Acolhimento
           </h2>
           <p className="mt-4 text-brand-charcoal/65 text-base md:text-lg max-w-2xl mx-auto font-light leading-relaxed">
@@ -166,7 +166,7 @@ export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProp
               <Heart className="w-4 h-4 text-brand-mint" />
               {dados.titulo}
             </div>
-            <h3 className="text-2xl md:text-4xl font-bold text-brand-charcoal mb-4">
+            <h3 className="font-serif text-2xl md:text-4xl font-medium text-[#214137] mb-4 tracking-tight">
               {dados.nome}
             </h3>
             <div className="p-4 mb-6 rounded-2xl bg-brand-offwhite border border-brand-terracotta/20">
@@ -218,7 +218,7 @@ export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProp
               <MapPin className="w-4 h-4" />
               Onde Acontece
             </span>
-            <h3 className="text-2xl md:text-3xl font-bold text-brand-charcoal mb-2">
+            <h3 className="font-serif text-2xl md:text-3xl font-medium text-[#214137] mb-2 tracking-tight">
               {dados.espaco_titulo}
             </h3>
             <p className="text-brand-charcoal/70 text-sm md:text-base leading-relaxed">
@@ -251,7 +251,7 @@ export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProp
               <ShieldCheck className="w-4 h-4" />
               Tire Suas Dúvidas
             </span>
-            <h3 className="text-2xl md:text-4xl font-bold text-brand-charcoal mb-3">
+            <h3 className="font-serif text-2xl md:text-4xl font-medium text-[#214137] mb-3 tracking-tight">
               Perguntas Frequentes
             </h3>
             <p className="text-brand-charcoal/65 text-sm md:text-base font-light">

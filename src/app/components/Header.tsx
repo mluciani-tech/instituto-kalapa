@@ -28,6 +28,10 @@ const contatos = {
   endereco: "Alameda Tangara, 500 - Cotia - SP",
   instagram: "https://instagram.com/institutoKalapa",
   instagramLabel: "@institutoKalapa",
+  youtube: "https://youtube.com/@institutoKalapa",
+  youtubeLabel: "@institutoKalapa",
+  linkedin: "https://linkedin.com/company/instituto-kalapa",
+  linkedinLabel: "INstituto Kalapa",
   email: "clatihucia.capeli@institutokalapa.com.br",
   whatsapp:
     "https://wa.me/5511917452732?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20um%20atendimento%20ou%20falar%20com%20a%20equipe%20do%20INstituto%20Kalapa.",
@@ -181,6 +185,78 @@ export default function Header() {
             >
               <Calendar className="w-3.5 h-3.5 text-white/90 shrink-0" />
               <span className="whitespace-nowrap">Agendar / Falar Conosco</span>
+            </a>
+
+            {/* Redes Sociais nos botões circulares */}
+            <a
+              href={contatos.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram do INstituto Kalapa"
+              title="Instagram"
+              className="hidden md:flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241]"
+            >
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+              </svg>
+            </a>
+
+            <a
+              href={contatos.youtube}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Canal no YouTube do INstituto Kalapa"
+              title="YouTube"
+              className="hidden md:flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241]"
+            >
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+                <polygon points="10 15 15 12 10 9 10 15" fill="currentColor" stroke="none" />
+              </svg>
+            </a>
+
+            <a
+              href={contatos.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn do INstituto Kalapa"
+              title="LinkedIn"
+              className="hidden md:flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241]"
+            >
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                <rect width="4" height="12" x="2" y="9" />
+                <circle cx="4" cy="4" r="2" />
+              </svg>
             </a>
 
             {/* Ícone discreto do Sistema ERP */}
@@ -358,6 +434,49 @@ export default function Header() {
                 Entrar na conta
               </Link>
             )}
+
+            {/* Redes Sociais no menu Mobile */}
+            <div className="mt-3 px-4 flex items-center gap-2.5">
+              <span className="text-xs font-medium text-[#214137]/70 mr-1">Siga-nos:</span>
+              <a
+                href={contatos.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="h-8 w-8 flex items-center justify-center rounded-full border border-[#DCD8CD] bg-white text-[#214137]"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                </svg>
+              </a>
+              <a
+                href={contatos.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="h-8 w-8 flex items-center justify-center rounded-full border border-[#DCD8CD] bg-white text-[#214137]"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+                  <polygon points="10 15 15 12 10 9 10 15" fill="currentColor" stroke="none" />
+                </svg>
+              </a>
+              <a
+                href={contatos.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="h-8 w-8 flex items-center justify-center rounded-full border border-[#DCD8CD] bg-white text-[#214137]"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                  <rect width="4" height="12" x="2" y="9" />
+                  <circle cx="4" cy="4" r="2" />
+                </svg>
+              </a>
+            </div>
 
             <div className="mt-3 pt-3 border-t border-[#E2DFD3] flex items-center justify-between px-4 text-[11px] text-[#4A5D52]">
               <a

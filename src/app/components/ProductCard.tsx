@@ -155,7 +155,7 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
 
           {/* Conteúdo */}
           <div className="flex flex-col p-6">
-            <h3 className="text-xl font-bold text-brand-charcoal mb-2 font-sans">
+            <h3 className="font-serif text-xl sm:text-[22px] font-medium text-[#214137] mb-2 leading-snug tracking-tight">
               <Link
                 href={`/produtos/${produto.id}`}
                 className="hover:text-brand-purple transition-colors"

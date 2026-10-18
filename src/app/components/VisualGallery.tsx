@@ -34,7 +34,7 @@ export default function VisualGallery() {
           <span className="inline-block px-4 py-1.5 rounded-full bg-brand-mint/20 text-brand-mint-dark text-sm font-semibold tracking-wide mb-4">
             Galeria Visual
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold text-brand-charcoal leading-tight max-w-3xl mx-auto">
+          <h2 className="font-serif text-3xl md:text-5xl font-medium text-[#214137] leading-tight max-w-3xl mx-auto tracking-tight">
             Não oferecemos respostas prontas. Criamos experiências que ampliam a consciência e revelam novas possibilidades de viver.
           </h2>
           <p className="mt-4 text-brand-charcoal/60 text-lg max-w-xl mx-auto">

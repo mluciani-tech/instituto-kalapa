@@ -43,7 +43,7 @@ export default async function ProdutosPage({
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white/80 text-sm font-medium tracking-wide mb-6">
             ✦ Nossos serviços
           </span>
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 font-sans">
+          <h1 className="font-serif text-3xl md:text-5xl font-medium text-white mb-4 tracking-tight">
             {filtro
               ? nomesCategorias[filtro.toLowerCase()] ||
                 `${filtro.charAt(0).toUpperCase() + filtro.slice(1)}`

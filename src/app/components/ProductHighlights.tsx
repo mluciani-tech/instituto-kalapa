@@ -113,7 +113,7 @@ export default function ProductHighlights() {
             <Sparkles aria-hidden="true" className="w-4 h-4" />
             Em destaque
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-brand-charcoal font-sans">
+          <h2 className="font-serif text-3xl md:text-5xl font-medium text-[#214137] tracking-tight">
             Nossos serviços
           </h2>
           <p className="mt-3 text-brand-charcoal/60 text-lg max-w-xl mx-auto">
