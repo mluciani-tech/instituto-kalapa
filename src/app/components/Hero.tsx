@@ -30,22 +30,15 @@ export default function Hero() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-xl text-white"
         >
-          {/* Marca com ícone de flor de lótus branco + título serifado */}
-          <div className="flex items-center gap-3.5 mb-4">
-            <svg
-              className="w-11 h-11 sm:w-13 sm:h-13 text-white shrink-0"
-              viewBox="0 0 48 48"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M24 8C19.5 15 17.5 21.5 17.5 28a6.5 6.5 0 0 0 13 0C30.5 21.5 28.5 15 24 8z" />
-              <path d="M24 34.5c-8 0-14.5-4.5-17-12.5 7.5-1 14 2.2 17 12.5z" />
-              <path d="M24 34.5c8 0 14.5-4.5 17-12.5-7.5-1-14 2.2-17 12.5z" />
-            </svg>
+          {/* Marca com o símbolo oficial do INstituto Kalapa + título serifado */}
+          <div className="flex items-center gap-3.5 sm:gap-4 mb-4">
+            <Image
+              src="/images/caminhos/logo-kalapa-claro.png"
+              alt="Símbolo INstituto Kalapa"
+              width={64}
+              height={64}
+              className="w-12 h-12 sm:w-14 sm:h-14 object-contain shrink-0 drop-shadow-xs"
+            />
             <h1 className="font-serif text-3xl sm:text-4xl md:text-[46px] font-normal tracking-tight text-white leading-none">
               INstituto Kalapa
             </h1>

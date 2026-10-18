@@ -343,23 +343,16 @@ export default function QuatroCaminhosSection() {
         >
           {/* Card Esquerdo (8 colunas): Conhecimento e experiências */}
           <div className="lg:col-span-8 rounded-2xl bg-[#FDFCF8] border border-[#E6E3D8] px-5 sm:px-7 py-5 sm:py-6 shadow-xs flex flex-col xl:flex-row items-center justify-between gap-6">
-            {/* Bloco Esquerdo do Card: Ícone Flor de Lótus + Título + Botão */}
-            <div className="flex items-center gap-4 sm:gap-5 w-full xl:w-auto xl:max-w-[330px]">
-              <div className="shrink-0 text-[#485742] hidden sm:flex items-center justify-center">
-                <svg
-                  className="w-11 h-11"
-                  viewBox="0 0 36 36"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M18 6C15 11 13.5 15.5 13.5 20a4.5 4.5 0 0 0 9 0C22.5 15.5 21 11 18 6z" />
-                  <path d="M18 24.5c-5.5 0-10-3-12-8.5 5.2-.8 9.8 1.5 12 8.5z" />
-                  <path d="M18 24.5c5.5 0 10-3 12-8.5-5.2-.8-9.8 1.5-12 8.5z" />
-                </svg>
+            {/* Bloco Esquerdo do Card: Símbolo Oficial Kalapa + Título + Botão */}
+            <div className="flex items-center gap-4 sm:gap-5 w-full xl:w-auto xl:max-w-[340px]">
+              <div className="shrink-0 hidden sm:flex items-center justify-center">
+                <Image
+                  src="/images/caminhos/logo-kalapa-escuro.png"
+                  alt="Símbolo INstituto Kalapa"
+                  width={56}
+                  height={56}
+                  className="w-12 h-12 sm:w-13 sm:h-13 object-contain"
+                />
               </div>
 
               <div className="hidden sm:block w-px self-stretch bg-[#E2DFD5]" />

@@ -20,12 +20,8 @@ import type { Usuario } from "@/lib/types";
 
 const navLinks = [
   { href: "/", label: "Início" },
-  { href: "/produtos?categoria=atendimentos", label: "Psicoterapia" },
-  { href: "/produtos?categoria=vivencias", label: "Vivências" },
-  { href: "/produtos/empreendedorismo", label: "Liderança e Empreendedorismo" },
-  { href: "/produtos?categoria=formacao", label: "Formação e Supervisão" },
-  { href: "/#conhecimento-experiencias", label: "Biblioteca" },
-  { href: "/#sobre", label: "Sobre" },
+  { href: "/#conhecimento-experiencias", label: "Conhecimento e Experiências" },
+  { href: "/#sobre", label: "Sobre a Fundadora" },
 ];
 
 const contatos = {
@@ -131,11 +127,11 @@ export default function Header() {
             className="group flex shrink-0 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B5241] focus-visible:ring-offset-2"
           >
             <Image
-              src="/logo-kalapa.png"
+              src="/images/caminhos/logo-kalapa-escuro.png"
               alt="Logo INstituto Kalapa"
               width={64}
               height={64}
-              className="h-11 w-11 shrink-0 rounded-xl border border-[#DFDCD2] bg-white p-1 object-contain shadow-xs transition-transform duration-300 group-hover:scale-[1.03] md:h-12 md:w-12"
+              className="h-11 w-11 shrink-0 object-contain transition-transform duration-300 group-hover:scale-[1.04] md:h-12 md:w-12"
             />
             <div className="shrink-0 leading-tight">
               <span className="block font-serif text-xl md:text-[24px] font-medium tracking-tight text-[#214137]">
@@ -150,7 +146,7 @@ export default function Header() {
           {/* Navegação Desktop Central */}
           <nav
             aria-label="Navegação principal"
-            className="hidden xl:flex items-center gap-5 2xl:gap-6 shrink-0"
+            className="hidden lg:flex items-center gap-7 xl:gap-9 shrink-0"
           >
             {navLinks.map((link) => {
               const isHome = link.href === "/";
@@ -280,7 +276,7 @@ export default function Header() {
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={menuOpen}
-              className="xl:hidden rounded-xl p-2 text-[#214137] hover:bg-[#EAE8DF] transition-colors"
+              className="lg:hidden rounded-xl p-2 text-[#214137] hover:bg-[#EAE8DF] transition-colors"
             >
               {menuOpen ? (
                 <X className="w-5 h-5" aria-hidden="true" />
@@ -294,7 +290,7 @@ export default function Header() {
 
       {/* Menu Mobile / Tablet */}
       {menuOpen && (
-        <div className="xl:hidden border-t border-[#E2DFD3] bg-[#F7F5EE] shadow-lg">
+        <div className="lg:hidden border-t border-[#E2DFD3] bg-[#F7F5EE] shadow-lg">
           <nav
             aria-label="Menu mobile"
             className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1"
