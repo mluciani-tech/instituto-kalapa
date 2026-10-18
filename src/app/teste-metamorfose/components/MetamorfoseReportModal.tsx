@@ -73,7 +73,7 @@ export default function MetamorfoseReportModal({
             {/* Logo Kalapa */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo-kalapa.png"
+              src="/images/caminhos/logo-kalapa-escuro.png"
               alt="INstituto Kalapa"
               className="h-10 w-auto object-contain shrink-0"
             />
@@ -318,7 +318,7 @@ export default function MetamorfoseReportModal({
                 <div className="flex items-center gap-4 border-b-2 border-[#B8965A] pb-2.5 mb-2 print-avoid-break">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/logo-kalapa.png"
+                    src="/images/caminhos/logo-kalapa-escuro.png"
                     alt="INstituto Kalapa"
                     className="h-10 w-auto object-contain shrink-0"
                   />
@@ -458,7 +458,7 @@ export default function MetamorfoseReportModal({
                     <div className="border-b-2 border-[#1A3C4D] pb-2 flex items-center gap-3 print-avoid-break">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src="/logo-kalapa.png"
+                        src="/images/caminhos/logo-kalapa-escuro.png"
                         alt="INstituto Kalapa"
                         className="h-8 w-auto object-contain shrink-0"
                       />
@@ -589,7 +589,7 @@ export default function MetamorfoseReportModal({
                 <div className="border-b-2 border-[#1A3C4D] pb-2 flex items-center gap-3 print-avoid-break">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/logo-kalapa.png"
+                    src="/images/caminhos/logo-kalapa-escuro.png"
                     alt="INstituto Kalapa"
                     className="h-8 w-auto object-contain shrink-0"
                   />

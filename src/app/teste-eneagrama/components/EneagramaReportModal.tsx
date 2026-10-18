@@ -153,12 +153,12 @@ export default function EneagramaReportModal({
             {/* Dados do Participante & Logo */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#F8F4ED]/80 p-3.5 rounded-xl border border-[#E8DEC8]">
               <div>
-                <div className="relative w-36 h-8 mb-1">
+                <div className="relative w-10 h-10 mb-1">
                   <Image
-                    src="/logo-kalapa.png"
+                    src="/images/caminhos/logo-kalapa-escuro.png"
                     alt="INstituto Kalapa"
                     fill
-                    sizes="144px"
+                    sizes="40px"
                     priority
                     className="object-contain object-left"
                   />

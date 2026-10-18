@@ -613,7 +613,7 @@ export default function AdminParticipantes({
               <div className="flex items-center gap-2.5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/logo-kalapa.png"
+                  src="/images/caminhos/logo-kalapa-escuro.png"
                   alt="INstituto Kalapa"
                   className="h-8 w-auto object-contain shrink-0"
                 />
@@ -695,7 +695,7 @@ export default function AdminParticipantes({
                       {/* Logo no Canto Superior Esquerdo */}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src="/logo-kalapa.png"
+                        src="/images/caminhos/logo-kalapa-escuro.png"
                         alt="INstituto Kalapa"
                         className="h-10 w-auto object-contain shrink-0"
                       />
