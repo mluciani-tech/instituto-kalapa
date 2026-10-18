@@ -32,12 +32,14 @@ export const metadata: Metadata = {
     "Transforme sua jornada de autoconhecimento com vivências terapêuticas em grupo. Acolhimento, pertencimento e cura coletiva no INstituto Kalapa.",
   icons: {
     icon: [
-      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
-      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-32x32.png?v=2", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-16x16.png?v=2", type: "image/png", sizes: "16x16" },
+      { url: "/favicon-48x48.png?v=2", type: "image/png", sizes: "48x48" },
     ],
-    shortcut: "/favicon-32x32.png",
+    shortcut: "/favicon.ico?v=2",
     apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon.png?v=2", sizes: "180x180", type: "image/png" },
     ],
   },
   manifest: "/site.webmanifest",
