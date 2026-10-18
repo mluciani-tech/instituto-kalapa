@@ -70,7 +70,7 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
   - Emissão de Lista de Convidados formatada para impressão/PDF.
 - **Cupons de Desconto:** Criação de cupons por porcentagem, valor fixo, limite de usos e validade.
 - **Usuários:** Lista completa de clientes com dados de contato, endereço e histórico de compras.
-- **Manual do Sistema Integrado:** Guia oficial com diagramas visuais e procedimentos operacionais totalmente harmonizado na paleta da marca (atualizado na versão v2.15.0).
+- **Manual do Sistema Integrado:** Guia oficial com diagramas visuais e procedimentos operacionais totalmente harmonizado na paleta da marca (atualizado na versão v2.16.0).
 - **Feedback & Modais Seguros:** Eliminação completa de caixas de diálogo bloqueantes do navegador (`alert`/`confirm`), adotando modais dedicados de confirmação e banners de retorno inline com auto-dismiss.
 - **Toast Notifications:** Alertas em tempo real na tela quando novos agendamentos são confirmados.
 

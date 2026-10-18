@@ -106,7 +106,7 @@ export default function AdminManual() {
       title: "9. Histórico & Versões do Sistema",
       icon: Zap,
       summary: "Registro de atualizações contínuas e notas de versão do projeto.",
-      badge: "v2.15",
+      badge: "v2.16",
     },
   ];
 
@@ -969,16 +969,36 @@ export default function AdminManual() {
                   </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-mono font-bold text-xs">
-                  Versão Atual: v2.15.0
+                  Versão Atual: v2.16.0
                 </div>
               </div>
 
               <div className="space-y-4">
-                {/* v2.15.0 */}
+                {/* v2.16.0 */}
                 <div className="relative pl-6 border-l-2 border-brand-purple space-y-1.5">
                   <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-purple" />
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-purple">v2.15.0</span>
+                    <span className="font-bold text-xs text-brand-purple">v2.16.0</span>
+                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-brand-charcoal">
+                    Padronização Tipográfica Global, Redes Sociais no Header, Novo Rodapé &amp; Otimização de Performance
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
+                    <li><strong>Padronização Global da Tipografia:</strong> Títulos e cabeçalhos em todo o projeto unificados na fonte serifada editorial (<code>font-serif</code> &mdash; Playfair Display / Cormorant Garamond), alinhados às seções 1 e 2 da home, com corpo de texto limpo em <code>Inter</code> (<code>font-sans</code>).</li>
+                    <li><strong>Redes Sociais no Header:</strong> Inclusão de botões circulares elegantes para Instagram, YouTube e LinkedIn ao lado dos utilitários no desktop e no menu retrátil mobile.</li>
+                    <li><strong>Novo Rodapé em 4 Colunas:</strong> Reestruturação do Footer com blocos bem distribuídos para Marca &amp; Propósito, Navegação Rápida, Espaço Físico (com link para Google Maps) e Contatos/Redes Sociais.</li>
+                    <li><strong>Otimização de Performance &amp; Core Web Vitals:</strong> Migração de fontes para <code>next/font/google</code> (eliminando <code>@import</code> bloqueante), ativação de ISR (<code>revalidate = 60</code>) na home para TTFB instantâneo (&lt;40ms via CDN Vercel) e suporte aos formatos de imagem AVIF e WebP.</li>
+                    <li><strong>Novo Favicon &amp; Identidade no Navegador:</strong> Atualização completa com o novo símbolo oficial Kalapa escuro em alto contraste, suporte nativo a <code>favicon.ico</code> e cache-buster <code>?v=2</code> para atualização imediata nas abas do navegador.</li>
+                    <li><strong>Humanização de Microcopy:</strong> Atualização dos links e acessos internos de &ldquo;Sistema ERP&rdquo; para <em>&ldquo;Espaço Sarawasti &amp; Brahma&rdquo;</em>.</li>
+                  </ul>
+                </div>
+
+                {/* v2.15.0 */}
+                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
+                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-brand-charcoal/70">v2.15.0</span>
                     <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">
@@ -987,8 +1007,8 @@ export default function AdminManual() {
                   <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
                     <li><strong>Meus Jogos na Área do Usuário:</strong> Nova aba &ldquo;Meus Jogos&rdquo; em <em>Minha Conta</em>, ao lado de &ldquo;Meus Testes&rdquo;. Jogos de autoconhecimento (ex.: A Metamorfose da Consciência) deixam de aparecer misturados aos testes, com textos, ícone e botão &ldquo;Iniciar Jogo&rdquo; próprios.</li>
                     <li><strong>Item Calendário na Home:</strong> Novo item &ldquo;Calendário&rdquo; na faixa de Conhecimento e Experiências, logo após &ldquo;Testes de autoconhecimento&rdquo;, levando à página de produtos da categoria <code>calendario</code>. A faixa passou a acomodar 5 itens e o cartão &ldquo;Quatro caminhos. Uma essência.&rdquo; foi reajustado.</li>
-                    <li><strong>Correção da Grade Semanal (Admin &rarr; Agenda):</strong> Corrigido o carregamento infinito (&ldquo;Carregando grade&hellip;&rdquo;) na aba <em>Grade Semanal de Trabalho</em>, causado por uma dependência circular na busca da grade.</li>
-                    <li><strong>Novo Símbolo Kalapa nos Relatórios:</strong> O símbolo oficial (flor de lótus) substitui o logo antigo no Dossiê da Metamorfose, no relatório do Eneagrama e na Lista de Convidados (Casa 52), tanto na tela quanto na impressão.</li>
+                    <li><strong>Correção da Grade Semanal (Admin &rarr; Agenda):</strong> Corrigido o carregamento infinito na aba <em>Grade Semanal de Trabalho</em>, causado por dependência circular na busca da grade.</li>
+                    <li><strong>Novo Símbolo Kalapa nos Relatórios:</strong> O símbolo oficial (flor de lótus) substitui o logo antigo no Dossiê da Metamorfose, no relatório do Eneagrama e na Lista de Convidados, tanto na tela quanto na impressão.</li>
                   </ul>
                 </div>
 
@@ -1000,33 +1020,13 @@ export default function AdminManual() {
                     <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">
-                    Relatório Editorial do Jogo Sistêmico (Metamorfose), Ficha Técnica & Correção de Impressão de Inscrições
+                    Relatório Editorial do Jogo Sistêmico (Metamorfose), Ficha Técnica &amp; Correção de Impressão de Inscrições
                   </h4>
                   <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
-                    <li><strong>Logotipo do INstituto Kalapa em Todas as Páginas:</strong> Inclusão do logotipo oficial no canto superior esquerdo da barra superior do modal na tela e em todas as 6 páginas A4 do relatório impresso/PDF (capa, quadrantes e folha de encerramento).</li>
-                    <li><strong>Eliminação Rigorosa de Páginas Fantasmas:</strong> Otimização da densidade vertical, paddings e alturas de linhas em todas as 6 páginas, além de ancoragem com <code>mt-auto</code> e regras de margem <code>8mm 10mm</code> com bloqueio estrito de quebra acidental (<code>page-break-after: avoid !important</code>) na página final.</li>
-                    <li><strong>Ficha Técnica & Concepção do Jogo:</strong> Criação de bloco exclusivo destacando a Criadora do Jogo (Clatihúcia Capeli – Consteladora familiar, certificada pela International Systemic Management) e Programação e Desenvolvimento (Marcio Luciani).</li>
-                    <li><strong>Atualização de Bibliografia:</strong> Título atualizado para <em>&ldquo;Bibliografias utilizadas para criação do jogo&rdquo;</em>, preservando as obras de Bert Hellinger, Jan Jacob Stam, Joan Garriga e Anne Ancelin Schützenberger.</li>
-                    <li><strong>Correção da Lista de Convidados (Casa 52):</strong> O modal de relatório do módulo de Inscrições foi migrado para Portal direto no <code>document.body</code> com contêiner oficial de impressão (<code>#relatorio-impressao-container</code>), resolvendo o problema de páginas em branco ao imprimir.</li>
-                    <li><strong>Filtro Inicial & Fallback Instantâneo:</strong> A lista de convidados agora abre por padrão em <em>&ldquo;Todos os produtos / Geral&rdquo;</em> (sem forçar produtos vazios), com pré-população imediata dos dados da tela e suporte expandido a todos os status de pagamento e confirmação.</li>
-                  </ul>
-                </div>
-
-                {/* v2.13.0 */}
-                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
-                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-charcoal/70">v2.13.0</span>
-                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
-                  </div>
-                  <h4 className="font-bold text-xs text-brand-charcoal">
-                    Padronização Acolhedora nos Testes, Proteção no Checkout & Modais Seguros no Admin
-                  </h4>
-                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
-                    <li><strong>Unificação dos 4 Testes de Autoconhecimento:</strong> Eneagrama, Yin/Yang, Cronotipo e Lealdades Invisíveis agora seguem o mesmo padrão de design, autosave transparente no navegador (localStorage) e reenvio resiliente em caso de falha de conexão.</li>
-                    <li><strong>Linguagem Não-Clínica & Acolhimento Ético:</strong> Nomenclatura ajustada para <em>&ldquo;Relatório de Autoconhecimento&rdquo;</em> e inclusão do componente de apoio com canal direto de acolhimento via WhatsApp e Centro de Valorização da Vida (CVV 188).</li>
-                    <li><strong>Proteção de Carrinho & Privacidade de Dados:</strong> O carrinho de compras não é mais esvaziado indevidamente ao clicar em &ldquo;Comprar Agora&rdquo;, e dados sensíveis (CPF e telefone) passam por mascaramento automático no checkout.</li>
-                    <li><strong>Eliminação de Diálogos Nativos no Admin:</strong> Substituição total de caixas de diálogo nativas do navegador (<code>alert</code> e <code>confirm</code>) por modais elegantes de confirmação e banners de feedback inline com auto-dismiss em cupons, agenda e avaliações.</li>
+                    <li><strong>Logotipo do INstituto Kalapa em Todas as Páginas:</strong> Inclusão do logotipo oficial no canto superior esquerdo da barra superior do modal na tela e em todas as 6 páginas A4 do relatório impresso/PDF.</li>
+                    <li><strong>Eliminação Rigorosa de Páginas Fantasmas:</strong> Otimização da densidade vertical, paddings e alturas de linhas em todas as 6 páginas, com bloqueio estrito de quebra acidental.</li>
+                    <li><strong>Ficha Técnica &amp; Concepção do Jogo:</strong> Criação de bloco exclusivo destacando a Criadora do Jogo e Programação/Desenvolvimento.</li>
+                    <li><strong>Correção da Lista de Convidados (Casa 52):</strong> O modal de relatório de Inscrições foi migrado para Portal direto no <code>document.body</code> com contêiner oficial de impressão, resolvendo páginas em branco.</li>
                   </ul>
                 </div>
               </div>
