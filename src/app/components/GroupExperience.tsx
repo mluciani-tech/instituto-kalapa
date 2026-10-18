@@ -35,7 +35,7 @@ export default function GroupExperience() {
   ];
 
   return (
-    <section id="experiencia" className="relative py-24 md:py-32 bg-brand-offwhite overflow-hidden">
+    <section id="experiencia" className="relative py-12 md:py-16 bg-[#F7F5EE] border-t border-[#E6E3D8] overflow-hidden">
       {/* Textura de fundo sutil */}
       <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_50%_50%,#1A3C4D_1px,transparent_1px)] bg-[length:40px_40px]" />
 
@@ -46,9 +46,9 @@ export default function GroupExperience() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16 md:mb-20"
+          className="text-center mb-10 md:mb-12"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-brand-purple-light text-brand-purple-dark text-sm font-semibold tracking-wide mb-6">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-brand-purple-light text-brand-purple-dark text-sm font-semibold tracking-wide mb-4">
             A Experiência do Grupo
           </span>
           <SplitText
@@ -59,7 +59,7 @@ export default function GroupExperience() {
             delay={80}
             duration={0.8}
           />
-          <p className="mt-6 text-lg text-brand-charcoal/60 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-lg text-brand-charcoal/60 max-w-2xl mx-auto leading-relaxed">
             As vivências do INstituto Kalapa são conduzidas por
             profissionais experientes, em um ambiente cuidadosamente preparado
             para promover segurança, escuta ativa e evolução conjunta.
@@ -67,7 +67,7 @@ export default function GroupExperience() {
         </motion.div>
 
         {/* Grid de benefícios */}
-        <div className="grid md:grid-cols-2 gap-8 md:gap-10 mb-16">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8 mb-10 md:mb-12">
           {beneficios.map((beneficio, index) => (
             <GlareHover
               key={beneficio.titulo}

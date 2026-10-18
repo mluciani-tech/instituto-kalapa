@@ -95,7 +95,7 @@ export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProp
   };
 
   return (
-    <section id="sobre" className="relative py-24 md:py-32 bg-white overflow-hidden scroll-mt-24 font-sans">
+    <section id="sobre" className="relative py-12 md:py-16 bg-white border-t border-[#E6E3D8] overflow-hidden scroll-mt-24 font-sans">
       {/* Detalhe de fundo suave */}
       <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_50%_50%,#B8965A_1px,transparent_1px)] bg-[length:32px_32px] pointer-events-none" />
 
@@ -106,7 +106,7 @@ export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProp
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16 md:mb-20"
+          className="text-center mb-10 md:mb-12"
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-terracotta/10 text-brand-terracotta text-sm font-semibold tracking-wide mb-4 border border-brand-terracotta/20">
             <Sparkles className="w-4 h-4" />
@@ -122,7 +122,7 @@ export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProp
         </motion.div>
 
         {/* Bloco 1: Card da Facilitadora */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-12 items-center mb-20 md:mb-28">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-12 items-center mb-12 md:mb-16">
           {/* Foto com moldura serena em ouro envelhecido */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -211,7 +211,7 @@ export default function AboutFacilitator({ initialConfig }: AboutFacilitatorProp
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="mb-20 md:mb-28 p-8 md:p-12 rounded-3xl bg-brand-offwhite border border-brand-charcoal/10"
+          className="mb-12 md:mb-16 p-8 md:p-10 rounded-3xl bg-brand-offwhite border border-brand-charcoal/10"
         >
           <div className="max-w-2xl mb-8">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-terracotta uppercase tracking-wider mb-2">

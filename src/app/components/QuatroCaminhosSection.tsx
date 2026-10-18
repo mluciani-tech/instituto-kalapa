@@ -253,16 +253,16 @@ export default function QuatroCaminhosSection() {
   return (
     <section
       id="quatro-caminhos"
-      className="relative pt-10 sm:pt-12 md:pt-14 bg-[#F7F5EE] text-[#214137] overflow-hidden"
+      className="relative pt-8 sm:pt-10 md:pt-12 bg-[#F7F5EE] text-[#214137] overflow-hidden"
     >
-      <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 pb-10 sm:pb-12">
+      <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-10">
         {/* Título Principal */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-8 sm:mb-11"
+          className="text-center mb-6 sm:mb-8"
         >
           <h2 className="font-serif text-2xl sm:text-3xl md:text-[34px] font-medium text-[#214137] tracking-tight">
             Encontre o caminho que faz sentido para o seu momento.

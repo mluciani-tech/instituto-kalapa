@@ -105,14 +105,14 @@ export default function ProductHighlights() {
   if (produtos.length === 0) return null;
 
   return (
-    <section className="py-20 bg-brand-offwhite">
+    <section className="py-12 md:py-16 bg-[#F7F5EE] border-t border-[#E6E3D8]">
       <div className="max-w-6xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-purple/10 text-brand-purple text-sm font-semibold tracking-wide mb-4">
             <Sparkles aria-hidden="true" className="w-4 h-4" />

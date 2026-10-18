@@ -20,7 +20,7 @@ const fotos = [
 
 export default function VisualGallery() {
   return (
-    <section className="relative py-24 md:py-32 bg-brand-offwhite overflow-hidden">
+    <section className="relative py-12 md:py-16 bg-white border-t border-[#E6E3D8] overflow-hidden">
       <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_70%_30%,#B8965A_1px,transparent_1px)] bg-[length:50px_50px]" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8">
@@ -29,9 +29,9 @@ export default function VisualGallery() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16 md:mb-20"
+          className="text-center mb-10 md:mb-12"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-brand-mint/20 text-brand-mint-dark text-sm font-semibold tracking-wide mb-6">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-brand-mint/20 text-brand-mint-dark text-sm font-semibold tracking-wide mb-4">
             Galeria Visual
           </span>
           <h2 className="text-3xl md:text-5xl font-bold text-brand-charcoal leading-tight max-w-3xl mx-auto">

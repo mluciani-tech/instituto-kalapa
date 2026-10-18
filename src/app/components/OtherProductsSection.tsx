@@ -246,7 +246,7 @@ export default function OtherProductsSection() {
   return (
     <section
       id="conhecimento-experiencias"
-      className="py-20 bg-[#F4F1E8] border-t border-[#E4E0D4] scroll-mt-24"
+      className="py-12 md:py-16 bg-[#F4F1E8] border-t border-[#E4E0D4] scroll-mt-24"
     >
       <div className="max-w-6xl mx-auto px-6">
         {/* Cabeçalho da Seção */}
