@@ -3,11 +3,28 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle, Calendar, Clock, Phone, Sparkles, CheckCircle2, ArrowRight, FileText, Download } from "lucide-react";
+import { ArrowLeft, ExternalLink, Package, Loader2, XCircle, KeyRound, ShoppingBag, AlertCircle, Calendar, Clock, Phone, Sparkles, CheckCircle2, ArrowRight, FileText, Download, Gamepad2 } from "lucide-react";
 import Footer from "../../components/Footer";
 import ModalAlterarSenha from "@/components/ModalAlterarSenha";
 import { useCart } from "@/context/CartContext";
 import type { Pedido, Usuario, Appointment } from "@/lib/types";
+
+/** Crédito pertence a um jogo (ex.: Metamorfose da Consciência / Jogo Sistêmico) em vez de teste. */
+function ehJogoCredito(cred: any): boolean {
+  const texto = [
+    cred?.slug_teste,
+    cred?.produtos?.slug,
+    cred?.produtos?.rota_teste,
+    cred?.produtos?.categoria,
+    cred?.produtos?.nome,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+  return /metamorfose|jogo/.test(texto);
+}
 
 function formatDate(iso: string) {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -26,7 +43,7 @@ export default function MeusPedidosPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [agendamentos, setAgendamentos] = useState<Appointment[]>([]);
   const [testesCreditos, setTestesCreditos] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<"pedidos" | "testes" | "consultas">("pedidos");
+  const [activeTab, setActiveTab] = useState<"pedidos" | "testes" | "jogos" | "consultas">("pedidos");
   const [loading, setLoading] = useState(true);
   const [cancelandoId, setCancelandoId] = useState<string | null>(null);
   const [cancelandoApptId, setCancelandoApptId] = useState<string | null>(null);
@@ -34,6 +51,10 @@ export default function MeusPedidosPage() {
   const [erroRetomada, setErroRetomada] = useState<{ [pedidoId: string]: string }>({});
   const [modalSenhaOpen, setModalSenhaOpen] = useState(false);
   const { setCartItems, clearCart, addItem } = useCart();
+
+  const creditosJogos = testesCreditos.filter(ehJogoCredito);
+  const creditosTestes = testesCreditos.filter((c) => !ehJogoCredito(c));
+  const listaCreditos = activeTab === "jogos" ? creditosJogos : creditosTestes;
 
   const fetchPedidos = useCallback(async () => {
     try {
@@ -176,7 +197,7 @@ export default function MeusPedidosPage() {
         nome: produto?.nome || "Teste de Autoconhecimento",
         preco: produto?.preco_promocional ?? produto?.preco ?? 47,
         imagem_url: produto?.imagem_url,
-        categoria: "testes",
+        categoria: ehJogoCredito(cred) ? "jogos" : "testes",
         is_teste: true,
         rota_teste: produto?.rota_teste || `/${cred.slug_teste}`,
       },
@@ -269,7 +290,19 @@ export default function MeusPedidosPage() {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Meus Testes ({testesCreditos.length})</span>
+              <span>Meus Testes ({creditosTestes.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("jogos")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === "jogos"
+                  ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/20"
+                  : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              <Gamepad2 className="w-3.5 h-3.5" />
+              <span>Meus Jogos ({creditosJogos.length})</span>
             </button>
             <button
               type="button"
@@ -493,27 +526,35 @@ export default function MeusPedidosPage() {
               })}
             </div>
             )
-          ) : activeTab === "testes" ? (
-            /* Lista de Testes do Cliente */
-            testesCreditos.length === 0 ? (
+          ) : activeTab === "testes" || activeTab === "jogos" ? (
+            /* Lista de Testes / Jogos do Cliente */
+            listaCreditos.length === 0 ? (
               <div className="glass-card border border-white/10 rounded-2xl p-12 text-center shadow-xl">
-                <Sparkles className="w-14 h-14 text-white/25 mx-auto mb-4" />
+                {activeTab === "jogos" ? (
+                  <Gamepad2 className="w-14 h-14 text-white/25 mx-auto mb-4" />
+                ) : (
+                  <Sparkles className="w-14 h-14 text-white/25 mx-auto mb-4" />
+                )}
                 <h2 className="text-base font-semibold text-white mb-1">
-                  Nenhum teste de autoconhecimento disponível
+                  {activeTab === "jogos"
+                    ? "Nenhum jogo de autoconhecimento disponível"
+                    : "Nenhum teste de autoconhecimento disponível"}
                 </h2>
                 <p className="text-xs text-white/50 max-w-sm mx-auto mb-6">
-                  Você ainda não possui avaliações cadastradas. Conheça nossos testes online com laudo clínico completo em PDF no INstituto Kalapa.
+                  {activeTab === "jogos"
+                    ? "Você ainda não possui jogos cadastrados. Conheça os jogos de autoconhecimento do INstituto Kalapa."
+                    : "Você ainda não possui avaliações cadastradas. Conheça nossos testes online com laudo clínico completo em PDF no INstituto Kalapa."}
                 </p>
                 <Link
-                  href="/produtos?categoria=testes"
+                  href={activeTab === "jogos" ? "/produtos?categoria=jogos" : "/produtos?categoria=testes"}
                   className="inline-block px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-brand-terracotta/20 cursor-pointer"
                 >
-                  Conhecer Testes de Autoconhecimento
+                  {activeTab === "jogos" ? "Conhecer Jogos de Autoconhecimento" : "Conhecer Testes de Autoconhecimento"}
                 </Link>
               </div>
             ) : (
               <div className="space-y-4">
-                {testesCreditos.map((cred) => {
+                {listaCreditos.map((cred) => {
                   const isDisponivel = cred.status === "disponivel";
                   const nomeTeste =
                     cred.produtos?.nome ||
@@ -521,6 +562,8 @@ export default function MeusPedidosPage() {
                       ? "Teste Yin ou Yang?"
                       : cred.slug_teste?.includes("eneagrama")
                       ? "Teste de Personalidade do Eneagrama"
+                      : ehJogoCredito(cred)
+                      ? "A Metamorfose da Consciência"
                       : "Teste de Autoconhecimento");
 
                   const rotaTeste =
@@ -544,7 +587,7 @@ export default function MeusPedidosPage() {
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
                         <div>
                           <span className="text-[10px] uppercase font-bold tracking-wider text-brand-terracotta block">
-                            Avaliação Online • INstituto Kalapa
+                            {activeTab === "jogos" ? "Jogo de Autoconhecimento" : "Avaliação Online"} • INstituto Kalapa
                           </span>
                           <h3 className="text-base font-bold text-white mt-0.5">
                             {nomeTeste}
@@ -580,7 +623,9 @@ export default function MeusPedidosPage() {
                             </p>
                           )}
                           <p className="text-white/50 text-[11px]">
-                            Laudo Clínico em PDF personalizado com seu nome incluso.
+                            {activeTab === "jogos"
+                              ? "Dossiê editorial completo com o resultado da sua jornada."
+                              : "Laudo Clínico em PDF personalizado com seu nome incluso."}
                           </p>
                         </div>
 
@@ -590,7 +635,7 @@ export default function MeusPedidosPage() {
                               href={rotaTeste}
                               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#B8965A] hover:from-amber-600 hover:to-[#A3834C] text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
                             >
-                              <span>Iniciar Avaliação</span>
+                              <span>{activeTab === "jogos" ? "Iniciar Jogo" : "Iniciar Avaliação"}</span>
                               <ArrowRight className="w-4 h-4" />
                             </Link>
                           ) : (
