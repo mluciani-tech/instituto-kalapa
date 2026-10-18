@@ -39,6 +39,15 @@ interface LinhaCronotipo {
   created_at: string;
 }
 
+interface LinhaLealdades {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string | null;
+  perfil_dominante: string;
+  created_at: string;
+}
+
 function temTelefone(t: string | null | undefined) {
   return !!t && t.trim().length >= 8;
 }
@@ -80,10 +89,19 @@ export async function GET(req: NextRequest) {
       ultimos30: 0,
       anteriores30: 0,
     },
+    lealdades: {
+      total: 0,
+      perfilMaisComum: null as string | null,
+      comTelefone: 0,
+      ultimos7: 0,
+      ultimos30: 0,
+      anteriores30: 0,
+    },
     combinado: { leadsUnicos: 0, fizeramMultiplos: 0, comTelefoneUnicos: 0 },
     recentes: [],
     eneagramaDisponivel: true,
     cronotipoDisponivel: true,
+    lealdadesDisponivel: true,
   };
 
   if (!isAdminConfigured()) {
@@ -93,7 +111,7 @@ export async function GET(req: NextRequest) {
   try {
     const search = (req.nextUrl.searchParams.get("search") || "").trim().toLowerCase();
 
-    const [yyRes, enRes, crRes] = await Promise.all([
+    const [yyRes, enRes, crRes, leRes] = await Promise.all([
       supabaseAdmin!
         .from("avaliacoes_yin_yang")
         .select("id, nome, email, telefone, tipo_resultado, pontos_yang, pontos_yin, created_at")
@@ -109,18 +127,26 @@ export async function GET(req: NextRequest) {
         .select("id, nome, email, telefone, cronotipo, nome_cronotipo, pontuacao_total, created_at")
         .order("created_at", { ascending: false })
         .limit(LIMITE_REGISTROS),
+      supabaseAdmin!
+        .from("avaliacoes_lealdades")
+        .select("id, nome, email, telefone, perfil_dominante, created_at")
+        .order("created_at", { ascending: false })
+        .limit(LIMITE_REGISTROS),
     ]);
 
     const eneagramaDisponivel = !enRes.error;
     const cronotipoDisponivel = !crRes.error;
+    const lealdadesDisponivel = !leRes.error;
 
     if (yyRes.error) console.warn("Aviso insights Yin/Yang:", yyRes.error.message);
     if (enRes.error) console.warn("Aviso insights Eneagrama:", enRes.error.message);
     if (crRes.error) console.warn("Aviso insights Cronotipo:", crRes.error.message);
+    if (leRes.error) console.warn("Aviso insights Lealdades:", leRes.error.message);
 
     const yy = (yyRes.data || []) as LinhaYinYang[];
     const en = (enRes.data || []) as LinhaEneagrama[];
     const cr = (crRes.data || []) as LinhaCronotipo[];
+    const le = (leRes.data || []) as LinhaLealdades[];
 
     // ---- Yin/Yang ----
     const yyDatas = yy.map((r) => r.created_at);
@@ -170,11 +196,33 @@ export async function GET(req: NextRequest) {
       anteriores30: contarPeriodo(crDatas, 30, 30),
     };
 
+    // ---- Lealdades Invisíveis ----
+    const leDatas = le.map((r) => r.created_at);
+    const porPerfilLealdades: Record<string, number> = {};
+    for (const r of le) {
+      const p = r.perfil_dominante || "Não definido";
+      porPerfilLealdades[p] = (porPerfilLealdades[p] || 0) + 1;
+    }
+    const perfilMaisComum =
+      le.length > 0
+        ? Object.entries(porPerfilLealdades).sort((a, b) => b[1] - a[1])[0][0]
+        : null;
+    const lealdades = {
+      total: le.length,
+      porPerfil: porPerfilLealdades,
+      perfilMaisComum,
+      comTelefone: le.filter((r) => temTelefone(r.telefone)).length,
+      ultimos7: contarPeriodo(leDatas, 7),
+      ultimos30: contarPeriodo(leDatas, 30),
+      anteriores30: contarPeriodo(leDatas, 30, 30),
+    };
+
     // ---- Combinado (leads únicos por e-mail) ----
     const emailsYY = new Set(yy.map((r) => r.email.toLowerCase()));
     const emailsEN = new Set(en.map((r) => r.email.toLowerCase()));
     const emailsCR = new Set(cr.map((r) => r.email.toLowerCase()));
-    const todosEmails = new Set([...emailsYY, ...emailsEN, ...emailsCR]);
+    const emailsLE = new Set(le.map((r) => r.email.toLowerCase()));
+    const todosEmails = new Set([...emailsYY, ...emailsEN, ...emailsCR, ...emailsLE]);
 
     // Participantes que realizaram 2 ou mais testes distintos
     let fizeramMultiplos = 0;
@@ -183,11 +231,12 @@ export async function GET(req: NextRequest) {
       if (emailsYY.has(email)) count++;
       if (emailsEN.has(email)) count++;
       if (emailsCR.has(email)) count++;
+      if (emailsLE.has(email)) count++;
       if (count >= 2) fizeramMultiplos++;
     });
 
     const telefonePorEmail = new Map<string, boolean>();
-    for (const r of [...yy, ...en, ...cr]) {
+    for (const r of [...yy, ...en, ...cr, ...le]) {
       const k = r.email.toLowerCase();
       telefonePorEmail.set(k, telefonePorEmail.get(k) || temTelefone(r.telefone));
     }
@@ -235,6 +284,16 @@ export async function GET(req: NextRequest) {
             : "Urso (Intermediário)",
         detalhe: `${r.pontuacao_total} / 18 pts`,
       })),
+      ...le.map((r) => ({
+        id: r.id,
+        teste: "lealdades" as const,
+        nome: r.nome,
+        email: r.email,
+        telefone: r.telefone,
+        created_at: r.created_at,
+        resultado: r.perfil_dominante || "Lealdade Sistêmica",
+        detalhe: "Padrão Transgeracional",
+      })),
     ];
 
     const recentes = recentesBrutos
@@ -253,10 +312,12 @@ export async function GET(req: NextRequest) {
       yinyang,
       eneagrama,
       cronotipo,
+      lealdades,
       combinado,
       recentes,
       eneagramaDisponivel,
       cronotipoDisponivel,
+      lealdadesDisponivel,
     });
   } catch (err: unknown) {
     console.error("Exceção na rota GET /api/admin/avaliacoes/insights:", err);

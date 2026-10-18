@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Buscar dados em paralelo
-    const [pedidosRes, produtosRes, usuariosRes, testesCreditosRes, downloadsRes] = await Promise.all([
+    const [pedidosRes, produtosRes, usuariosRes, testesCreditosRes, downloadsRes, metamorfoseRes] = await Promise.all([
       supabaseAdmin!
         .from("pedidos")
         .select(`
@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
           produto_id,
           itens,
           created_at,
-          produtos (id, nome, slug, is_teste, atendimento_individual, categoria, is_biblioteca)
+          produtos (id, nome, slug, is_teste, rota_teste, atendimento_individual, categoria, is_biblioteca)
         `)
         .order("created_at", { ascending: false }),
 
@@ -88,6 +88,11 @@ export async function GET(req: NextRequest) {
           produtos (id, nome, slug)
         `)
         .order("created_at", { ascending: false }),
+
+      supabaseAdmin!
+        .from("avaliacoes_metamorfose")
+        .select("id, usuario_id, nome, email, telefone, tema_escolhido, predominio_bloco, pontuacoes, created_at")
+        .order("created_at", { ascending: false }),
     ]);
 
     if (pedidosRes.error || produtosRes.error) {
@@ -98,21 +103,47 @@ export async function GET(req: NextRequest) {
     const allPedidos = pedidosRes.data || [];
     const allProdutos = produtosRes.data || [];
     const allDownloads = downloadsRes.data || [];
+    const allMetamorfose = metamorfoseRes.data || [];
     const totalUsuarios = usuariosRes.count || 0;
 
     // Helper para categorização de item
     const getCategoriaItem = (
-      item: { is_teste?: boolean; slug?: string; categoria?: string | null; atendimento_individual?: boolean } | null | undefined
-    ): "testes" | "atendimentos" | "vivencias" => {
+      item: {
+        nome?: string;
+        is_teste?: boolean;
+        rota_teste?: string | null;
+        slug?: string;
+        categoria?: string | null;
+        atendimento_individual?: boolean;
+      } | null | undefined
+    ): "jogos" | "testes" | "atendimentos" | "vivencias" => {
       if (!item) return "vivencias";
-      if (item.is_teste || item.slug?.startsWith("teste-") || item.categoria === "testes") {
+      const s = (item.slug || "").toLowerCase();
+      const c = (item.categoria || "").toLowerCase();
+      const r = (item.rota_teste || "").toLowerCase();
+      const n = (item.nome || "").toLowerCase();
+
+      if (
+        s === "jogo" ||
+        s === "jogos" ||
+        c.includes("jogo") ||
+        r.includes("metamorfose") ||
+        r.includes("jogo") ||
+        n.includes("metamorfose") ||
+        n.includes("jogo")
+      ) {
+        return "jogos";
+      }
+      if (item.is_teste || s.startsWith("teste") || c === "testes" || c === "teste") {
         return "testes";
       }
       if (
         item.atendimento_individual ||
-        item.categoria === "atendimentos" ||
-        item.slug === "terapia-adulto" ||
-        item.slug === "terapia-infantil"
+        c.includes("atendimento") ||
+        s.includes("atendimento") ||
+        s === "terapia-adulto" ||
+        s === "terapia-infantil" ||
+        s.includes("psicoterapia")
       ) {
         return "atendimentos";
       }
@@ -169,16 +200,17 @@ export async function GET(req: NextRequest) {
       outros: { count: outrosCount, valor: outrosValor, percentual: Math.round((outrosCount / totalMetodos) * 100) },
     };
 
-    // Linhas de Negócio no período (Testes vs Atendimentos vs Vivências)
+    // Linhas de Negócio no período (Testes vs Jogos vs Atendimentos vs Vivências)
     const linhasNegocio = {
-      testes: { receita: 0, pedidos: 0, ticketMedio: 0, percentualReceita: 0 },
-      atendimentos: { receita: 0, pedidos: 0, ticketMedio: 0, percentualReceita: 0 },
-      vivencias: { receita: 0, pedidos: 0, ticketMedio: 0, percentualReceita: 0 },
+      testes: { receita: 0, count: 0, pedidos: 0, ticketMedio: 0, percentualReceita: 0 },
+      jogos: { receita: 0, count: 0, pedidos: 0, ticketMedio: 0, percentualReceita: 0 },
+      atendimentos: { receita: 0, count: 0, pedidos: 0, ticketMedio: 0, percentualReceita: 0 },
+      vivencias: { receita: 0, count: 0, pedidos: 0, ticketMedio: 0, percentualReceita: 0 },
     };
 
     for (const p of pedidosPagosPeriodo) {
       const v = Number(p.valor) || 0;
-      let cat: "testes" | "atendimentos" | "vivencias" = "vivencias";
+      let cat: "jogos" | "testes" | "atendimentos" | "vivencias" = "vivencias";
 
       const itens = Array.isArray(p.itens) ? p.itens : [];
       if (itens.length > 0) {
@@ -191,16 +223,17 @@ export async function GET(req: NextRequest) {
 
       linhasNegocio[cat].receita += v;
       linhasNegocio[cat].pedidos += 1;
+      linhasNegocio[cat].count += 1;
     }
 
     const totalReceitaLinhas = faturamentoPeriodo || 1;
-    for (const k of ["testes", "atendimentos", "vivencias"] as const) {
+    for (const k of ["testes", "jogos", "atendimentos", "vivencias"] as const) {
       const l = linhasNegocio[k];
       l.ticketMedio = l.pedidos > 0 ? Math.round(l.receita / l.pedidos) : 0;
-      l.percentualReceita = Math.round((l.receita / totalReceitaLinhas) * 100);
+      l.percentualReceita = faturamentoPeriodo > 0 ? Math.round((l.receita / totalReceitaLinhas) * 100) : 0;
     }
 
-    // Monitor de Ativação de Testes
+    // Monitor de Ativação de Testes e Jogos
     const allCreditos = testesCreditosRes?.data || [];
     const totalCreditos = allCreditos.length;
     const creditosUtilizados = allCreditos.filter((c: any) => c.status === "utilizado").length;
@@ -211,6 +244,9 @@ export async function GET(req: NextRequest) {
       totalVendidos: totalCreditos,
       utilizados: creditosUtilizados,
       disponiveis: creditosDisponiveis,
+      totalCreditosVendidos: totalCreditos,
+      totalCreditosUtilizados: creditosUtilizados,
+      totalCreditosDisponiveis: creditosDisponiveis,
       taxaAtivacao,
     };
 
@@ -319,7 +355,9 @@ export async function GET(req: NextRequest) {
 
         let msgTexto = `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos seu interesse na vivência "${prodNome}". Ficou com alguma dúvida sobre a inscrição ou pagamento? Posso te ajudar!`;
 
-        if (categoria === "testes") {
+        if (categoria === "jogos") {
+          msgTexto = `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos seu interesse no jogo de autoconhecimento "${prodNome}". Ficou com alguma dúvida sobre o funcionamento da jornada ou o dossiê em PDF? Posso te ajudar!`;
+        } else if (categoria === "testes") {
           msgTexto = `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos seu interesse na avaliação online "${prodNome}". Ficou com alguma dúvida sobre o teste ou laudo clínico em PDF? Posso te ajudar!`;
         } else if (categoria === "atendimentos") {
           msgTexto = `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos seu interesse no atendimento individual com a Clatihúcia ("${prodNome}"). Precisa de alguma ajuda com horários ou pagamento?`;
@@ -402,7 +440,7 @@ export async function GET(req: NextRequest) {
       const jaComprou = emailCliente ? emailsClientesCompradores.has(emailCliente) : false;
 
       // Mensagem calorosa para abordagem no WhatsApp
-      const msgTexto = `Olá ${nomeCliente}, tudo bem? Sou da equipe do Instituto Kalapa. Vi que você baixou o conteúdo "${materialNome}" da nossa Biblioteca! Gostaria de saber o que achou do material e se ficou com alguma dúvida. Estamos à disposição caso queira se aprofundar!`;
+      const msgTexto = `Olá ${nomeCliente}, tudo bem? Sou da equipe do INstituto Kalapa. Vi que você baixou o conteúdo "${materialNome}" da nossa Biblioteca! Gostaria de saber o que achou do material e se ficou com alguma dúvida. Estamos à disposição caso queira se aprofundar!`;
       const msgEncoded = encodeURIComponent(msgTexto);
 
       return {
@@ -428,6 +466,81 @@ export async function GET(req: NextRequest) {
       leadsRecentes: leadsBibliotecaRecentes,
     };
 
+    // ==========================================
+    // Telemetria & Jornadas de Jogos (Metamorfose)
+    // ==========================================
+    const metamorfosePeriodo = sinceDate
+      ? allMetamorfose.filter((m: { created_at: string }) => new Date(m.created_at) >= sinceDate)
+      : allMetamorfose;
+
+    const emailsJogosPeriodo = new Set(
+      metamorfosePeriodo.map((m: { email?: string | null }) => (m.email || "").toLowerCase().trim()).filter(Boolean)
+    );
+    const emailsJogosGeral = new Set(
+      allMetamorfose.map((m: { email?: string | null }) => (m.email || "").toLowerCase().trim()).filter(Boolean)
+    );
+
+    let blocoACount = 0;
+    let blocoBCount = 0;
+    let transicaoCount = 0;
+    for (const m of allMetamorfose) {
+      const pts = (m.pontuacoes || {}) as { blocoA?: number; blocoB?: number };
+      const pA = Number(pts.blocoA ?? 0);
+      const pB = Number(pts.blocoB ?? 0);
+      const pred = String(m.predominio_bloco || "").toLowerCase();
+      if (pA >= 3 || pred.includes("bloco a")) blocoACount += 1;
+      else if (pB >= 3 || pred.includes("bloco b")) blocoBCount += 1;
+      else transicaoCount += 1;
+    }
+
+    const creditosJogos = allCreditos.filter(
+      (c: any) => String(c.slug_teste || "").includes("metamorfose") || String(c.slug_teste || "").includes("jogo")
+    );
+
+    const partidasRecentes = allMetamorfose.slice(0, 8).map((m: any) => {
+      let telLimpo = (m.telefone || "").replace(/\D/g, "");
+      if (telLimpo.length === 10 || telLimpo.length === 11) {
+        telLimpo = `55${telLimpo}`;
+      }
+      const nomeCliente = (m.nome || "").trim() || "Participante";
+      const emailCliente = (m.email || "").toLowerCase().trim();
+      const jaComprou = emailCliente ? emailsClientesCompradores.has(emailCliente) : false;
+      const tema = m.tema_escolhido || "Vivência Sistêmica";
+
+      const msgTexto = `Olá ${nomeCliente}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos que você concluiu a jornada d'A Metamorfose da Consciência sobre "${tema}". Como foi para você acessar as cartas e o dossiê fenomenológico? Se quiser aprofundar esse movimento em uma sessão ou vivência, estamos à disposição!`;
+      const msgEncoded = encodeURIComponent(msgTexto);
+
+      return {
+        id: m.id,
+        usuario_id: m.usuario_id || null,
+        cliente_nome: nomeCliente,
+        cliente_email: m.email || null,
+        cliente_telefone: m.telefone || null,
+        telefone_whatsapp: telLimpo ? `https://wa.me/${telLimpo}?text=${msgEncoded}` : null,
+        tema_escolhido: tema,
+        predominio_bloco: m.predominio_bloco || "Equilíbrio em Transição",
+        pontuacoes: m.pontuacoes || { blocoA: 0, blocoB: 0 },
+        tipo_lead: jaComprou ? ("cliente_recorrente" as const) : ("novo_prospect" as const),
+        created_at: m.created_at,
+      };
+    });
+
+    const jogosStats = {
+      totalPartidasPeriodo: metamorfosePeriodo.length,
+      totalPartidasGeral: allMetamorfose.length,
+      leadsUnicosPeriodo: emailsJogosPeriodo.size,
+      leadsUnicosGeral: emailsJogosGeral.size,
+      creditosVendidos: creditosJogos.length,
+      creditosUtilizados: creditosJogos.filter((c: any) => c.status === "utilizado").length,
+      creditosDisponiveis: creditosJogos.filter((c: any) => c.status === "disponivel").length,
+      predominioResumo: {
+        blocoA: blocoACount,
+        blocoB: blocoBCount,
+        transicao: transicaoCount,
+      },
+      partidasRecentes,
+    };
+
     return NextResponse.json({
       periodo,
       kpis: {
@@ -445,6 +558,7 @@ export async function GET(req: NextRequest) {
       linhasNegocio,
       monitorTestes,
       bibliotecaStats,
+      jogosStats,
       timeline,
       metodosPagamento,
       produtosRanking,

@@ -16,4 +16,5 @@ export type Tab =
   | "usuarios"
   | "agendamentos"
   | "avaliacoes"
+  | "jogos"
   | "manual";

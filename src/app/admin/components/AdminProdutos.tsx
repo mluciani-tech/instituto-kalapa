@@ -54,7 +54,7 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
   const [produtoSucesso, setProdutoSucesso] = useState("");
   const [ajustandoContador, setAjustandoContador] = useState<{ produto: Produto; valor: string } | null>(null);
   const [salvandoContador, setSalvandoContador] = useState(false);
-  const [produtosStatusFiltro, setProdutosStatusFiltro] = useState<"todos" | "ativos" | "inativos" | "testes" | "atendimentos">("todos");
+  const [produtosStatusFiltro, setProdutosStatusFiltro] = useState<"todos" | "ativos" | "inativos" | "testes" | "jogos" | "atendimentos" | "biblioteca">("todos");
   const [produtosSlugFiltro, setProdutosSlugFiltro] = useState<string>("");
   const [produtosSearch, setProdutosSearch] = useState("");
   const [formProdutoDestacado, setFormProdutoDestacado] = useState(false);
@@ -70,11 +70,19 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
     return Object.entries(counts).sort((a, b) => b[1] - a[1]);
   }, [produtos]);
 
+  const isJogoProduto = (p: Produto) => {
+    const slug = (p.slug || "").toLowerCase();
+    const cat = (p.categoria || "").toLowerCase();
+    return slug === "jogos" || slug.includes("metamorfose") || cat === "jogos";
+  };
+
   const produtosFiltrados = produtos.filter((p) => {
     if (produtosStatusFiltro === "ativos" && !p.ativo) return false;
     if (produtosStatusFiltro === "inativos" && p.ativo) return false;
-    if (produtosStatusFiltro === "testes" && !p.is_teste && p.categoria !== "testes") return false;
+    if (produtosStatusFiltro === "jogos" && !isJogoProduto(p)) return false;
+    if (produtosStatusFiltro === "testes" && (isJogoProduto(p) || (!p.is_teste && p.categoria !== "testes"))) return false;
     if (produtosStatusFiltro === "atendimentos" && !p.atendimento_individual && !isProdutoAgendamento(p)) return false;
+    if (produtosStatusFiltro === "biblioteca" && !p.is_biblioteca && !p.arquivo_url && p.slug !== "receitas") return false;
     if (produtosSlugFiltro && (p.slug?.trim() || "sem-slug") !== produtosSlugFiltro) return false;
     if (produtosSearch.trim()) {
       const q = produtosSearch.trim().toLowerCase();
@@ -427,7 +435,9 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                   <option value="ativos" className="bg-white text-brand-charcoal">Ativos</option>
                   <option value="inativos" className="bg-white text-brand-charcoal">Inativos</option>
                   <option value="testes" className="bg-white text-brand-charcoal">Somente Testes</option>
+                  <option value="jogos" className="bg-white text-brand-charcoal">Somente Jogos</option>
                   <option value="atendimentos" className="bg-white text-brand-charcoal">Somente Atendimentos</option>
+                  <option value="biblioteca" className="bg-white text-brand-charcoal">Somente Biblioteca & Receitas</option>
                 </select>
 
                 {/* Dropdown Filtro por Slug com Rolagem */}
@@ -1073,11 +1083,15 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                             🗓️ Atendimento ({formatDuracao(p.duracao_minutos)})
                           </span>
                         )}
-                        {p.is_teste && (
+                        {isJogoProduto(p) ? (
+                          <span className="text-xs bg-rose-50 text-rose-800 border border-rose-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
+                            🎮 Jogo ({p.rota_teste || "/teste-metamorfose"})
+                          </span>
+                        ) : p.is_teste ? (
                           <span className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
                             🧠 Teste ({p.rota_teste || `/teste-${p.slug.replace(/^teste-/, "")}`})
                           </span>
-                        )}
+                        ) : null}
                         {(p.permite_checkout === false || p.categoria?.toLowerCase() === "calendario" || p.slug?.startsWith("calendario")) && (
                           <span className="text-xs bg-purple-50 text-purple-800 border border-purple-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
                             📢 Informativo (Sem Checkout)
@@ -1085,7 +1099,7 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                         )}
                         {(p.is_biblioteca || p.arquivo_url) && (
                           <span className="text-xs bg-blue-50 text-blue-800 border border-blue-200/80 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
-                            📚 Biblioteca {p.arquivo_nome ? `(${p.arquivo_nome})` : "(Download)"}
+                            {p.slug === "receitas" || p.categoria?.toLowerCase() === "receitas" ? "🍽️ Receitas" : "📚 Biblioteca"} {p.arquivo_nome ? `(${p.arquivo_nome})` : "(Download)"}
                           </span>
                         )}
                       </div>

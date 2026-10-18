@@ -28,6 +28,7 @@ import {
   BookOpen,
   Download,
   FileText,
+  Gamepad2,
 } from "lucide-react";
 
 interface LinhaNegocioItem {
@@ -35,6 +36,8 @@ interface LinhaNegocioItem {
   count: number;
   ticketMedio: number;
   percentualReceita: number;
+  partidasRealizadas?: number;
+  partidasGeral?: number;
 }
 
 interface MonitorTestesData {
@@ -87,10 +90,30 @@ interface DashboardData {
   };
   linhasNegocio?: {
     testes: LinhaNegocioItem;
+    jogos?: LinhaNegocioItem;
     atendimentos: LinhaNegocioItem;
     vivencias: LinhaNegocioItem;
   };
   monitorTestes?: MonitorTestesData;
+  jogosStats?: {
+    totalPartidasPeriodo: number;
+    totalPartidasGeral: number;
+    leadsUnicosGeral: number;
+    blocoAGeral: number;
+    blocoBGeral: number;
+    transicaoGeral: number;
+    partidasRecentes: {
+      id: string;
+      nome: string;
+      email: string;
+      telefone: string | null;
+      telefone_whatsapp: string | null;
+      tema_escolhido: string;
+      predominio_bloco: string;
+      pontuacoes?: { blocoA?: number; blocoB?: number };
+      created_at: string;
+    }[];
+  };
   bibliotecaStats?: {
     totalDownloadsPeriodo: number;
     totalDownloadsGeral: number;
@@ -145,7 +168,7 @@ interface DashboardData {
     telefone_whatsapp: string | null;
     valor: number;
     produto_nome: string;
-    categoria?: "testes" | "atendimentos" | "vivencias";
+    categoria?: "testes" | "jogos" | "atendimentos" | "vivencias";
     created_at: string;
   }[];
   totaisGerais: {
@@ -156,7 +179,7 @@ interface DashboardData {
 }
 
 interface AdminDashboardProps {
-  onNavigateTab: (tab: "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios") => void;
+  onNavigateTab: (tab: "produtos" | "pedidos" | "participantes" | "cupons" | "usuarios" | "avaliacoes" | "jogos") => void;
 }
 
 export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
@@ -575,7 +598,7 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
                 Mix de Linhas de Negócio & Comercialização
               </h3>
               <p className="text-xs text-brand-charcoal/50 mt-0.5">
-                Comparativo de faturamento entre Testes Online, Atendimentos e Vivências
+                Comparativo de faturamento entre Testes Online, Jogos Sistêmicos, Atendimentos e Vivências
               </p>
             </div>
             {data.monitorTestes && (
@@ -586,7 +609,7 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {/* Card Linha 1: Testes Online */}
             <div className="bg-gradient-to-br from-purple-50/80 to-white p-5 rounded-2xl border border-purple-100 shadow-xs relative overflow-hidden flex flex-col justify-between">
               <div>
@@ -618,7 +641,47 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
               </div>
             </div>
 
-            {/* Card Linha 2: Atendimentos Individuais */}
+            {/* Card Linha 2: Jogos Online */}
+            <div className="bg-gradient-to-br from-rose-50/70 to-white p-5 rounded-2xl border border-rose-100 shadow-xs relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-rose-800 uppercase tracking-wider flex items-center gap-1">
+                    <Gamepad2 className="w-3.5 h-3.5" />
+                    Jogos Online
+                  </span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+                    {data.linhasNegocio.jogos?.percentualReceita ?? 0}% da receita
+                  </span>
+                </div>
+                <div className="text-xl font-bold text-brand-purple mt-3">
+                  {formatMoney(data.linhasNegocio.jogos?.receita ?? 0)}
+                </div>
+                <div className="mt-2 space-y-1 text-xs text-brand-charcoal/70">
+                  <div className="flex justify-between">
+                    <span>Vendas no período:</span>
+                    <strong className="text-brand-purple font-semibold">{data.linhasNegocio.jogos?.count ?? 0}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Jornadas realizadas:</span>
+                    <strong className="text-brand-purple font-semibold">
+                      {data.linhasNegocio.jogos?.partidasRealizadas ?? data.jogosStats?.totalPartidasPeriodo ?? 0}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-2.5 border-t border-rose-100 text-[11px] text-rose-800/80 font-medium flex items-center justify-between">
+                <span>🦋 A Metamorfose da Consciência</span>
+                <button
+                  type="button"
+                  onClick={() => onNavigateTab("jogos")}
+                  className="text-rose-800 font-bold hover:underline cursor-pointer"
+                >
+                  Ver →
+                </button>
+              </div>
+            </div>
+
+            {/* Card Linha 3: Atendimentos Individuais */}
             <div className="bg-gradient-to-br from-amber-50/70 to-white p-5 rounded-2xl border border-amber-100 shadow-xs relative overflow-hidden flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
@@ -649,7 +712,7 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
               </div>
             </div>
 
-            {/* Card Linha 3: Vivências & Cursos */}
+            {/* Card Linha 4: Vivências & Cursos */}
             <div className="bg-gradient-to-br from-emerald-50/70 to-white p-5 rounded-2xl border border-emerald-100 shadow-xs relative overflow-hidden flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
@@ -721,6 +784,153 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
               </div>
             ) : null}
           </div>
+        </div>
+      )}
+
+      {/* Seção: Jogos de Autoconhecimento — A Metamorfose da Consciência */}
+      {data?.jogosStats && (
+        <div className="bg-gradient-to-r from-brand-purple/5 via-brand-beige-light to-amber-500/10 p-5 rounded-2xl border border-brand-beige shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="w-7 h-7 rounded-lg bg-brand-purple text-white flex items-center justify-center shadow-xs">
+                  <Gamepad2 className="w-4 h-4" />
+                </span>
+                <h3 className="text-sm font-bold text-brand-purple">
+                  Jogos de Autoconhecimento — A Metamorfose da Consciência
+                </h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-purple/10 text-brand-purple border border-brand-purple/20">
+                  Jogo Sistêmico Online
+                </span>
+              </div>
+              <p className="text-xs text-brand-charcoal/60 mt-1">
+                Acompanhe as jornadas realizadas nos 4 Quadrantes (Ovo, Lagarta, Crisálida e Borboleta), a Balança Fenomenológica e acione participantes via WhatsApp.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+              <button
+                type="button"
+                onClick={() => onNavigateTab("jogos")}
+                className="px-3.5 py-2 rounded-xl bg-brand-purple hover:bg-brand-purple-dark text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              >
+                <Gamepad2 className="w-3.5 h-3.5" />
+                <span>Abrir Painel de Jogos</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div className="bg-white/90 backdrop-blur-xs p-4 rounded-xl border border-brand-beige">
+              <span className="text-[11px] font-medium text-brand-charcoal/60 block">
+                Jornadas no Período
+              </span>
+              <div className="text-2xl font-bold text-brand-purple mt-1 flex items-baseline gap-2">
+                {data.jogosStats.totalPartidasPeriodo}
+                <span className="text-xs font-normal text-brand-charcoal/50">
+                  ({data.jogosStats.totalPartidasGeral} no total)
+                </span>
+              </div>
+              <p className="text-[10px] text-brand-charcoal/50 mt-1">
+                Travessias concluídas nos 4 quadrantes
+              </p>
+            </div>
+
+            <div className="bg-white/90 backdrop-blur-xs p-4 rounded-xl border border-brand-beige">
+              <span className="text-[11px] font-medium text-brand-charcoal/60 block">
+                Participantes Únicos
+              </span>
+              <div className="text-2xl font-bold text-emerald-700 mt-1">
+                {data.jogosStats.leadsUnicosGeral}
+              </div>
+              <p className="text-[10px] text-brand-charcoal/50 mt-1">
+                Pessoas que vivenciaram o jogo
+              </p>
+            </div>
+
+            <div className="bg-white/90 backdrop-blur-xs p-4 rounded-xl border border-brand-beige">
+              <span className="text-[11px] font-medium text-brand-charcoal/60 block">
+                Bloco A — Campo Ancestral
+              </span>
+              <div className="text-2xl font-bold text-amber-800 mt-1">
+                {data.jogosStats.blocoAGeral}
+              </div>
+              <p className="text-[10px] text-brand-charcoal/50 mt-1">
+                Predomínio de emaranhamento / ferida
+              </p>
+            </div>
+
+            <div className="bg-white/90 backdrop-blur-xs p-4 rounded-xl border border-brand-beige">
+              <span className="text-[11px] font-medium text-brand-charcoal/60 block">
+                Bloco B Adulto & Transição
+              </span>
+              <div className="text-2xl font-bold text-brand-purple mt-1 flex items-baseline gap-2">
+                {data.jogosStats.blocoBGeral}
+                <span className="text-xs font-normal text-brand-charcoal/60">
+                  · {data.jogosStats.transicaoGeral} em transição
+                </span>
+              </div>
+              <p className="text-[10px] text-brand-charcoal/50 mt-1">
+                Postura adulta lúcida ou travessia mista
+              </p>
+            </div>
+          </div>
+
+          {data.jogosStats.partidasRecentes && data.jogosStats.partidasRecentes.length > 0 && (
+            <div className="bg-white/90 rounded-xl border border-brand-beige p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-brand-purple">
+                  Últimas Jornadas Realizadas
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onNavigateTab("jogos")}
+                  className="text-[11px] font-semibold text-brand-purple hover:underline cursor-pointer"
+                >
+                  Ver dossiês completos →
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                {data.jogosStats.partidasRecentes.slice(0, 4).map((j) => (
+                  <div
+                    key={j.id}
+                    className="p-3 rounded-xl border border-brand-beige/80 bg-brand-beige-light/30 flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold text-brand-charcoal truncate">{j.nome}</span>
+                        <span className="text-[10px] text-brand-charcoal/40">
+                          {formatDateShort(j.created_at)}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-brand-charcoal/70 truncate mt-0.5">
+                        Tema: <strong>{j.tema_escolhido}</strong>
+                      </p>
+                    </div>
+                    {j.telefone_whatsapp ? (
+                      <a
+                        href={j.telefone_whatsapp}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shrink-0 transition-colors"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>WhatsApp</span>
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateTab("jogos")}
+                        className="px-2.5 py-1.5 rounded-lg bg-brand-purple/10 text-brand-purple text-[11px] font-semibold shrink-0 cursor-pointer"
+                      >
+                        Dossiê
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1398,6 +1608,11 @@ export default function AdminDashboard({ onNavigateTab }: AdminDashboardProps) {
                           {ped.categoria === "testes" && (
                             <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-purple-100 text-purple-700 border border-purple-200">
                               🧠 Teste Online
+                            </span>
+                          )}
+                          {ped.categoria === "jogos" && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                              🎮 Jogo Online
                             </span>
                           )}
                           {ped.categoria === "atendimentos" && (

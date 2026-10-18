@@ -19,16 +19,18 @@ import {
   Sunrise,
   SunMedium,
   Moon,
+  HeartHandshake,
 } from "lucide-react";
 import AdminAvaliacoesYinYang from "./AdminAvaliacoesYinYang";
 import AdminAvaliacoesEneagrama from "./AdminAvaliacoesEneagrama";
 import AdminAvaliacoesCronotipo from "./AdminAvaliacoesCronotipo";
+import AdminAvaliacoesLealdades from "./AdminAvaliacoesLealdades";
 
-type Visao = "todos" | "yinyang" | "eneagrama" | "cronotipo";
+type Visao = "todos" | "yinyang" | "eneagrama" | "cronotipo" | "lealdades";
 
 interface LinhaCombinada {
   id: string;
-  teste: "yinyang" | "eneagrama" | "cronotipo";
+  teste: "yinyang" | "eneagrama" | "cronotipo" | "lealdades";
   nome: string;
   email: string;
   telefone: string | null;
@@ -67,6 +69,14 @@ interface Insights {
     ultimos30: number;
     anteriores30: number;
   };
+  lealdades?: {
+    total: number;
+    perfilMaisComum: string | null;
+    comTelefone: number;
+    ultimos7: number;
+    ultimos30: number;
+    anteriores30: number;
+  };
   combinado: {
     leadsUnicos: number;
     fizeramAmbos: number;
@@ -76,6 +86,7 @@ interface Insights {
   recentes: LinhaCombinada[];
   eneagramaDisponivel: boolean;
   cronotipoDisponivel: boolean;
+  lealdadesDisponivel?: boolean;
 }
 
 function Tendencia({ atual, anterior }: { atual: number; anterior: number }) {
@@ -120,7 +131,7 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [testeFiltro, setTesteFiltro] = useState<"todos" | "yinyang" | "eneagrama" | "cronotipo">("todos");
+  const [testeFiltro, setTesteFiltro] = useState<"todos" | "yinyang" | "eneagrama" | "cronotipo" | "lealdades">("todos");
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -146,22 +157,26 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
   const totalAvaliacoes =
     (dados?.yinyang.total || 0) +
     (dados?.eneagrama.total || 0) +
-    (dados?.cronotipo?.total || 0);
+    (dados?.cronotipo?.total || 0) +
+    (dados?.lealdades?.total || 0);
 
   const ultimos30 =
     (dados?.yinyang.ultimos30 || 0) +
     (dados?.eneagrama.ultimos30 || 0) +
-    (dados?.cronotipo?.ultimos30 || 0);
+    (dados?.cronotipo?.ultimos30 || 0) +
+    (dados?.lealdades?.ultimos30 || 0);
 
   const anteriores30 =
     (dados?.yinyang.anteriores30 || 0) +
     (dados?.eneagrama.anteriores30 || 0) +
-    (dados?.cronotipo?.anteriores30 || 0);
+    (dados?.cronotipo?.anteriores30 || 0) +
+    (dados?.lealdades?.anteriores30 || 0);
 
   const ultimos7 =
     (dados?.yinyang.ultimos7 || 0) +
     (dados?.eneagrama.ultimos7 || 0) +
-    (dados?.cronotipo?.ultimos7 || 0);
+    (dados?.cronotipo?.ultimos7 || 0) +
+    (dados?.lealdades?.ultimos7 || 0);
 
   const linhas = (dados?.recentes || []).filter(
     (r) => testeFiltro === "todos" || r.teste === testeFiltro
@@ -188,7 +203,7 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
           <p className="text-2xl sm:text-3xl font-bold text-brand-purple">{totalAvaliacoes}</p>
           <p className="text-[11px] text-brand-charcoal/50 mt-1">
             {dados?.yinyang.total || 0} Yin/Yang · {dados?.eneagrama.total || 0} Eneagrama ·{" "}
-            {dados?.cronotipo?.total || 0} Cronotipo
+            {dados?.cronotipo?.total || 0} Cronotipo · {dados?.lealdades?.total || 0} Lealdades
           </p>
         </div>
 
@@ -399,6 +414,7 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
               ["yinyang", "Yin/Yang"],
               ["eneagrama", "Eneagrama"],
               ["cronotipo", "Cronotipo"],
+              ["lealdades", "Lealdades Invisíveis"],
             ].map(([id, label]) => (
               <option key={id} value={id}>
                 {label}
@@ -484,6 +500,8 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
                             ? "bg-brand-terracotta/10 text-brand-terracotta border-brand-terracotta/25"
                             : r.teste === "cronotipo"
                             ? "bg-amber-100/70 text-amber-900 border-amber-200"
+                            : r.teste === "lealdades"
+                            ? "bg-rose-50 text-rose-900 border-rose-200"
                             : "bg-brand-purple/10 text-brand-purple border-brand-purple/20"
                         }`}
                         title="Abrir a lista completa deste teste"
@@ -492,6 +510,8 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
                           <Sparkles className="w-3.5 h-3.5" />
                         ) : r.teste === "cronotipo" ? (
                           <Clock className="w-3.5 h-3.5 text-[#B8965A]" />
+                        ) : r.teste === "lealdades" ? (
+                          <HeartHandshake className="w-3.5 h-3.5 text-rose-700" />
                         ) : (
                           <Compass className="w-3.5 h-3.5" />
                         )}
@@ -499,6 +519,8 @@ function VisaoGeral({ onAbrirTeste }: { onAbrirTeste: (v: Visao) => void }) {
                           ? "Yin/Yang"
                           : r.teste === "cronotipo"
                           ? "Cronotipo"
+                          : r.teste === "lealdades"
+                          ? "Lealdades"
                           : "Eneagrama"}
                       </button>
                     </td>
@@ -529,10 +551,11 @@ export default function AdminAvaliacoes() {
   const [visao, setVisao] = useState<Visao>("todos");
 
   const abas: { id: Visao; label: string; icon: React.ElementType }[] = [
-    { id: "todos", label: "Todos", icon: Layers },
+    { id: "todos", label: "Todos os Testes", icon: Layers },
     { id: "yinyang", label: "Yin/Yang", icon: Sparkles },
     { id: "eneagrama", label: "Eneagrama", icon: Compass },
     { id: "cronotipo", label: "Cronotipo", icon: Clock },
+    { id: "lealdades", label: "Lealdades Invisíveis", icon: HeartHandshake },
   ];
 
   return (
@@ -542,7 +565,7 @@ export default function AdminAvaliacoes() {
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-brand-purple">Avaliações</h1>
             <span className="text-xs bg-brand-terracotta/15 text-brand-terracotta font-semibold px-2.5 py-0.5 rounded-full">
-              Leads & Diagnósticos
+              Leads & Diagnósticos (4 Testes)
             </span>
           </div>
           <p className="text-xs sm:text-sm text-brand-charcoal/60 mt-0.5">
@@ -551,7 +574,7 @@ export default function AdminAvaliacoes() {
           </p>
         </div>
 
-        <div className="relative self-start sm:self-auto shrink-0 w-full sm:w-52">
+        <div className="relative self-start sm:self-auto shrink-0 w-full sm:w-56">
           <select
             value={visao}
             onChange={(e) => setVisao(e.target.value as Visao)}
@@ -580,6 +603,7 @@ export default function AdminAvaliacoes() {
       {visao === "yinyang" && <AdminAvaliacoesYinYang />}
       {visao === "eneagrama" && <AdminAvaliacoesEneagrama />}
       {visao === "cronotipo" && <AdminAvaliacoesCronotipo />}
+      {visao === "lealdades" && <AdminAvaliacoesLealdades />}
     </div>
   );
 }

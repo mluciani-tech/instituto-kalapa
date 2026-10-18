@@ -10,6 +10,7 @@ import AdminManual from "./components/AdminManual";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminAlterarSenhaModal from "./components/AdminAlterarSenhaModal";
 import AdminAvaliacoes from "./components/AdminAvaliacoes";
+import AdminJogos from "./components/AdminJogos";
 import AdminSobre from "./components/AdminSobre";
 import AdminProdutos from "./components/AdminProdutos";
 import AdminPedidos from "./components/AdminPedidos";
@@ -67,16 +68,18 @@ export default function AdminPage() {
   const [usuariosTotal, setUsuariosTotal] = useState(0);
   const [usuariosSearch, setUsuariosSearch] = useState("");
 
-  // Avaliações Yin/Yang & Agendamentos (Contadores do Sidebar)
+  // Avaliações, Jogos & Agendamentos (Contadores do Sidebar)
   const [avaliacoesTotal, setAvaliacoesTotal] = useState(0);
+  const [jogosTotal, setJogosTotal] = useState(0);
   const [agendamentosTotal, setAgendamentosTotal] = useState(0);
 
   const fetchAvaliacoesTotal = useCallback(async () => {
     try {
-      const [yy, en, cr] = await Promise.all([
+      const [yy, en, cr, ld] = await Promise.all([
         fetch("/api/admin/avaliacoes-yin-yang?perPage=1"),
         fetch("/api/admin/avaliacoes-eneagrama?perPage=1"),
         fetch("/api/admin/avaliacoes-cronotipo?perPage=1"),
+        fetch("/api/admin/avaliacoes-lealdades?perPage=1"),
       ]);
       let soma = 0;
       if (yy.ok) {
@@ -91,7 +94,23 @@ export default function AdminPage() {
         const json = await cr.json();
         soma += json.totalGeral ?? json.total ?? 0;
       }
+      if (ld.ok) {
+        const json = await ld.json();
+        soma += json.totalGeral ?? json.total ?? 0;
+      }
       setAvaliacoesTotal(soma);
+    } catch {
+      // Ignora silenciosamente
+    }
+  }, []);
+
+  const fetchJogosTotal = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/jogos-metamorfose?perPage=1");
+      if (res.ok) {
+        const json = await res.json();
+        setJogosTotal(json.totalGeral ?? json.total ?? 0);
+      }
     } catch {
       // Ignora silenciosamente
     }
@@ -227,10 +246,11 @@ export default function AdminPage() {
         fetchCupons(),
         fetchUsuarios(),
         fetchAvaliacoesTotal(),
+        fetchJogosTotal(),
         fetchAgendamentosTotal(),
       ]);
     }
-  }, [authed, fetchProdutos, fetchPedidos, fetchParticipantes, fetchCupons, fetchUsuarios, fetchAvaliacoesTotal, fetchAgendamentosTotal]);
+  }, [authed, fetchProdutos, fetchPedidos, fetchParticipantes, fetchCupons, fetchUsuarios, fetchAvaliacoesTotal, fetchJogosTotal, fetchAgendamentosTotal]);
 
   // Auth handlers
   const handleLogin = async (e: React.FormEvent) => {
@@ -252,6 +272,7 @@ export default function AdminPage() {
         fetchCupons(),
         fetchUsuarios(),
         fetchAvaliacoesTotal(),
+        fetchJogosTotal(),
         fetchAgendamentosTotal(),
       ]);
     } else {
@@ -317,6 +338,7 @@ export default function AdminPage() {
     { id: "participantes", label: "Inscrições", count: participantesTotal || participantes.length },
     { id: "agendamentos", label: "🗓️ Agenda & Atendimentos", count: agendamentosTotal, highlight: newAppointmentsCount > 0 },
     { id: "avaliacoes", label: "Avaliações", count: avaliacoesTotal },
+    { id: "jogos", label: "🎮 Jogos", count: jogosTotal },
     { id: "cupons", label: "Cupons", count: cupons.length },
     { id: "usuarios", label: "Usuários", count: usuariosTotal },
     { id: "manual", label: "📖 Manual do Sistema" },
@@ -336,6 +358,9 @@ export default function AdminPage() {
           }
           if (tab === "avaliacoes") {
             void fetchAvaliacoesTotal();
+          }
+          if (tab === "jogos") {
+            void fetchJogosTotal();
           }
         }}
         onLogout={handleLogout}
@@ -457,8 +482,13 @@ export default function AdminPage() {
           {/* Tab: Agenda & Atendimentos */}
           {activeTab === "agendamentos" && <AdminAgenda />}
 
-          {/* Tab: Avaliações (Yin/Yang, Eneagrama e visão geral) */}
+          {/* Tab: Avaliações (Yin/Yang, Eneagrama, Cronotipo, Lealdades e visão geral) */}
           {activeTab === "avaliacoes" && <AdminAvaliacoes />}
+
+          {/* Tab: Jogos de Autoconhecimento (A Metamorfose da Consciência) */}
+          {activeTab === "jogos" && (
+            <AdminJogos onNavigateProdutos={() => setActiveTab("produtos")} />
+          )}
 
           {/* Tab: Manual do Sistema */}
           {activeTab === "manual" && <AdminManual />}
