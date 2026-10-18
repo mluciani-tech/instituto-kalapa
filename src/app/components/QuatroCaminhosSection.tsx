@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Gamepad2, BookOpen } from "lucide-react";
 
 interface CaminhoCard {
   id: string;
@@ -190,48 +190,18 @@ const itensConhecimento = [
     ),
   },
   {
-    id: "artigos",
-    titulo: "Artigos e conteúdos",
-    subtitulo: "(Psicologia, Consciência, Negócios e mais)",
-    aba: "artigos",
-    icone: (
-      <svg
-        className="w-7 h-7 text-[#485742]"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H11v16H4.5A2.5 2.5 0 0 0 2 21.5v-16z" />
-        <path d="M22 5.5A2.5 2.5 0 0 0 19.5 3H13v16h6.5a2.5 2.5 0 0 1 2.5 2.5v-16z" />
-      </svg>
-    ),
+    id: "jogos",
+    titulo: "Jogos de Autoconhecimento",
+    subtitulo: "(Metamorfose e Jornadas)",
+    aba: "jogos",
+    icone: <Gamepad2 className="w-7 h-7 text-[#485742]" />,
   },
   {
-    id: "guias",
-    titulo: "Guias e materiais",
-    subtitulo: "(Para empreendedores e terapeutas)",
-    aba: "guias",
-    icone: (
-      <svg
-        className="w-7 h-7 text-[#485742]"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <line x1="8" y1="13" x2="16" y2="13" />
-        <line x1="8" y1="17" x2="14" y2="17" />
-      </svg>
-    ),
+    id: "biblioteca",
+    titulo: "Biblioteca Kalapa",
+    subtitulo: "(Artigos, Guias e Downloads)",
+    aba: "biblioteca",
+    icone: <BookOpen className="w-7 h-7 text-[#485742]" />,
   },
 ];
 

@@ -15,13 +15,18 @@ import {
 import ProductCard, { type Produto } from "./ProductCard";
 import type { VagasInfo } from "@/lib/types";
 
-type AbaFiltro = "todos" | "testes" | "receitas" | "artigos" | "guias";
+type AbaFiltro = "todos" | "testes" | "jogos" | "receitas" | "biblioteca";
 
 const ABAS: { id: AbaFiltro; label: string; icone: React.ReactNode }[] = [
   { id: "todos", label: "Todos", icone: <Sparkles className="w-4 h-4" /> },
   {
     id: "testes",
-    label: "Testes & Jogos",
+    label: "Testes",
+    icone: <Compass className="w-4 h-4" />,
+  },
+  {
+    id: "jogos",
+    label: "Jogos de Autoconhecimento",
     icone: <Gamepad2 className="w-4 h-4" />,
   },
   {
@@ -30,14 +35,9 @@ const ABAS: { id: AbaFiltro; label: string; icone: React.ReactNode }[] = [
     icone: <Utensils className="w-4 h-4" />,
   },
   {
-    id: "artigos",
-    label: "Artigos & Conteúdos",
+    id: "biblioteca",
+    label: "Biblioteca Kalapa",
     icone: <BookOpen className="w-4 h-4" />,
-  },
-  {
-    id: "guias",
-    label: "Guias & Downloads",
-    icone: <FileDown className="w-4 h-4" />,
   },
 ];
 
@@ -70,7 +70,7 @@ const recursosFixos: RecursoDestaque[] = [
   },
   {
     id: "jogo-metamorfose",
-    aba: "testes",
+    aba: "jogos",
     badge: "Jogo Sistêmico Interativo",
     titulo: "A Metamorfose da Consciência",
     subtitulo: "Jornada gamificada pelos 4 Quadrantes Sistêmicos",
@@ -95,30 +95,17 @@ const recursosFixos: RecursoDestaque[] = [
     icone: <Utensils className="w-5 h-5 text-white" />,
   },
   {
-    id: "artigos-conteudos",
-    aba: "artigos",
-    badge: "Leituras & Reflexões",
-    titulo: "Artigos e Conteúdos",
-    subtitulo: "Psicologia, Consciência, Relacionamentos e Negócios",
+    id: "biblioteca-kalapa",
+    aba: "biblioteca",
+    badge: "Biblioteca Kalapa & PDFs",
+    titulo: "Biblioteca Kalapa",
+    subtitulo: "Artigos, reflexões, e-books, cadernos e materiais para download",
     descricao:
-      "Textos autorais e reflexões sistêmicas para ampliar o olhar sobre saúde emocional, vínculos familiares e liderança consciente.",
-    ctaTexto: "Ler artigos e conteúdos",
-    href: "/produtos?categoria=artigos",
-    corBg: "bg-[#EAE8EC]",
-    icone: <BookOpen className="w-5 h-5 text-white" />,
-  },
-  {
-    id: "guias-downloads",
-    aba: "guias",
-    badge: "Biblioteca Digital & PDFs",
-    titulo: "Guias, Materiais e Downloads",
-    subtitulo: "E-books, cadernos de exercícios e materiais de apoio",
-    descricao:
-      "Materiais ricos para download imediato, desenvolvidos para apoiar empreendedores, terapeutas e buscadores em sua prática diária.",
-    ctaTexto: "Acessar materiais e downloads",
+      "Conteúdos autorais e materiais ricos desenvolvidos para apoiar empreendedores, terapeutas e buscadores em sua prática diária.",
+    ctaTexto: "Acessar Biblioteca Kalapa",
     href: "/produtos?categoria=biblioteca",
     corBg: "bg-[#EFE7DC]",
-    icone: <FileDown className="w-5 h-5 text-white" />,
+    icone: <BookOpen className="w-5 h-5 text-white" />,
   },
 ];
 
@@ -134,13 +121,19 @@ function classificarProdutoOutro(p: Produto): Exclude<AbaFiltro, "todos"> | null
   const slug = norm(p.slug || "");
 
   if (
+    cat === "jogos" ||
+    cat === "jogo" ||
+    slug.includes("jogo") ||
+    slug.includes("metamorfose")
+  ) {
+    return "jogos";
+  }
+
+  if (
     p.is_teste === true ||
     cat === "testes" ||
     cat === "teste" ||
-    cat === "jogos" ||
-    cat === "jogo" ||
-    slug.startsWith("teste-") ||
-    slug.includes("jogo")
+    slug.startsWith("teste-")
   ) {
     return "testes";
   }
@@ -150,25 +143,20 @@ function classificarProdutoOutro(p: Produto): Exclude<AbaFiltro, "todos"> | null
   }
 
   if (
-    cat === "artigos" ||
-    cat === "artigo" ||
-    cat === "conteudos" ||
-    cat === "conteudo"
-  ) {
-    return "artigos";
-  }
-
-  if (
     p.is_biblioteca === true ||
     cat === "biblioteca" ||
     cat === "biblioteca-kalapa" ||
+    cat === "artigos" ||
+    cat === "artigo" ||
+    cat === "conteudos" ||
+    cat === "conteudo" ||
     cat === "guias" ||
     cat === "guia" ||
     cat === "downloads" ||
     cat === "download" ||
     cat === "materiais"
   ) {
-    return "guias";
+    return "biblioteca";
   }
 
   return null;
