@@ -7,6 +7,7 @@ import { ArrowLeft, MessageCircle, Sparkles } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
 import type { VagasInfo } from "@/lib/types";
 import { isProdutoAgendamento } from "@/lib/agendamento";
+import { fetchProdutosPublicosCached, fetchVagasBatchClient } from "@/lib/produtos-client";
 
 interface ProductGridProps {
   categoria?: string | null;
@@ -20,12 +21,7 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const prodRes = await fetch("/api/produtos");
-        if (!prodRes.ok) {
-          setLoading(false);
-          return;
-        }
-        let produtosData: Produto[] = await prodRes.json();
+        let produtosData: Produto[] = await fetchProdutosPublicosCached();
 
         if (categoria) {
           const normalize = (s: string) =>
@@ -149,20 +145,7 @@ export default function ProductGrid({ categoria }: ProductGridProps) {
 
         const produtosComVagas = produtosData.filter((p) => p.vagas_maximas != null);
         if (produtosComVagas.length > 0) {
-          const vagasResults = await Promise.all(
-            produtosComVagas.map((p) =>
-              fetch(`/api/vagas?produto_id=${p.id}`)
-                .then((r) => r.ok ? r.json() : null)
-                .catch(() => null)
-            )
-          );
-
-          const map: Record<string, VagasInfo> = {};
-          produtosComVagas.forEach((p, i) => {
-            if (vagasResults[i]) {
-              map[p.id] = vagasResults[i];
-            }
-          });
+          const map = await fetchVagasBatchClient(produtosComVagas.map((p) => p.id));
           setVagasMap(map);
         }
       } catch (err) {

@@ -219,3 +219,137 @@ export async function getVagasInfo(produtoId?: string | null): Promise<VagasCalc
     };
   }
 }
+
+/**
+ * Calcula informações de vagas para múltiplos produtos de uma só vez (batch),
+ * evitando N+1 queries no Supabase e múltiplas requisições HTTP no cliente.
+ */
+export async function getVagasInfoBatch(produtoIds: string[]): Promise<Record<string, VagasCalculadas>> {
+  const uniqueIds = Array.from(new Set(produtoIds.filter(Boolean)));
+  const result: Record<string, VagasCalculadas> = {};
+  if (uniqueIds.length === 0) return result;
+
+  const turmaAtual = await getTurmaAtual();
+  if (!isAdminConfigured()) {
+    for (const id of uniqueIds) {
+      result[id] = {
+        preenchidas: 0,
+        maximas: VAGAS_PADRAO,
+        restantes: VAGAS_PADRAO,
+        turma: turmaAtual,
+        manual: false,
+        reais: 0,
+      };
+    }
+    return result;
+  }
+
+  try {
+    const [produtosRes, configRes, pedidosRes, inscricoesRes] = await Promise.all([
+      supabaseAdmin!
+        .from("produtos")
+        .select("id, vagas_maximas, vagas_ocupadas_manual")
+        .in("id", uniqueIds),
+      supabaseAdmin!
+        .from("configuracoes")
+        .select("valor")
+        .eq("chave", "vagas_maximas")
+        .single(),
+      supabaseAdmin!
+        .from("pedidos")
+        .select("id, status, produto_id, itens")
+        .in("status", ["pago", "confirmado"]),
+      supabaseAdmin!
+        .from("inscricoes")
+        .select("id, pedido_id, status, pedidos(produto_id)")
+        .in("status", ["pago", "confirmado"]),
+    ]);
+
+    const globalMax = configRes.data?.valor ? Number(configRes.data.valor) : VAGAS_PADRAO;
+    const prodMap = new Map<string, { vagas_maximas: number | null; vagas_ocupadas_manual: number | null }>();
+    for (const p of produtosRes.data || []) {
+      prodMap.set(p.id, p);
+    }
+
+    const pedidos = pedidosRes.data || [];
+    const inscricoes = (inscricoesRes.data || []) as Array<{
+      id: string;
+      pedido_id?: string | null;
+      pedidos?: { produto_id?: string } | { produto_id?: string }[] | null;
+    }>;
+
+    for (const produtoId of uniqueIds) {
+      const prod = prodMap.get(produtoId);
+      const maximas = prod?.vagas_maximas != null && prod.vagas_maximas > 0 ? prod.vagas_maximas : globalMax;
+      const manualOcupadas =
+        prod?.vagas_ocupadas_manual != null && prod.vagas_ocupadas_manual >= 0
+          ? prod.vagas_ocupadas_manual
+          : null;
+
+      let totalVagas = 0;
+      const pedidosContados = new Set<string>();
+
+      for (const ped of pedidos) {
+        let matched = false;
+        let qtd = 0;
+
+        if (ped.produto_id === produtoId) {
+          matched = true;
+        }
+
+        if (Array.isArray(ped.itens)) {
+          for (const it of ped.itens as Array<{ produto_id?: string; quantidade?: number }>) {
+            if (it && it.produto_id === produtoId) {
+              matched = true;
+              qtd += Number(it.quantidade) || 1;
+            }
+          }
+        }
+
+        if (matched) {
+          pedidosContados.add(ped.id);
+          totalVagas += qtd > 0 ? qtd : 1;
+        }
+      }
+
+      for (const insc of inscricoes) {
+        if (insc.pedido_id && pedidosContados.has(insc.pedido_id)) {
+          continue;
+        }
+        const pedObj = Array.isArray(insc.pedidos) ? insc.pedidos[0] : insc.pedidos;
+        if (pedObj?.produto_id === produtoId) {
+          totalVagas += 1;
+        }
+      }
+
+      const reais = Math.max(totalVagas, 0);
+      const isManual = manualOcupadas !== null;
+      const preenchidas = (manualOcupadas || 0) + reais;
+      const restantes = Math.max(maximas - preenchidas, 0);
+
+      result[produtoId] = {
+        preenchidas,
+        maximas,
+        restantes,
+        turma: turmaAtual,
+        manual: isManual,
+        reais,
+      };
+    }
+
+    return result;
+  } catch (err) {
+    console.error("[vagas] Erro em getVagasInfoBatch:", err);
+    for (const id of uniqueIds) {
+      result[id] = {
+        preenchidas: 0,
+        maximas: VAGAS_PADRAO,
+        restantes: VAGAS_PADRAO,
+        turma: turmaAtual,
+        manual: false,
+        reais: 0,
+      };
+    }
+    return result;
+  }
+}

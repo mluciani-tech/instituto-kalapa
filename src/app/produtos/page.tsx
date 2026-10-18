@@ -28,9 +28,10 @@ const nomesCategorias: Record<string, string> = {
 export default async function ProdutosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categoria?: string }>;
+  searchParams: Promise<{ categoria?: string; slug?: string }>;
 }) {
-  const { categoria } = await searchParams;
+  const { categoria, slug } = await searchParams;
+  const filtro = categoria || slug;
 
   return (
     <main className="min-h-screen bg-brand-offwhite">
@@ -43,9 +44,9 @@ export default async function ProdutosPage({
             ✦ Nossos serviços
           </span>
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 font-sans">
-            {categoria
-              ? nomesCategorias[categoria.toLowerCase()] ||
-                `${categoria.charAt(0).toUpperCase() + categoria.slice(1)}`
+            {filtro
+              ? nomesCategorias[filtro.toLowerCase()] ||
+                `${filtro.charAt(0).toUpperCase() + filtro.slice(1)}`
               : "Escolha a experiência ideal para você"}
           </h1>
           <p className="text-white/60 text-lg max-w-2xl mx-auto">
@@ -56,7 +57,7 @@ export default async function ProdutosPage({
       </section>
 
       <section className="max-w-6xl mx-auto px-6 py-16">
-        <ProductGrid categoria={categoria || null} />
+        <ProductGrid categoria={filtro || null} />
 
         {/* Reassurance WhatsApp Callout */}
         <div className="mt-16 max-w-2xl mx-auto p-5 rounded-2xl bg-white border border-brand-terracotta/20 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">

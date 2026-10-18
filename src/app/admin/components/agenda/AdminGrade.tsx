@@ -64,7 +64,22 @@ export default function AdminGrade({
         const data = await res.json();
         const rawAvail: TherapistAvailability[] = data.availability || [];
         if (rawAvail.length > 0) {
-          const novaGrade = { ...grade };
+          const novaGrade: {
+            [day: number]: {
+              ativo: boolean;
+              manhaAtivo: boolean;
+              manhaInicio: string;
+              manhaFim: string;
+              tardeAtivo: boolean;
+              tardeInicio: string;
+              tardeFim: string;
+              noiteAtivo: boolean;
+              noiteInicio: string;
+              noiteFim: string;
+              slotMinutos: number;
+              bufferMinutos: number;
+            };
+          } = {};
           // Resetar
           for (const d of [0, 1, 2, 3, 4, 5, 6]) {
             novaGrade[d] = {
@@ -86,6 +101,7 @@ export default function AdminGrade({
           // Agrupar janelas por dia
           rawAvail.forEach((w) => {
             const d = w.day_of_week;
+            if (!novaGrade[d]) return;
             novaGrade[d].ativo = true;
             const duracao = (!w.slot_duration_minutes || w.slot_duration_minutes === 50) ? 90 : w.slot_duration_minutes;
             novaGrade[d].slotMinutos = duracao;
@@ -114,7 +130,7 @@ export default function AdminGrade({
     } finally {
       setLoading(false);
     }
-  }, [grade]);
+  }, []);
 
   useEffect(() => {
     fetchGrade();

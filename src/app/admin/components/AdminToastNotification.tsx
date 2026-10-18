@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Bell, Calendar, X, ChevronRight, Sparkles } from "lucide-react";
 
 interface AppointmentNotification {
@@ -24,6 +24,11 @@ export default function AdminToastNotification({
   onNewAppointmentsCountChange,
 }: AdminToastNotificationProps) {
   const [activeToast, setActiveToast] = useState<AppointmentNotification | null>(null);
+  const onCountChangeRef = useRef(onNewAppointmentsCountChange);
+
+  useEffect(() => {
+    onCountChangeRef.current = onNewAppointmentsCountChange;
+  }, [onNewAppointmentsCountChange]);
 
   const checkRecentAppointments = useCallback(async () => {
     try {
@@ -34,7 +39,7 @@ export default function AdminToastNotification({
       const appts: AppointmentNotification[] = data.appointments || [];
 
       if (appts.length === 0) {
-        onNewAppointmentsCountChange?.(0);
+        onCountChangeRef.current?.(0);
         return;
       }
 
@@ -63,12 +68,12 @@ export default function AdminToastNotification({
           count = 1;
         }
 
-        onNewAppointmentsCountChange?.(count);
+        onCountChangeRef.current?.(count);
       }
     } catch {
       // ignore
     }
-  }, [onNewAppointmentsCountChange]);
+  }, []);
 
   useEffect(() => {
     // Checagem imediata

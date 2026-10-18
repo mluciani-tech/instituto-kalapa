@@ -1,23 +1,51 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Menu } from "lucide-react";
 import type { Produto, Pedido, Participante, Cupom, Usuario } from "@/lib/types";
-import AdminDashboard from "./components/AdminDashboard";
-import AdminAgenda from "./components/AdminAgenda";
 import AdminToastNotification from "./components/AdminToastNotification";
-import AdminManual from "./components/AdminManual";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminAlterarSenhaModal from "./components/AdminAlterarSenhaModal";
-import AdminAvaliacoes from "./components/AdminAvaliacoes";
-import AdminJogos from "./components/AdminJogos";
 import AdminSobre from "./components/AdminSobre";
-import AdminProdutos from "./components/AdminProdutos";
-import AdminPedidos from "./components/AdminPedidos";
-import AdminParticipantes from "./components/AdminParticipantes";
-import AdminCupons from "./components/AdminCupons";
-import AdminUsuarios from "./components/AdminUsuarios";
 import type { Paginated, Tab } from "./lib/types";
+
+const TabLoadingFallback = () => (
+  <div className="flex items-center justify-center py-20">
+    <div className="w-8 h-8 border-4 border-brand-purple border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
+const AdminDashboard = dynamic(() => import("./components/AdminDashboard"), {
+  loading: TabLoadingFallback,
+});
+const AdminAgenda = dynamic(() => import("./components/AdminAgenda"), {
+  loading: TabLoadingFallback,
+});
+const AdminManual = dynamic(() => import("./components/AdminManual"), {
+  loading: TabLoadingFallback,
+});
+const AdminAvaliacoes = dynamic(() => import("./components/AdminAvaliacoes"), {
+  loading: TabLoadingFallback,
+});
+const AdminJogos = dynamic(() => import("./components/AdminJogos"), {
+  loading: TabLoadingFallback,
+});
+const AdminProdutos = dynamic(() => import("./components/AdminProdutos"), {
+  loading: TabLoadingFallback,
+});
+const AdminPedidos = dynamic(() => import("./components/AdminPedidos"), {
+  loading: TabLoadingFallback,
+});
+const AdminParticipantes = dynamic(() => import("./components/AdminParticipantes"), {
+  loading: TabLoadingFallback,
+});
+const AdminCupons = dynamic(() => import("./components/AdminCupons"), {
+  loading: TabLoadingFallback,
+});
+const AdminUsuarios = dynamic(() => import("./components/AdminUsuarios"), {
+  loading: TabLoadingFallback,
+});
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
@@ -123,7 +151,9 @@ export default function AdminPage() {
         const json = await res.json();
         if (Array.isArray(json)) {
           setAgendamentosTotal(json.length);
-        } else if (json && json.data && Array.isArray(json.data)) {
+        } else if (json && Array.isArray(json.appointments)) {
+          setAgendamentosTotal(json.total ?? json.appointments.length);
+        } else if (json && Array.isArray(json.data)) {
           setAgendamentosTotal(json.total ?? json.data.length);
         }
       }
@@ -236,9 +266,12 @@ export default function AdminPage() {
     await Promise.all([fetchPedidos(), fetchParticipantes()]);
   }, [fetchPedidos, fetchParticipantes]);
 
+  const initialLoadDoneRef = useRef(false);
+
   useEffect(() => { checkAuth(); }, [checkAuth]);
   useEffect(() => {
-    if (authed) {
+    if (authed && !initialLoadDoneRef.current) {
+      initialLoadDoneRef.current = true;
       void Promise.all([
         fetchProdutos(),
         fetchPedidos(),
@@ -249,8 +282,26 @@ export default function AdminPage() {
         fetchJogosTotal(),
         fetchAgendamentosTotal(),
       ]);
+    } else if (!authed) {
+      initialLoadDoneRef.current = false;
     }
   }, [authed, fetchProdutos, fetchPedidos, fetchParticipantes, fetchCupons, fetchUsuarios, fetchAvaliacoesTotal, fetchJogosTotal, fetchAgendamentosTotal]);
+
+  // Recarrega apenas Pedidos quando a ordenação mudar
+  useEffect(() => {
+    if (authed && initialLoadDoneRef.current) {
+      void fetchPedidos();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pedidosSort]);
+
+  // Recarrega apenas Participantes quando a ordenação mudar
+  useEffect(() => {
+    if (authed && initialLoadDoneRef.current) {
+      void fetchParticipantes();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [participantesSort]);
 
   // Auth handlers
   const handleLogin = async (e: React.FormEvent) => {

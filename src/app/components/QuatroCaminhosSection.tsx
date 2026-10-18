@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Gamepad2, BookOpen } from "lucide-react";
+import { ArrowRight, Gamepad2, BookOpen, CalendarDays } from "lucide-react";
 
 interface CaminhoCard {
   id: string;
@@ -167,6 +167,14 @@ const itensConhecimento = [
     ),
   },
   {
+    id: "calendario",
+    titulo: "Calendário",
+    subtitulo: "(Programação e próximos encontros)",
+    aba: "calendario",
+    href: "/produtos?categoria=calendario",
+    icone: <CalendarDays className="w-7 h-7 text-[#485742]" strokeWidth={1.4} />,
+  },
+  {
     id: "receitas",
     titulo: "Receitas das vivências",
     subtitulo: "(Terapêuticas e saudáveis)",
@@ -194,14 +202,14 @@ const itensConhecimento = [
     titulo: "Jogos de Autoconhecimento",
     subtitulo: "(Metamorfose e Jornadas)",
     aba: "jogos",
-    icone: <Gamepad2 className="w-7 h-7 text-[#485742]" />,
+    icone: <Gamepad2 className="w-7 h-7 text-[#485742]" strokeWidth={1.4} />,
   },
   {
     id: "biblioteca",
     titulo: "Biblioteca Kalapa",
     subtitulo: "(Artigos, Guias e Downloads)",
     aba: "biblioteca",
-    icone: <BookOpen className="w-7 h-7 text-[#485742]" />,
+    icone: <BookOpen className="w-7 h-7 text-[#485742]" strokeWidth={1.4} />,
   },
 ];
 
@@ -311,33 +319,33 @@ export default function QuatroCaminhosSection() {
           transition={{ duration: 0.6, delay: 0.25 }}
           className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch"
         >
-          {/* Card Esquerdo (8 colunas): Conhecimento e experiências */}
-          <div className="lg:col-span-8 rounded-2xl bg-[#FDFCF8] border border-[#E6E3D8] px-5 sm:px-7 py-5 sm:py-6 shadow-xs flex flex-col xl:flex-row items-center justify-between gap-6">
+          {/* Card Esquerdo (9 colunas em telas grandes para acomodar 5 itens com conforto): Conhecimento e experiências */}
+          <div className="lg:col-span-8 xl:col-span-9 rounded-2xl bg-[#FDFCF8] border border-[#E6E3D8] px-4 sm:px-6 py-5 sm:py-6 shadow-xs flex flex-col xl:flex-row items-center justify-between gap-5">
             {/* Bloco Esquerdo do Card: Símbolo Oficial Kalapa + Título + Botão */}
-            <div className="flex items-center gap-4 sm:gap-5 w-full xl:w-auto xl:max-w-[340px]">
+            <div className="flex items-center gap-3.5 sm:gap-4 w-full xl:w-auto xl:max-w-[295px] shrink-0">
               <div className="shrink-0 hidden sm:flex items-center justify-center">
                 <Image
                   src="/images/caminhos/logo-kalapa-escuro.png"
                   alt="Símbolo INstituto Kalapa"
-                  width={56}
-                  height={56}
-                  className="w-12 h-12 sm:w-13 sm:h-13 object-contain"
+                  width={52}
+                  height={52}
+                  className="w-11 h-11 sm:w-12 sm:h-12 object-contain"
                 />
               </div>
 
               <div className="hidden sm:block w-px self-stretch bg-[#E2DFD5]" />
 
               <div className="flex-1 text-center sm:text-left">
-                <h3 className="font-serif text-xl sm:text-[22px] font-semibold text-[#214137] leading-tight">
+                <h3 className="font-serif text-lg sm:text-[20px] font-semibold text-[#214137] leading-tight">
                   Conhecimento e experiências
                 </h3>
-                <p className="text-xs text-[#3B4D44]/85 mt-1.5 mb-3.5 leading-relaxed">
-                  Testes, receitas, artigos e conteúdos para inspirar sua jornada.
+                <p className="text-xs text-[#3B4D44]/85 mt-1 mb-3 leading-relaxed">
+                  Testes, calendário, receitas, jogos e conteúdos para inspirar sua jornada.
                 </p>
                 <button
                   type="button"
                   onClick={() => navegarParaSecaoProdutos("todos")}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-[#485742]/55 text-[#214137] text-xs font-medium hover:bg-[#485742] hover:text-white transition-colors cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full border border-[#485742]/55 text-[#214137] text-xs font-medium hover:bg-[#485742] hover:text-white transition-colors cursor-pointer"
                 >
                   <span>Acessar a Biblioteca Kalapa</span>
                   <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />
@@ -345,53 +353,66 @@ export default function QuatroCaminhosSection() {
               </div>
             </div>
 
-            {/* 4 Mini-Colunas de Categorias de Conteúdo */}
-            <div className="w-full xl:w-auto flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-0 sm:divide-x sm:divide-[#E6E3DA]">
-              {itensConhecimento.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => navegarParaSecaoProdutos(item.aba)}
-                  className="group px-2 sm:px-3.5 py-2 flex flex-col items-center text-center rounded-xl sm:rounded-none hover:bg-[#F4F1E8]/80 transition-colors cursor-pointer"
-                >
-                  <div className="mb-2 transition-transform duration-300 group-hover:-translate-y-0.5">
-                    {item.icone}
-                  </div>
-                  <span className="text-xs font-semibold text-[#214137] leading-snug mb-1 group-hover:text-[#152B24]">
-                    {item.titulo}
-                  </span>
-                  <span className="text-[11px] text-[#3B4D44]/75 leading-tight">
-                    {item.subtitulo}
-                  </span>
-                </button>
-              ))}
+            {/* 5 Mini-Colunas de Categorias de Conteúdo */}
+            <div className="w-full xl:w-auto flex-1 grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-0 sm:divide-x sm:divide-[#E6E3DA]">
+              {itensConhecimento.map((item) => {
+                const classe =
+                  "group px-2 sm:px-2.5 py-2 flex flex-col items-center text-center rounded-xl sm:rounded-none hover:bg-[#F4F1E8]/80 transition-colors cursor-pointer";
+                const conteudo = (
+                  <>
+                    <div className="mb-2 transition-transform duration-300 group-hover:-translate-y-0.5">
+                      {item.icone}
+                    </div>
+                    <span className="text-[11.5px] sm:text-xs font-semibold text-[#214137] leading-snug mb-1 group-hover:text-[#152B24]">
+                      {item.titulo}
+                    </span>
+                    <span className="text-[10.5px] text-[#3B4D44]/75 leading-tight">
+                      {item.subtitulo}
+                    </span>
+                  </>
+                );
+                return "href" in item && item.href ? (
+                  <Link key={item.id} href={item.href} className={classe}>
+                    {conteudo}
+                  </Link>
+                ) : (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => navegarParaSecaoProdutos(item.aba)}
+                    className={classe}
+                  >
+                    {conteudo}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Card Direito (4 colunas): Quatro caminhos. Uma essência. */}
-          <div className="lg:col-span-4 rounded-2xl overflow-hidden relative bg-[#DCE1D4] border border-[#D3D9C9] shadow-xs flex items-center min-h-[175px]">
+          {/* Card Direito (3 colunas em xl): Quatro caminhos. Uma essência. */}
+          <div className="lg:col-span-4 xl:col-span-3 rounded-2xl overflow-hidden relative bg-[#DCE1D4] border border-[#D3D9C9] shadow-xs flex items-center min-h-[175px]">
             {/* Imagem Botânica de Fundo Contínua */}
             <Image
               src="/images/caminhos/folhas-essencia.jpg"
               alt="Folhas naturais simbolizando a essência do INstituto Kalapa"
               fill
-              sizes="(max-width: 1024px) 100vw, 33vw"
-              className="object-cover object-left"
+              sizes="(max-width: 1024px) 100vw, 28vw"
+              className="object-cover object-[18%_center]"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#DCE1D4]/75 to-[#E5E8DE]/95" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#DCE1D4]/80 to-[#E5E8DE]/95" />
 
             {/* Texto Conceitual à Direita */}
-            <div className="relative z-10 w-full py-5 pr-5 pl-32 sm:pl-36 flex flex-col justify-center">
-              <h3 className="font-serif italic text-xl sm:text-[24px] font-medium text-[#2A3F33] leading-tight mb-2">
+            <div className="relative z-10 w-full py-4 pr-4 pl-24 sm:pl-28 xl:pl-24 flex flex-col justify-center">
+              <h3 className="font-serif italic text-lg sm:text-[21px] font-medium text-[#2A3F33] leading-tight mb-1.5">
                 Quatro caminhos.
                 <br />
                 Uma essência.
               </h3>
-              <p className="text-xs text-[#2E4036]/90 leading-relaxed mb-3">
+              <p className="text-[11.5px] text-[#2E4036]/90 leading-relaxed mb-2.5">
                 Ampliar a consciência para construir novas possibilidades de
                 viver, relacionar-se e trabalhar.
               </p>
-              <span className="text-xs font-semibold text-[#214137] tracking-wide mt-auto">
+              <span className="text-[11.5px] font-semibold text-[#214137] tracking-wide mt-auto">
                 INstituto Kalapa
               </span>
             </div>

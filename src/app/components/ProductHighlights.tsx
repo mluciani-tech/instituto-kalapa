@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, MessageCircle } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
 import type { VagasInfo } from "@/lib/types";
+import { fetchProdutosPublicosCached, fetchVagasBatchClient } from "@/lib/produtos-client";
 
 export default function ProductHighlights() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -13,12 +14,12 @@ export default function ProductHighlights() {
   const [vagasMap, setVagasMap] = useState<Record<string, VagasInfo>>({});
 
   useEffect(() => {
-    fetch("/api/produtos")
-      .then((r) => r.json())
+    fetchProdutosPublicosCached()
       .then(async (data: Produto[]) => {
         const CategoriasOutros = new Set([
           "testes",
           "teste",
+          "calendario",
           "jogos",
           "jogo",
           "receitas",
@@ -53,20 +54,7 @@ export default function ProductHighlights() {
 
         const produtosComVagas = destaques.filter((p) => p.vagas_maximas != null);
         if (produtosComVagas.length > 0) {
-          const vagasResults = await Promise.all(
-            produtosComVagas.map((p) =>
-              fetch(`/api/vagas?produto_id=${p.id}`)
-                .then((r) => r.ok ? r.json() : null)
-                .catch(() => null)
-            )
-          );
-
-          const map: Record<string, VagasInfo> = {};
-          produtosComVagas.forEach((p, i) => {
-            if (vagasResults[i]) {
-              map[p.id] = vagasResults[i];
-            }
-          });
+          const map = await fetchVagasBatchClient(produtosComVagas.map((p) => p.id));
           setVagasMap(map);
         }
 

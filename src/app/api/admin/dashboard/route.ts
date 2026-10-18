@@ -126,11 +126,11 @@ export async function GET(req: NextRequest) {
       if (
         s === "jogo" ||
         s === "jogos" ||
-        c.includes("jogo") ||
+        s === "teste-metamorfose" ||
+        c === "jogo" ||
+        c === "jogos" ||
         r.includes("metamorfose") ||
-        r.includes("jogo") ||
-        n.includes("metamorfose") ||
-        n.includes("jogo")
+        n.includes("metamorfose")
       ) {
         return "jogos";
       }
@@ -165,10 +165,10 @@ export async function GET(req: NextRequest) {
     const faturamentoPeriodo = pedidosPagosPeriodo.reduce((acc, p) => acc + (Number(p.valor) || 0), 0);
     const faturamentoTotal = pedidosPagosTotal.reduce((acc, p) => acc + (Number(p.valor) || 0), 0);
 
-    const countPagosPeriodo = pedidosPagosPeriodo.length;
+    const countPagosPeriodo = pedidosPagosPeriodo.filter((p) => (Number(p.valor) || 0) > 0).length;
     const countTotalPeriodo = pedidosPeriodo.length;
     const ticketMedioPeriodo = countPagosPeriodo > 0 ? faturamentoPeriodo / countPagosPeriodo : 0;
-    const taxaConversaoPeriodo = countTotalPeriodo > 0 ? (countPagosPeriodo / countTotalPeriodo) * 100 : 0;
+    const taxaConversaoPeriodo = countTotalPeriodo > 0 ? (pedidosPagosPeriodo.length / countTotalPeriodo) * 100 : 0;
 
     // Métodos de Pagamento (PIX vs Cartão) no período
     let pixCount = 0;
@@ -180,6 +180,7 @@ export async function GET(req: NextRequest) {
 
     for (const p of pedidosPagosPeriodo) {
       const v = Number(p.valor) || 0;
+      if (v <= 0) continue;
       const m = (p.metodo_pagamento || "").toLowerCase();
       if (m.includes("pix")) {
         pixCount += 1;
@@ -210,20 +211,28 @@ export async function GET(req: NextRequest) {
 
     for (const p of pedidosPagosPeriodo) {
       const v = Number(p.valor) || 0;
-      let cat: "jogos" | "testes" | "atendimentos" | "vivencias" = "vivencias";
-
       const itens = Array.isArray(p.itens) ? p.itens : [];
-      if (itens.length > 0) {
-        const firstItem = itens[0] as any;
-        cat = getCategoriaItem(firstItem);
-      } else {
-        const prod = p.produtos as any;
-        cat = getCategoriaItem(prod);
-      }
+      const firstItem = (itens.length > 0 ? itens[0] : {}) as any;
+      const prod = (p.produtos || {}) as any;
+
+      const mergedItem = {
+        ...firstItem,
+        ...prod,
+        slug: prod.slug || firstItem.slug,
+        categoria: prod.categoria || firstItem.categoria,
+        rota_teste: prod.rota_teste || firstItem.rota_teste,
+        nome: prod.nome || firstItem.nome,
+        is_teste: prod.is_teste ?? firstItem.is_teste,
+        atendimento_individual: prod.atendimento_individual ?? firstItem.atendimento_individual,
+      };
+
+      const cat = getCategoriaItem(mergedItem);
 
       linhasNegocio[cat].receita += v;
-      linhasNegocio[cat].pedidos += 1;
-      linhasNegocio[cat].count += 1;
+      if (v > 0) {
+        linhasNegocio[cat].pedidos += 1;
+        linhasNegocio[cat].count += 1;
+      }
     }
 
     const totalReceitaLinhas = faturamentoPeriodo || 1;
@@ -351,7 +360,8 @@ export async function GET(req: NextRequest) {
         const itemObj = Array.isArray(itensData) ? itensData[0] : null;
 
         const prodNome = prodObj?.nome || itemObj?.nome || "Vivência Kalapa";
-        const categoria = getCategoriaItem(itemObj || prodObj);
+        const mergedItem = { ...(prodObj || {}), ...(itemObj || {}), slug: prodObj?.slug || itemObj?.slug, categoria: prodObj?.categoria || itemObj?.categoria, is_teste: prodObj?.is_teste ?? itemObj?.is_teste };
+        const categoria = getCategoriaItem(mergedItem);
 
         let msgTexto = `Olá ${p.cliente_nome || ""}, tudo bem? Sou da equipe do INstituto Kalapa. Vimos seu interesse na vivência "${prodNome}". Ficou com alguma dúvida sobre a inscrição ou pagamento? Posso te ajudar!`;
 
@@ -513,6 +523,9 @@ export async function GET(req: NextRequest) {
       return {
         id: m.id,
         usuario_id: m.usuario_id || null,
+        nome: nomeCliente,
+        email: m.email || "",
+        telefone: m.telefone || null,
         cliente_nome: nomeCliente,
         cliente_email: m.email || null,
         cliente_telefone: m.telefone || null,
@@ -530,6 +543,9 @@ export async function GET(req: NextRequest) {
       totalPartidasGeral: allMetamorfose.length,
       leadsUnicosPeriodo: emailsJogosPeriodo.size,
       leadsUnicosGeral: emailsJogosGeral.size,
+      blocoAGeral: blocoACount,
+      blocoBGeral: blocoBCount,
+      transicaoGeral: transicaoCount,
       creditosVendidos: creditosJogos.length,
       creditosUtilizados: creditosJogos.filter((c: any) => c.status === "utilizado").length,
       creditosDisponiveis: creditosJogos.filter((c: any) => c.status === "disponivel").length,

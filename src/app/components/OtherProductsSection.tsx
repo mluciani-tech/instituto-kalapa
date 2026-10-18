@@ -10,12 +10,14 @@ import {
   FileDown,
   Utensils,
   Gamepad2,
+  CalendarDays,
   ArrowRight,
 } from "lucide-react";
 import ProductCard, { type Produto } from "./ProductCard";
 import type { VagasInfo } from "@/lib/types";
+import { fetchProdutosPublicosCached, fetchVagasBatchClient } from "@/lib/produtos-client";
 
-type AbaFiltro = "todos" | "testes" | "jogos" | "receitas" | "biblioteca";
+type AbaFiltro = "todos" | "testes" | "calendario" | "jogos" | "receitas" | "biblioteca";
 
 const ABAS: { id: AbaFiltro; label: string; icone: React.ReactNode }[] = [
   { id: "todos", label: "Todos", icone: <Sparkles className="w-4 h-4" /> },
@@ -23,6 +25,11 @@ const ABAS: { id: AbaFiltro; label: string; icone: React.ReactNode }[] = [
     id: "testes",
     label: "Testes",
     icone: <Compass className="w-4 h-4" />,
+  },
+  {
+    id: "calendario",
+    label: "Calendário",
+    icone: <CalendarDays className="w-4 h-4" />,
   },
   {
     id: "jogos",
@@ -69,6 +76,19 @@ const recursosFixos: RecursoDestaque[] = [
     icone: <Compass className="w-5 h-5 text-white" />,
   },
   {
+    id: "calendario-kalapa",
+    aba: "calendario",
+    badge: "Programação Oficial",
+    titulo: "Calendário de Encontros",
+    subtitulo: "Datas das próximas vivências, grupos e formações",
+    descricao:
+      "Consulte nossa agenda atualizada de vivências presenciais, grupos terapêuticos, práticas contemplativas e encontros no INstituto Kalapa.",
+    ctaTexto: "Ver Calendário",
+    href: "/produtos?slug=calendario",
+    corBg: "bg-[#EAE8EC]",
+    icone: <CalendarDays className="w-5 h-5 text-white" />,
+  },
+  {
     id: "jogo-metamorfose",
     aba: "jogos",
     badge: "Jogo Sistêmico Interativo",
@@ -109,7 +129,7 @@ const recursosFixos: RecursoDestaque[] = [
   },
 ];
 
-function classificarProdutoOutro(p: Produto): Exclude<AbaFiltro, "todos"> | null {
+export function classificarProdutoOutro(p: Produto): Exclude<AbaFiltro, "todos"> | null {
   const norm = (s: string) =>
     s
       .toLowerCase()
@@ -119,6 +139,10 @@ function classificarProdutoOutro(p: Produto): Exclude<AbaFiltro, "todos"> | null
 
   const cat = norm(p.categoria || "");
   const slug = norm(p.slug || "");
+
+  if (cat === "calendario" || slug === "calendario" || slug.startsWith("calendario-")) {
+    return "calendario";
+  }
 
   if (cat === "receitas" || cat === "receita" || slug.includes("receita")) {
     return "receitas";
@@ -181,7 +205,7 @@ export default function OtherProductsSection() {
       const novaAba = customEvent.detail?.aba as AbaFiltro | undefined;
       if (
         novaAba &&
-        ["todos", "testes", "jogos", "receitas", "biblioteca"].includes(novaAba)
+        ["todos", "testes", "calendario", "jogos", "receitas", "biblioteca"].includes(novaAba)
       ) {
         setAbaAtiva(novaAba);
       }
@@ -200,8 +224,7 @@ export default function OtherProductsSection() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/produtos")
-      .then((r) => (r.ok ? r.json() : []))
+    fetchProdutosPublicosCached()
       .then(async (data: Produto[]) => {
         const filtrados = data.filter(
           (p) => classificarProdutoOutro(p) !== null
@@ -210,17 +233,7 @@ export default function OtherProductsSection() {
 
         const comVagas = filtrados.filter((p) => p.vagas_maximas != null);
         if (comVagas.length > 0) {
-          const vagasResults = await Promise.all(
-            comVagas.map((p) =>
-              fetch(`/api/vagas?produto_id=${p.id}`)
-                .then((r) => (r.ok ? r.json() : null))
-                .catch(() => null)
-            )
-          );
-          const map: Record<string, VagasInfo> = {};
-          comVagas.forEach((p, i) => {
-            if (vagasResults[i]) map[p.id] = vagasResults[i];
-          });
+          const map = await fetchVagasBatchClient(comVagas.map((p) => p.id));
           setVagasMap(map);
         }
       })
