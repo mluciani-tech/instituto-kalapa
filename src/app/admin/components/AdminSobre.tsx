@@ -37,7 +37,7 @@ export default function AdminSobre({ onError }: Props) {
       setFacilitadoraFoto(data.facilitadora_foto || FOTO_FACILITADORA_PADRAO);
       setFacilitadoraCredenciais(data.facilitadora_credenciais || "Constelação Familiar, Vivências em Grupo e Acolhimento do Trauma");
       setFacilitadoraBio(data.facilitadora_bio || "Com mais de 10 anos de dedicação ao cuidado emocional e ao desenvolvimento humano, Clatihúcia Capeli conduz vivências que acolhem a dor sem julgamentos, permitindo que ela se transforme em força e consciência.\n\nSua abordagem integra a sabedoria sistêmica das constelações familiares, a neurobiologia do trauma e a potência curativa da presença em grupo. Cada encontro é cuidadosamente preparado para ser um santuário de respeito, acolhimento genuíno e pertencimento.");
-      setEspacoTitulo(data.espaco_titulo || "Espaço Serena — Refúgio e Natureza");
+      setEspacoTitulo(data.espaco_titulo || "Sarawasti & Bhama — Refúgio e Natureza");
       setEspacoDescricao(data.espaco_descricao || "Localizado em meio à natureza na Granja Viana (Cotia - SP), o espaço foi concebido como um refúgio acolhedor, silencioso e seguro para vivências presenciais transformadoras.");
       if (data.espaco_fotos) {
         try {
