@@ -106,7 +106,7 @@ export default function AdminManual() {
       title: "9. Histórico & Versões do Sistema",
       icon: Zap,
       summary: "Registro de atualizações contínuas e notas de versão do projeto.",
-      badge: "v2.14",
+      badge: "v2.15",
     },
   ];
 
@@ -969,16 +969,33 @@ export default function AdminManual() {
                   </p>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-brand-purple/10 text-brand-purple font-mono font-bold text-xs">
-                  Versão Atual: v2.13.0
+                  Versão Atual: v2.15.0
                 </div>
               </div>
 
               <div className="space-y-4">
-                {/* v2.14.0 */}
+                {/* v2.15.0 */}
                 <div className="relative pl-6 border-l-2 border-brand-purple space-y-1.5">
                   <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-purple" />
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs text-brand-purple">v2.14.0</span>
+                    <span className="font-bold text-xs text-brand-purple">v2.15.0</span>
+                    <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-brand-charcoal">
+                    Aba &ldquo;Meus Jogos&rdquo;, Item Calendário na Home &amp; Correção do Carregamento da Grade de Agenda
+                  </h4>
+                  <ul className="text-xs text-brand-charcoal/70 list-disc list-inside space-y-0.5 mb-4">
+                    <li><strong>Meus Jogos na Área do Usuário:</strong> Nova aba &ldquo;Meus Jogos&rdquo; em <em>Minha Conta</em>, ao lado de &ldquo;Meus Testes&rdquo;. Jogos de autoconhecimento (ex.: A Metamorfose da Consciência) deixam de aparecer misturados aos testes, com textos, ícone e botão &ldquo;Iniciar Jogo&rdquo; próprios.</li>
+                    <li><strong>Item Calendário na Home:</strong> Novo item &ldquo;Calendário&rdquo; na faixa de Conhecimento e Experiências, logo após &ldquo;Testes de autoconhecimento&rdquo;, levando à página de produtos da categoria <code>calendario</code>. A faixa passou a acomodar 5 itens e o cartão &ldquo;Quatro caminhos. Uma essência.&rdquo; foi reajustado.</li>
+                    <li><strong>Correção da Grade Semanal (Admin &rarr; Agenda):</strong> Corrigido o carregamento infinito (&ldquo;Carregando grade&hellip;&rdquo;) na aba <em>Grade Semanal de Trabalho</em>, causado por uma dependência circular na busca da grade.</li>
+                  </ul>
+                </div>
+
+                {/* v2.14.0 */}
+                <div className="relative pl-6 border-l-2 border-brand-beige space-y-1.5">
+                  <div className="absolute -left-1.5 top-0 w-3 h-3 rounded-full bg-brand-beige" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-brand-charcoal/70">v2.14.0</span>
                     <span className="text-[10px] text-brand-charcoal/50">Outubro / 2026</span>
                   </div>
                   <h4 className="font-bold text-xs text-brand-charcoal">
