@@ -8,19 +8,19 @@ export default function Footer() {
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
         {/* Logo / Nome */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3.5">
           <Image
-            src="/logo-kalapa.png"
-            alt=""
-            width={48}
-            height={48}
-            className="w-12 h-12 object-contain rounded-xl bg-brand-offwhite p-1.5 shadow-md shadow-black/20"
+            src="/images/caminhos/logo-kalapa-claro.png"
+            alt="Logo INstituto Kalapa"
+            width={52}
+            height={52}
+            className="w-12 h-12 object-contain shrink-0"
           />
           <div>
             <span className="text-white font-bold text-xl tracking-tight">
               INstituto Kalapa
             </span>
-            <p className="text-white/30 text-sm mt-1">
+            <p className="text-white/40 text-xs sm:text-sm mt-0.5">
               Transformação Comportamental
             </p>
           </div>
