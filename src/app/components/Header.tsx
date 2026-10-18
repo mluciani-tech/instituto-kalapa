@@ -37,7 +37,7 @@ const contatos = {
     "https://wa.me/5511917452732?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20um%20atendimento%20ou%20falar%20com%20a%20equipe%20do%20INstituto%20Kalapa.",
   whatsappLabel: "(11) 91745-2732",
   erp: "https://espaco-serena-clinica.web.app/?return_url=https%3A%2F%2Fwww.institutokalapa.com.br&redirect_url=https%3A%2F%2Fwww.institutokalapa.com.br",
-  erpLabel: "Espaço Serena (Acesso Interno)",
+  erpLabel: "Espaço Sarawasti & Brahma",
 };
 
 export default function Header() {
@@ -486,7 +486,7 @@ export default function Header() {
                 className="inline-flex items-center gap-1.5 font-medium text-[#214137] hover:underline"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
-                Sistema ERP
+                Espaço Sarawasti & Brahma
               </a>
               <span>{contatos.endereco}</span>
             </div>

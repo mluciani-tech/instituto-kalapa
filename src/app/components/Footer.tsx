@@ -268,7 +268,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="hover:text-white/70 transition-colors"
             >
-              Espaço Serena (Acesso Interno)
+              Espaço Sarawasti & Brahma
             </a>
             <span>•</span>
             <span>Espaço Terapêutico e Desenvolvimento Humano</span>
