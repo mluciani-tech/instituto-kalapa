@@ -12,7 +12,7 @@ export default function Footer() {
     youtubeLabel: "@institutoKalapa",
     linkedin: "https://linkedin.com/company/instituto-kalapa",
     linkedinLabel: "INstituto Kalapa",
-    email: "clatihucia.capeli@institutokalapa.com.br",
+    email: "contato@institutokalapa.com.br",
     whatsapp:
       "https://wa.me/5511917452732?text=Ol%C3%A1!%20Gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20o%20INstituto%20Kalapa.",
     whatsappLabel: "(11) 91745-2732",

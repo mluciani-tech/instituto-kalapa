@@ -32,7 +32,7 @@ const contatos = {
   youtubeLabel: "@institutoKalapa",
   linkedin: "https://linkedin.com/company/instituto-kalapa",
   linkedinLabel: "INstituto Kalapa",
-  email: "clatihucia.capeli@institutokalapa.com.br",
+  email: "contato@institutokalapa.com.br",
   whatsapp:
     "https://wa.me/5511917452732?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20um%20atendimento%20ou%20falar%20com%20a%20equipe%20do%20INstituto%20Kalapa.",
   whatsappLabel: "(11) 91745-2732",

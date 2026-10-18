@@ -48,7 +48,8 @@ export async function GET(req: NextRequest) {
           .from("pedidos")
           .select("id, status, valor, itens, produtos(nome)");
 
-        if (u.email.toLowerCase() === "clatihucia.capeli@institutokalapa.com.br") {
+        const adminEmails = ["clatihucia.capeli@institutokalapa.com.br", "contato@institutokalapa.com.br"];
+        if (adminEmails.includes(u.email.toLowerCase())) {
           queryPedidos = queryPedidos.eq("usuario_id", u.id);
         } else {
           queryPedidos = queryPedidos.or(`usuario_id.eq.${u.id},cliente_email.ilike.${u.email}`);
