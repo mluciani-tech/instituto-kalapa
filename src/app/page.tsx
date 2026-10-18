@@ -8,7 +8,7 @@ import OtherProductsSection from "./components/OtherProductsSection";
 import Footer from "./components/Footer";
 import { getPublicConfig } from "@/lib/config";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function Home() {
   const config = await getPublicConfig();

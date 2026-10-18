@@ -37,7 +37,7 @@ const contatos = {
     "https://wa.me/5511917452732?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20um%20atendimento%20ou%20falar%20com%20a%20equipe%20do%20INstituto%20Kalapa.",
   whatsappLabel: "(11) 91745-2732",
   erp: "https://espaco-serena-clinica.web.app/?return_url=https%3A%2F%2Fwww.institutokalapa.com.br&redirect_url=https%3A%2F%2Fwww.institutokalapa.com.br",
-  erpLabel: "Sistema Espaço Serena (ERP)",
+  erpLabel: "Espaço Serena (Acesso Interno)",
 };
 
 export default function Header() {
@@ -187,14 +187,14 @@ export default function Header() {
               <span className="whitespace-nowrap">Agendar / Falar Conosco</span>
             </a>
 
-            {/* Redes Sociais nos botões circulares */}
+            {/* Redes Sociais nos botões circulares (visíveis a partir de telas xl para máximo conforto) */}
             <a
               href={contatos.instagram}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram do INstituto Kalapa"
               title="Instagram"
-              className="hidden md:flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241]"
+              className="hidden xl:flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241]"
             >
               <svg
                 className="w-4 h-4"
@@ -218,7 +218,7 @@ export default function Header() {
               rel="noopener noreferrer"
               aria-label="Canal no YouTube do INstituto Kalapa"
               title="YouTube"
-              className="hidden md:flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241]"
+              className="hidden xl:flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241]"
             >
               <svg
                 className="w-4 h-4"
@@ -241,7 +241,7 @@ export default function Header() {
               rel="noopener noreferrer"
               aria-label="LinkedIn do INstituto Kalapa"
               title="LinkedIn"
-              className="hidden md:flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241]"
+              className="hidden xl:flex h-9 w-9 items-center justify-center rounded-full border border-[#DCD8CD] bg-white/80 text-[#214137] transition-all duration-200 hover:bg-white hover:border-[#3B5241]"
             >
               <svg
                 className="w-4 h-4"

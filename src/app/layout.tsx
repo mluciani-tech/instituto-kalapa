@@ -1,9 +1,30 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Playfair_Display, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
 import CartDrawer from "./components/CartDrawer";
 import { CartProvider } from "@/context/CartContext";
 import { MotionConfig } from "framer-motion";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-serif",
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-cormorant",
+});
 
 export const metadata: Metadata = {
   title: "INstituto Kalapa — Vivências Terapêuticas em Grupo",
@@ -72,15 +93,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="h-full antialiased">
+    <html
+      lang="pt-BR"
+      className={`h-full antialiased ${inter.variable} ${playfair.variable} ${cormorant.variable}`}
+    >
       <body className="min-h-full flex flex-col font-sans">
         <MotionConfig reducedMotion="user">
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link
-            rel="preconnect"
-            href="https://fonts.gstatic.com"
-            crossOrigin="anonymous"
-          />
           <CartProvider>
             <Header />
             <CartDrawer />
