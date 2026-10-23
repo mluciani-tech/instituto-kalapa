@@ -147,7 +147,7 @@ const itensConhecimento = [
     id: "testes",
     titulo: "Testes de autoconhecimento",
     subtitulo: "(Eneagrama, Cronotipo e mais)",
-    aba: "testes",
+    href: "/teste-autoconhecimento",
     icone: (
       <svg
         className="w-7 h-7 text-[#485742]"
@@ -170,7 +170,6 @@ const itensConhecimento = [
     id: "calendario",
     titulo: "Calendário",
     subtitulo: "(Programação e próximos encontros)",
-    aba: "calendario",
     href: "/produtos?categoria=calendario",
     icone: <CalendarDays className="w-7 h-7 text-[#485742]" strokeWidth={1.4} />,
   },
@@ -178,7 +177,7 @@ const itensConhecimento = [
     id: "receitas",
     titulo: "Receitas das vivências",
     subtitulo: "(Terapêuticas e saudáveis)",
-    aba: "receitas",
+    href: "/produtos?categoria=receitas",
     icone: (
       <svg
         className="w-7 h-7 text-[#485742]"
@@ -201,32 +200,19 @@ const itensConhecimento = [
     id: "jogos",
     titulo: "Jogos de Autoconhecimento",
     subtitulo: "(Metamorfose e Jornadas)",
-    aba: "jogos",
+    href: "/jogo-sistemico",
     icone: <Gamepad2 className="w-7 h-7 text-[#485742]" strokeWidth={1.4} />,
   },
   {
     id: "biblioteca",
     titulo: "Biblioteca Kalapa",
     subtitulo: "(Artigos, Guias e Downloads)",
-    aba: "biblioteca",
+    href: "/produtos?categoria=biblioteca",
     icone: <BookOpen className="w-7 h-7 text-[#485742]" strokeWidth={1.4} />,
   },
 ];
 
 export default function QuatroCaminhosSection() {
-  const navegarParaSecaoProdutos = (aba: string) => {
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("kalapa:selecionar-aba-conhecimento", {
-          detail: { aba },
-        })
-      );
-      const section = document.getElementById("conhecimento-experiencias");
-      if (section) {
-        section.scrollIntoView({ behavior: "instant", block: "start" });
-      }
-    }
-  };
 
   return (
     <section
@@ -342,50 +328,35 @@ export default function QuatroCaminhosSection() {
                 <p className="text-xs text-[#3B4D44]/85 mt-1 mb-3 leading-relaxed">
                   Testes, calendário, receitas, jogos e conteúdos para inspirar sua jornada.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => navegarParaSecaoProdutos("todos")}
+                <Link
+                  href="/produtos?categoria=biblioteca"
                   className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full border border-[#485742]/55 text-[#214137] text-xs font-medium hover:bg-[#485742] hover:text-white transition-colors cursor-pointer"
                 >
                   <span>Acessar a Biblioteca Kalapa</span>
                   <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />
-                </button>
+                </Link>
               </div>
             </div>
 
             {/* 5 Mini-Colunas de Categorias de Conteúdo */}
             <div className="w-full xl:w-auto flex-1 grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-0 sm:divide-x sm:divide-[#E6E3DA]">
-              {itensConhecimento.map((item) => {
-                const classe =
-                  "group px-2 sm:px-2.5 py-2 flex flex-col items-center text-center rounded-xl sm:rounded-none hover:bg-[#F4F1E8]/80 transition-colors cursor-pointer";
-                const conteudo = (
-                  <>
-                    <div className="mb-2 transition-transform duration-300 group-hover:-translate-y-0.5">
-                      {item.icone}
-                    </div>
-                    <span className="text-[11.5px] sm:text-xs font-semibold text-[#214137] leading-snug mb-1 group-hover:text-[#152B24]">
-                      {item.titulo}
-                    </span>
-                    <span className="text-[10.5px] text-[#3B4D44]/75 leading-tight">
-                      {item.subtitulo}
-                    </span>
-                  </>
-                );
-                return "href" in item && item.href ? (
-                  <Link key={item.id} href={item.href} className={classe}>
-                    {conteudo}
-                  </Link>
-                ) : (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => navegarParaSecaoProdutos(item.aba)}
-                    className={classe}
-                  >
-                    {conteudo}
-                  </button>
-                );
-              })}
+              {itensConhecimento.map((item) => (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  className="group px-2 sm:px-2.5 py-2 flex flex-col items-center text-center rounded-xl sm:rounded-none hover:bg-[#F4F1E8]/80 transition-colors cursor-pointer"
+                >
+                  <div className="mb-2 transition-transform duration-300 group-hover:-translate-y-0.5">
+                    {item.icone}
+                  </div>
+                  <span className="text-[11.5px] sm:text-xs font-semibold text-[#214137] leading-snug mb-1 group-hover:text-[#152B24]">
+                    {item.titulo}
+                  </span>
+                  <span className="text-[10.5px] text-[#3B4D44]/75 leading-tight">
+                    {item.subtitulo}
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
 

@@ -7,7 +7,6 @@ import {
   Sparkles,
   Compass,
   BookOpen,
-  FileDown,
   Utensils,
   Gamepad2,
   CalendarDays,
@@ -48,86 +47,41 @@ const ABAS: { id: AbaFiltro; label: string; icone: React.ReactNode }[] = [
   },
 ];
 
-interface RecursoDestaque {
-  id: string;
-  aba: Exclude<AbaFiltro, "todos">;
-  badge: string;
-  titulo: string;
-  subtitulo: string;
-  descricao: string;
-  ctaTexto: string;
-  href: string;
-  corBg: string;
-  icone: React.ReactNode;
-}
-
-const recursosFixos: RecursoDestaque[] = [
-  {
-    id: "hub-testes",
-    aba: "testes",
-    badge: "Autoconhecimento & Diagnóstico",
-    titulo: "Testes de Autoconhecimento",
-    subtitulo: "Eneagrama, Cronotipo, Yin-Yang e Lealdades Sistêmicas",
-    descricao:
-      "Avaliações terapêuticas e diagnósticas com emissão de relatório individual detalhado em PDF para mapear seu momento atual.",
-    ctaTexto: "Explorar todos os testes",
+const linksDedicadosPorAba: Record<
+  Exclude<AbaFiltro, "todos">,
+  { label: string; href: string; mensagem: string }
+> = {
+  testes: {
+    label: "Acessar Portal de Testes",
     href: "/teste-autoconhecimento",
-    corBg: "bg-[#EAE8DF]",
-    icone: <Compass className="w-5 h-5 text-white" />,
+    mensagem:
+      "Explore todas as avaliações terapêuticas e diagnósticas de autoconhecimento com emissão de relatório individual detalhado em PDF.",
   },
-  {
-    id: "calendario-kalapa",
-    aba: "calendario",
-    badge: "Programação Oficial",
-    titulo: "Calendário de Encontros",
-    subtitulo: "Datas das próximas vivências, grupos e formações",
-    descricao:
-      "Consulte nossa agenda atualizada de vivências presenciais, grupos terapêuticos, práticas contemplativas e encontros no INstituto Kalapa.",
-    ctaTexto: "Ver Calendário",
-    href: "/produtos?slug=calendario",
-    corBg: "bg-[#EAE8EC]",
-    icone: <CalendarDays className="w-5 h-5 text-white" />,
+  calendario: {
+    label: "Ver Calendário de Encontros",
+    href: "/produtos?categoria=calendario",
+    mensagem:
+      "Consulte nossa agenda atualizada de vivências presenciais, grupos terapêuticos e encontros no INstituto Kalapa.",
   },
-  {
-    id: "jogo-metamorfose",
-    aba: "jogos",
-    badge: "Jogo Sistêmico Interativo",
-    titulo: "A Metamorfose da Consciência",
-    subtitulo: "Jornada gamificada pelos 4 Quadrantes Sistêmicos",
-    descricao:
-      "Experiência profunda de autoindagação inspirada nas Constelações e no Eneagrama, com emissão do Dossiê Editorial completo.",
-    ctaTexto: "Acessar o Jogo Sistêmico",
+  jogos: {
+    label: "Jogar Metamorfose da Consciência",
     href: "/jogo-sistemico",
-    corBg: "bg-[#EFE7DC]",
-    icone: <Gamepad2 className="w-5 h-5 text-white" />,
+    mensagem:
+      "Jornada gamificada de autoindagação inspirada nas Constelações e no Eneagrama, com emissão do Dossiê Editorial completo.",
   },
-  {
-    id: "receitas-vivencias",
-    aba: "receitas",
-    badge: "Cuidado & Nutrição Consciente",
-    titulo: "Receitas das Vivências",
-    subtitulo: "Preparos terapêuticos, chás e culinária afetiva do Kalapa",
-    descricao:
-      "Sabores que acolhem durante nossos encontros presenciais, reunidos para você reproduzir em casa com equilíbrio e presença.",
-    ctaTexto: "Ver receitas e preparos",
+  receitas: {
+    label: "Ver Receitas e Preparos",
     href: "/produtos?categoria=receitas",
-    corBg: "bg-[#EAE8DF]",
-    icone: <Utensils className="w-5 h-5 text-white" />,
+    mensagem:
+      "Preparos terapêuticos, chás e culinária afetiva das nossas vivências reunidos para você reproduzir em casa.",
   },
-  {
-    id: "biblioteca-kalapa",
-    aba: "biblioteca",
-    badge: "Biblioteca Kalapa & PDFs",
-    titulo: "Biblioteca Kalapa",
-    subtitulo: "Artigos, reflexões, e-books, cadernos e materiais para download",
-    descricao:
-      "Conteúdos autorais e materiais ricos desenvolvidos para apoiar empreendedores, terapeutas e buscadores em sua prática diária.",
-    ctaTexto: "Acessar Biblioteca Kalapa",
+  biblioteca: {
+    label: "Acessar Biblioteca Kalapa",
     href: "/produtos?categoria=biblioteca",
-    corBg: "bg-[#EFE7DC]",
-    icone: <BookOpen className="w-5 h-5 text-white" />,
+    mensagem:
+      "Artigos autorais, reflexões, e-books e materiais ricos para download desenvolvidos para apoiar sua prática diária.",
   },
-];
+};
 
 export function classificarProdutoOutro(p: Produto): Exclude<AbaFiltro, "todos"> | null {
   const norm = (s: string) =>
@@ -240,11 +194,6 @@ export default function OtherProductsSection() {
       .catch(() => {});
   }, []);
 
-  const recursosFiltrados = useMemo(() => {
-    if (abaAtiva === "todos") return recursosFixos;
-    return recursosFixos.filter((r) => r.aba === abaAtiva);
-  }, [abaAtiva]);
-
   const produtosDinamicosFiltrados = useMemo(() => {
     if (abaAtiva === "todos") return produtosOutros;
     return produtosOutros.filter(
@@ -308,65 +257,9 @@ export default function OtherProductsSection() {
           })}
         </div>
 
-        {/* Cards de Acesso Rápido das Categorias Digitais (Testes, Jogos, Receitas, Artigos, Downloads) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {recursosFiltrados.map((item, idx) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: idx * 0.06 }}
-              className="h-full"
-            >
-              <Link
-                href={item.href}
-                className={`group flex flex-col h-full rounded-2xl p-6 ${item.corBg} border border-black/[0.05] shadow-xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5`}
-              >
-                <div className="flex items-center justify-between gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-full bg-[#485742] flex items-center justify-center shadow-xs">
-                    {item.icone}
-                  </div>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-white/70 text-[#214137] border border-black/5">
-                    {item.badge}
-                  </span>
-                </div>
-
-                <h3 className="font-serif text-xl font-semibold text-[#214137] mb-1.5">
-                  {item.titulo}
-                </h3>
-                <p className="text-xs font-semibold text-[#214137]/90 mb-3">
-                  {item.subtitulo}
-                </p>
-                <p className="text-xs text-[#3B4D44]/85 leading-relaxed text-justify mb-6 flex-1">
-                  {item.descricao}
-                </p>
-
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#214137] group-hover:text-[#152B24] mt-auto">
-                  <span>{item.ctaTexto}</span>
-                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </span>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Produtos Dinâmicos do Banco (Testes, Biblioteca, Receitas, Jogos, Downloads) */}
-        {produtosDinamicosFiltrados.length > 0 && (
-          <div className="pt-6 border-t border-[#DFDCD2]">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="font-serif text-2xl font-medium text-[#214137]">
-                Itens disponíveis para acesso ou download imediato
-              </h3>
-              <Link
-                href="/produtos?categoria=biblioteca"
-                className="text-xs sm:text-sm font-semibold text-[#485742] hover:text-[#214137] inline-flex items-center gap-1.5"
-              >
-                <span>Ver Biblioteca completa</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
+        {/* Listagem Direta de Produtos/Materiais */}
+        {produtosDinamicosFiltrados.length > 0 ? (
+          <div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
               {produtosDinamicosFiltrados.map((produto, index) => (
                 <ProductCard
@@ -381,6 +274,47 @@ export default function OtherProductsSection() {
                 />
               ))}
             </div>
+
+            <div className="mt-10 text-center">
+              <Link
+                href={
+                  abaAtiva !== "todos" && linksDedicadosPorAba[abaAtiva]
+                    ? linksDedicadosPorAba[abaAtiva].href
+                    : "/produtos?categoria=biblioteca"
+                }
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#485742] hover:text-[#214137] transition-colors"
+              >
+                <span>
+                  {abaAtiva !== "todos" && linksDedicadosPorAba[abaAtiva]
+                    ? linksDedicadosPorAba[abaAtiva].label
+                    : "Ver Biblioteca completa"}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="max-w-xl mx-auto p-8 rounded-2xl bg-[#FDFCF8] border border-[#E6E3D8] text-center shadow-xs">
+            <p className="text-sm text-[#3B4D44] mb-4 leading-relaxed">
+              {abaAtiva !== "todos" && linksDedicadosPorAba[abaAtiva]
+                ? linksDedicadosPorAba[abaAtiva].mensagem
+                : "Nenhum conteúdo listado no momento."}
+            </p>
+            <Link
+              href={
+                abaAtiva !== "todos" && linksDedicadosPorAba[abaAtiva]
+                  ? linksDedicadosPorAba[abaAtiva].href
+                  : "/produtos?categoria=biblioteca"
+              }
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-[#485742] text-white text-xs sm:text-sm font-semibold hover:bg-[#3B4736] transition-colors cursor-pointer"
+            >
+              <span>
+                {abaAtiva !== "todos" && linksDedicadosPorAba[abaAtiva]
+                  ? linksDedicadosPorAba[abaAtiva].label
+                  : "Explorar Biblioteca Kalapa"}
+              </span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         )}
       </div>
