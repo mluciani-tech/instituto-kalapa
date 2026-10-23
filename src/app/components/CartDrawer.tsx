@@ -133,7 +133,7 @@ export default function CartDrawer() {
           <div className="p-5 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-brand-terracotta" />
-              <h2 className="text-base font-semibold text-white tracking-tight">
+              <h2 className="text-base font-semibold text-white tracking-tight font-sans">
                 Sua Reserva
               </h2>
               <span className="text-xs bg-brand-terracotta/20 text-brand-terracotta border border-brand-terracotta/30 px-2 py-0.5 rounded-full font-medium">
@@ -265,7 +265,7 @@ export default function CartDrawer() {
                   )}
 
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-xs font-semibold text-white truncate">
+                    <h3 className="text-xs font-semibold text-white truncate font-sans">
                       {item.nome}
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">

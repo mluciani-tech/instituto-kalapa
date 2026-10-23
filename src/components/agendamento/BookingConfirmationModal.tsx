@@ -228,7 +228,7 @@ export default function BookingConfirmationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-brand-charcoal/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-brand-charcoal/60 backdrop-blur-xs animate-in fade-in duration-200 font-sans">
       <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-brand-charcoal/10 flex flex-col max-h-[92vh]">
         {/* Header */}
         <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-brand-charcoal/10 flex items-center justify-between bg-brand-offwhite">

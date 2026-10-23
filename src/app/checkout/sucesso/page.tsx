@@ -122,7 +122,7 @@ function SucessoContent() {
   };
 
   return (
-    <section className="relative min-h-screen pt-28 pb-16 md:pt-36 md:pb-24 bg-brand-charcoal overflow-hidden flex items-center justify-center">
+    <section className="relative min-h-screen pt-28 pb-16 md:pt-36 md:pb-24 bg-brand-charcoal overflow-hidden flex items-center justify-center font-sans">
       <div className="absolute inset-0 bg-gradient-to-br from-brand-charcoal via-brand-purple-deep/30 to-brand-charcoal" />
 
       <div className="relative z-10 w-full max-w-2xl mx-auto px-6">
@@ -229,7 +229,7 @@ function SucessoContent() {
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#B8965A]/20 flex items-center justify-center text-[#B8965A]">
                 <Sparkles className="w-6 h-6 animate-pulse" />
               </div>
-              <p className="text-lg font-serif font-bold text-white mb-1">
+              <p className="text-lg font-sans font-bold text-white mb-1">
                 Sua Avaliação Está Liberada!
               </p>
               <p className="text-xs sm:text-sm text-white/80 mb-3 max-w-md mx-auto">

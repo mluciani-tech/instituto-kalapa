@@ -113,7 +113,7 @@ export default function LoginPage() {
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Área Segura
               </span>
-              <h1 className="font-serif text-xl md:text-2xl font-medium text-white tracking-tight">
+              <h1 className="font-sans text-xl md:text-2xl font-bold text-white tracking-tight">
                 Entre na sua conta para continuar
               </h1>
               <p className="text-xs text-white/50 mt-1">

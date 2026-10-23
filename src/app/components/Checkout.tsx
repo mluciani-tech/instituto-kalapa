@@ -386,7 +386,7 @@ export default function Checkout() {
             <ShieldCheck className="w-4 h-4" />
             Checkout Seguro InfinitePay
           </span>
-          <h1 className="font-serif text-2xl md:text-3xl font-medium text-[#214137] tracking-tight">
+          <h1 className="font-sans text-2xl md:text-3xl font-bold text-[#214137] tracking-tight">
             Finalizar Reserva
           </h1>
           <p className="mt-1 text-brand-charcoal/60 text-xs md:text-sm">

@@ -139,7 +139,7 @@ export default function ProductAppointmentSection({ produto }: ProductAppointmen
   };
 
   return (
-    <div id="agendamento" className="mt-8 pt-8 border-t border-brand-charcoal/10 scroll-mt-24">
+    <div id="agendamento" className="mt-8 pt-8 border-t border-brand-charcoal/10 scroll-mt-24 font-sans">
       <div className="mb-6">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-terracotta/10 text-brand-terracotta text-xs font-semibold mb-2">
           <CalendarIcon className="w-3.5 h-3.5" />

@@ -37,6 +37,22 @@ h1, h2, h3, .font-heading {
   font-family: var(--font-serif);
 }
 
+.font-sans h1,
+.font-sans h2,
+.font-sans h3,
+.font-sans h4,
+.font-sans h5,
+.font-sans h6,
+.font-sans .font-heading,
+h1.font-sans,
+h2.font-sans,
+h3.font-sans,
+h4.font-sans,
+h5.font-sans,
+h6.font-sans {
+  font-family: var(--font-sans);
+}
+
 body {
   background: #F8F4ED;
   color: #4A4A4A;
