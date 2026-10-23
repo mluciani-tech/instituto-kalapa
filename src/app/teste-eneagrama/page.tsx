@@ -263,7 +263,7 @@ export default function TesteEneagramaPage() {
     limparRascunho();
 
     setEtapa("resultado");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const continuarRascunho = () => {
@@ -272,7 +272,7 @@ export default function TesteEneagramaPage() {
     setAfirmacaoAtualIndex(Math.min(rascunho.indice, totalQuestoes - 1));
     setDataRealizacao(null);
     setEtapa("teste");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const handleReiniciarTeste = () => {
@@ -289,7 +289,7 @@ export default function TesteEneagramaPage() {
       setAfirmacaoAtualIndex(0);
       setDataRealizacao(null);
       setEtapa("teste");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
 
@@ -303,7 +303,7 @@ export default function TesteEneagramaPage() {
     setAfirmacaoAtualIndex(0);
     setDataRealizacao(null);
     setEtapa("teste");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   return (

@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 const INFINITEPAY_API = "https://api.checkout.infinitepay.io/links";
 const INFINITEPAY_HANDLE = process.env.INFINITEPAY_HANDLE || "kalapa";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://instituto-kalapa.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.institutokalapa.com.br";
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || "";
 
 function formatPhoneE164(phone: string): string {

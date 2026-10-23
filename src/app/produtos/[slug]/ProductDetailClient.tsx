@@ -42,7 +42,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
         setTimeout(() => {
           const el = document.getElementById("agendamento") || document.getElementById("agendamento-section");
           if (el) {
-            el.scrollIntoView({ behavior: "smooth" });
+            el.scrollIntoView({ behavior: "instant" });
           }
         }, 300);
       }
@@ -445,7 +445,7 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                     onClick={(e) => {
                       e.preventDefault();
                       const el = document.getElementById("agendamento") || document.getElementById("agendamento-section");
-                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                      if (el) el.scrollIntoView({ behavior: "instant" });
                     }}
                     className="flex-1 py-3.5 px-4 sm:px-5 font-bold text-xs sm:text-sm rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white shadow-md shadow-brand-terracotta/25 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
                   >

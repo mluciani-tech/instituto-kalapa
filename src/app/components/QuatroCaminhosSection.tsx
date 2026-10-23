@@ -223,7 +223,7 @@ export default function QuatroCaminhosSection() {
       );
       const section = document.getElementById("conhecimento-experiencias");
       if (section) {
-        section.scrollIntoView({ behavior: "smooth", block: "start" });
+        section.scrollIntoView({ behavior: "instant", block: "start" });
       }
     }
   };

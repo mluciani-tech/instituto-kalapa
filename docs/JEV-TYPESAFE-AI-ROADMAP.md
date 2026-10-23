@@ -47,6 +47,6 @@ O **Jev** é um modelo discriminativo de inteligência artificial desenvolvido p
 
 ## 4. Próximos Passos (Quando for Implementar)
 1. Criar conta e credenciais de API no painel da [TypeSafe AI](https://docs.typesafe.ai).
-2. Adicionar variável de ambiente `TYPESAFE_API_KEY` no `.env.local` e no painel da Vercel.
+2. Adicionar variável de ambiente `TYPESAFE_API_KEY` no `.env.local` e no painel da Hostinger.
 3. Instalar o SDK oficial via `npm install @typesafe-ai/sdk` (ou `typesafe-sdk-js`).
 4. Desenvolver uma rota piloto isolada (ex: `/src/app/api/triagem/route.ts`) para validação antes de plugar na interface pública.

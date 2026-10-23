@@ -25,7 +25,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;

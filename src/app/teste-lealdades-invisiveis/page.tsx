@@ -199,7 +199,7 @@ export default function TesteLealdadesPage() {
     if (perguntaAtualIndex < LEALDADES_PERGUNTAS.length - 1) {
       setTimeout(() => {
         setPerguntaAtualIndex(perguntaAtualIndex + 1);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({ top: 0, behavior: "instant" });
       }, 300);
     } else {
       // Fim do teste
@@ -212,7 +212,7 @@ export default function TesteLealdadesPage() {
       }
       limparRascunho();
       setEtapa("resultado");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
 

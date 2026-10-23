@@ -879,7 +879,7 @@ export default function AdminManual() {
                 <ul className="list-disc list-inside text-brand-charcoal/70 space-y-1">
                   <li>Troque a senha periodicamente ou sempre que houver mudança na equipe com acesso de gestão.</li>
                   <li>Evite reutilizar senhas pessoais ou combinações simples como datas de aniversário.</li>
-                  <li>Em caso de emergência ou esquecimento da senha, o acesso mestre pode ser restaurado via console Supabase ou redefinindo a variável no Vercel.</li>
+                  <li>Em caso de emergência ou esquecimento da senha, o acesso mestre pode ser restaurado via console Supabase ou redefinindo a variável no painel da Hostinger.</li>
                 </ul>
               </div>
             </div>
@@ -917,7 +917,7 @@ export default function AdminManual() {
                   },
                   {
                     q: "O que acontece se eu esquecer a senha atual do painel de administração?",
-                    a: "Por motivos de segurança, a senha é armazenada como hash criptográfico não reversível. Caso a senha seja esquecida, o desenvolvedor ou responsável pela infraestrutura técnica pode restaurar a credencial pelo Supabase (tabela configuracoes) ou pela variável ADMIN_PASSWORD na Vercel.",
+                    a: "Por motivos de segurança, a senha é armazenada como hash criptográfico não reversível. Caso a senha seja esquecida, o desenvolvedor ou responsável pela infraestrutura técnica pode restaurar a credencial pelo Supabase (tabela configuracoes) ou pela variável ADMIN_PASSWORD na Hostinger.",
                   },
                   {
                     q: "Um cliente pediu para cancelar ou reagendar a sessão. O que devo fazer?",
@@ -988,7 +988,7 @@ export default function AdminManual() {
                     <li><strong>Padronização Global da Tipografia:</strong> Títulos e cabeçalhos em todo o projeto unificados na fonte serifada editorial (<code>font-serif</code> &mdash; Playfair Display / Cormorant Garamond), alinhados às seções 1 e 2 da home, com corpo de texto limpo em <code>Inter</code> (<code>font-sans</code>).</li>
                     <li><strong>Redes Sociais no Header:</strong> Inclusão de botões circulares elegantes para Instagram, YouTube e LinkedIn ao lado dos utilitários no desktop e no menu retrátil mobile.</li>
                     <li><strong>Novo Rodapé em 4 Colunas:</strong> Reestruturação do Footer com blocos bem distribuídos para Marca &amp; Propósito, Navegação Rápida, Espaço Físico (com link para Google Maps) e Contatos/Redes Sociais.</li>
-                    <li><strong>Otimização de Performance &amp; Core Web Vitals:</strong> Migração de fontes para <code>next/font/google</code> (eliminando <code>@import</code> bloqueante), ativação de ISR (<code>revalidate = 60</code>) na home para TTFB instantâneo (&lt;40ms via CDN Vercel) e suporte aos formatos de imagem AVIF e WebP.</li>
+                    <li><strong>Otimização de Performance &amp; Core Web Vitals:</strong> Migração de fontes para <code>next/font/google</code> (eliminando <code>@import</code> bloqueante), ativação de ISR (<code>revalidate = 60</code>) na home para TTFB ultrarrápido na Hostinger e suporte aos formatos de imagem AVIF e WebP.</li>
                     <li><strong>Novo Favicon &amp; Identidade no Navegador:</strong> Atualização completa com o novo símbolo oficial Kalapa escuro em alto contraste, suporte nativo a <code>favicon.ico</code> e cache-buster <code>?v=2</code> para atualização imediata nas abas do navegador.</li>
                     <li><strong>Humanização de Microcopy:</strong> Atualização dos links e acessos internos de &ldquo;Sistema ERP&rdquo; para <em>&ldquo;Espaço Sarawasti &amp; Brahma&rdquo;</em>.</li>
                   </ul>

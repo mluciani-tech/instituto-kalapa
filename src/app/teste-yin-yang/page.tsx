@@ -256,7 +256,7 @@ export default function TesteYinYangPage() {
     limparRascunho();
 
     setEtapa("resultado");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const continuarRascunho = () => {
@@ -265,7 +265,7 @@ export default function TesteYinYangPage() {
     setPerguntaAtualIndex(Math.min(rascunho.indice, YIN_YANG_PERGUNTAS.length - 1));
     setDataRealizacao(null);
     setEtapa("teste");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const handleRefazerPorEmpate = () => {
@@ -274,7 +274,7 @@ export default function TesteYinYangPage() {
     setPerguntaAtualIndex(0);
     setEtapa("teste");
     setModalEmpateAberto(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const handleReiniciarTeste = () => {
@@ -288,7 +288,7 @@ export default function TesteYinYangPage() {
       setPerguntaAtualIndex(0);
       setDataRealizacao(null);
       setEtapa("teste");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
 
@@ -301,7 +301,7 @@ export default function TesteYinYangPage() {
     setEtapa("teste");
     setRespostas({});
     setPerguntaAtualIndex(0);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   return (

@@ -1,5 +1,5 @@
 // Rate limiter simples em memória.
-// Nota: em serverless (Vercel), cada instância tem seu próprio mapa —
+// Nota: em instâncias de processos Node.js / workers, cada instância tem seu próprio mapa —
 // não é perfeito, mas dificulta força bruta na prática.
 
 type Entry = { count: number; resetAt: number };

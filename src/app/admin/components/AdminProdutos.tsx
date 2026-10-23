@@ -291,9 +291,9 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
     setTimeout(() => {
       const container = document.getElementById("form-produto-container");
       if (container) {
-        container.scrollIntoView({ behavior: "smooth", block: "start" });
+        container.scrollIntoView({ behavior: "instant", block: "start" });
       } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.scrollTo({ top: 0, behavior: "instant" });
       }
       const inputNome = document.getElementById("input-produto-nome");
       if (inputNome) inputNome.focus();
@@ -494,9 +494,9 @@ export default function AdminProdutos({ produtos, onReload, onError }: Props) {
                     setTimeout(() => {
                       const container = document.getElementById("form-produto-container");
                       if (container) {
-                        container.scrollIntoView({ behavior: "smooth", block: "start" });
+                        container.scrollIntoView({ behavior: "instant", block: "start" });
                       } else {
-                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        window.scrollTo({ top: 0, behavior: "instant" });
                       }
                       const inputNome = document.getElementById("input-produto-nome");
                       if (inputNome) inputNome.focus();

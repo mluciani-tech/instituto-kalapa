@@ -225,7 +225,7 @@ export default function TesteMetamorfosePage() {
     setSubfase("sorteio");
     setDataRealizacao(null);
     setEtapa("teste");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const handleSelecionarCarta = (
@@ -240,7 +240,7 @@ export default function TesteMetamorfosePage() {
       },
     }));
     setSubfase("leitura");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const handleTrocarCartaNoQuadrante = (qId: 1 | 2 | 3 | 4) => {
@@ -253,7 +253,7 @@ export default function TesteMetamorfosePage() {
       };
     });
     setSubfase("sorteio");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const handleConcluirRitoDePassagem = (qId: 1 | 2 | 3 | 4) => {
@@ -263,7 +263,7 @@ export default function TesteMetamorfosePage() {
       setSubfase(
         estadoJornada.cartasSorteadas[proximoQ] ? "leitura" : "sorteio"
       );
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "instant" });
     } else {
       // Finalizou os 4 quadrantes!
       const resultadoCalc = calcularResultadoMetamorfose(estadoJornada);
@@ -275,7 +275,7 @@ export default function TesteMetamorfosePage() {
       }
       limparRascunho();
       setEtapa("resultado");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
 
@@ -551,7 +551,7 @@ export default function TesteMetamorfosePage() {
                   setSubfase(
                     estadoJornada.cartasSorteadas[1] ? "leitura" : "sorteio"
                   );
-                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  window.scrollTo({ top: 0, behavior: "instant" });
                 }}
               />
             )}
@@ -595,7 +595,7 @@ export default function TesteMetamorfosePage() {
                     }
                     onIrParaRitoDePassagem={() => {
                       setSubfase("rito");
-                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      window.scrollTo({ top: 0, behavior: "instant" });
                     }}
                   />
                 )}
@@ -605,7 +605,7 @@ export default function TesteMetamorfosePage() {
                     carta={cartaQuadranteAtual}
                     onVoltarLeitura={() => {
                       setSubfase("leitura");
-                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      window.scrollTo({ top: 0, behavior: "instant" });
                     }}
                     onAvancarProximoQuadrante={() =>
                       handleConcluirRitoDePassagem(

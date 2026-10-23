@@ -30,7 +30,7 @@ export async function verifyAdminPassword(password: string): Promise<boolean> {
   const rawEnv = process.env.ADMIN_PASSWORD;
   if (!rawEnv) return false;
 
-  // Trata quotes adicionadas em Vercel ou arquivos .env ("minhasenha" ou 'minhasenha') e espaços
+  // Trata quotes adicionadas em painel do servidor ou arquivos .env ("minhasenha" ou 'minhasenha') e espaços
   const cleanEnv = rawEnv.trim().replace(/^["']|["']$/g, "");
 
   const safeCompare = (a: string, b: string) => {

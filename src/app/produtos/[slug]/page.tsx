@@ -118,7 +118,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://instituto-kalapa.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.institutokalapa.com.br";
   const pageUrl = `${siteUrl}/produtos/${produto.id}`;
   const title = `${produto.nome} — INstituto Kalapa`;
   const description =

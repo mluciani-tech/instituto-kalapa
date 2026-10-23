@@ -14,7 +14,7 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
 - **Gateway de Pagamento:** InfinitePay API (Pix dinâmico e Cartão até 12x com validação de webhook HMAC)
 - **E-mails:** SMTP Hostinger Corporativo (`smtp.hostinger.com:465` SSL) + Resend (com fallback mock)
 - **Ícones:** Lucide React
-- **Deploy:** Vercel
+- **Deploy:** Hostinger (Node.js Web App / Cloud)
 
 ---
 
@@ -100,11 +100,28 @@ Plataforma oficial do **Instituto Kalapa** com catálogo de experiências, contr
 
 ```bash
 npm run dev          # Iniciar ambiente de desenvolvimento (porta 3000)
-npm run build        # Executar build de produção com Turbopack
+npm run build        # Executar build de produção Next.js (com compatibilidade Hostinger)
 npm run start        # Subir servidor Node de produção
 npm run typecheck    # Verificação estrita de tipagem TypeScript (tsc --noEmit)
 npm run lint         # Análise estática de código com ESLint
 ```
+
+---
+
+## Deploy em Produção (Hostinger)
+
+A infraestrutura oficial do Instituto Kalapa opera na **Hostinger**:
+
+1. **Aplicação Node.js:**
+   - Configure a versão do Node.js (>= 20.x).
+   - Diretório raiz apontando para o projeto.
+   - Script de inicialização / comando de start: `npm run start` ou inicialização via PM2.
+2. **Variáveis de Ambiente:**
+   - Cadastre no painel da Hostinger todas as variáveis listadas na tabela acima (incluindo `NEXT_PUBLIC_SITE_URL=https://www.institutokalapa.com.br` e `SUPABASE_SERVICE_ROLE_KEY`).
+3. **Build & Deploy:**
+   - Executar `npm install` seguido de `npm run build`.
+   - O comando de build utiliza a flag `--webpack` nativa para máxima estabilidade em ambientes Linux Hostinger.
+   - Iniciar o processo da aplicação com `npm run start`.
 
 ---
 

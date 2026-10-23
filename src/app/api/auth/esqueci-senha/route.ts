@@ -14,7 +14,7 @@ function getBaseUrl(req: NextRequest): string {
   const proto = req.headers.get("x-forwarded-proto") || "https";
   if (host) return `${proto}://${host}`;
 
-  return process.env.NEXT_PUBLIC_SITE_URL || "https://instituto-kalapa.vercel.app";
+  return process.env.NEXT_PUBLIC_SITE_URL || "https://www.institutokalapa.com.br";
 }
 
 export async function POST(req: NextRequest) {

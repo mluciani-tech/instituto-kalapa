@@ -257,7 +257,7 @@ export default function TesteCronotipoPage() {
     limparRascunho();
 
     setEtapa("resultado");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const continuarRascunho = () => {
@@ -266,7 +266,7 @@ export default function TesteCronotipoPage() {
     setQuestaoAtualIndex(Math.min(rascunho.indice, totalQuestoes - 1));
     setDataRealizacao(null);
     setEtapa("teste");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const handleReiniciarTeste = () => {
@@ -284,7 +284,7 @@ export default function TesteCronotipoPage() {
       setQuestaoAtualIndex(0);
       setDataRealizacao(null);
       setEtapa("teste");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
 
@@ -298,7 +298,7 @@ export default function TesteCronotipoPage() {
     setQuestaoAtualIndex(0);
     setDataRealizacao(null);
     setEtapa("teste");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   return (

@@ -66,7 +66,7 @@ export default function ProductHighlights() {
             if (targetSlug) {
               const el = document.getElementById(`produto-${targetSlug}`);
               if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.scrollIntoView({ behavior: "instant", block: "center" });
                 el.classList.add("ring-4", "ring-brand-purple/40", "rounded-2xl", "transition-all");
                 setTimeout(() => {
                   el.classList.remove("ring-4", "ring-brand-purple/40");

@@ -104,7 +104,7 @@ export default function Header() {
   const handleHomeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (pathname === "/") {
       e.preventDefault();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   };
 
@@ -381,7 +381,7 @@ export default function Header() {
                     setMenuOpen(false);
                     if (isHome && pathname === "/") {
                       e.preventDefault();
-                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      window.scrollTo({ top: 0, behavior: "instant" });
                     }
                   }}
                   className="px-4 py-3 text-sm font-medium text-[#214137] hover:bg-[#EAE8DF] rounded-xl transition-colors"
