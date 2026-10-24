@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, ArrowRight, ShoppingBag, Calendar, Download } from "lucide-react";
+import { Check, ArrowRight, ShoppingBag, Calendar, Download, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
@@ -198,26 +198,28 @@ export default function ProductCard({ produto, index = 0, vagas }: ProductCardPr
                 <span className="font-medium text-brand-charcoal">Sessão individual · Escolha seu horário na agenda</span>
               </div>
             ) : isJogo ? (
-              <div className="mb-4 flex items-center justify-between text-xs text-brand-charcoal/80 bg-amber-50/80 px-3.5 py-2.5 rounded-xl border border-amber-200/70">
+              <div className="mb-4 flex items-center justify-between gap-2 text-xs text-brand-charcoal/80 bg-amber-50/80 px-3.5 py-2.5 rounded-xl border border-amber-200/70">
                 <div className="flex items-center gap-1.5 font-medium text-amber-950">
                   <span>🎮</span>
                   <span>Jogo de Autoconhecimento</span>
                 </div>
                 {produto.inclui_laudo_pdf !== false && (
-                  <span className="text-[11px] font-semibold text-amber-900 bg-white px-2 py-0.5 rounded-md border border-amber-200">
-                    Dossiê PDF Incluso
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span>Dossiê PDF</span>
                   </span>
                 )}
               </div>
             ) : isTeste ? (
-              <div className="mb-4 flex items-center justify-between text-xs text-brand-charcoal/80 bg-emerald-50 px-3.5 py-2.5 rounded-xl border border-emerald-200/60">
+              <div className="mb-4 flex items-center justify-between gap-2 text-xs text-brand-charcoal/80 bg-emerald-50 px-3.5 py-2.5 rounded-xl border border-emerald-200/60">
                 <div className="flex items-center gap-1.5 font-medium text-emerald-950">
                   <span>🧠</span>
                   <span>Avaliação Online</span>
                 </div>
                 {produto.inclui_laudo_pdf !== false && (
-                  <span className="text-[11px] font-semibold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
-                    Laudo PDF Incluso
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span>Laudo PDF</span>
                   </span>
                 )}
               </div>

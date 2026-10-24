@@ -14,7 +14,8 @@ import {
   ShieldCheck,
   Calendar,
   Download,
-  FileText
+  FileText,
+  CheckCircle2
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import type { Produto, VagasInfo } from "@/lib/types";
@@ -293,8 +294,9 @@ export default function ProductDetailClient({ produto, vagas }: ProductDetailCli
                   </span>
                 </span>
                 {produto.inclui_laudo_pdf !== false && (
-                  <span className="text-[11px] font-semibold text-emerald-800 bg-white px-2.5 py-0.5 rounded-full border border-emerald-300">
-                    {isJogo ? "Dossiê em PDF Incluso" : "Laudo Clínico em PDF Incluso"}
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span>{isJogo ? "Dossiê PDF" : "Laudo PDF"}</span>
                   </span>
                 )}
               </div>
